@@ -16,4 +16,19 @@ class Category extends Model
         'parent_id',
         'is_active',
     ];
+
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
 }
