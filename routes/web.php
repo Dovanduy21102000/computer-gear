@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,4 +16,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 //Admin
-Route::get('dashboard/index', [DashboardController::class,'index'])->name('dashboard.index');
+Route::get('/dashboard/index', [DashboardController::class,'index'])->name('dashboard.index');
+
+
+
+
+Route::prefix('admin')->group(function () {
+    Route::resource('coupons', CouponController::class);
+});
