@@ -1,54 +1,65 @@
-@extends('backend.layout') 
-
-@section('content')
-<div class="container mt-4">
-    <h2 class="mb-4">Quản lý bình luận</h2>
-
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+<main id="main" class="main">
+    @if (session()->has('success'))
+        <div class="alert alert-{{ session()->get('success') ? 'info' : 'danger' }}">
+            {{ session()->get('success') ? 'Thao tác thành công' : session()->get('error') }}
+        </div>
     @endif
 
-    <table class="table table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>User</th>
-                <th>Sản phẩm</th>
-                <th>Nội dung</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($comments as $comment)
-                <tr>
-                    <td>{{ $comment->id }}</td>
-                    <td>{{ $comment->user->name ?? 'N/A' }}</td>
-                    <td>{{ $comment->product->name ?? 'N/A' }}</td>
-                    <td>{{ $comment->content }}</td>
-                    <td>
-                        <form action="#" method="POST">
-                            @csrf
-                            <select name="status" class="form-select" onchange="this.form.submit()">
-                                <option value="0" {{ $comment->status == 0 ? 'selected' : '' }}>Hiển thị</option>
-                                <option value="1" {{ $comment->status == 1 ? 'selected' : '' }}>Ẩn</option>
-                            </select>
-                        </form>
-                    </td>
-                    <td>
-                        <form action="#" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <div class="d-flex justify-content-center">
-        {{ $comments->links() }}
+    <div class="pagetitle">
+        <h1>Danh sách bình luận</h1>
+        <nav>
+            <ol class="breadcrumb"></ol>
+        </nav>
     </div>
-</div>
-@endsection
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table datatable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Nội dung</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($comments as $comment)
+                                    <tr>
+                                        <td>{{ $comment->id }}</td>
+                                        <td>{{ $comment->user->name ?? 'Unknown' }}</td>
+                                        <td>{{ $comment->product->name ?? 'Sản phẩm không tồn tại' }}</td>
+                                        <td>{{ $comment->content }}</td>
+                                        <td>
+                                            <span class="badge {{ $comment->status == 0 ? 'bg-success' : 'bg-danger' }}">
+                                                {{ $comment->status == 0 ? 'Hiển thị' : 'Ẩn' }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $comment->created_at->format('d/m/Y H:i:s') }}</td>
+                                        <td>
+                                            <form action="{{ route('comment.toggleStatus', $comment->id) }}" method="POST"
+                                                style="display:inline;">
+                                                @csrf
+                                                @method('PUT')
+                                                <button type="submit" class="btn btn-primary">
+                                                    {{ $comment->status == 0 ? 'Ẩn' : 'Hiện' }}
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ $comments->links() }}
+    </section>
+</main>

@@ -20,3 +20,4 @@ Route::get('dashboard/index', [DashboardController::class,'index'])->name('dashb
 
 
 Route::get('comment/index', [CommentController::class, 'index'])->name('comment.index');
+Route::put('/comment/toggle/{id}', [CommentController::class, 'toggleStatus'])->name('comment.toggleStatus');
