@@ -20,6 +20,7 @@
     <!-- Vendor CSS Files -->
     <link href="backend/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="backend/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="backend/font-awesome/css/font-awesome.css" rel="stylesheet">
     <link href="backend/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
     <link href="backend/vendor/quill/quill.snow.css" rel="stylesheet">
     <link href="backend/vendor/quill/quill.bubble.css" rel="stylesheet">
