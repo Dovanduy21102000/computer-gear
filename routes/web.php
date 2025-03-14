@@ -1,7 +1,8 @@
 <?php
-
-use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CouponController;
+
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,3 +25,7 @@ Route::get('/dashboard/index', [DashboardController::class,'index'])->name('dash
 Route::prefix('admin')->group(function () {
     Route::resource('coupons', CouponController::class);
 });
+//User
+
+Route::resource('users', UserController::class);
+Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
