@@ -6,7 +6,7 @@ use App\Http\Controllers\CouponController;
 
 
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\CouponController;
+
 
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
