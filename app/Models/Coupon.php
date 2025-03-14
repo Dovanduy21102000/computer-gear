@@ -17,9 +17,38 @@ class Coupon extends Model
       'price',
       'maximum_amount',
       'min_order_total',
-      'max_uses',
+      'quantity',
       'used_count',
       'status',
       'expire_date',
     ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'coupon_user')->withTimestamps();
+    }
+
+    // public function checkAndUpdateStatus()
+    // {
+    //     if ($this->quantity <= 0) {
+    //         $this->update(['status' => 0]); // Cập nhật trạng thái thành ngưng hoạt động
+    //     }
+    // }
+
+    
+
+    // public function useCoupon()
+    // {
+    //     if ($this->quantity > 0) {
+    //         $this->decrement('quantity'); // Giảm số lượng còn lại
+    //         $this->increment('used_count'); // Tăng số lần sử dụng
+
+    //         // Kiểm tra nếu số lượng về 0, cập nhật trạng thái "ngưng hoạt động"
+    //         if ($this->quantity <= 0) {
+    //             $this->update(['status' => 0]);
+    //         }
+    //     }
+    // }
 }
+
+
