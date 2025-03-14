@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BannerController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -23,4 +24,5 @@ Route::get('/dashboard/index', [DashboardController::class,'index'])->name('dash
 
 Route::prefix('admin')->group(function () {
     Route::resource('coupons', CouponController::class);
+    Route::resource('banners',BannerController::class);
 });
