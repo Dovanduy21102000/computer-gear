@@ -15,8 +15,8 @@ class Order extends Model
         'shipping_email',
         'shipping_phone',
         'shipping_address',
-        'shipping_city',
-        'shipping_province',
+        'province_id',
+        'district_id',
         'specific_address',
         'coupon_code',
         'coupon_discount',
@@ -27,4 +27,18 @@ class Order extends Model
         'status',
         'notes',
     ];
+    public function province()
+    {
+        return $this->belongsTo(Province::class);
+    }
+
+    public function district()
+    {
+        return $this->belongsTo(District::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

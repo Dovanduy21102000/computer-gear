@@ -20,3 +20,5 @@ Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dash
 Route::prefix('admin')->group(function () {
     Route::resource('orders', OrderController::class);
 });
+Route::get('provinces', [OrderController::class, 'getProvinces']);
+Route::get('districts/{provinceCode}', [OrderController::class, 'getDistricts']);
