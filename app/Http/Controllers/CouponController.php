@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class CouponController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
@@ -75,10 +76,11 @@ class CouponController extends Controller
         'status' => 'required|boolean',
     ], $messages);
 
-    Coupon::create($request->all());
 
-    return redirect()->route('coupons.index')->with('success', 'Thêm mã khuyến mại thành công!');
-}
+        Coupon::create($request->all());
+
+        return redirect()->route('coupons.index')->with('success', 'Thêm mã khuyến mại thành công!');
+    }
 
 
 
@@ -165,8 +167,9 @@ class CouponController extends Controller
     // Cập nhật dữ liệu
     $coupon->update($validatedData);
 
-    return redirect()->route('coupons.index')->with('success', 'Mã khuyến mại đã được cập nhật thành công!');
-}
+
+        return redirect()->route('coupons.index')->with('success', 'Mã khuyến mại đã được cập nhật thành công!');
+    }
 
 
 
