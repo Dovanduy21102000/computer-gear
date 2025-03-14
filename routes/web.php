@@ -18,4 +18,7 @@ use Illuminate\Support\Facades\Route;
 //Admin
 Route::get('dashboard/index', [DashboardController::class,'index'])->name('dashboard.index');
 
-Route::get('dashboard/categories', [CategoryController::class,'index'])->name('categories.index');
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('categories', CategoryController::class);
+});
+

@@ -10,21 +10,10 @@
         </a>
 
         <li class="nav-item">
-          <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
-            <i class="bi bi-layout-text-window-reverse"></i><span>Quản lý danh mục</span><i class="bi bi-chevron-down ms-auto"></i>
+          <a class="nav-link collapsed" href="{{ route('admin.categories.index') }}">
+            <i class="bi bi-layout-text-window-reverse"></i>
+              <span>Quản lý danh mục</span>
           </a>
-          <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-            <li>
-              <a href="{{ route('categories.index') }}">
-                <i class="bi bi-circle"></i><span>Danh sách danh mục</span>
-              </a>
-            </li>
-            <li>
-              <a href="">
-                <i class="bi bi-circle"></i><span>Thêm mới danh mục</span>
-              </a>
-            </li>
-          </ul>
         </li>
 
       </li><!-- End Dashboard Nav -->
