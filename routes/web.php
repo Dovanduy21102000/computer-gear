@@ -1,8 +1,14 @@
 <?php
 
+
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\CouponController;
+
+
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CouponController;
+
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,3 +32,7 @@ Route::prefix('admin')->group(function () {
     Route::resource('coupons', CouponController::class);
     Route::resource('banners',BannerController::class);
 });
+//User
+
+Route::resource('users', UserController::class);
+Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
