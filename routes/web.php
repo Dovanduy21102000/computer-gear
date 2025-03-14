@@ -1,9 +1,6 @@
 <?php
 
-
 use App\Http\Controllers\BannerController;
-use App\Http\Controllers\CouponController;
-
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CouponController;

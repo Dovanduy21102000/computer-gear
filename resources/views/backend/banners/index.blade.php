@@ -17,7 +17,7 @@
         </nav>
     </div><!-- End Page Title -->
 
-    <a class="btn btn-primary mb-10" style="float " href="{{ route('banners.create') }}">Them moi</a>
+    <a class="btn btn-primary mb-10" style="float " href="{{ route('banners.create') }}">Thêm mới</a>
  
     <br>
     <section class="section">
@@ -33,8 +33,7 @@
                                     <th>ID</th>
                                     <th>Tiêu đề</th>
                                     <th>Ảnh</th>
-                                    {{-- <th>Btn url</th>
-                                    <th>Mô tả</th> --}}
+
                                     <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
@@ -46,7 +45,7 @@
                                         <td>{{ $banner->title }}</td>
                                         <td>
                                             @if ($banner->image)
-                                                <img src="{{ Storage::url($banner->image) }}" width="150px" height="100px">
+                                                <img src="{{ Storage::url($banner->image) }}" width="100px" height="100px">
                                             @endif
                                         </td>
                                         {{-- <td>
