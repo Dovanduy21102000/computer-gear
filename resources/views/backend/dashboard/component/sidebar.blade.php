@@ -39,7 +39,11 @@
                   <i class="bi bi-circle"></i><span>Danh sách sản phẩm</span>
                 </a>
               </li>
-
+              <li>
+                <a href="{{route('categories.index')}}">
+                  <i class="bi bi-circle"></i><span>Quản lý danh mục</span>
+                </a>
+              </li>
               <li>
                 <a href="{{route('brands.index')}}">
                   <i class="bi bi-circle"></i><span>Quản lý thương hiệu</span>
