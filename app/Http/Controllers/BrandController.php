@@ -36,7 +36,7 @@ class BrandController extends BaseCRUDController
         $columns    = $this->columns;
         $urlBase    = $this->urlBase;
 
-        $template = 'backend.dashboard.brands.index';
+        $template = 'backend.brands.index';
         return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'urlBase'));
     }
 
@@ -47,7 +47,7 @@ class BrandController extends BaseCRUDController
         $title         = $this->titleCreate;
         $urlBase       = $this->urlBase;
 
-        $template = 'backend.dashboard.brands.add';
+        $template = 'backend.brands.add';
         return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'brands'));
     }
 
@@ -57,7 +57,7 @@ class BrandController extends BaseCRUDController
         $title         = $this->titleCreate;
         $urlBase       = $this->urlBase;
 
-        $template = 'backend.dashboard.brands.edit';
+        $template = 'backend.brands.edit';
         return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'brand'));
     }
 
@@ -66,7 +66,7 @@ class BrandController extends BaseCRUDController
         $brand         = $this->model::findOrFail($id);
         $urlBase       = $this->urlBase;
 
-        $template = 'backend.dashboard.brands.show';
+        $template = 'backend.brands.show';
         return view('backend.dashboard.layout', compact('template', 'urlBase', 'brand'));
     }
 
