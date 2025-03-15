@@ -8,7 +8,7 @@ class CommentController extends Controller
 {
     public function index(){
         $comments = Comment::paginate(10);
-        $template = 'backend.comment.index';
+        $template = 'backend.comments.index';
         return view('backend.dashboard.layout', compact('comments','template'));
     }
 
@@ -18,6 +18,6 @@ class CommentController extends Controller
         $comment->status = $comment->status == 0 ? 1 : 0; // Chuyển đổi trạng thái
         $comment->save();
 
-        return redirect()->route('comment.index')->with('success', 'Cập nhật trạng thái thành công!');
+        return redirect()->route('comments.index')->with('success', 'Cập nhật trạng thái thành công!');
     }
 }

@@ -43,7 +43,7 @@
                                         </td>
                                         <td>{{ $comment->created_at->format('d/m/Y H:i:s') }}</td>
                                         <td>
-                                            <form action="{{ route('comment.toggleStatus', $comment->id) }}" method="POST"
+                                            <form action="{{ route('comments.toggleStatus', $comment->id) }}" method="POST"
                                                 style="display:inline;">
                                                 @csrf
                                                 @method('PUT')

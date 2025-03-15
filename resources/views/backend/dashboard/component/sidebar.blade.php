@@ -11,7 +11,7 @@
     </li><!-- End Dashboard Nav -->
 
   <li class="nav-item">
-    <a class="nav-link" href="{{ route('comment.index') }}">
+    <a class="nav-link" href="{{ route('comments.index') }}">
       <i class="bi bi-file-earmark"></i>
       <span>Quản lý bình luận</span>
     </a>

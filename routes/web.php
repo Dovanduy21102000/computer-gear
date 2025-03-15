@@ -21,8 +21,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('dashboard/index', [DashboardController::class,'index'])->name('dashboard.index');
 
 // comment
-Route::get('comment/index', [CommentController::class, 'index'])->name('comment.index');
-Route::put('/comment/toggle/{id}', [CommentController::class, 'toggleStatus'])->name('comment.toggleStatus');
+Route::get('comments/index', [CommentController::class, 'index'])->name('comments.index');
+Route::put('/comments/toggle/{id}', [CommentController::class, 'toggleStatus'])->name('comments.toggleStatus');
 
 // Attribute
 Route::resource('attributes', AttributeController::class);
