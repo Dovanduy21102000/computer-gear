@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class AttributeValueController extends BaseCRUDController
 {
-    public $pathView = 'backend.dashboard.attributevalues.';
+    public $pathView = 'backend.attributevalues.';
     protected $model = AttributeValue::class;
     protected $fieldImage = null;
     public $folderImage;
@@ -33,7 +33,7 @@ class AttributeValueController extends BaseCRUDController
         $columns    = $this->columns;
         $urlBase    = $this->urlBase;
 
-        $template = 'backend.dashboard.attributevalues.index';
+        $template = 'backend.attributevalues.index';
         return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'attributes', 'urlBase'));
     }
 
@@ -43,7 +43,7 @@ class AttributeValueController extends BaseCRUDController
         $title      = $this->titleCreate;
         $urlBase    = $this->urlBase;
 
-        $template = 'backend.dashboard.attributevalues.add';
+        $template = 'backend.attributevalues.add';
         return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'attributes'));
     }
 
@@ -54,7 +54,7 @@ class AttributeValueController extends BaseCRUDController
         $title               = $this->titleCreate;
         $urlBase             = $this->urlBase;
 
-        $template = 'backend.dashboard.attributevalues.edit';
+        $template = 'backend.attributevalues.edit';
         return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'attributes', 'attributeValue'));
     }
 
@@ -64,7 +64,7 @@ class AttributeValueController extends BaseCRUDController
         $attributeValue     = $this->model::findOrFail($id);
         $urlBase            = $this->urlBase;
 
-        $template = 'backend.dashboard.attributevalues.show';
+        $template = 'backend.attributevalues.show';
         return view('backend.dashboard.layout', compact('template', 'urlBase', 'attributes', 'attributeValue'));
     }
 

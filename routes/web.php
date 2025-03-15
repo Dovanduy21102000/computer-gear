@@ -10,6 +10,7 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
 
 
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,30 +29,31 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
 
-$objects = [
-    'categories'        => CategoryController::class,
-    'attributes'        => AttributeController::class,
-    'attributevalues'   => AttributeValueController::class,
-    'brands'            => BrandController::class,
-    'coupons'           => CouponController::class,
-    'banners'           => BannerController::class
-];
 
 
 
 
-Route::get('/dashboard/index', [DashboardController::class,'index'])->name('dashboard.index');
+
+Route::get('/dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
 
 
 
 
 Route::prefix('admin')->group(function () {
+    $objects = [
+        'categories'        => CategoryController::class,
+        'attributes'        => AttributeController::class,
+        'attributevalues'   => AttributeValueController::class,
+        'brands'            => BrandController::class,
+        'coupons'           => CouponController::class,
+        'banners'           => BannerController::class,
+        'products'           => ProductController::class,
+    ];
     foreach ($objects as $object => $controller) {
-    Route::resource($object, $controller);
-  };
+        Route::resource($object, $controller);
+    };
 });
 //User
 
 Route::resource('users', UserController::class);
 Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
-

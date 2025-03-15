@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class AttributeController extends BaseCRUDController
 {
-    public $pathView = 'backend.dashboard.attributes.';
+    public $pathView = 'backend.attributes.';
     protected $model = Attribute::class;
     protected $fieldImage = null;
     public $folderImage;
@@ -32,7 +32,7 @@ class AttributeController extends BaseCRUDController
         $columns    = $this->columns;
         $urlBase    = $this->urlBase;
 
-        $template = 'backend.dashboard.attributes.index';
+        $template = 'backend.attributes.index';
         return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'urlBase'));
     }
 
@@ -41,7 +41,7 @@ class AttributeController extends BaseCRUDController
         $title      = $this->titleCreate;
         $urlBase    = $this->urlBase;
 
-        $template = 'backend.dashboard.attributes.add';
+        $template = 'backend.attributes.add';
         return view('backend.dashboard.layout', compact('template', 'title', 'urlBase'));
     }
 
@@ -51,7 +51,7 @@ class AttributeController extends BaseCRUDController
         $title         = $this->titleCreate;
         $urlBase       = $this->urlBase;
 
-        $template = 'backend.dashboard.attributes.edit';
+        $template = 'backend.attributes.edit';
         return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'attribute'));
     }
 
@@ -60,7 +60,7 @@ class AttributeController extends BaseCRUDController
         $attribute     = $this->model::findOrFail($id);
         $urlBase       = $this->urlBase;
 
-        $template = 'backend.dashboard.attributes.show';
+        $template = 'backend.attributes.show';
         return view('backend.dashboard.layout', compact('template', 'urlBase', 'attribute'));
     }
 

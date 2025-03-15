@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class CategoryController extends BaseCRUDController
 {
-    public $pathView = 'backend.dashboard.categories.';
+    public $pathView = 'backend.categories.';
     protected $model = Category::class;
     protected $fieldImage = null;
     public $folderImage;
@@ -35,7 +35,7 @@ class CategoryController extends BaseCRUDController
         $columns    = $this->columns;
         $urlBase    = $this->urlBase;
 
-        $template = 'backend.dashboard.categories.index';
+        $template = 'backend.categories.index';
         return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'urlBase'));
     }
 
@@ -45,7 +45,7 @@ class CategoryController extends BaseCRUDController
         $title      = $this->titleCreate;
         $urlBase    = $this->urlBase;
 
-        $template = 'backend.dashboard.categories.add';
+        $template = 'backend.categories.add';
         return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'categories'));
     }
 
@@ -56,7 +56,7 @@ class CategoryController extends BaseCRUDController
         $title         = $this->titleCreate;
         $urlBase       = $this->urlBase;
 
-        $template = 'backend.dashboard.categories.edit';
+        $template = 'backend.categories.edit';
         return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'categories', 'category'));
     }
 
@@ -66,7 +66,7 @@ class CategoryController extends BaseCRUDController
         $category      = $this->model::findOrFail($id);
         $urlBase       = $this->urlBase;
 
-        $template = 'backend.dashboard.categories.show';
+        $template = 'backend.categories.show';
         return view('backend.dashboard.layout', compact('template', 'urlBase', 'categories', 'category'));
     }
 
