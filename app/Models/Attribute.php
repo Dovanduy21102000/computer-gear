@@ -14,4 +14,8 @@ class Attribute extends Model
         'name',
         'status'
     ];
+
+    public function values(){
+        return $this->hasMany(AttributeValue::class);
+    }
 }
