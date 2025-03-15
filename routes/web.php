@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\AttributeController;
+use App\Http\Controllers\AttributeValueController;
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,4 +19,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 //Admin
-Route::get('dashboard/index', [DashboardController::class,'index'])->name('dashboard.index');
+Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
+
+$objects = [
+    'categories'        => CategoryController::class,
+    'attributes'        => AttributeController::class,
+    'attributevalues'   => AttributeValueController::class,
+    'brands'            => BrandController::class
+];
+
+
+foreach ($objects as $object => $controller) {
+    Route::resource($object, $controller);
+};
