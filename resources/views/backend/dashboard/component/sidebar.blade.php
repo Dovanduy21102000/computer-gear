@@ -27,7 +27,13 @@
                 <i class="bi bi-person"></i>
                 <span>Quản lý thành viên</span>
             </a>
-        </li>    
+        </li>   
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="{{ route('products.index') }}">
+            <i class="bi bi-display"></i>
+              <span>Quản lý sản phẩm</span>
+          </a>
+      </li>  
     </ul>
 
 </aside><!-- End Sidebar-->
