@@ -14,4 +14,8 @@ class Attribute extends Model
         'name',
         'status'
     ];
+
+    public $attributes = [
+        'status' => 1
+    ];
 }
