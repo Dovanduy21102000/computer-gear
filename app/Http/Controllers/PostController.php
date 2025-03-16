@@ -19,6 +19,8 @@ class PostController extends BaseCRUDController
     public $titleCreate = 'Tạo mới bài viết';
     public $titleEdit   = 'Chỉnh sửa bài viết';
 
+    public $titleShow   = 'Thông tin bài viết có id:';
+
     public $columns = [
         'category_id'   => 'Danh mục',
         'title'         => 'Tiêu đề',
@@ -72,12 +74,13 @@ class PostController extends BaseCRUDController
 
     public function show($id)
     {
-        $categories      = Category::all();
-        $post          = $this->model::findOrFail($id);
-        $urlBase       = $this->urlBase;
+        $categories     = Category::all();
+        $post           = $this->model::findOrFail($id);
+        $urlBase        = $this->urlBase;
+        $title          = $this->titleShow;
 
         $template = 'backend.posts.show';
-        return view('backend.dashboard.layout', compact('template', 'urlBase', 'post', 'categories'));
+        return view('backend.dashboard.layout', compact('template', 'urlBase', 'post', 'categories', 'title'));
     }
 
 
