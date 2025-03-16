@@ -107,6 +107,7 @@
                                     <textarea id="ck_content" name="content" placeholder="CONTENT" class="form-control" disabled>{{ old('content', $post->content) }}</textarea>
 
                                     <script>
+                                        var isShowMode = {{ $isShowMode ? 'true' : 'false' }};
                                         CKEDITOR.ClassicEditor
                                             .create(document.querySelector('#ck_content'), {
                                                 htmlSupport: {
@@ -148,7 +149,7 @@
                                                     ],
                                                     supportAllValues: true
                                                 },
-                                                ckfinder: {
+                                                ckfinder: isShowMode ? false {
                                                     uploadUrl: "{{ route('posts.upload') }}",
                                                     options: {
                                                         resourceType: "Images"
@@ -314,6 +315,7 @@
                                                     'PasteFromOfficeEnhanced',
                                                     'CaseChange'
                                                 ],
+                                                readOnly: isShowMode,
 
                                             })
                                             .then(createdEditor => {
@@ -362,8 +364,8 @@
                             <!-- Submit Button -->
                             <div class="row mb-3">
                                 <div class="col-sm-10 offset-sm-2">
-                                    <a href="{{ route('posts.index') }}" type="submit" class="btn btn-primary">Cập
-                                        nhật</a>
+                                    <a href="{{ route('posts.index') }}" type="submit" class="btn btn-primary">Quay
+                                        lại </a>
                                 </div>
                             </div>
 

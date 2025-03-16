@@ -80,7 +80,7 @@ class PostController extends BaseCRUDController
         $title          = $this->titleShow;
 
         $template = 'backend.posts.show';
-        return view('backend.dashboard.layout', compact('template', 'urlBase', 'post', 'categories', 'title'));
+        return view('backend.dashboard.layout', compact('template', 'urlBase', 'post', 'categories', 'title'))->with('isShowMode', true);;
     }
 
 
