@@ -2,7 +2,7 @@
     <base href="{{ env('APP_URL') }}">
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard - Computer-Gear</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
@@ -16,6 +16,9 @@
     <link
         href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
         rel="stylesheet">
+    {{-- CKFinder --}}
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+
 
     <!-- Vendor CSS Files -->
     <link href="backend/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -30,7 +33,7 @@
     <!-- Template Main CSS File -->
     <link href="backend/css/style.css" rel="stylesheet">
 
-    
+
     <!-- =======================================================
     * Template Name: NiceAdmin
     * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
