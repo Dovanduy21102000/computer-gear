@@ -8,8 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
-
-
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 //Admin
 
 Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
+
 
 
 
@@ -57,3 +57,11 @@ Route::prefix('admin')->group(function () {
 
 Route::resource('users', UserController::class);
 Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
+
+
+
+//Client 
+
+// Trang chủ client
+Route::get('/', [HomeController::class, 'index'])->name('home.index');
+
