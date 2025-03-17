@@ -9,7 +9,7 @@
 @endif
     <div class="pagetitle">
       <h1>Danh sách khuyến mại</h1>
-      <a class="mt-5" href="{{ route('coupons.create') }}"><button type="button" class="btn btn-primary">Thêm mã khuyến mại</button></a>
+      <a class="btn btn-primary mb-10" style="float " href="{{ route('coupons.create') }}">Thêm mới</a>
       
       <nav>
         <ol class="breadcrumb">

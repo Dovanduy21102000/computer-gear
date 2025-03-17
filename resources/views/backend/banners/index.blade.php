@@ -88,7 +88,6 @@
                 </div>
             </div>
         </div>
-           {{$banners->links()}}
     </section>
   
 </main><!-- End #main -->
