@@ -138,16 +138,44 @@ class BaseCRUDController extends Controller
     {
         try {
             $model = $this->model::findOrFail($id);
+            $model->delete(); // Soft delete
 
-            $model->delete();
+            return redirect()->route($this->urlBase . 'index')->with('success', 'Bản ghi đã chuyển vào thùng rác');
+        } catch (\Throwable $th) {
+            return back()->with('success', false)->with('error', $th->getMessage());
+        }
+    }
 
-            if (Storage::exists($model->{$this->fieldImage})) {
-                $image = str_replace('storage/', '', $model->{$this->fieldImage});
+    /**
+     * Restore a soft-deleted record.
+     */
+    public function restore($id)
+    {
+        try {
+            $model = $this->model::withTrashed()->findOrFail($id);
+            $model->restore(); // Restore soft-deleted record
 
-                Storage::delete($image);
+            return redirect()->route($this->urlBase . 'index')->with('success', 'Record restored.');
+        } catch (\Throwable $th) {
+            return back()->with('success', false)->with('error', $th->getMessage());
+        }
+    }
+
+    /**
+     * Permanently delete a record.
+     */
+    public function forceDestroy($id)
+    {
+        try {
+            $model = $this->model::withTrashed()->findOrFail($id);
+
+            if ($this->fieldImage && Storage::disk('public')->exists($model->{$this->fieldImage})) {
+                Storage::disk('public')->delete($model->{$this->fieldImage});
             }
 
-            return redirect()->route($this->urlBase . 'index')->with('success', true);
+            $model->forceDelete();
+
+            return redirect()->route($this->urlBase . 'index')->with('success', 'Record permanently deleted.');
         } catch (\Throwable $th) {
             return back()->with('success', false)->with('error', $th->getMessage());
         }
