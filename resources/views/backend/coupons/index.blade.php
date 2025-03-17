@@ -1,11 +1,16 @@
 <main id="main" class="main">
   @if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
+    
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle me-1"></i>
+      {{ session('success') }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 @endif
     <div class="pagetitle">
       <h1>Danh sách khuyến mại</h1>
+      <a class="mt-5" href="{{ route('coupons.create') }}"><button type="button" class="btn btn-primary">Thêm mã khuyến mại</button></a>
+      
       <nav>
         <ol class="breadcrumb">
         </ol>
@@ -49,15 +54,17 @@
                     </td>
                     <td>{{ $coupon->expire_date ? date('d-m-Y', strtotime($coupon->expire_date)) : 'Không' }}</td>
                     <td>
-                        <a href="{{ route('coupons.show', $coupon->id) }}" class="btn btn-info btn-sm">Xem</a>
-                      <a href="{{ route('coupons.edit', $coupon->id) }}" class="btn btn-warning btn-sm">Sửa</a>
+                        <a href="{{ route('coupons.show', $coupon->id) }}" ><button type="button" class="btn btn-success"><i class="bi bi-eye"></i></button></a>
+                      <a href="{{ route('coupons.edit', $coupon->id) }}"><button type="button" class="btn btn-warning"><i class="bi bi-wrench"></i></button></a>
                       <form action="{{ route('coupons.destroy', $coupon->id) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xóa khuyến mãi này?')">Xóa</button>
+                        <button type="submit" class="btn btn-danger " onclick="return confirm('Xóa khuyến mãi này?')"><i class="bi bi-trash-fill"></i></button>
                       </form>
                     </td>
                   </tr>
+
+                  
                   @endforeach
                 </tbody>
               </table>

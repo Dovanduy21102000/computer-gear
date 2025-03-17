@@ -26,4 +26,14 @@ class Product extends Model
         'views',
         'is_variant',
     ];
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    // Quan hệ với Brand (Một sản phẩm thuộc về một thương hiệu)
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class, 'brand_id');
+    }
 }

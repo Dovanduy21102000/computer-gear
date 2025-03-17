@@ -108,21 +108,21 @@ class BaseCRUDController extends Controller
 
         try {
             $model = $this->model::findOrFail($id);
+            $oldImagePath = $model->{$this->fieldImage}; // Store old image path
 
             $model->fill($request->except([$this->fieldImage]));
 
-            if ($request->hasFile($this->fieldImage)) {
-                $oldImage = Storage::put($this->folderImage, $request->{$this->fieldImage});
-
-                $model->{$this->fieldImage} = 'storage/' . $oldImage;
+            if ($this->fieldImage && $request->hasFile($this->fieldImage)) {
+                // Upload new image
+                $newImagePath = Storage::put($this->folderImage, $request->{$this->fieldImage});
+                $model->{$this->fieldImage} = $newImagePath;
             }
 
             $model->save();
 
-            if ($request->hasFile($this->fieldImage)) {
-                $oldImage = str_replace('storage/', '', $oldImage);
-
-                Storage::delete($oldImage);
+            if ($this->fieldImage && $request->hasFile($this->fieldImage) && $oldImagePath) {
+                // Delete old image if a new one was uploaded
+                Storage::delete(str_replace('storage/', '', $oldImagePath));
             }
 
             return redirect()->route($this->urlBase . 'index')->with('success', true);

@@ -47,8 +47,8 @@
                   <td>{{ number_format($coupon->min_order_total, 2) }}</td>
                 </tr>
                 <tr>
-                  <th>Số lần sử dụng tối đa</th>
-                  <td>{{ $coupon->max_uses }}</td>
+                  <th>Số lượng</th>
+                  <td>{{ $coupon->quantity }}</td>
                 </tr>
                 <tr>
                   <th>Đã sử dụng</th>
