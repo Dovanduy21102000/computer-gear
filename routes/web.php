@@ -35,12 +35,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
 
-
-
-
-
-
-
 Route::get('/dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
 
 
@@ -75,5 +69,6 @@ Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
 // Trang chủ client
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
 Route::get('/products', [ProductClientController::class, 'index'])->name('products.index');
+Route::get('/products/{slug}', [ProductClientController::class, 'detail'])->name('products.detail');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 

@@ -305,214 +305,50 @@
                 <!-- End Shop-control-bar -->
                 <!-- Shop Body -->
                 <!-- Tab Content -->
-                <div class="tab-content" id="pills-tabContent">
-                    <div class="tab-pane fade pt-2 show active" id="pills-one-example1" role="tabpanel" aria-labelledby="pills-one-example1-tab" data-target-group="groups">
-                        <ul class="row list-unstyled products-group no-gutters">
+                <div class="tab-pane fade pt-2 show active" id="pills-one-example1" role="tabpanel" aria-labelledby="pills-one-example1-tab" data-target-group="groups">
+                    <ul class="row list-unstyled products-group no-gutters">
+                        @foreach($products as $product)
                             <li class="col-6 col-md-3 col-wd-2gdot4 product-item">
                                 <div class="product-item__outer h-100">
                                     <div class="product-item__inner px-xl-4 p-3">
                                         <div class="product-item__body pb-xl-2">
-                                            <div class="mb-2"><a href="../shop/product-categories-7-column-full-width.html" class="font-size-12 text-gray-5">Speakers</a></div>
-                                            <h5 class="mb-1 product-item__title"><a href="../shop/single-product-fullwidth.html" class="text-blue font-weight-bold">Wireless Audio System Multiroom 360 degree Full base audio</a></h5>
                                             <div class="mb-2">
-                                                <a href="../shop/single-product-fullwidth.html" class="d-block text-center"><img class="img-fluid" src="fontend/assets/img/212X200/img9.jpg" alt="Image Description"></a>
+                                                <a href="{{ route('products.detail', $product->slug) }}" class="d-block text-center"><img class="img-fluid" src="{{ $product->image }}" alt="Image Description"></a>
                                             </div>
-                                            <div class="flex-center-between mb-1">
+                                            <h5 class="mb-1 product-item__title"><a href="{{ route('products.detail', $product->slug) }}" class="text-blue font-weight-bold">{{ $product->name }}</a></h5>
+                                            <div class="flex-center-between mb-1">  
                                                 <div class="prodcut-price">
-                                                    <div class="text-gray-100">$685,00</div>
+                                                    <div class="text-gray-100">${{ number_format($product->price, 2) }}</div>
                                                 </div>
                                                 <div class="d-none d-xl-block prodcut-add-cart">
-                                                    <a href="../shop/single-product-fullwidth.html" class="btn-add-cart btn-primary transition-3d-hover"><i class="ec ec-add-to-cart"></i></a>
+                                                    <a href="#" class="btn-add-cart btn-primary transition-3d-hover"><i class="ec ec-add-to-cart"></i></a>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="product-item__footer">
                                             <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                <a href="../shop/compare.html" class="text-gray-6 font-size-13"><i class="ec ec-compare mr-1 font-size-15"></i> Compare</a>
-                                                <a href="../shop/wishlist.html" class="text-gray-6 font-size-13"><i class="ec ec-favorites mr-1 font-size-15"></i> Wishlist</a>
+                                                <a href="#" class="text-gray-6 font-size-13"><i class="ec ec-compare mr-1 font-size-15"></i> Compare</a>
+                                                <a href="#" class="text-gray-6 font-size-13"><i class="ec ec-favorites mr-1 font-size-15"></i> Wishlist</a>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </li>
-                            
-                        </ul>
-                    </div>
-                    <div class="tab-pane fade pt-2" id="pills-two-example1" role="tabpanel" aria-labelledby="pills-two-example1-tab" data-target-group="groups">
-                        <ul class="row list-unstyled products-group no-gutters">
-                            <li class="col-6 col-md-3 col-wd-2gdot4 product-item">
-                                <div class="product-item__outer h-100">
-                                    <div class="product-item__inner px-xl-4 p-3">
-                                        <div class="product-item__body pb-xl-2">
-                                            <div class="mb-2"><a href="../shop/product-categories-7-column-full-width.html" class="font-size-12 text-gray-5">Speakers</a></div>
-                                            <h5 class="mb-1 product-item__title"><a href="../shop/single-product-fullwidth.html" class="text-blue font-weight-bold">Wireless Audio System Multiroom 360 degree Full base audio</a></h5>
-                                            <div class="mb-2">
-                                                <a href="../shop/single-product-fullwidth.html" class="d-block text-center"><img class="img-fluid" src="fontend/assets/img/212X200/img9.jpg" alt="Image Description"></a>
-                                            </div>
-                                            <div class="mb-3">
-                                                <a class="d-inline-flex align-items-center small font-size-14" href="#">
-                                                    <div class="text-warning mr-2">
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                    </div>
-                                                    <span class="text-secondary">(40)</span>
-                                                </a>
-                                            </div>
-                                            <ul class="font-size-12 p-0 text-gray-110 mb-4">
-                                                <li class="line-clamp-1 mb-1 list-bullet">Brand new and high quality</li>
-                                                <li class="line-clamp-1 mb-1 list-bullet">Made of supreme quality, durable EVA crush resistant, anti-shock material.</li>
-                                                <li class="line-clamp-1 mb-1 list-bullet">20 MP Electro and 28 megapixel CMOS rear camera</li>
-                                            </ul>
-                                            <div class="text-gray-20 mb-2 font-size-12">SKU: FW511948218</div>
-                                            <div class="flex-center-between mb-1">
-                                                <div class="prodcut-price">
-                                                    <div class="text-gray-100">$685,00</div>
-                                                </div>
-                                                <div class="d-none d-xl-block prodcut-add-cart">
-                                                    <a href="../shop/single-product-fullwidth.html" class="btn-add-cart btn-primary transition-3d-hover"><i class="ec ec-add-to-cart"></i></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="product-item__footer">
-                                            <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                <a href="../shop/compare.html" class="text-gray-6 font-size-13"><i class="ec ec-compare mr-1 font-size-15"></i> Compare</a>
-                                                <a href="../shop/wishlist.html" class="text-gray-6 font-size-13"><i class="ec ec-favorites mr-1 font-size-15"></i> Wishlist</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            
-                            
-                        </ul>
-                    </div>
-                    <div class="tab-pane fade pt-2" id="pills-three-example1" role="tabpanel" aria-labelledby="pills-three-example1-tab" data-target-group="groups">
-                        <ul class="d-block list-unstyled products-group prodcut-list-view">
-                            <li class="product-item remove-divider">
-                                <div class="product-item__outer w-100">
-                                    <div class="product-item__inner remove-prodcut-hover py-4 row">
-                                        <div class="product-item__header col-6 col-md-4">
-                                            <div class="mb-2">
-                                                <a href="../shop/single-product-fullwidth.html" class="d-block text-center"><img class="img-fluid" src="fontend/assets/img/212X200/img9.jpg" alt="Image Description"></a>
-                                            </div>
-                                        </div>
-                                        <div class="product-item__body col-6 col-md-5">
-                                            <div class="pr-lg-10">
-                                                <div class="mb-2"><a href="../shop/product-categories-7-column-full-width.html" class="font-size-12 text-gray-5">Speakers</a></div>
-                                                <h5 class="mb-2 product-item__title"><a href="../shop/single-product-fullwidth.html" class="text-blue font-weight-bold">Wireless Audio System Multiroom 360 degree Full base audio</a></h5>
-                                                <div class="prodcut-price mb-2 d-md-none">
-                                                    <div class="text-gray-100">$685,00</div>
-                                                </div>
-                                                <div class="mb-3 d-none d-md-block">
-                                                    <a class="d-inline-flex align-items-center small font-size-14" href="#">
-                                                        <div class="text-warning mr-2">
-                                                            <small class="fas fa-star"></small>
-                                                            <small class="fas fa-star"></small>
-                                                            <small class="fas fa-star"></small>
-                                                            <small class="fas fa-star"></small>
-                                                            <small class="far fa-star text-muted"></small>
-                                                        </div>
-                                                        <span class="text-secondary">(40)</span>
-                                                    </a>
-                                                </div>
-                                                <ul class="font-size-12 p-0 text-gray-110 mb-4 d-none d-md-block">
-                                                    <li class="line-clamp-1 mb-1 list-bullet">Brand new and high quality</li>
-                                                    <li class="line-clamp-1 mb-1 list-bullet">Made of supreme quality, durable EVA crush resistant, anti-shock material.</li>
-                                                    <li class="line-clamp-1 mb-1 list-bullet">20 MP Electro and 28 megapixel CMOS rear camera</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <div class="product-item__footer col-md-3 d-md-block">
-                                            <div class="mb-3">
-                                                <div class="prodcut-price mb-2">
-                                                    <div class="text-gray-100">$685,00</div>
-                                                </div>
-                                                <div class="prodcut-add-cart">
-                                                    <a href="../shop/single-product-fullwidth.html" class="btn btn-sm btn-block btn-primary-dark btn-wide transition-3d-hover">Add to cart</a>
-                                                </div>
-                                            </div>
-                                            <div class="flex-horizontal-center justify-content-between justify-content-wd-center flex-wrap">
-                                                <a href="../shop/compare.html" class="text-gray-6 font-size-13 mx-wd-3"><i class="ec ec-compare mr-1 font-size-15"></i> Compare</a>
-                                                <a href="../shop/wishlist.html" class="text-gray-6 font-size-13 mx-wd-3"><i class="ec ec-favorites mr-1 font-size-15"></i> Wishlist</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-
-                        </ul>
-                    </div>
-                    <div class="tab-pane fade pt-2" id="pills-four-example1" role="tabpanel" aria-labelledby="pills-four-example1-tab" data-target-group="groups">
-                        <ul class="d-block list-unstyled products-group prodcut-list-view-small">
-                            <li class="product-item remove-divider">
-                                <div class="product-item__outer w-100">
-                                    <div class="product-item__inner remove-prodcut-hover py-4 row">
-                                        <div class="product-item__header col-6 col-md-2">
-                                            <div class="mb-2">
-                                                <a href="../shop/single-product-fullwidth.html" class="d-block text-center"><img class="img-fluid" src="fontend/assets/img/212X200/img9.jpg" alt="Image Description"></a>
-                                            </div>
-                                        </div>
-                                        <div class="product-item__body col-6 col-md-7">
-                                            <div class="pr-lg-10">
-                                                <div class="mb-2"><a href="../shop/product-categories-7-column-full-width.html" class="font-size-12 text-gray-5">Speakers</a></div>
-                                                <h5 class="mb-2 product-item__title"><a href="../shop/single-product-fullwidth.html" class="text-blue font-weight-bold">Wireless Audio System Multiroom 360 degree Full base audio</a></h5>
-                                                <div class="prodcut-price d-md-none">
-                                                    <div class="text-gray-100">$685,00</div>
-                                                </div>
-                                                <ul class="font-size-12 p-0 text-gray-110 mb-4 d-none d-md-block">
-                                                    <li class="line-clamp-1 mb-1 list-bullet">Brand new and high quality</li>
-                                                    <li class="line-clamp-1 mb-1 list-bullet">Made of supreme quality, durable EVA crush resistant, anti-shock material.</li>
-                                                    <li class="line-clamp-1 mb-1 list-bullet">20 MP Electro and 28 megapixel CMOS rear camera</li>
-                                                </ul>
-                                                <div class="mb-3 d-none d-md-block">
-                                                    <a class="d-inline-flex align-items-center small font-size-14" href="#">
-                                                        <div class="text-warning mr-2">
-                                                            <small class="fas fa-star"></small>
-                                                            <small class="fas fa-star"></small>
-                                                            <small class="fas fa-star"></small>
-                                                            <small class="fas fa-star"></small>
-                                                            <small class="far fa-star text-muted"></small>
-                                                        </div>
-                                                        <span class="text-secondary">(40)</span>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="product-item__footer col-md-3 d-md-block">
-                                            <div class="mb-2 flex-center-between">
-                                                <div class="prodcut-price">
-                                                    <div class="text-gray-100">$685,00</div>
-                                                </div>
-                                                <div class="prodcut-add-cart">
-                                                    <a href="../shop/single-product-fullwidth.html" class="btn-add-cart btn-primary transition-3d-hover"><i class="ec ec-add-to-cart"></i></a>
-                                                </div>
-                                            </div>
-                                            <div class="flex-horizontal-center justify-content-between justify-content-wd-center flex-wrap border-top pt-3">
-                                                <a href="../shop/compare.html" class="text-gray-6 font-size-13 mx-wd-3"><i class="ec ec-compare mr-1 font-size-15"></i> Compare</a>
-                                                <a href="../shop/wishlist.html" class="text-gray-6 font-size-13 mx-wd-3"><i class="ec ec-favorites mr-1 font-size-15"></i> Wishlist</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            
-                        </ul>
-                    </div>
+                        @endforeach
+                    </ul>
                 </div>
+
                 <!-- End Tab Content -->
                 <!-- End Shop Body -->
                 <!-- Shop Pagination -->
-                <nav class="d-md-flex justify-content-between align-items-center border-top pt-3" aria-label="Page navigation example">
-                    <div class="text-center text-md-left mb-3 mb-md-0">Showing 1–25 of 56 results</div>
+                {{-- <nav class="d-md-flex justify-content-between align-items-center border-top pt-3" aria-label="Page navigation example">
+                    <div class="text-center text-md-left mb-3 mb-md-0">Showing 1-25 of 56 results</div>
                     <ul class="pagination mb-0 pagination-shop justify-content-center justify-content-md-start">
                         <li class="page-item"><a class="page-link current" href="#">1</a></li>
                         <li class="page-item"><a class="page-link" href="#">2</a></li>
                         <li class="page-item"><a class="page-link" href="#">3</a></li>
                     </ul>
-                </nav>
+                </nav> --}}
                 <!-- End Shop Pagination -->
             </div>
         </div>

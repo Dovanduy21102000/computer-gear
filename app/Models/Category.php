@@ -20,4 +20,9 @@ class Category extends Model
     public $attributes = [
         'is_active' => 1
     ];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }
