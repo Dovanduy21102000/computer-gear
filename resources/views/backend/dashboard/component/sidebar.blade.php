@@ -49,6 +49,11 @@
                   <i class="bi bi-circle"></i><span>Quản lý thương hiệu</span>
                 </a>
               </li>
+              <li>
+                <a href="{{route('posts.index')}}">
+                  <i class="bi bi-circle"></i><span>Quản lý bài viết</span>
+                </a>
+              </li>
 
               <li>
                 <a href="{{route('attributes.index')}}">

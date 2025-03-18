@@ -57,6 +57,7 @@ Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
 
 // Trang chủ client
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
-Route::get('/products', [ProductClientController::class, 'index'])->name('products.index');
+Route::get('/products', [ProductClientController::class, 'index'])->name('products.client.index');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 
+Route::get('/blog/{slug}', [BlogController::class, 'show']);

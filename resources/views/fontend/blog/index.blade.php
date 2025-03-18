@@ -18,66 +18,23 @@
 
     <div class="container">
         <div class="row">
-            <div class="col-xl-9 col-wd">
-                <div class="min-width-1100-wd">
-                    <article class="card mb-13 border-0">
-                        <div class="row">
-                            <div class="col-lg-4 mb-5 mb-lg-0">
-                                <a href="../blog/single-blog-post.html" class="d-block"><img class="img-fluid min-height-250 object-fit-cover" src="../../assets/img/1500X730/img1.jpg" alt="Image Description"></a>
-                            </div>
-                            <div class="col-lg-8">
-                                <div class="card-body p-0">
-                                    <h4 class="mb-3"><a href="../blog/single-blog-post.html">Robot Wars – Post with Gallery</a></h4>
-                                    <div class="mb-3 pb-3 border-bottom">
-                                        <div class="list-group list-group-horizontal flex-wrap list-group-borderless align-items-center mx-n0dot5">
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5">Design,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> Technology,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> News,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> Videos</a>
-                                            <span class="mx-2 font-size-n5 mt-1 text-gray-5"><i class="fas fa-circle"></i></span>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5">March 4, 2016</a>
-                                        </div>
-                                    </div>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt, erat in malesuada aliquam, est erat faucibus purus, eget viverra nulla sem vitae neque. Quisque id sodales libero. In nec enim nisi, in ultricies quam. Sed lacinia feugiat velit, cursus molestie lectus.</p>
-                                    <div class="flex-horizontal-center">
-                                        <a href="../blog/single-blog-post.html" class="btn btn-soft-secondary-w mb-md-0 font-weight-normal px-5 px-md-4 px-lg-5">Read More</a>
-                                        <a href="../blog/single-blog-post.html" class="font-size-12 text-gray-5 ml-4"><i class="far fa-comment"></i> 3</a>
-                                    </div>
-                                </div>
-                            </div>
+            @foreach($blogs as $post)
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="{{ asset('storage/' . $post->image) }}" class="img-fluid" alt="{{ $post->title }}">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title"><a href="{{ route('blog.show', $post->slug) }}">{{ $post->title }}</a></h5>
+                            <p class="card-text">{{ Str::limit($post->description, 150) }}</p>
+                            <p class="card-text"><small class="text-muted">Đăng ngày {{ $post->created_at->format('d/m/Y') }}</small></p>
+                            <a href="{{ route('blog.show', $post->slug) }}" class="btn btn-primary">Đọc tiếp</a>
                         </div>
-                    </article>
-                    <article class="card mb-13 border-0">
-                        <div class="row">
-                            <div class="col-lg-4 mb-5 mb-lg-0">
-                                <a href="../blog/single-blog-post.html" class="d-block"><img class="img-fluid min-height-250 object-fit-cover" src="../../assets/img/1500X730/img3.jpg" alt="Image Description"></a>
-                            </div>
-                            <div class="col-lg-8">
-                                <div class="card-body p-0">
-                                    <h4 class="mb-3"><a href="../blog/single-blog-post.html">Robot Wars – Now Closed – Post with Audio</a></h4>
-                                    <div class="mb-3 pb-3 border-bottom">
-                                        <div class="list-group list-group-horizontal flex-wrap list-group-borderless align-items-center mx-n0dot5">
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5">Design,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> Technology,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> News,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> Audio</a>
-                                            <span class="mx-2 font-size-n5 mt-1 text-gray-5"><i class="fas fa-circle"></i></span>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5">March 4, 2016</a>
-                                        </div>
-                                    </div>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt, erat in malesuada aliquam, est erat faucibus purus, eget viverra nulla sem vitae neque. Quisque id sodales libero. In nec enim nisi, in ultricies quam. Sed lacinia feugiat velit, cursus molestie lectus.</p>
-                                    <div class="flex-horizontal-center">
-                                        <a href="../blog/single-blog-post.html" class="btn btn-soft-secondary-w mb-md-0 font-weight-normal px-5 px-md-4 px-lg-5">Read More</a>
-                                        <a href="../blog/single-blog-post.html" class="font-size-12 text-gray-5 ml-4"><i class="far fa-comment"></i> Leave a comment</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                    
-                    
+                    </div>
                 </div>
             </div>
+            @endforeach
             <div class="col-xl-3 col-wd">
                 <aside class="mb-7">
                     <form class="">
