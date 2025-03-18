@@ -40,15 +40,46 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $user = $order->user;
-        $province = $order->province;
-        $district = $order->district;
+        // Lấy danh sách tỉnh/thành phố từ API
+        $response = Http::get('https://provinces.open-api.vn/api/p');
+        $provinces = json_decode($response->body(), true) ?? [];
+
+        // Kiểm tra và lấy tên tỉnh/thành phố
+        $provinceName = '';
+        foreach ($provinces as $province) {
+            if (!empty($order->province_id) && $province['code'] == $order->province_id) {
+                $provinceName = $province['name'];
+                break;
+            }
+        }
+
+
+        // Lấy danh sách quận/huyện theo tỉnh cũ nếu có
+        $districts = [];
+        if (!empty($order->province_id)) {
+            $response = Http::get("https://provinces.open-api.vn/api/p/{$order->province_id}?depth=2");
+
+            $districtData = json_decode($response->body(), true);
+            $districts = $districtData['districts'] ?? [];
+        }
+
+        // Kiểm tra và lấy tên quận/huyện
+        $districtName = '';
+        foreach ($districts as $district) {
+            if (!empty($order->district_id) && $district['code'] == $order->district_id) {
+                $districtName = $district['name'];
+                break;
+            }
+        }
         $template = 'backend.orders.show';
         return view('backend.dashboard.layout', compact(
             'template',
             'order',
             'user',
-            'province',
-            'district'
+            'provinces',
+            'districts',
+            'provinceName',
+            'districtName'
         ));
     }
 

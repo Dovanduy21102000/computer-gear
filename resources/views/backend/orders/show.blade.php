@@ -42,17 +42,23 @@
 
                         <div class="row mb-3">
                             <label class="col-sm-2 col-form-label">Tỉnh/Thành phố</label>
-                            <div class="col-sm-10">{{ $order->province->name }}</div>
+                            <div class="col-sm-10">
+                                {{ $provinceName ?? 'Không xác định' }}
+                            </div>
                         </div>
 
                         <div class="row mb-3">
                             <label class="col-sm-2 col-form-label">Quận/Huyện</label>
-                            <div class="col-sm-10">{{ $order->district->name }}</div>
+                            <div class="col-sm-10">
+                                {{ $districtName ?? 'Không xác định' }}
+                            </div>
                         </div>
 
                         <div class="row mb-3">
                             <label class="col-sm-2 col-form-label">Địa chỉ cụ thể</label>
-                            <div class="col-sm-10">{{ $order->specific_address }}</div>
+                            <div class="col-sm-10">
+                                {{ $order->specific_address }}
+                            </div>
                         </div>
 
                         <h5 class="card-title">Thanh toán</h5>
