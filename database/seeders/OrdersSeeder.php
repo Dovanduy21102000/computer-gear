@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
 
 class OrdersSeeder extends Seeder
 {
@@ -24,6 +25,7 @@ class OrdersSeeder extends Seeder
             $finalPrice = $totalPrice - $couponDiscount; // Tính final_price trước khi insert
 
             DB::table('orders')->insert([
+                'code' => strtoupper(Str::random(8)),
                 'user_id' => rand(1, 10),
                 'shipping_user_name' => $faker->name,
                 'shipping_email' => $faker->email,

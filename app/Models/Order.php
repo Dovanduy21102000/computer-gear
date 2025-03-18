@@ -10,6 +10,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
+        'code',
         'user_id',
         'shipping_user_name',
         'shipping_email',
@@ -27,16 +28,11 @@ class Order extends Model
         'status',
         'notes',
     ];
-    public function province()
-    {
-        return $this->belongsTo(Province::class);
-    }
+    public $attributes = [
+        'payment_status' => 1
+    ];
 
-    public function district()
-    {
-        return $this->belongsTo(District::class);
-    }
-
+    // Liên kết với bảng users (Người dùng)
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -26,6 +26,7 @@ class DistrictSeeder extends Seeder
                 District::create([
                     'province_id' => $province->id,
                     'name' => $faker->citySuffix,  // Sử dụng Faker để giả mạo tên quận/huyện
+                    'code' => $faker->countryCode,
                 ]);
             }
         }

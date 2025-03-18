@@ -26,13 +26,14 @@
                             <thead>
                                 <tr>
                                     <th>ID đơn</th>
+                                    <th>Mã đơn hàng</th>
                                     <th>Tên người nhận</th>
                                     <th>Địa chỉ giao hàng</th>
                                     <th>Tổng giá trị</th>
                                     <th>Giảm giá</th>
                                     <th>Giá trị cuối cùng</th>
                                     <th>Trạng thái</th>
-                                    <th>Phương thức thanh toán</th>
+                                    <th>PTTT</th>
                                     <th>Ngày tạo</th>
                                     <th>Thao tác</th>
                                 </tr>
@@ -41,6 +42,7 @@
                                 @foreach ($orders as $order)
                                     <tr>
                                         <td>{{ $order->id }}</td>
+                                        <td>{{ $order->code }}</td>
                                         <td>{{ $order->shipping_user_name }}</td>
                                         <td>{{ $order->shipping_address }}</td>
                                         <td>{{ $order->total_price }}</td>
@@ -48,42 +50,57 @@
                                         <td>{{ number_format($order->final_price, 2) }}</td>
                                         <td>
                                             <span
-                                                class="badge {{ $order->status === 'pending'? 'bg-warning': 
-                                                ($order->status === 'processing'? 'bg-primary': 
-                                                ($order->status === 'delivered'? 'bg-success': 
-                                                ($order->status === 'completed'? 'bg-info': 
-                                                ($order->status === 'canceled'? 'bg-danger': '')))) }}">
-                                                {{ $order->status === 'pending'? 'Đang chờ xử lý': 
-                                                ($order->status === 'processing'? 'Đang xử lý':
-                                                ($order->status === 'delivered'? 'Đang giao hàng':
-                                                ($order->status === 'completed'? 'Hoàn thành': 
-                                                ($order->status === 'canceled'? 'Hủy đơn': '')))) }}
+                                                class="badge {{ $order->status === 'pending'
+                                                    ? 'bg-warning'
+                                                    : ($order->status === 'processing'
+                                                        ? 'bg-primary'
+                                                        : ($order->status === 'delivered'
+                                                            ? 'bg-success'
+                                                            : ($order->status === 'completed'
+                                                                ? 'bg-info'
+                                                                : ($order->status === 'canceled'
+                                                                    ? 'bg-danger'
+                                                                    : '')))) }}">
+                                                {{ $order->status === 'pending'
+                                                    ? 'Đang chờ xử lý'
+                                                    : ($order->status === 'processing'
+                                                        ? 'Đang xử lý'
+                                                        : ($order->status === 'delivered'
+                                                            ? 'Đang giao hàng'
+                                                            : ($order->status === 'completed'
+                                                                ? 'Hoàn thành'
+                                                                : ($order->status === 'canceled'
+                                                                    ? 'Hủy đơn'
+                                                                    : '')))) }}
                                             </span>
                                         </td>
                                         <td>
                                             <span
-                                                class="badge {{ $order->payment_method === 'momo'? 'bg-success': 
-                                                ($order->payment_method === 'cash'? 'bg-danger': 
-                                                ($order->payment_method === 'vn_pay'? 'bg-info': '')) }}">
-                                                {{ $order->payment_method === 'momo'? 'Momo': 
-                                                ($order->payment_method === 'cash'? 'Thanh toán khi nhận hàng': 
-                                                ($order->payment_method === 'vn_pay'? 'VN Pay': '')) }}
+                                                class="badge {{ $order->payment_method === 'momo'
+                                                    ? 'bg-success'
+                                                    : ($order->payment_method === 'cash'
+                                                        ? 'bg-danger'
+                                                        : ($order->payment_method === 'vn_pay'
+                                                            ? 'bg-info'
+                                                            : '')) }}">
+                                                {{ $order->payment_method === 'momo'
+                                                    ? 'Momo'
+                                                    : ($order->payment_method === 'cash'
+                                                        ? 'Thanh toán khi nhận hàng'
+                                                        : ($order->payment_method === 'vn_pay'
+                                                            ? 'VN Pay'
+                                                            : '')) }}
                                             </span>
                                         </td>
                                         <td>{{ $order->created_at ? $order->created_at->format('d-m-Y') : 'Không' }}
                                         </td>
-                                        <td>
-                                            <a href="{{ route('orders.show', $order->id) }}"
-                                                class="btn btn-info btn-sm">Xem</a>
-                                            <a href="{{ route('orders.edit', $order->id) }}"
-                                                class="btn btn-warning btn-sm">Sửa</a>
-                                            <form action="{{ route('orders.destroy', $order->id) }}" method="POST"
-                                                style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('Bạn xác nhận xóa đơn hàng')">Xóa</button>
-                                            </form>
+                                        <td class="text-center text-nowrap" style="width: 1px;">
+                                            <a href="{{ route('orders.show', $order->id) }}"><button type="button"
+                                                    class="btn btn-success btn-sm"><i
+                                                        class="bi bi-eye"></i></button></a>
+                                            <a href="{{ route('orders.edit', $order->id) }}"><button type="button"
+                                                    class="btn btn-warning btn-sm"><i
+                                                        class="bi bi-wrench"></i></button></a>
                                         </td>
                                     </tr>
                                 @endforeach

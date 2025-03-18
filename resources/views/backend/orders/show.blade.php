@@ -42,12 +42,12 @@
 
                         <div class="row mb-3">
                             <label class="col-sm-2 col-form-label">Tỉnh/Thành phố</label>
-                            <div class="col-sm-10">{{ $order->shipping_city }}</div>
+                            <div class="col-sm-10">{{ $order->province->name }}</div>
                         </div>
 
                         <div class="row mb-3">
                             <label class="col-sm-2 col-form-label">Quận/Huyện</label>
-                            <div class="col-sm-10">{{ $order->shipping_province }}</div>
+                            <div class="col-sm-10">{{ $order->district->name }}</div>
                         </div>
 
                         <div class="row mb-3">
@@ -88,6 +88,7 @@
                                     $statuses = [
                                         'pending' => ['label' => 'Chờ xử lý', 'class' => 'badge bg-warning text-dark'],
                                         'processing' => ['label' => 'Đang xử lý', 'class' => 'badge bg-primary'],
+                                        'delivered' => ['label' => 'Đang giao', 'class' => 'badge bg-info'],
                                         'completed' => ['label' => 'Hoàn thành', 'class' => 'badge bg-success'],
                                         'canceled' => ['label' => 'Đã hủy', 'class' => 'badge bg-danger'],
                                     ];
