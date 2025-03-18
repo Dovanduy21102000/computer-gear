@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\AttributeController;
 use App\Http\Controllers\AttributeValueController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BannerController;
@@ -10,8 +11,11 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
 
 use App\Http\Controllers\HomeController;
+
 use App\Http\Controllers\PostController;
 
+
+use App\Http\Controllers\ProductClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -70,4 +74,6 @@ Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
 
 // Trang chủ client
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
+Route::get('/products', [ProductClientController::class, 'index'])->name('products.index');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 
