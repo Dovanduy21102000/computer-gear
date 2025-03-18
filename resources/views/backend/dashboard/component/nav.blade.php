@@ -2,9 +2,9 @@
 <header id="header" class="header fixed-top d-flex align-items-center">
 
     <div class="d-flex align-items-center justify-content-between">
-      <a href="index.html" class="logo d-flex align-items-center">
+      <a href="{{ route('home.index') }}" class="logo d-flex align-items-center">
         <img src="backend/img/logo.png" alt="">
-        <span class="d-none d-lg-block">ĐỖ DUY</span>
+        <span class="d-none d-lg-block">COMPUTER GEAR</span>
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
     </div><!-- End Logo -->
