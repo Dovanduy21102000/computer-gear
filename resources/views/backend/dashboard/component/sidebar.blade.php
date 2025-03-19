@@ -28,6 +28,13 @@
                 <span>Quản lý thành viên</span>
             </a>
         </li>  
+
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="{{route('posts.index')}}">
+            <i class="bi bi-file-earmark-text"></i>
+            <span>Quản lý bài viết</span>
+          </a>
+        </li>
         
         <li class="nav-item">
             <a class="nav-link" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#" aria-expanded="true">
@@ -49,11 +56,7 @@
                   <i class="bi bi-circle"></i><span>Quản lý thương hiệu</span>
                 </a>
               </li>
-              <li>
-                <a href="{{route('posts.index')}}">
-                  <i class="bi bi-circle"></i><span>Quản lý bài viết</span>
-                </a>
-              </li>
+            
 
               <li>
                 <a href="{{route('attributes.index')}}">
