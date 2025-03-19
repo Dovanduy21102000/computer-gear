@@ -30,7 +30,7 @@ class CategoryController extends BaseCRUDController
 
     public function index()
     {
-        $data       = Category::paginate(2);
+        $data       = Category::paginate(5);
         $title      = $this->titleIndex;
         $columns    = $this->columns;
         $urlBase    = $this->urlBase;

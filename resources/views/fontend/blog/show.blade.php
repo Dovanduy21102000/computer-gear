@@ -1,23 +1,14 @@
 <main id="content" role="main">
     <!-- breadcrumb -->
-    <style>
-        .img-small {
-    width: 100%; /* Tự động điều chỉnh chiều rộng ảnh theo chiều rộng của container */
-    height: auto; /* Giữ tỷ lệ ảnh */
-    max-height: 200px; /* Giới hạn chiều cao tối đa của ảnh */
-    object-fit: cover; /* Cắt ảnh để phù hợp với container mà không bị méo */
-}
-
-
-    </style>
     <div class="bg-gray-13 bg-md-transparent">
         <div class="container">
             <!-- breadcrumb -->
             <div class="my-md-3">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-3 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble">
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a href="{{route('home.index')}}">Trang chủ</a></li>
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">Blog</li>
+                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a href="{{route('home.index')}}">Home</a></li>
+                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a href="{{route('blog.index')}}">Blog</a></li>
+                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a href="#">BlogShow</a></li>
                     </ol>
                 </nav>
             </div>
@@ -30,41 +21,61 @@
         <div class="row">
             <div class="col-xl-9 col-wd">
                 <div class="min-width-1100-wd">
-                    
-                        @foreach($posts as $post)
-                        <article class="card mb-13 border-0">
-                            <div class="row">
-                                <div class="col-lg-4 mb-5 mb-lg-0">
-                                    <a href="{{ route('blog.show', $post->slug) }}" class="d-block">
-                                        <img class="img-fluid img-small object-fit-cover" 
-                                             src="{{ asset('storage/' . $post->image) }}" 
-                                             alt="{{ $post->title }}">
-
-                                    </a>
-                                </div>
-                                <div class="col-lg-8">
-                                    <div class="card-body p-0">
-                                        <h4 class="mb-3"><a href="{{ route('blog.show', $post->slug) }}">{{ $post->title }}</a></h4>
-                                        <div class="mb-3 pb-3 border-bottom">
-                                            <span class="mx-0dot5 text-gray-5">{{ $post->created_at->format('d/m/Y') }}</span>
-                                        </div>
-                                        <p>{{ Str::limit($post->description, 150) }}</p>
-                                        <div class="flex-horizontal-center">
-                                            <a href="{{ route('blog.show', $post->slug) }}" class="btn btn-soft-secondary-w">
-                                                Đọc tiếp
-                                            </a>
-                                        </div>
-                                    </div>
+                    <article class="card mb-8 border-0">
+                        <!-- Hiển thị ảnh bài viết -->
+                        <img class="img-fluid" src="{{ asset('storage/' . $post->image) }}" alt="{{ $post->title }}" style="width: 1000px; height: 500px;">
+                       <br>
+            
+                        <div class="card-body pt-5 pb-0 px-0">
+                            <div class="d-block d-md-flex flex-center-between mb-4 mb-md-0">
+                                <!-- Hiển thị tiêu đề bài viết -->
+                                <h4 class="mb-md-3 mb-1">{{ $post->title }}</h4>
+                                <a href="#" class="font-size-12 text-gray-5 ml-md-4">
+                                    <i class="far fa-comment"></i> Leave a comment
+                                </a>
+                            </div>
+            
+                            <div class="mb-3 pb-3 border-bottom">
+                                <div class="list-group list-group-horizontal flex-wrap list-group-borderless align-items-center mx-n0dot5">
+                                    <!-- Hiển thị thể loại bài viết (category) -->
+                                    {{-- @foreach($post->categories as $category)
+                                        <a href="#" class="mx-0dot5 text-gray-5">{{ $category->name }}</a>
+                                    @endforeach --}}
+                                    <span class="mx-2 font-size-n5 mt-1 text-gray-5"><i class="fas fa-circle"></i></span>
+                                    <!-- Hiển thị ngày đăng -->
+                                    <a href="#" class="mx-0dot5 text-gray-5">{{ $post->created_at->format('F j, Y') }}</a>
                                 </div>
                             </div>
-                        </article>
-                    @endforeach
-                    
-
-                    
-                    
+            
+                            <!-- Hiển thị mô tả bài viết -->
+                            <p><strong>{{ $post->description }}</strong></p>
+                            <!-- Hiển thị nội dung bài viết -->
+                            <p>{!! $post->content !!}</p>
+                            
+                            
+                        </div>
+                    </article>
+            
+                    <ul class="nav justify-content-between mb-11">
+                        <!-- Hiển thị bài viết trước và sau -->
+                        @if($recentPosts->count() > 0)
+                            <li class="nav-item m-0">
+                                <a class="nav-link text-gray-27 px-0" href="{{ route('blog.show', ['slug' => $recentPosts[0]->slug]) }}">
+                                    <span class="mr-1">←</span> {{ $recentPosts[0]->title }}
+                                </a>
+                            </li>
+                            @if($recentPosts->count() > 1)
+                                <li class="nav-item m-0">
+                                    <a class="nav-link text-gray-27 px-0" href="{{ route('blog.show', ['slug' => $recentPosts[1]->slug]) }}">
+                                        {{ $recentPosts[1]->title }} <span class="ml-1">→</span>
+                                    </a>
+                                </li>
+                            @endif
+                        @endif
+                    </ul>
                 </div>
             </div>
+            
             <div class="col-xl-3 col-wd">
                 <aside class="mb-7">
                     <form class="">
@@ -105,10 +116,6 @@
                
             </div>
         </div>
-       
-    </div>
-    <div class="d-flex justify-content-center mt-2">
-        {{ $posts->links() }}
+        
     </div>
 </main>
-<!-- ========== END MAIN CONTENT ========== -->

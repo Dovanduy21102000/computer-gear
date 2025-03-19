@@ -1,53 +1,50 @@
         <!-- Go to Top -->
-        <a class="js-go-to u-go-to" href="#"
-            data-position='{"bottom": 15, "right": 15 }'
-            data-type="fixed"
-            data-offset-top="400"
-            data-compensation="#header"
-            data-show-effect="slideInUp"
-            data-hide-effect="slideOutDown">
+        <a class="js-go-to u-go-to" href="#" data-position='{"bottom": 15, "right": 15 }' data-type="fixed"
+            data-offset-top="400" data-compensation="#header" data-show-effect="slideInUp" data-hide-effect="slideOutDown">
             <span class="fas fa-arrow-up u-go-to__inner"></span>
         </a>
         <!-- End Go to Top -->
 
         <!-- JS Global Compulsory -->
-        <script src="fontend/assets/vendor/jquery/dist/jquery.min.js"></script>
-        <script src="fontend/assets/vendor/jquery-migrate/dist/jquery-migrate.min.js"></script>
-        <script src="fontend/assets/vendor/popper.js/dist/umd/popper.min.js"></script>
-        <script src="fontend/assets/vendor/bootstrap/bootstrap.min.js"></script>
+        <script src="{{ asset('fontend/assets/vendor/jquery/dist/jquery.min.js') }}"></script>
+        <script src="{{ asset('fontend/assets/vendor/jquery-migrate/dist/jquery-migrate.min.js') }}"></script>
+
+        <script src="{{ asset('fontend/assets/vendor/popper.js/dist/umd/popper.min.js') }}"></script>
+        <script src="{{ asset('fontend/assets/vendor/bootstrap/bootstrap.min.js') }}"></script>
 
         <!-- JS Implementing Plugins -->
-        <script src="fontend/assets/vendor/appear.js"></script>
-        <script src="fontend/assets/vendor/jquery.countdown.min.js"></script>
-        <script src="fontend/assets/vendor/hs-megamenu/src/hs.megamenu.js"></script>
-        <script src="fontend/assets/vendor/svg-injector/dist/svg-injector.min.js"></script>
-        <script src="fontend/assets/vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>
-        <script src="fontend/assets/vendor/jquery-validation/dist/jquery.validate.min.js"></script>
-        <script src="fontend/assets/vendor/fancybox/jquery.fancybox.min.js"></script>
-        <script src="fontend/assets/vendor/typed.js/lib/typed.min.js"></script>
-        <script src="fontend/assets/vendor/slick-carousel/slick/slick.js"></script>
-        <script src="fontend/assets/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+        <script src="{{ asset('fontend/assets/vendor/appear.js') }}"></script>
+        <script src="{{ asset('fontend/assets/vendor/jquery.countdown.min.js') }}"></script>
+        <script src="{{ asset('fontend/assets/vendor/hs-megamenu/src/hs.megamenu.js') }}"></script>
+        <script src="{{ asset('fontend/assets/vendor/svg-injector/dist/svg-injector.min.js') }}"></script>
+        <script src="{{ asset('fontend/assets/vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js') }}">
+        </script>
+        <script src="{{ asset('fontend/assets/vendor/jquery-validation/dist/jquery.validate.min.js') }}"></script>
+        <script src="{{ asset('fontend/assets/vendor/fancybox/jquery.fancybox.min.js') }}"></script>
+        <script src="{{ asset('fontend/assets/vendor/typed.js/lib/typed.min.js') }}"></script>
+        <script src="{{ asset('fontend/assets/vendor/slick-carousel/slick/slick.js') }}"></script>
+        <script src="{{ asset('fontend/assets/vendor/bootstrap-select/dist/js/bootstrap-select.min.js') }}"></script>
 
         <!-- JS Electro -->
-        <script src="fontend/assets/js/hs.core.js"></script>
-        <script src="fontend/assets/js/components/hs.countdown.js"></script>
-        <script src="fontend/assets/js/components/hs.header.js"></script>
-        <script src="fontend/assets/js/components/hs.hamburgers.js"></script>
-        <script src="fontend/assets/js/components/hs.unfold.js"></script>
-        <script src="fontend/assets/js/components/hs.focus-state.js"></script>
-        <script src="fontend/assets/js/components/hs.malihu-scrollbar.js"></script>
-        <script src="fontend/assets/js/components/hs.validation.js"></script>
-        <script src="fontend/assets/js/components/hs.fancybox.js"></script>
-        <script src="fontend/assets/js/components/hs.onscroll-animation.js"></script>
-        <script src="fontend/assets/js/components/hs.slick-carousel.js"></script>
-        <script src="fontend/assets/js/components/hs.show-animation.js"></script>
-        <script src="fontend/assets/js/components/hs.svg-injector.js"></script>
-        <script src="fontend/assets/js/components/hs.go-to.js"></script>
-        <script src="fontend/assets/js/components/hs.selectpicker.js"></script>
+        <script src="{{ asset('fontend/assets/js/hs.core.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.countdown.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.header.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.hamburgers.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.unfold.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.focus-state.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.malihu-scrollbar.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.validation.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.fancybox.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.onscroll-animation.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.slick-carousel.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.show-animation.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.svg-injector.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.go-to.js') }}"></script>
+        <script src="{{ asset('fontend/assets/js/components/hs.selectpicker.js') }}"></script>
 
         <!-- JS Plugins Init. -->
         <script>
-            $(window).on('load', function () {
+            $(window).on('load', function() {
                 // initialization of HSMegaMenu component
                 $('.js-mega-menu').HSMegaMenu({
                     event: 'hover',
@@ -58,7 +55,7 @@
                 });
             });
 
-            $(document).on('ready', function () {
+            $(document).on('ready', function() {
                 // initialization of header
                 $.HSCore.components.HSHeader.init($('#header'));
 
@@ -67,7 +64,7 @@
 
                 // initialization of unfold component
                 $.HSCore.components.HSUnfold.init($('[data-unfold-target]'), {
-                    afterOpen: function () {
+                    afterOpen: function() {
                         $(this).find('input[type="search"]').focus();
                     }
                 });
@@ -117,7 +114,7 @@
 
                 // initialization of unfold component
                 $.HSCore.components.HSUnfold.init($('[data-unfold-target]'), {
-                    beforeClose: function () {
+                    beforeClose: function() {
                         $('#hamburgerTrigger').removeClass('is-active');
                     },
                     afterClose: function() {
@@ -125,12 +122,12 @@
                     }
                 });
 
-                $('#headerSidebarList [data-toggle="collapse"]').on('click', function (e) {
+                $('#headerSidebarList [data-toggle="collapse"]').on('click', function(e) {
                     e.preventDefault();
 
                     var target = $(this).data('target');
 
-                    if($(this).attr('aria-expanded') === "true") {
+                    if ($(this).attr('aria-expanded') === "true") {
                         $(target).collapse('hide');
                     } else {
                         $(target).collapse('show');
@@ -142,5 +139,21 @@
 
                 // initialization of select picker
                 $.HSCore.components.HSSelectPicker.init('.js-select');
+            });
+
+            $(document).ready(function() {
+                $(document).on('click', '.js-plus', function() {
+                    let $input = $(this).closest('.js-quantity').find('.js-result');
+                    let value = parseInt($input.val(), 10) || 0;
+                    $input.val(value + 1);
+                });
+
+                $(document).on('click', '.js-minus', function() {
+                    let $input = $(this).closest('.js-quantity').find('.js-result');
+                    let value = parseInt($input.val(), 10) || 1;
+                    if (value > 1) {
+                        $input.val(value - 1);
+                    }
+                });
             });
         </script>

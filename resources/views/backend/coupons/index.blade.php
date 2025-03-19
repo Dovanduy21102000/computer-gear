@@ -7,6 +7,7 @@
         </div>
     @endif
     <div class="pagetitle">
+<<<<<<< HEAD
         <h1>Quản lý khuyến mãi</h1>
         <nav>
             <ol class="breadcrumb">
@@ -14,6 +15,15 @@
                 <li class="breadcrumb-item active">Quản lý khuyến mại</li>
             </ol>
         </nav>
+=======
+      <h1>Danh sách khuyến mại</h1>
+      <a class="btn btn-primary mb-10" style="float " href="{{ route('coupons.create') }}">Thêm mới</a>
+      
+      <nav>
+        <ol class="breadcrumb">
+        </ol>
+      </nav>
+>>>>>>> acf26489b6efda40ac4b8213f9c61158c0f1f2af
     </div><!-- End Page Title -->
 
 
