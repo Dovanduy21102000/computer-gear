@@ -22,7 +22,7 @@ class BaseCRUDController extends Controller
 
     public $columns = [];
 
-
+    protected $searchable = [];
 
     public function __construct()
     {
@@ -192,5 +192,26 @@ class BaseCRUDController extends Controller
     protected function validateUpdate(Request $request, $id)
     {
         return $request->validate([]);
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $model = new $this->model;
+
+        $searchableColumns = property_exists($this, 'searchable') ? $this->searchable : ['name'];
+
+        // Perform search
+        $data = $model::where(function ($q) use ($query, $searchableColumns) {
+            foreach ($searchableColumns as $column) {
+                $q->orWhere($column, 'LIKE', "%$query%");
+            }
+        });
+        // ->paginate(10); // Paginate results
+
+        return view($this->pathView . 'index', compact('data'))
+            ->with('title', $this->titleIndex)
+            ->with('columns', $this->columns)
+            ->with('urlBase', $this->urlBase);
     }
 }
