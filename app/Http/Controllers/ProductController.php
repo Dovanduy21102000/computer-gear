@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
-    
+
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -30,7 +31,7 @@ class ProductController extends Controller
         // Lấy danh sách danh mục và thương hiệu
         $categories = Category::all();
         $brands = Brand::all();
-        return view('backend.dashboard.layout', compact('template','categories','brands'));
+        return view('backend.dashboard.layout', compact('template', 'categories', 'brands'));
     }
 
     /**
@@ -38,12 +39,15 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+
+        // dd($request->all());
+
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
             'sku' => 'required|string|max:255|unique:products',
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:products',
+            'slug' => 'nullable|string|max:255|unique:products',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
@@ -54,9 +58,19 @@ class ProductController extends Controller
             'is_variant' => 'boolean',
         ]);
 
+        if (!$request->slug) {
+            $request->merge(['slug' => Str::slug($request->name)]);
+        }
+
+        // dd("Validation passed", $validatedData);
+
         // Xử lý upload ảnh
         if ($request->hasFile('thumbnail')) {
             $thumbnailPath = $request->file('thumbnail')->store('products', 'public');
+
+            if (!$thumbnailPath) {
+                dd("File upload failed");
+            }
         } else {
             $thumbnailPath = null;
         }
@@ -72,12 +86,12 @@ class ProductController extends Controller
             'short_description' => $request->short_description,
             'description' => $request->description,
             'price' => $request->price,
-            'price_sale' => $request->price_sale,
+            'price_sale' => $request->price_sale ?? null,
             'quantity' => $request->quantity,
             'status' => $request->status,
             'is_variant' => $request->is_variant,
+            'views' => 0
         ]);
-
         return redirect()->route('products.index')->with('success', 'Sản phẩm đã được thêm thành công.');
     }
 
@@ -125,7 +139,7 @@ class ProductController extends Controller
             'brand_id' => 'required|exists:brands,id',
             'sku' => 'required|string|max:255|unique:products,sku,' . $product->id,
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:products,slug,' . $product->id,
+            'slug' => 'nullable|string|max:255|unique:products,slug,' . $product->id,
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
