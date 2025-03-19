@@ -10,7 +10,7 @@ class BannerController extends Controller
 {
     public function index()
     {
-        $banners = Banner::latest()->paginate(5);
+        $banners = Banner::all();
         $template = 'backend.banners.index';
 
         return view('backend.dashboard.layout', compact('banners', 'template'));
