@@ -283,15 +283,7 @@
                                     </div>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="pills-two-example1-tab" data-toggle="pill"
-                                    href="#pills-two-example1" role="tab" aria-controls="pills-two-example1"
-                                    aria-selected="false">
-                                    <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                        <i class="fa fa-align-justify"></i>
-                                    </div>
-                                </a>
-                            </li>
+                            
                             <li class="nav-item">
                                 <a class="nav-link" id="pills-three-example1-tab" data-toggle="pill"
                                     href="#pills-three-example1" role="tab" aria-controls="pills-three-example1"
@@ -301,15 +293,7 @@
                                     </div>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="pills-four-example1-tab" data-toggle="pill"
-                                    href="#pills-four-example1" role="tab" aria-controls="pills-four-example1"
-                                    aria-selected="true">
-                                    <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                        <i class="fa fa-th-list"></i>
-                                    </div>
-                                </a>
-                            </li>
+                            
                         </ul>
                     </div>
                     <div class="d-flex">
@@ -350,53 +334,38 @@
                 <!-- Shop Body -->
                 <!-- Tab Content -->
                 <div class="tab-content" id="pills-tabContent">
-                    <div class="tab-pane fade pt-2 show active" id="pills-one-example1" role="tabpanel"
-                        aria-labelledby="pills-one-example1-tab" data-target-group="groups">
+                    <!-- Grid View -->
+                    <div class="tab-pane fade pt-2 show active" id="pills-one-example1" role="tabpanel" aria-labelledby="pills-one-example1-tab" data-target-group="groups">
                         <ul class="row list-unstyled products-group no-gutters">
                             @foreach ($products as $product)
                                 <li class="col-6 col-md-3 col-wd-2gdot4 product-item">
                                     <div class="product-item__outer h-100">
                                         <div class="product-item__inner px-xl-4 p-3">
                                             <div class="product-item__body pb-xl-2">
-                                                <!-- Category Name -->
                                                 <div class="mb-2">
-                                                    <a href="" class="font-size-12 text-gray-5">
-                                                        {{ $product->category->name }}
-                                                    </a>
+                                                    <a href="#" class="font-size-12 text-gray-5">{{ $product->category->name ?? 'Danh mục' }}</a>
                                                 </div>
-
-                                                <!-- Product Name -->
                                                 <h5 class="mb-1 product-item__title">
-                                                    <a href="" class="text-blue font-weight-bold">
+                                                    <a href="{{ route('client.products.detail', $product->slug) }}" class="text-blue font-weight-bold">
                                                         {{ $product->name }}
                                                     </a>
                                                 </h5>
-
-                                                <!-- Product Image -->
                                                 <div class="mb-2">
-                                                    <a href="" class="d-block text-center">
-                                                        <img class="img-fluid"
-                                                            src="{{ asset('storage/' . $product->thumbnail) }}"
-                                                            alt="{{ $product->name }}">
+                                                    <a href="{{ route('client.products.detail', $product->slug) }}" class="d-block text-center">
+                                                        <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}" alt="{{ $product->name }}">
+
                                                     </a>
                                                 </div>
-
-                                                <!-- Price -->
                                                 <div class="flex-center-between mb-1">
                                                     <div class="prodcut-price">
                                                         @if ($product->price_sale)
-                                                            <div class="text-gray-100">
-                                                                <del>${{ number_format($product->price, 2) }}</del>
-                                                                <span
-                                                                    class="text-danger">${{ number_format($product->price_sale, 2) }}</span>
-                                                            </div>
+                                                            <div class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}đ</div>
+                                                            <del class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
                                                         @else
-                                                            <div class="text-gray-100">
-                                                                ${{ number_format($product->price, 2) }}</div>
+                                                            <div class="text-gray-100">{{ number_format($product->price, 0, ',', '.') }}đ</div>
                                                         @endif
                                                     </div>
 
-                                                    <!-- Add to Cart -->
                                                     <div class="d-none d-xl-block prodcut-add-cart">
                                                         <form action="{{ route('cart.add') }}" method="POST">
                                                             @csrf
@@ -407,30 +376,97 @@
                                                             </button>
                                                         </form>
                                                     </div>
-                                                    
+                                                    <div class="d-none d-xl-block prodcut-add-cart">
+                                                        <a href="#" class="btn-add-cart btn-primary transition-3d-hover"><i class="ec ec-add-to-cart"></i></a>
+                                                    </div>
                                                 </div>
                                             </div>
-
-                                            <!-- Footer: Compare & Wishlist -->
                                             <div class="product-item__footer">
                                                 <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                    <a href="" class="text-gray-6 font-size-13">
-                                                        <i class="ec ec-compare mr-1 font-size-15"></i> Compare
-                                                    </a>
-                                                    <a href="" class="text-gray-6 font-size-13">
-                                                        <i class="ec ec-favorites mr-1 font-size-15"></i> Wishlist
-                                                    </a>
+                                                    <a href="#" class="text-gray-6 font-size-13"><i class="ec ec-compare mr-1 font-size-15"></i> So sánh</a>
+                                                    <a href="#" class="text-gray-6 font-size-13"><i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích</a>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </li>
                             @endforeach
+                            
 
-
+                            
+                        </ul>
+                    </div>
+        
+                    <!-- List View -->
+                    <div class="tab-pane fade pt-2" id="pills-three-example1" role="tabpanel" aria-labelledby="pills-three-example1-tab" data-target-group="groups">
+                        <ul class="d-block list-unstyled products-group prodcut-list-view">
+                            @foreach ($products as $product)
+                                <li class="product-item remove-divider">
+                                    <div class="product-item__outer w-100">
+                                        <div class="product-item__inner remove-prodcut-hover py-4 row">
+                                            <div class="product-item__header col-6 col-md-4">
+                                                <div class="mb-2">
+                                                    <a href="{{ route('client.products.detail', $product->slug) }}" class="d-block text-center">
+                                                        <img class="img-fluid" src="{{ asset($product->thumbnail) }}" alt="{{ $product->name }}">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="product-item__body col-6 col-md-5">
+                                                <div class="pr-lg-10">
+                                                    <div class="mb-2">
+                                                        <a href="#" class="font-size-12 text-gray-5">{{ $product->category->name ?? 'Danh mục' }}</a>
+                                                    </div>
+                                                    <h5 class="mb-2 product-item__title">
+                                                        <a href="{{ route('client.products.detail', $product->slug) }}" class="text-blue font-weight-bold">
+                                                            {{ $product->name }}
+                                                        </a>
+                                                    </h5>
+                                                    <div class="prodcut-price mb-2 d-md-none">
+                                                        @if ($product->price_sale)
+                                                            <div class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}đ</div>
+                                                            <del class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                                        @else
+                                                            <div class="text-gray-100">{{ number_format($product->price, 0, ',', '.') }}đ</div>
+                                                        @endif
+                                                    </div>
+                                                    <ul class="font-size-12 p-0 text-gray-110 mb-4 d-none d-md-block">
+                                                        <li class="line-clamp-1 mb-1 list-bullet">Chất lượng cao cấp</li>
+                                                        <li class="line-clamp-1 mb-1 list-bullet">Thiết kế bền bỉ, chống sốc</li>
+                                                        <li class="line-clamp-1 mb-1 list-bullet">Bảo hành chính hãng</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="product-item__footer col-md-3 d-md-block">
+                                                <div class="mb-3">
+                                                    <div class="prodcut-price mb-2">
+                                                        @if ($product->price_sale)
+                                                            <div class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}đ</div>
+                                                            <del class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                                        @else
+                                                            <div class="text-gray-100">{{ number_format($product->price, 0, ',', '.') }}đ</div>
+                                                        @endif
+                                                    </div>
+                                                    <div class="prodcut-add-cart">
+                                                        <a href="#" class="btn btn-sm btn-block btn-primary-dark btn-wide transition-3d-hover">Thêm vào giỏ</a>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-horizontal-center justify-content-between justify-content-wd-center flex-wrap">
+                                                    <a href="#" class="text-gray-6 font-size-13 mx-wd-3"><i class="ec ec-compare mr-1 font-size-15"></i> So sánh</a>
+                                                    <a href="#" class="text-gray-6 font-size-13 mx-wd-3"><i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
                 </div>
+        
+                <!-- Phân trang -->
+                {{-- <div class="d-flex justify-content-center mt-4">
+                    {{ $products->links() }}
+                </div> --}}
                 <!-- End Tab Content -->
                 <!-- End Shop Body -->
                 <!-- Shop Pagination -->

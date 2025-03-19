@@ -65,7 +65,11 @@ Route::get('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.r
 Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.applyCoupon');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
-Route::get('/products', [ProductClientController::class, 'index'])->name('products.client.index');
+
+Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
+Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
+
+
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
