@@ -504,7 +504,10 @@
 
                              <!-- Pages -->
                              <li class="nav-item hs-has-mega-menu u-header__nav-item">
-                                 <a class="nav-link u-header__nav-link" href="{{ route('products.client.index') }}">Sản
+
+
+                                 <a class="nav-link u-header__nav-link" href="{{ route('client.products.index') }}">Sản
+
                                      phẩm</a>
                              </li>
                              <!-- End Pages -->
