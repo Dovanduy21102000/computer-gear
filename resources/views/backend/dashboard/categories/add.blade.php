@@ -1,12 +1,11 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Form Elements</h1>
+        <h1>Danh sách sản phẩm</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Forms</li>
-                <li class="breadcrumb-item active">Elements</li>
+                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                <li class="breadcrumb-item active">Quản lý sản phẩm</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->

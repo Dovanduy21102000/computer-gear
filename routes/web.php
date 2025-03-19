@@ -44,6 +44,7 @@ Route::get('/dashboard/index', [DashboardController::class, 'index'])->name('das
 
 Route::prefix('admin')->group(function () {
     $objects = [
+        
         'categories'        => CategoryController::class,
         'attributes'        => AttributeController::class,
         'attributevalues'   => AttributeValueController::class,

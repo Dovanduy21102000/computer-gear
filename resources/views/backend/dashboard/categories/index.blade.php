@@ -1,12 +1,11 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Data Tables</h1>
+        <h1>Danh sách sản phẩm</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Tables</li>
-                <li class="breadcrumb-item active">Data</li>
+                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                <li class="breadcrumb-item active">Quản lý sản phẩm</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -18,9 +17,8 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">{{ $title }}</h5>
-                        <a href="{{ route($urlBase . 'create') }}" class="btn btn-danger"><i
-                                class="fa fa-plus mr5"></i>Thêm
-                            mới bài viết</a>
+                        <a href="{{ route($urlBase . 'create') }}" class="btn btn-primary"><i
+                                class="fa fa-plus mr5"></i>Thêm mới</a>
 
                         <!-- Table with stripped rows -->
                         <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
