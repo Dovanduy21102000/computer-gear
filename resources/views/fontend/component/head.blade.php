@@ -1,5 +1,6 @@
 <head>
     <!-- Title -->
+    <base href="{{ config('app.url') }}">
     <title>ComputerGear</title>
 
     <!-- Required Meta Tags Always Come First -->

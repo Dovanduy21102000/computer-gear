@@ -20,4 +20,11 @@ class Category extends Model
     public $attributes = [
         'is_active' => 1
     ];
+    // App\Models\Category.php
+
+public function posts()
+{
+    return $this->hasMany(Post::class);
+}
+
 }

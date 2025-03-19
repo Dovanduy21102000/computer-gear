@@ -21,4 +21,14 @@ class Post extends Model
         'is_hot',
         'views',
     ];
+    // Scope để lấy các bài viết có trạng thái "published"
+    public function scopePublished($query)
+    {
+        return $query->where('status', 1);
+    }
+
+    public function category()
+{
+    return $this->belongsTo(Category::class);
+}
 }

@@ -1,0 +1,65 @@
+{{-- <div class="col-xl-3 col-wd">
+                <aside class="mb-7">
+                    <form class="">
+                        <div class="d-flex align-items-center">
+                            <label class="sr-only" for="signupSrEmail">Search Electro blog</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control px-4" name="search" id="signupSrEmail" placeholder="Search..." aria-label="Search Electro blog">
+                            </div>
+                            <button type="submit" class="btn btn-primary text-nowrap ml-3 d-none">
+                                <span class="fas fa-search font-size-1 mr-2"></span> Search
+                            </button>
+                        </div>
+                    </form>
+                </aside>
+                <aside class="mb-7">
+                    <div class="border-bottom border-color-1 mb-5">
+                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">About Blog</h3>
+                    </div>
+                    <p class="text-gray-90 mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt, erat in malesuada aliquam, est erat faucibus purus, eget viverra nulla sem vitae neque. Quisque id sodales libero.</p>
+                </aside>
+                <aside class="mb-7">
+                    <div class="border-bottom border-color-1 mb-5">
+                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Categories</h3>
+                    </div>
+                    <div class="list-group">
+                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-0"><i class="mr-2 fas fa-angle-right"></i> Design</a>
+                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Events</a>
+                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Links & Quotes</a>
+                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> News</a>
+                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Social</a>
+                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Technology</a>
+                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Audios</a>
+                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Videos</a>
+                    </div>
+                </aside>
+                <aside class="mb-7">
+                    <div class="border-bottom border-color-1 mb-5">
+                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Recent Posts</h3>
+                    </div>
+                    <article class="mb-4">
+                        <div class="media">
+                            <div class="width-75 height-75 mr-3">
+                                <img class="img-fluid object-fit-cover" src="../../assets/img/1500X730/img1.jpg" alt="Image Description">
+                            </div>
+                            <div class="media-body">
+                                <h4 class="font-size-14 mb-1"><a href="../blog/single-blog-post.html" class="text-gray-39">Robot Wars – Post with Gallery</a></h4>
+                                <span class="text-gray-5">March 3, 2020</span>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="mb-4">
+                        <div class="media">
+                            <div class="width-75 height-75 mr-3">
+                                <img class="img-fluid object-fit-cover" src="../../assets/img/1500X730/img4.jpg" alt="Image Description">
+                            </div>
+                            <div class="media-body">
+                                <h4 class="font-size-14 mb-1"><a href="../blog/single-blog-post.html" class="text-gray-39">Robot Wars – Now Closed – Post with Audio</a></h4>
+                                <span class="text-gray-5">March 3, 2020</span>
+                            </div>
+                        </div>
+                    </article>
+                    
+                </aside>
+                
+            </div> --}}
