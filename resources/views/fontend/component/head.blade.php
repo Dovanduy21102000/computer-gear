@@ -1,6 +1,7 @@
 <head>
     <!-- Title -->
-    <title>Home-v2 | Electro - Responsive Website Template</title>
+    <base href="{{ config('app.url') }}">
+    <title>ComputerGear</title>
 
     <!-- Required Meta Tags Always Come First -->
     <meta charset="utf-8">
