@@ -1,16 +1,15 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Form Elements</h1>
+        <h1>Quản lý bài viết</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Forms</li>
-                <li class="breadcrumb-item active">Elements</li>
+                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                <li class="breadcrumb-item active">Quản lý bài viết</li>
+                <li class="breadcrumb-item active">Chi tiết bài viết</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
-
     <section class="section">
         <div class="row">
             <div class="col-lg-6">
@@ -364,7 +363,7 @@
                             <!-- Submit Button -->
                             <div class="row mb-3">
                                 <div class="col-sm-10 offset-sm-2">
-                                    <a href="{{ route('posts.index') }}" type="submit" class="btn btn-primary">Quay
+                                    <a href="{{ route('posts.index') }}" type="submit" class="btn btn-secondary">Quay
                                         lại </a>
                                 </div>
                             </div>

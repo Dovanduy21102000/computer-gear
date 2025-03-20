@@ -26,5 +26,8 @@ public function posts()
 {
     return $this->hasMany(Post::class);
 }
-
+public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
 }

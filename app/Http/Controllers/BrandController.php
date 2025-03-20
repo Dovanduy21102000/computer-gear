@@ -15,9 +15,9 @@ class BrandController extends BaseCRUDController
     public $fieldImage  = 'logo';
     public $folderImage = 'brands/images';
 
-    public $titleIndex = 'Danh sách hãng';
-    public $titleCreate = 'Thêm mới hãng';
-    public $titleEdit = 'Chỉnh sửa hãng';
+    public $titleIndex = 'Danh sách thương hiệu';
+    public $titleCreate = 'Thêm mới thương hiệu';
+    public $titleEdit = 'Chỉnh sửa thương hiệu';
 
     public $columns = [
         'name'          => 'Tên hãng',
@@ -31,7 +31,7 @@ class BrandController extends BaseCRUDController
 
     public function index()
     {
-        $data       = Brand::paginate(2);
+        $data       = Brand::paginate(10);
         $title      = $this->titleIndex;
         $columns    = $this->columns;
         $urlBase    = $this->urlBase;

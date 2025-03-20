@@ -72,7 +72,7 @@
                                                     <div class="slug">{{ $item->slug }}</div>
                                                 </td>
                                                 <td class="text-center">
-                                                    <div class="parent_id">{{ $item->parent_id ?? 0 }}</div>
+                                                    <div class="parent_id">{{ $item->parent->name ?? 'Không có' }}</div>
                                                 </td>
 
                                                 <td class="text-center">
