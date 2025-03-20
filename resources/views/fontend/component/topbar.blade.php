@@ -15,19 +15,39 @@
                     </li>
                     <li class="list-inline-item mr-0 u-header-topbar__nav-item u-header-topbar__nav-item-border">
                         <!-- Account Sidebar Toggle Button -->
-                        <a id="sidebarNavToggler" href="javascript:;" role="button" class="u-header-topbar__nav-link"
-                            aria-controls="sidebarContent"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                            data-unfold-event="click"
-                            data-unfold-hide-on-scroll="false"
-                            data-unfold-target="#sidebarContent"
-                            data-unfold-type="css-animation"
-                            data-unfold-animation-in="fadeInRight"
-                            data-unfold-animation-out="fadeOutRight"
-                            data-unfold-duration="500">
-                            <i class="ec ec-user mr-1"></i>Đăng ký<span class="text-gray-50">hoặc</span> Đăng nhập 
-                        </a>
+                        <a id="profileDropdown" href="javascript:;" role="button" class="u-header-topbar__nav-link"
+                        aria-controls="sidebarContent"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        data-unfold-event="click"
+                        data-unfold-hide-on-scroll="false"
+                        data-unfold-target="#sidebarContent"
+                        data-unfold-type="css-animation"
+                        data-unfold-animation-in="fadeInRight"
+                        data-unfold-animation-out="fadeOutRight"
+                        data-unfold-duration="500"
+                        data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false"
+                        aria-controls="profileDropdownMenu"
+                        >
+                        @auth
+                        <!-- Khi người dùng đã đăng nhập -->
+                        <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
+                        <div id="profileDropdownMenu" class="dropdown-menu dropdown-unfold" aria-labelledby="profileDropdown">
+                            <a class="dropdown-item" href="#">Quản lý tài khoản</a>
+                            <a class="dropdown-item" href="{{ route('logout') }}"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Đăng xuất</a>
+                        </div>
+                        <!-- Form đăng xuất -->
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            @csrf
+                        </form>
+                        @else
+                            <!-- Khi người dùng chưa đăng nhập -->
+                            <i class="ec ec-user mr-1"></i> Đăng ký<span class="text-gray-50">hoặc</span> Đăng nhập
+                        @endauth
+                    </a>
+
                         <!-- End Account Sidebar Toggle Button -->
                     </li>
                 </ul>
@@ -35,4 +55,23 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Kiểm tra trạng thái đăng nhập
+        const isLoggedIn = {{ Auth::check() ? 'true' : 'false' }}; // Laravel kiểm tra đăng nhập
+        
+        const sidebarNavToggler = document.getElementById('sidebarNavToggler');
+        
+        if (isLoggedIn) {
+            // Chỉ truy cập 'name' khi người dùng đã đăng nhập
+            const userName = "{{ Auth::user()->name ?? ''}}"; // Lấy tên người dùng nếu đã đăng nhập
+            sidebarNavToggler.innerHTML = '<i class="ec ec-user mr-1"></i> Xin chào, ' + userName;
+        } else {
+            sidebarNavToggler.innerHTML = '<i class="ec ec-user mr-1"></i> Đăng ký<span class="text-gray-50">hoặc</span> Đăng nhập';
+        }
+    });
+</script>
+
+
 <!-- End Topbar -->
