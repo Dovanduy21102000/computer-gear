@@ -23,6 +23,8 @@ class BaseCRUDController extends Controller
     public $columns = [];
 
 
+    protected $searchable = [];
+
 
     public function __construct()
     {
@@ -108,6 +110,7 @@ class BaseCRUDController extends Controller
 
         try {
             $model = $this->model::findOrFail($id);
+
             $oldImagePath = $model->{$this->fieldImage}; // Store old image path
 
             $model->fill($request->except([$this->fieldImage]));
@@ -116,13 +119,16 @@ class BaseCRUDController extends Controller
                 // Upload new image
                 $newImagePath = Storage::put($this->folderImage, $request->{$this->fieldImage});
                 $model->{$this->fieldImage} = $newImagePath;
+
             }
 
             $model->save();
 
+
             if ($this->fieldImage && $request->hasFile($this->fieldImage) && $oldImagePath) {
                 // Delete old image if a new one was uploaded
                 Storage::delete(str_replace('storage/', '', $oldImagePath));
+
             }
 
             return redirect()->route($this->urlBase . 'index')->with('success', true);
@@ -138,6 +144,7 @@ class BaseCRUDController extends Controller
     {
         try {
             $model = $this->model::findOrFail($id);
+
             $model->delete(); // Soft delete
 
             return redirect()->route($this->urlBase . 'index')->with('success', 'Bản ghi đã chuyển vào thùng rác');
@@ -176,6 +183,7 @@ class BaseCRUDController extends Controller
             $model->forceDelete();
 
             return redirect()->route($this->urlBase . 'index')->with('success', 'Record permanently deleted.');
+
         } catch (\Throwable $th) {
             return back()->with('success', false)->with('error', $th->getMessage());
         }
@@ -184,13 +192,37 @@ class BaseCRUDController extends Controller
     /**
      * Validate request (to be overridden in child controllers).
      */
+
     protected function validateStore(Request $request)
+
     {
         return $request->validate([]);
     }
 
+
     protected function validateUpdate(Request $request, $id)
     {
         return $request->validate([]);
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $model = new $this->model;
+
+        $searchableColumns = property_exists($this, 'searchable') ? $this->searchable : ['name'];
+
+        // Perform search
+        $data = $model::where(function ($q) use ($query, $searchableColumns) {
+            foreach ($searchableColumns as $column) {
+                $q->orWhere($column, 'LIKE', "%$query%");
+            }
+        });
+        // ->paginate(10); // Paginate results
+
+        return view($this->pathView . 'index', compact('data'))
+            ->with('title', $this->titleIndex)
+            ->with('columns', $this->columns)
+            ->with('urlBase', $this->urlBase);
     }
 }

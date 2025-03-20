@@ -1,5 +1,15 @@
 <main id="content" role="main">
     <!-- breadcrumb -->
+    <style>
+        .img-small {
+    width: 100%; /* Tự động điều chỉnh chiều rộng ảnh theo chiều rộng của container */
+    height: auto; /* Giữ tỷ lệ ảnh */
+    max-height: 200px; /* Giới hạn chiều cao tối đa của ảnh */
+    object-fit: cover; /* Cắt ảnh để phù hợp với container mà không bị méo */
+}
+
+
+    </style>
     <div class="bg-gray-13 bg-md-transparent">
         <div class="container">
             <!-- breadcrumb -->
@@ -20,131 +30,91 @@
         <div class="row">
             <div class="col-xl-9 col-wd">
                 <div class="min-width-1100-wd">
-                    <article class="card mb-13 border-0">
-                        <div class="row">
-                            <div class="col-lg-4 mb-5 mb-lg-0">
-                                <a href="../blog/single-blog-post.html" class="d-block"><img class="img-fluid min-height-250 object-fit-cover" src="../../assets/img/1500X730/img1.jpg" alt="Image Description"></a>
-                            </div>
-                            <div class="col-lg-8">
-                                <div class="card-body p-0">
-                                    <h4 class="mb-3"><a href="../blog/single-blog-post.html">Robot Wars – Post with Gallery</a></h4>
-                                    <div class="mb-3 pb-3 border-bottom">
-                                        <div class="list-group list-group-horizontal flex-wrap list-group-borderless align-items-center mx-n0dot5">
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5">Design,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> Technology,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> News,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> Videos</a>
-                                            <span class="mx-2 font-size-n5 mt-1 text-gray-5"><i class="fas fa-circle"></i></span>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5">March 4, 2016</a>
+                    
+                        @foreach($posts as $post)
+                        <article class="card mb-13 border-0">
+                            <div class="row">
+                                <div class="col-lg-4 mb-5 mb-lg-0">
+                                    <a href="{{ route('blog.show', $post->slug) }}" class="d-block">
+                                        <img class="img-fluid img-small object-fit-cover" 
+                                             src="{{ asset('storage/' . $post->image) }}" 
+                                             alt="{{ $post->title }}">
+
+                                    </a>
+                                </div>
+                                <div class="col-lg-8">
+                                    <div class="card-body p-0">
+                                        <h4 class="mb-3"><a href="{{ route('blog.show', $post->slug) }}">{{ $post->title }}</a></h4>
+                                        <div class="mb-3 pb-3 border-bottom">
+                                            <span class="mx-0dot5 text-gray-5">{{ $post->created_at->format('d/m/Y') }}</span>
                                         </div>
-                                    </div>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt, erat in malesuada aliquam, est erat faucibus purus, eget viverra nulla sem vitae neque. Quisque id sodales libero. In nec enim nisi, in ultricies quam. Sed lacinia feugiat velit, cursus molestie lectus.</p>
-                                    <div class="flex-horizontal-center">
-                                        <a href="../blog/single-blog-post.html" class="btn btn-soft-secondary-w mb-md-0 font-weight-normal px-5 px-md-4 px-lg-5">Read More</a>
-                                        <a href="../blog/single-blog-post.html" class="font-size-12 text-gray-5 ml-4"><i class="far fa-comment"></i> 3</a>
+                                        <p>{{ Str::limit($post->description, 150) }}</p>
+                                        <div class="flex-horizontal-center">
+                                            <a href="{{ route('blog.show', $post->slug) }}" class="btn btn-soft-secondary-w">
+                                                Đọc tiếp
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </article>
-                    <article class="card mb-13 border-0">
-                        <div class="row">
-                            <div class="col-lg-4 mb-5 mb-lg-0">
-                                <a href="../blog/single-blog-post.html" class="d-block"><img class="img-fluid min-height-250 object-fit-cover" src="../../assets/img/1500X730/img3.jpg" alt="Image Description"></a>
-                            </div>
-                            <div class="col-lg-8">
-                                <div class="card-body p-0">
-                                    <h4 class="mb-3"><a href="../blog/single-blog-post.html">Robot Wars – Now Closed – Post with Audio</a></h4>
-                                    <div class="mb-3 pb-3 border-bottom">
-                                        <div class="list-group list-group-horizontal flex-wrap list-group-borderless align-items-center mx-n0dot5">
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5">Design,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> Technology,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> News,</a>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5"> Audio</a>
-                                            <span class="mx-2 font-size-n5 mt-1 text-gray-5"><i class="fas fa-circle"></i></span>
-                                            <a href="../blog/single-blog-post.html" class="mx-0dot5 text-gray-5">March 4, 2016</a>
-                                        </div>
-                                    </div>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt, erat in malesuada aliquam, est erat faucibus purus, eget viverra nulla sem vitae neque. Quisque id sodales libero. In nec enim nisi, in ultricies quam. Sed lacinia feugiat velit, cursus molestie lectus.</p>
-                                    <div class="flex-horizontal-center">
-                                        <a href="../blog/single-blog-post.html" class="btn btn-soft-secondary-w mb-md-0 font-weight-normal px-5 px-md-4 px-lg-5">Read More</a>
-                                        <a href="../blog/single-blog-post.html" class="font-size-12 text-gray-5 ml-4"><i class="far fa-comment"></i> Leave a comment</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
+                        </article>
+                    @endforeach
+                    
+
                     
                     
                 </div>
             </div>
             <div class="col-xl-3 col-wd">
                 <aside class="mb-7">
-                    <form class="">
-                        <div class="d-flex align-items-center">
-                            <label class="sr-only" for="signupSrEmail">Search Electro blog</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control px-4" name="search" id="signupSrEmail" placeholder="Search..." aria-label="Search Electro blog">
-                            </div>
-                            <button type="submit" class="btn btn-primary text-nowrap ml-3 d-none">
-                                <span class="fas fa-search font-size-1 mr-2"></span> Search
-                            </button>
+                    <form action="{{ route('blog.index') }}" method="GET">
+                        <div class="form-group">
+                            <label for="category">Chọn danh mục:</label>
+                            <select name="category_id" id="category" class="form-control">
+                                <option value="">-- Tất cả danh mục --</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
+                        <div class="form-group">
+                            <label for="search">Tìm kiếm bài viết:</label>
+                            <input type="text" name="search" id="search" class="form-control" placeholder="Nhập từ khóa..." value="{{ request('search') }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
                     </form>
-                </aside>
-                <aside class="mb-7">
-                    <div class="border-bottom border-color-1 mb-5">
-                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">About Blog</h3>
-                    </div>
-                    <p class="text-gray-90 mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt, erat in malesuada aliquam, est erat faucibus purus, eget viverra nulla sem vitae neque. Quisque id sodales libero.</p>
-                </aside>
-                <aside class="mb-7">
-                    <div class="border-bottom border-color-1 mb-5">
-                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Categories</h3>
-                    </div>
-                    <div class="list-group">
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-0"><i class="mr-2 fas fa-angle-right"></i> Design</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Events</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Links & Quotes</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> News</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Social</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Technology</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Audios</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Videos</a>
-                    </div>
-                </aside>
-                <aside class="mb-7">
-                    <div class="border-bottom border-color-1 mb-5">
-                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Recent Posts</h3>
-                    </div>
-                    <article class="mb-4">
-                        <div class="media">
-                            <div class="width-75 height-75 mr-3">
-                                <img class="img-fluid object-fit-cover" src="../../assets/img/1500X730/img1.jpg" alt="Image Description">
-                            </div>
-                            <div class="media-body">
-                                <h4 class="font-size-14 mb-1"><a href="../blog/single-blog-post.html" class="text-gray-39">Robot Wars – Post with Gallery</a></h4>
-                                <span class="text-gray-5">March 3, 2020</span>
-                            </div>
-                        </div>
-                    </article>
-                    <article class="mb-4">
-                        <div class="media">
-                            <div class="width-75 height-75 mr-3">
-                                <img class="img-fluid object-fit-cover" src="../../assets/img/1500X730/img4.jpg" alt="Image Description">
-                            </div>
-                            <div class="media-body">
-                                <h4 class="font-size-14 mb-1"><a href="../blog/single-blog-post.html" class="text-gray-39">Robot Wars – Now Closed – Post with Audio</a></h4>
-                                <span class="text-gray-5">March 3, 2020</span>
-                            </div>
-                        </div>
-                    </article>
                     
                 </aside>
+                <aside class="mb-7">
+                    <div class="border-bottom border-color-1 mb-5">
+                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Khám Phá Blog Của Chúng Tôi</h3>
+                    </div>
+                    <p class="text-gray-90 mb-0">Chào mừng bạn đến với blog của cửa hàng chúng tôi! Tại đây, bạn sẽ tìm thấy các bài viết chia sẻ thông tin về những sản phẩm máy tính mới nhất, các xu hướng công nghệ hiện đại, cùng những mẹo hay giúp bạn sử dụng máy tính hiệu quả hơn. Chúng tôi cam kết mang đến những kiến thức bổ ích và những sản phẩm chất lượng, giúp bạn có trải nghiệm công nghệ tuyệt vời nhất. Hãy theo dõi blog để luôn cập nhật những thông tin mới nhất nhé!</p>
+                </aside>
                 
+                
+                <aside class="mb-7">
+                    <div class="border-bottom border-color-1 mb-5">
+                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Danh Mục Bài Viết</h3>
+                    </div>
+                    <div class="list-group">
+                        @foreach($categories as $category)
+                            <a href="{{ route('blog.index', ['category_id' => $category->id]) }}" 
+                               class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-0">
+                                <i class="mr-2 fas fa-angle-right"></i> {{ $category->name }}
+                            </a>
+                        @endforeach
+                    </div>
+                </aside>
+               
             </div>
         </div>
        
+    </div>
+    <div class="d-flex justify-content-center mt-2">
+        {{ $posts->links() }}
     </div>
 </main>
 <!-- ========== END MAIN CONTENT ========== -->

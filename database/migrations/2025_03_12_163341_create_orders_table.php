@@ -13,12 +13,13 @@ return new class extends Migration {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(\App\Models\User::class)->constrained()->cascadeOnDelete();
+            $table->string('code')->unique();
             $table->string('shipping_user_name')->nullable();
             $table->string('shipping_email')->nullable();
             $table->string('shipping_phone')->nullable();
             $table->string('shipping_address')->nullable();
-            $table->string('shipping_city')->nullable();
-            $table->string('shipping_province')->nullable();
+            $table->foreignIdFor(\App\Models\Province::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(\App\Models\District::class)->nullable()->constrained()->nullOnDelete();
             $table->string('specific_address')->nullable();
             $table->string('coupon_code')->nullable();
             $table->decimal('coupon_discount', 10, 2)->nullable();

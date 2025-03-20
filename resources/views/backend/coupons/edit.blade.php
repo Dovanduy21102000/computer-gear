@@ -1,7 +1,14 @@
 <main id="main" class="main">
     <div class="pagetitle">
-        <h1>Chỉnh sửa mã khuyến mại</h1>
-    </div>
+        <h1>Quản lý khuyến mãi</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                <li class="breadcrumb-item active">Quản lý khuyến mại</li>
+                <li class="breadcrumb-item active">Cập nhật khuyến mại</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
 
     <section class="section">
         <div class="row">

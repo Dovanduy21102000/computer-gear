@@ -26,6 +26,12 @@ class Product extends Model
         'views',
         'is_variant',
     ];
+
+    protected $casts = [
+        'status' => 'boolean',
+        'is_variant' => 'boolean',
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');

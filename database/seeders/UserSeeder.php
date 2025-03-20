@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Faker\Factory as Faker;
+
 class UserSeeder extends Seeder
 {
     /**
@@ -18,7 +19,7 @@ class UserSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             DB::table('users')->insert([
                 'name' => $faker->name,
                 'email' => $faker->unique()->safeEmail,
