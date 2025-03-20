@@ -19,11 +19,13 @@
             <h1 class="text-center">Cart</h1>
         </div>
         <div class="mb-10 cart-table">
-            <form action="{{ route('cart.update') }}" method="post">
+            <form action="{{ route('cart.update') }}" id="cart-form" method="post">
                 @csrf
                 <table class="table" cellspacing="0">
                     <thead>
                         <tr>
+                            <th class="text-center"><input type="checkbox" id="select-all"></th>
+                            <!-- Select All Checkbox -->
                             <th class="product-remove">&nbsp;</th>
                             <th class="product-thumbnail">&nbsp;</th>
                             <th class="product-name">Product</th>
@@ -35,6 +37,10 @@
                     <tbody>
                         @foreach ($cartItems as $item)
                             <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
+                                        class="select-item">
+                                </td>
                                 <td class="text-center">
                                     <a href="{{ route('cart.remove', $item->id) }}"
                                         class="text-gray-32 font-size-26">×</a>
@@ -50,7 +56,7 @@
                                     <a href="#" class="text-gray-90">{{ $item->product->name }}</a>
                                 </td>
                                 <td data-title="Price">
-                                    <span class="">{{ number_format($item->product->price, 2) }}$</span>
+                                    <span class="">{{ number_format($item->product->price, 0, ',', '.') }}₫</span>
                                 </td>
                                 <td data-title="Quantity">
                                     <div class="border rounded-pill py-1 width-122 w-xl-80 px-3 border-color-1">
@@ -68,7 +74,7 @@
                                 </td>
                                 <td data-title="Total">
                                     <span
-                                        class="">{{ number_format($item->quantity * $item->product->price, 2) }}$</span>
+                                        class="">{{ number_format($item->quantity * $item->product->price, 0, ',', '.') }}₫</span>
                                 </td>
                             </tr>
                         @endforeach
@@ -77,8 +83,15 @@
                                 <div class="pt-md-3">
                                     <div class="d-block d-md-flex flex-center-between">
                                         <div class="mb-3 mb-md-0 w-xl-40"></div>
+
+
                                         <!-- Update Cart Button -->
                                         <div class="d-md-flex">
+                                            <button type="submit" id="delete-selected"
+                                                class="btn btn-danger ml-md-2 px-5 px-md-4 px-lg-5 w-100 w-md-auto d-none d-md-inline-block mx-2">
+                                                Delete Selected
+                                            </button>
+
                                             <button type="submit"
                                                 class="btn btn-soft-secondary mb-3 mb-md-0 font-weight-normal px-5 px-md-4 px-lg-5 w-100 w-md-auto">
                                                 Update Cart
@@ -137,7 +150,7 @@
                             <tr class="cart-subtotal">
                                 <th>Subtotal</th>
                                 <td data-title="Subtotal">
-                                    <span class="amount">${{ number_format($subtotal, 2) }}</span>
+                                    <span class="amount">{{ number_format($subtotal, 0, ',', '.') }}₫</span>
                                 </td>
                             </tr>
 
@@ -168,4 +181,43 @@
         </div>
 
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('select-all').addEventListener('click', function(event) {
+                document.querySelectorAll('.select-item').forEach(checkbox => {
+                    checkbox.checked = event.target.checked;
+                });
+            });
+
+            document.getElementById('delete-selected').addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default form submission
+                let selectedItems = document.querySelectorAll('.select-item:checked');
+                if (selectedItems.length === 0) {
+                    alert('Please select at least one item to delete.');
+                    return;
+                }
+                if (confirm('Are you sure you want to delete the selected items?')) {
+                    let form = document.getElementById('cart-form');
+                    if (form) {
+                        form.action = "{{ route('cart.bulkDelete') }}";
+                        form.submit();
+                    } else {
+                        console.error("Form not found!");
+                    }
+                }
+            });
+
+            document.getElementById('update-cart').addEventListener('click', function(event) {
+                event.preventDefault();
+                let form = document.getElementById('cart-form');
+                if (form) {
+                    form.action = "{{ route('cart.update') }}"; // Ensure update action
+                    form.submit();
+                } else {
+                    console.error("Form not found!");
+                }
+            });
+        });
+    </script>
 </main>
