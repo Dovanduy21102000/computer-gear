@@ -7,7 +7,6 @@
         </div>
     @endif
     <div class="pagetitle">
-<<<<<<< HEAD
         <h1>Quản lý khuyến mãi</h1>
         <nav>
             <ol class="breadcrumb">
@@ -15,21 +14,9 @@
                 <li class="breadcrumb-item active">Quản lý khuyến mại</li>
             </ol>
         </nav>
-=======
-      <h1>Danh sách khuyến mại</h1>
-      <a class="btn btn-primary mb-10" style="float " href="{{ route('coupons.create') }}">Thêm mới</a>
-      
-      <nav>
-        <ol class="breadcrumb">
-        </ol>
-      </nav>
->>>>>>> acf26489b6efda40ac4b8213f9c61158c0f1f2af
     </div><!-- End Page Title -->
-
-
     <section class="section">
         <div class="row">
-
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-body">
@@ -38,10 +25,6 @@
                             <div class="datatable-top">
                                 <div>
                                     <a class="btn btn-primary" href="{{ route('coupons.create') }}">Thêm mới</a>
-                                </div>
-                                <div class="datatable-search">
-                                    <input class="datatable-input" placeholder="Search..." type="search" name="search"
-                                        title="Search within table">
                                 </div>
                             </div>
                             <div class="datatable-container">
@@ -99,7 +82,6 @@
                                 </table>
                                 <!-- End Table -->
                             </div>
-                             {{ $coupons->links() }}
                         </div>
                         <!-- End Table with stripped rows -->
                     </div>

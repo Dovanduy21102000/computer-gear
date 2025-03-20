@@ -1,12 +1,11 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Data Tables</h1>
+        <h1>Quản lý danh mục sản phẩm</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Tables</li>
-                <li class="breadcrumb-item active">Data</li>
+                <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item">Quản lý danh mục sản phẩm</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -18,9 +17,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">{{ $title }}</h5>
-                        <a href="{{ route($urlBase . 'create') }}" class="btn btn-danger"><i
-                                class="fa fa-plus mr5"></i>Thêm
-                            mới bài viết</a>
+                        <a href="{{ route($urlBase . 'create') }}" class="btn btn-primary">Thêm mới</a>
 
                         <!-- Table with stripped rows -->
                         <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
@@ -41,55 +38,61 @@
                                 </div>
                             </div>
                             <div class="datatable-container">
-                                <table class="table datatable datatable-table">
+                                <table class="table datatable datatable-table table-bordered">
                                     <thead>
                                         <tr>
-                                            @foreach ($columns as $col => $name)
-                                                <td>{{ $name }}</td>
-                                            @endforeach
-                                            <td>
-                                                Thao tác
-                                            </td>
+                                            <th class="text-center">
+                                                Tên danh mục
+                                                </td>
+                                            <th class="text-center">
+                                                Slug
+                                                </td>
+                                            <th class="text-center">
+                                                Danh mục cha
+                                                </td>
+                                            <th class="text-center">
+                                                Ngày thêm
+                                                </td>
+                                            <th class="text-center">
+                                                Trạng thái
+                                                </td>
+                                            <th class="text-center">
+                                                Hành động
+                                                </td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($data as $item)
                                             <tr>
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="name"><span
                                                             class="maintitle">{{ $item->name }}</span></div>
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="slug">{{ $item->slug }}</div>
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="parent_id">{{ $item->parent_id ?? 0 }}</div>
                                                 </td>
-                                                <td>
+
+                                                <td class="text-center">
+                                                    <div class="created_at">{{ $item->created_at }}</div>
+                                                </td>
+                                                <td class="text-center">
                                                     <div class="is_active">
                                                         {{ $item->is_active ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <div class="created_at">{{ $item->created_at }}</div>
-                                                </td>
-                                                <td>
-                                                    <div class="updated_at">{{ $item->updated_at }}</div>
-                                                </td>
-
-                                                <td>
-                                                    <div class="deleted_at">{{ $item->deleted_at }}</div>
-                                                </td>
-
                                                 <td class="text-center text-nowrap" style="width: 1px;">
+                                                    <a href="{{ route($urlBase . 'show', $item) }}"
+                                                        class="btn btn-success">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
                                                     <a href="{{ route($urlBase . 'edit', $item) }}"
                                                         class="btn btn-warning">
-                                                        <i class="fa fa-edit"></i> Sửa
+                                                        <i class="fa fa-edit"></i>
                                                     </a>
-                                                    <a href="{{ route($urlBase . 'show', $item) }}"
-                                                        class="btn btn-info">
-                                                        <i class="fa fa-eye"></i> Xem
-                                                    </a>
+
                                                     <form action="{{ route($urlBase . 'destroy', $item) }}"
                                                         method="post" id="item-{{ $item->id }}"
                                                         style="display: inline-block;">
@@ -97,7 +100,7 @@
                                                         @method('DELETE')
                                                         <button class="btn btn-danger"
                                                             onclick="return confirm('Bạn có chắc muốn xoá?');">
-                                                            <i class="fa fa-trash"></i> Xoá
+                                                            <i class="fa fa-trash"></i>
                                                         </button>
                                                     </form>
                                                 </td>
@@ -110,8 +113,8 @@
                         </div>
                         <!-- End Table with stripped rows -->
                         <div class="d-flex justify-content-center mt-2">
-                          {{ $data->links() }}
-                      </div>
+                            {{ $data->links() }}
+                        </div>
                     </div>
                 </div>
 

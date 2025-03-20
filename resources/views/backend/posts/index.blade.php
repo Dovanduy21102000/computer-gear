@@ -1,12 +1,11 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Data Tables</h1>
+        <h1>Quản lý bài viết</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Tables</li>
-                <li class="breadcrumb-item active">Data</li>
+                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                <li class="breadcrumb-item active">Danh sách bài viết</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -18,9 +17,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">{{ $title }}</h5>
-                        <a href="{{ route($urlBase . 'create') }}" class="btn btn-danger"><i
-                                class="fa fa-plus mr5"></i>Thêm
-                            mới bài viết</a>
+                        <a href="{{ route($urlBase . 'create') }}" class="btn btn-primary">Thêm mới</a>
 
                         <!-- Table with stripped rows -->
                         <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
@@ -43,14 +40,14 @@
                             <div class="datatable-container">
                                 <table class="table datatable datatable-table">
                                     <thead>
-                                        <tr>
+                                        <th>
                                             @foreach ($columns as $col => $name)
                                                 <td>{{ $name }}</td>
                                             @endforeach
                                             <td>
                                                 Thao tác
                                             </td>
-                                        </tr>
+                                        </th>
                                     </thead>
                                     <tbody>
                                         @foreach ($data as $item)
@@ -122,7 +119,7 @@
                                                         @method('DELETE')
                                                         <button class="btn btn-danger"
                                                             onclick="return confirm('Bạn có chắc muốn xoá?');">
-                                                            <i class="fa fa-trash"></i> Xoá
+                                                            <i class="fa fa-trash"></i>
                                                         </button>
                                                     </form>
                                                 </td>
