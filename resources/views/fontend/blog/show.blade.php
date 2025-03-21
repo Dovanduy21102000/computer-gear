@@ -78,17 +78,25 @@
             
             <div class="col-xl-3 col-wd">
                 <aside class="mb-7">
-                    <form class="">
-                        <div class="d-flex align-items-center">
-                            <label class="sr-only" for="signupSrEmail">Search Electro blog</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control px-4" name="search" id="signupSrEmail" placeholder="Search..." aria-label="Search Electro blog">
-                            </div>
-                            <button type="submit" class="btn btn-primary text-nowrap ml-3 d-none">
-                                <span class="fas fa-search font-size-1 mr-2"></span> Search
-                            </button>
+                    <form action="{{ route('blog.index') }}" method="GET">
+                        <div class="form-group">
+                            <label for="category">Chọn danh mục:</label>
+                            <select name="category_id" id="category" class="form-control">
+                                <option value="">-- Tất cả danh mục --</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
+                        <div class="form-group">
+                            <label for="search">Tìm kiếm bài viết:</label>
+                            <input type="text" name="search" id="search" class="form-control" placeholder="Nhập từ khóa..." value="{{ request('search') }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
                     </form>
+                    
                 </aside>
                 <aside class="mb-7">
                     <div class="border-bottom border-color-1 mb-5">
@@ -103,17 +111,26 @@
                         <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Categories</h3>
                     </div>
                     <div class="list-group">
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-0"><i class="mr-2 fas fa-angle-right"></i> Design</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Events</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Links & Quotes</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> News</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Social</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Technology</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Audios</a>
-                        <a href="../blog/single-blog-post.html" class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-right-0 border-left-0 border-bottom-0"><i class="mr-2 fas fa-angle-right"></i> Videos</a>
+                        @foreach($categories as $category)
+                            <a href="{{ route('blog.show', ['slug' => $post->slug, 'category_id' => $category->id]) }}"
+                               class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-0">
+                                <i class="mr-2 fas fa-angle-right"></i> {{ $category->name }}
+                            </a>
+                        @endforeach
                     </div>
                 </aside>
-               
+                
+                @if($filteredPosts->isNotEmpty())
+                    <div class="filtered-posts">
+                        <h4>Bài viết theo danh mục:</h4>
+                        <ul>
+                            @foreach($filteredPosts as $filteredPost)
+                                <li><a href="{{ route('blog.show', ['slug' => $filteredPost->slug]) }}">{{ $filteredPost->title }}</a></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                
             </div>
         </div>
         

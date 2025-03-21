@@ -11,32 +11,49 @@ class BlogController extends Controller
 {
     public function index(Request $request)
     {
-        // Lấy danh sách bài viết có trạng thái "published"
-        // $posts = Post::where('status', 1)->take(5)->get();
-        $categoryId = $request->input('category_id');
+        $query = Post::where('status', 1); // Lấy bài viết đã xuất bản
 
-        // Nếu có category_id, lọc bài viết theo danh mục
-        if ($categoryId) {
-            $posts = Post::where('category_id', $categoryId)->where('status', 1)->latest()->paginate(5);
-        } else {
-            // Nếu không có category_id, lấy tất cả bài viết có trạng thái "published"
-            $posts = Post::where('status', 1)->latest()->paginate(5);
+        // Lọc theo danh mục nếu có
+        if ($request->has('category_id') && !empty($request->category_id)) {
+            $query->where('category_id', $request->category_id);
         }
     
-        // Trả dữ liệu ra view frontend
+        // Lọc theo từ khóa tìm kiếm nếu có
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+    
+        $posts = $query->latest()->paginate(5);
+    
+        // Lấy danh sách danh mục để hiển thị trên form tìm kiếm
+        $categories = \App\Models\Category::all(); 
+    
         $template = 'fontend.blog.index';
-        return view('fontend.layout', compact('template', 'posts'));
+        return view('fontend.layout', compact('template', 'posts', 'categories'));
     }
 
-    public function show($slug)
+    public function show(Request $request, $slug)
     {
         $post = Post::where('slug', $slug)->firstOrFail();
         $recentPosts = Post::where('status', 1)->latest()->take(5)->get();
+        $categories = \App\Models\Category::all(); // Lấy danh sách tất cả danh mục
     
-        $template = 'fontend.blog.show'; // Kế thừa từ layout
+        // Kiểm tra xem có tham số category_id trong request không
+        $categoryId = $request->input('category_id');
+        if ($categoryId) {
+            $filteredPosts = Post::where('status', 1)
+                ->whereHas('categories', function ($query) use ($categoryId) {
+                    $query->where('categories.id', $categoryId);
+                })
+                ->latest()
+                ->get();
+        } else {
+            $filteredPosts = collect(); // Trả về collection rỗng nếu không lọc theo danh mục
+        }
     
-        // dd($template);
-        // die;
-        return view('fontend.layout', compact('template', 'post', 'recentPosts'));
+        $template = 'fontend.blog.show';
+    
+        return view('fontend.layout', compact('template', 'post', 'recentPosts', 'categories', 'filteredPosts'));
     }
+    
 }
