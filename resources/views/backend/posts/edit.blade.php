@@ -1,12 +1,12 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Form Elements</h1>
+        <h1>Quản lý bài viết</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Forms</li>
-                <li class="breadcrumb-item active">Elements</li>
+                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                <li class="breadcrumb-item active">Quản lý bài viết</li>
+                <li class="breadcrumb-item active">Chỉnh sửa bài viết</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -360,7 +360,12 @@
                             <!-- Submit Button -->
                             <div class="row mb-3">
                                 <div class="col-sm-10 offset-sm-2">
-                                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                                    <button type="submit" class="btn btn-warning">Cập nhật</button>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-10 offset-sm-2">
+                                    <a href="{{ route($urlBase . 'index') }}" class="btn btn-secondary">Quay lại</a>
                                 </div>
                             </div>
 

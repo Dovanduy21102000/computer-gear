@@ -44,10 +44,10 @@ Route::prefix('admin')->group(function () {
         'orders'            => OrderController::class,
     ];
     foreach ($objects as $object => $controller) {
-        Route::resource($object, $controller);
+        Route::resource($object, $controller)->middleware('admin');
     };
 
-    Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
+    Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload')->middleware('admin');
 });
 Route::get('/api/districts/{province_id}', function ($province_id) {
     $response = Http::get("https://provinces.open-api.vn/api/p/{$province_id}?depth=2");

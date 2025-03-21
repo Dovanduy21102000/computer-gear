@@ -84,7 +84,11 @@
                                     <button type="submit" class="btn btn-primary">Thêm mới</button>
                                 </div>
                             </div>
-
+                            <div class="row mb-3">
+                                <div class="col-sm-10 offset-sm-2">
+                                    <a href="{{ route($urlBase . 'index') }}" class="btn btn-secondary">Quay lại</a>
+                                </div>
+                            </div>
                         </form><!-- End General Form Elements -->
 
                     </div>
