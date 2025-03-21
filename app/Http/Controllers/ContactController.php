@@ -67,9 +67,16 @@ class ContactController extends Controller
      */
     public function destroy(Contact $contact)
     {
+        // Kiểm tra nếu trạng thái là 'pending' thì không thể xóa
+        if ($contact->status === 'pending') {
+            return redirect()->route('contacts.index')->with('error', 'Liên hệ đang chờ xử lý, không thể xóa!');
+        }
+    
+        // Tiến hành xóa nếu không phải trạng thái 'pending'
         $contact->delete();
         return redirect()->route('contacts.index')->with('success', 'Liên hệ đã được xóa!');
     }
+    
 
     
 }
