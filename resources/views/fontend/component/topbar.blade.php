@@ -32,21 +32,25 @@
                         >
                         @auth
                         <!-- Khi người dùng đã đăng nhập -->
+
                         <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
-                        <div id="profileDropdownMenu" class="dropdown-menu dropdown-unfold" aria-labelledby="profileDropdown">
+
                             <a class="dropdown-item" href="#">Quản lý tài khoản</a>
                             <a class="dropdown-item" href="{{ route('logout') }}"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Đăng xuất</a>
-                        </div>
+
                         <!-- Form đăng xuất -->
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                             @csrf
                         </form>
                         @else
                             <!-- Khi người dùng chưa đăng nhập -->
-                            <i class="ec ec-user mr-1"></i> Đăng ký<span class="text-gray-50">hoặc</span> Đăng nhập
+                            <div id="topbar">
+                                <i class="ec ec-user mr-1"></i>
+                                <span onclick="toggleForm('login')">Đăng nhập</span>
+                            </div>
                         @endauth
-                    </a>
+                        </a>
 
                         <!-- End Account Sidebar Toggle Button -->
                     </li>
