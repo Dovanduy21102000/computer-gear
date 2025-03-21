@@ -1,12 +1,11 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Data Tables</h1>
+        <h1>Quản lý thuộc tính</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Tables</li>
-                <li class="breadcrumb-item active">Data</li>
+                <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item">Quản lý thuộc tính</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -18,9 +17,8 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">{{ $title }}</h5>
-                        <a href="{{ route($urlBase . 'create') }}" class="btn btn-danger"><i
-                                class="fa fa-plus mr5"></i>Thêm
-                            mới thuộc tính</a>
+                        <a href="{{ route($urlBase . 'create') }}" class="btn btn-primary">Thêm
+                            mới</a>
 
                         <!-- Table with stripped rows -->
                         <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
@@ -41,44 +39,43 @@
                                 </div>
                             </div>
                             <div class="datatable-container">
-                                <table class="table datatable datatable-table">
+                                <table class="table datatable datatable-table table-bordered">
                                     <thead>
                                         <tr>
-                                            @foreach ($columns as $col => $name)
-                                                <td>{{ $name }}</td>
-                                            @endforeach
-                                            <td>
-                                                Thao tác
-                                            </td>
+
+                                            <th class="text-center">ID</th>
+                                            <th class="text-center">Tên thuộc tính</th>
+                                            <th class="text-center">Trạng thái</th>
+                                            <th class="text-center">Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($data as $item)
                                             <tr>
-                                                <td>
+                                                <td class="text-center">
+                                                    <div class="id"><span
+                                                            class="maintitle">{{ $item->id }}</span></div>
+                                                </td>
+                                                <td class="text-center">
                                                     <div class="name"><span
                                                             class="maintitle">{{ $item->name }}</span></div>
                                                 </td>
-                                                <td>
-                                                    <div class="status">
+                                                <td class="text-center">
+                                                    <span
+                                                        class="badge {{ $item->status ? 'bg-success' : 'bg-danger' }}">
                                                         {{ $item->status ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="created_at">{{ $item->created_at }}</div>
-                                                </td>
-                                                <td>
-                                                    <div class="updated_at">{{ $item->updated_at }}</div>
+                                                    </span>
                                                 </td>
 
+
                                                 <td class="text-center text-nowrap" style="width: 1px;">
+                                                    <a href="{{ route($urlBase . 'show', $item) }}"
+                                                        class="btn btn-success">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
                                                     <a href="{{ route($urlBase . 'edit', $item) }}"
                                                         class="btn btn-warning">
-                                                        <i class="fa fa-edit"></i> Sửa
-                                                    </a>
-                                                    <a href="{{ route($urlBase . 'show', $item) }}"
-                                                        class="btn btn-info">
-                                                        <i class="fa fa-eye"></i> Xem
+                                                        <i class="fa fa-edit"></i>
                                                     </a>
                                                     <form action="{{ route($urlBase . 'destroy', $item) }}"
                                                         method="post" id="item-{{ $item->id }}"
@@ -87,7 +84,7 @@
                                                         @method('DELETE')
                                                         <button class="btn btn-danger"
                                                             onclick="return confirm('Bạn có chắc muốn xoá?');">
-                                                            <i class="fa fa-trash"></i> Xoá
+                                                            <i class="fa fa-trash"></i>
                                                         </button>
                                                     </form>
                                                 </td>

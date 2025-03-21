@@ -1,12 +1,12 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Form Elements</h1>
+        <h1>Quản lý danh muc</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Forms</li>
-                <li class="breadcrumb-item active">Elements</li>
+                <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Quản lý thương hiệu</li>
+                <li class="breadcrumb-item active">Chỉnh sửa thương hiệu</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -90,7 +90,11 @@
                                     <button type="submit" class="btn btn-success">Cập nhật</button>
                                 </div>
                             </div>
-
+                            <div class="row mb-3">
+                                <div class="col-sm-10 offset-sm-2">
+                                    <a href="{{ route($urlBase . 'index') }}" class="btn btn-secondary">Quay lại</a>
+                                </div>
+                            </div>
                         </form><!-- End Edit Form -->
 
                     </div>

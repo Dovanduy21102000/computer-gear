@@ -16,18 +16,19 @@ use App\Http\Controllers\ProductClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderItemController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 
 
 //Admin
 //Authentication
-Route::get('dashboard/index', [DashboardController::class,'index'])->name('dashboard.index')
-->middleware('admin');
-Route::get('admin', [AuthController::class,'index'])->name('auth.admin')
-->middleware('login');
-Route::post('login', [AuthController::class,'login'])->name('auth.login');
-Route::get('logout', [AuthController::class,'logout'])->name('auth.logout');
+Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index')
+    ->middleware('admin');
+Route::get('admin', [AuthController::class, 'index'])->name('auth.admin')
+    ->middleware('login');
+Route::post('login', [AuthController::class, 'login'])->name('auth.login');
+Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 Route::prefix('admin')->group(function () {
     $objects = [
@@ -42,12 +43,13 @@ Route::prefix('admin')->group(function () {
         'posts'             => PostController::class,
         'users'             => UserController::class,
         'orders'            => OrderController::class,
+        'orderitems'        => OrderItemController::class,
     ];
     foreach ($objects as $object => $controller) {
-        Route::resource($object, $controller);
+        Route::resource($object, $controller)->middleware('admin');
     };
 
-    Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
+    Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload')->middleware('admin');
 });
 Route::get('/api/districts/{province_id}', function ($province_id) {
     $response = Http::get("https://provinces.open-api.vn/api/p/{$province_id}?depth=2");

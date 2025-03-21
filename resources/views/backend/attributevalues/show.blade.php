@@ -1,33 +1,32 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Form Elements</h1>
+        <h1>Quản lý giá trị thuộc tính</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Forms</li>
-                <li class="breadcrumb-item active">Elements</li>
+                <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item">Quản lý giá trị thuộc tính</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
 
     <section class="section">
-        <div class="row">
-            <div class="col-lg-6">
-
+        <div class="row"> <!-- Xóa justify-content-center -->
+            <div class="col-lg-8"> <!-- Mở rộng khối để không quá nhỏ -->
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Thông tin danh mục có id: {{ $attributeValue->id }}</h5>
+                        <h5 class="card-title">Thông tin giá trị thuộc tính có ID: {{ $attributeValue->id }}</h5>
 
                         <!-- Edit Form -->
                         <form action="{{ route($urlBase . 'update', $attributeValue->id) }}" method="POST">
                             @csrf
 
-                            <!-- Name -->
                             <!-- Attribute Category -->
                             <div class="row mb-3">
-                                <label for="attribute_id" class="col-sm-2 col-form-label">Thuộc tính</label>
-                                <div class="col-sm-10">
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <label for="attribute_id" class="fw-bold text-nowrap mb-0">Thuộc tính:</label>
+                                </div>
+                                <div class="col-md-9">
                                     <select class="form-control @error('attribute_id') is-invalid @enderror"
                                         id="attribute_id" name="attribute_id" disabled>
                                         <option value="">-- Chọn thuộc tính --</option>
@@ -46,8 +45,10 @@
 
                             <!-- Attribute Value -->
                             <div class="row mb-3">
-                                <label for="value" class="col-sm-2 col-form-label">Thông tin thuộc tính con</label>
-                                <div class="col-sm-10">
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <label for="value" class="fw-bold text-nowrap mb-0">Giá trị:</label>
+                                </div>
+                                <div class="col-md-9">
                                     <input type="text" class="form-control @error('value') is-invalid @enderror"
                                         id="value" name="value" value="{{ old('value', $attributeValue->value) }}"
                                         required disabled>
@@ -57,16 +58,37 @@
                                 </div>
                             </div>
 
+                            <!-- Created At -->
+                            <div class="row mb-2">
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <label class="fw-bold text-nowrap mb-0">Ngày tạo:</label>
+                                </div>
+                                <div class="col-md-9">
+                                    {{ $attributeValue->created_at }}
+                                </div>
+                            </div>
+
+                            <!-- Updated At -->
+                            <div class="row mb-2">
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <label class="fw-bold text-nowrap mb-0">Ngày cập nhật:</label>
+                                </div>
+                                <div class="col-md-9">
+                                    {{ $attributeValue->updated_at }}
+                                </div>
+                            </div>
+
                         </form><!-- End Edit Form -->
+
                         <!-- Submit Button -->
-                        <div class="row mb-3">
-                            <div class="col-sm-10 offset-sm-2">
-                                <a href="{{ route($urlBase . 'index') }}" class="btn btn-success">Back</a>
+                        <div class="row">
+                            <div class="col-md-9 offset-md-3">
+                                <a href="{{ route($urlBase . 'index') }}" class="btn btn-secondary">Quay lại</a>
                             </div>
                         </div>
-                    </div>
-                </div>
 
+                    </div>
+                </div><!-- End Card -->
             </div>
         </div>
     </section>
