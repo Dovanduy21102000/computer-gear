@@ -8,6 +8,8 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ContactClientController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -42,9 +44,11 @@ Route::prefix('admin')->group(function () {
         'posts'             => PostController::class,
         'users'             => UserController::class,
         'orders'            => OrderController::class,
+        'contacts'          => ContactController::class, // Thêm quản lý liên hệ
+     
     ];
     foreach ($objects as $object => $controller) {
-        Route::resource($object, $controller);
+        Route::resource($object, $controller)->middleware('admin');
     };
 
     Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
@@ -76,3 +80,7 @@ Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('c
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+Route::get('/contact', [ContactClientController::class, 'index'])->name('client.contacts.index');// Danh sách liên hệ (nếu cần)
+Route::post('/contact', [ContactClientController::class, 'store'])->name('client.contacts.store'); // Xử lý gửi liên hệ
+
