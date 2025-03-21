@@ -521,7 +521,7 @@
 
                              <!-- About us -->
                              <li class="nav-item u-header__nav-item">
-                                 <a class="nav-link u-header__nav-link" href="about.html">Về chúng tôi</a>
+                                 <a class="nav-link u-header__nav-link" href="{{ route('client.contacts.index') }}">Liên hệ</a>
                              </li>
                              <!-- End About us -->
 
