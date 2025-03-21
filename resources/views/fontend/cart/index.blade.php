@@ -21,6 +21,13 @@
         <div class="mb-10 cart-table">
             <form action="{{ route('cart.update') }}" id="cart-form" method="post">
                 @csrf
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" id="delete-selected"
+                        class="btn btn-danger ml-md-2 px-5 px-md-4 px-lg-5 w-100 w-md-auto d-none d-md-inline-block mx-2 mb-2"
+                        style="border-radius: 0%">
+                        Delete Selected
+                    </button>
+                </div>
                 <table class="table" cellspacing="0">
                     <thead>
                         <tr>
@@ -79,7 +86,7 @@
                             </tr>
                         @endforeach
                         <tr>
-                            <td colspan="6" class="border-top space-top-2 justify-content-center">
+                            <td colspan="8" class="border-top space-top-2 justify-content-center">
                                 <div class="pt-md-3">
                                     <div class="d-block d-md-flex flex-center-between">
                                         <div class="mb-3 mb-md-0 w-xl-40"></div>
@@ -87,10 +94,6 @@
 
                                         <!-- Update Cart Button -->
                                         <div class="d-md-flex">
-                                            <button type="submit" id="delete-selected"
-                                                class="btn btn-danger ml-md-2 px-5 px-md-4 px-lg-5 w-100 w-md-auto d-none d-md-inline-block mx-2">
-                                                Delete Selected
-                                            </button>
 
                                             <button type="submit"
                                                 class="btn btn-soft-secondary mb-3 mb-md-0 font-weight-normal px-5 px-md-4 px-lg-5 w-100 w-md-auto">
@@ -158,7 +161,8 @@
                                 <tr class="coupon-discount">
                                     <th>Coupon ({{ session('coupon')['code'] }})</th>
                                     <td data-title="Discount">
-                                        <span class="text-danger">- ${{ number_format($discount, 2) }}</span>
+                                        <span class="text-danger">- {{ number_format($discount, 0, ',', '.') }}₫<<
+                                                /span>
                                     </td>
                                 </tr>
                             @endif
@@ -166,7 +170,8 @@
                             <tr class="order-total">
                                 <th>Total</th>
                                 <td data-title="Total">
-                                    <strong><span class="amount">${{ number_format($total, 2) }}</span></strong>
+                                    <strong><span
+                                            class="amount">{{ number_format($total, 0, ',', '.') }}₫</span></strong>
                                 </td>
                             </tr>
                         </tbody>
