@@ -9,51 +9,42 @@ use Illuminate\Support\Facades\Auth;
 class ContactClientController extends Controller
 {
     /**
-     * Hiển thị trang danh sách liên hệ (nếu cần)
+     * Hiển thị form liên hệ.
      */
     public function index()
     {
-        $contacts = Contact::where('status', 'pending')->get(); // Lấy các liên hệ chưa xử lý
-        $template = 'fontend.contacts.index';
-        return view('fontend.layout', compact('template', 'contacts'));
+        $template = 'fontend.contacts.index'; // Đảm bảo bạn có view cho form liên hệ
+        return view('fontend.layout', compact('template'));
     }
 
     /**
-     * Hiển thị form liên hệ
-     */
-  
-
-    /**
-     * Xử lý gửi thông tin liên hệ
+     * Xử lý gửi thông tin liên hệ.
      */
     public function store(Request $request)
-{
-    $messages = [
-        'name.required' => 'Vui lòng nhập tên.',
-        'email.required' => 'Vui lòng nhập email.',
-        'email.email' => 'Email không hợp lệ.',
-        'message.required' => 'Vui lòng nhập nội dung liên hệ.',
-    ];
+    {
+        // Kiểm tra nếu người dùng chưa đăng nhập
+        if (!Auth::check()) {
+            // Nếu người dùng chưa đăng nhập, hiển thị thông báo lỗi và không cho gửi liên hệ
+            return redirect()->route('client.contacts.index')->with('error', 'Bạn cần đăng nhập để gửi liên hệ.');
+        }
 
-    $data = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email',
-        'phone' => 'nullable|string|max:20',
-        'subject' => 'nullable|string|max:255',
-        'message' => 'required|string',
-    ], $messages);
+        // Validate dữ liệu từ form
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'phone' => 'nullable|string|max:20',
+            'subject' => 'nullable|string|max:255',
+            'message' => 'required|string',
+        ]);
 
-    if (Auth::check()) {
+        // Lưu thông tin người dùng nếu đã đăng nhập
         $data['user_id'] = Auth::id();
+
+        // Tạo mới liên hệ
+        Contact::create($data);
+
+        // Chuyển hướng về trang liên hệ với thông báo thành công
+        return redirect()->route('client.contacts.index')->with('success', 'Gửi liên hệ thành công!');
     }
-
-    $data['ip_address'] = $request->ip();
-    $data['status'] = 'pending';
-
-    Contact::create($data);
-
-    // Chuyển hướng đến trang form rỗng thay vì quay lại trang cũ
-    return redirect()->route('contact.create')->with('success', 'Gửi liên hệ thành công!');
 }
 
-}

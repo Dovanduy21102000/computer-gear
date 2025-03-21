@@ -81,6 +81,8 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-Route::get('/contact', [ContactClientController::class, 'index'])->name('client.contacts.index');// Danh sách liên hệ (nếu cần)
-Route::post('/contact', [ContactClientController::class, 'store'])->name('client.contacts.store'); // Xử lý gửi liên hệ
+Route::get('/contact', [ContactClientController::class, 'index'])->name('client.contacts.index');
+Route::post('/contact', [ContactClientController::class, 'store'])->name('client.contacts.store');
+
+
 
