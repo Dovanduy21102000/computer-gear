@@ -37,17 +37,18 @@ class LoginController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
-
+        // dd($credentials);
         // Cố gắng đăng nhập người dùng
         if (Auth::attempt($credentials)) {
             // Đăng nhập thành công, chuyển hướng người dùng
-            return redirect()->route('home') ;// Chuyển hướng tới trang dashboard hoặc trang bạn muốn
+            return redirect()->route('home') ;
         }
 
         // Đăng nhập thất bại
-        return back()->withErrors([
-            'email' => 'These credentials do not match our records.',
+        return back()->withInput($request->only('email'))->withErrors([
+            'email' => 'Email hoặc mật khẩu không chính xác.',
         ]);
+        
     }
 
     // Xử lý đăng xuất

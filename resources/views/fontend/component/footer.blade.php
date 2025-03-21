@@ -261,7 +261,16 @@
                  <!-- End Toggle Button -->
 
                  <!-- Content -->
-                 <div class="js-scrollbar u-sidebar__body" id="footer">
+                <div class="js-scrollbar u-sidebar__body" id="footer">
+                    @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>                 
+                    </div>
+                    @endif
                      <div class="u-sidebar__content u-header-sidebar__content">
                         <form class="js-validate" method="POST" action="{{ route('login') }}" id="loginForm" style="display: none;">
                             @csrf
@@ -285,9 +294,6 @@
                                                 </span>
                                             </div>
                                             <input type="email" class="form-control" name="email" placeholder="email" required>
-                                            @error('email')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -303,9 +309,6 @@
                                                 </span>
                                             </div>
                                             <input type="password" class="form-control" name="password" placeholder="Password" required>
-                                            @error('password')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -323,7 +326,7 @@
                                     <a class="js-animation-link small text-dark" href="javascript:;" data-target="#signup" data-link-group="idForm" data-animation-in="slideInUp" onclick="toggleForm('signup')">Signup</a>
                                 </div>
                 
-                                <div class="text-center">
+                                {{-- <div class="text-center">
                                     <span class="u-divider u-divider--xs u-divider--text mb-4">OR</span>
                                 </div>
                 
@@ -335,7 +338,7 @@
                                     <a class="btn btn-block btn-sm btn-soft-google transition-3d-hover ml-1 mt-0" href="#">
                                         <span class="fab fa-google mr-1"></span> Google
                                     </a>
-                                </div>
+                                </div> --}}
                             </div>
                         </form>
                 
@@ -360,9 +363,6 @@
                                         </div>
                                         <input type="text" class="form-control" name="name" id="signupName" placeholder="Name" required>
                                     </div>
-                                    @error('name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
                             </div>
                             
@@ -378,9 +378,6 @@
                                         </div>
                                         <input type="email" class="form-control" name="email" id="signupEmail" placeholder="Email" required>
                                     </div>
-                                    @error('email')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
                             </div>
                 
@@ -396,9 +393,6 @@
                                         </div>
                                         <input type="password" class="form-control" name="password" id="signupPassword" placeholder="Password" required>
                                     </div>
-                                    @error('password')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
                             </div>
                 
@@ -414,9 +408,6 @@
                                         </div>
                                         <input type="password" class="form-control" name="password_confirmation" id="signupConfirmPassword" placeholder="Confirm Password" required>
                                     </div>
-                                    @error('password_confirmation')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
                             </div>
                 
@@ -445,6 +436,32 @@
                         </form>
 
                         <!-- Form Forgot Password -->
+                        {{-- <div id="forgotPassword" style="display: none; opacity: 0;" data-target-group="idForm">
+                            <!-- Title -->
+                            <header class="text-center mb-7">
+                                <h2 class="h4 mb-0">Recover Password.</h2>
+                                <p>Enter your email address and an email with instructions will be sent to you.</p>
+                            </header>
+                            <!-- End Title -->
+                          
+                            <!-- Form Group -->
+                            <div class="form-group">
+                                <div class="js-form-message js-focus-state">
+                                    <label class="sr-only" for="recoverEmail">Your email</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="recoverEmailLabel">
+                                                <span class="fas fa-user"></span>
+                                            </span>
+                                        </div>
+                                        <input type="email" class="form-control" name="email"
+                                            id="recoverEmail" placeholder="Your email" aria-label="Your email"
+                                            aria-describedby="recoverEmailLabel" required
+                                            data-msg="Please enter a valid email address."
+                                            data-error-class="u-has-error" data-success-class="u-has-success">
+                                    </div>
+                                </div>
+                            </div> --}}
                         <!-- End Form Group -->
                      </div>
                  </div>

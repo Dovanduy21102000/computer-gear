@@ -7,13 +7,13 @@
             </div>
             <div class="topbar-right ml-auto">
                 <ul class="list-inline mb-0">
-                    <li class="list-inline-item mr-0 u-header-topbar__nav-item u-header-topbar__nav-item-border">
+                    <li class="list-inline-item mr-2 u-header-topbar__nav-item u-header-topbar__nav-item-border">
                         <a href="#" class="u-header-topbar__nav-link"><i class="ec ec-map-pointer mr-1"></i> Vị trí cửa hàng</a>
                     </li>
-                    <li class="list-inline-item mr-0 u-header-topbar__nav-item u-header-topbar__nav-item-border">
+                    <li class="list-inline-item mr-2 u-header-topbar__nav-item u-header-topbar__nav-item-border">
                         <a href="https://transvelo.github.io/electro-html/2.0/html/shop/track-your-order.html" class="u-header-topbar__nav-link"><i class="ec ec-transport mr-1"></i> Theo dõi đơn hàng của bạn</a>
                     </li>
-                    <li class="list-inline-item mr-0 u-header-topbar__nav-item u-header-topbar__nav-item-border">
+                    <li class="list-inline-item mr-2 u-header-topbar__nav-item u-header-topbar__nav-item-border">
                         <!-- Account Sidebar Toggle Button -->
                         <a id="profileDropdown" href="javascript:;" role="button" class="u-header-topbar__nav-link"
                         aria-controls="sidebarContent"
@@ -33,12 +33,19 @@
                         @auth
                         <!-- Khi người dùng đã đăng nhập -->
 
-                        <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
-
-                            <a class="dropdown-item" href="#">Quản lý tài khoản</a>
-                            <a class="dropdown-item" href="{{ route('logout') }}"
-                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Đăng xuất</a>
-
+                        <div class="dropdown">
+                            <a id="userDropdown" href="javascript:;" class="dropdown-toggle d-flex align-items-center"
+                               role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
+                            </a>
+                            
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#">Quản lý tài khoản</a>
+                                <a class="dropdown-item" href="{{ route('logout') }}"
+                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Đăng xuất</a>
+                            </div>
+                        </div>
+                        
                         <!-- Form đăng xuất -->
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                             @csrf
