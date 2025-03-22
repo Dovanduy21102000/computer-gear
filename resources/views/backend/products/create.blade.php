@@ -93,7 +93,7 @@
                             <div class="row mb-3">
                                 <label for="short_description" class="col-sm-2 col-form-label">Mô tả ngắn</label>
                                 <div class="col-sm-10">
-                                    <textarea class="form-control" id="short_description" name="short_description" rows="3"></textarea>
+                                    <textarea id="ck_short_description" name="short_description" class="form-control" rows="3"></textarea>
                                 </div>
                             </div>
 
@@ -101,9 +101,60 @@
                             <div class="row mb-3">
                                 <label for="description" class="col-sm-2 col-form-label">Mô tả chi tiết</label>
                                 <div class="col-sm-10">
-                                    <textarea class="form-control" id="description" name="description" rows="5"></textarea>
+                                    <textarea id="ck_description" name="description" class="form-control" rows="5"></textarea>
                                 </div>
                             </div>
+
+                            <script>
+                                function initCKEditor(selector, height) {
+                                    CKEDITOR.ClassicEditor
+                                        .create(document.querySelector(selector), {
+                                            htmlSupport: {
+                                                allow: [{
+                                                    name: /.*/,
+                                                    attributes: true,
+                                                    classes: true,
+                                                    styles: true
+                                                }]
+                                            },
+                                            height: height,
+                                            allowedContent: true,
+                                            extraAllowedContent: 'iframe[*]; div[*]; span[*]; style;',
+                                            clipboard: {
+                                                pasteFilter: null
+                                            },
+                                            extraPlugins: ['MediaEmbed', 'Clipboard'],
+                                            toolbar: {
+                                                items: [
+                                                    'undo', 'redo', '|', 'bold', 'italic', '|',
+                                                    'bulletedList', 'numberedList', '|', 'link', 'uploadImage',
+                                                    'blockQuote', 'insertTable', 'mediaEmbed'
+                                                ],
+                                                shouldNotGroupWhenFull: true,
+                                            },
+                                            mediaEmbed: {
+                                                previewsInData: true
+                                            },
+                                            removePlugins: [
+                                                'AIAssistant', 'MultiLevelList', 'RealTimeCollaborativeComments',
+                                                'RealTimeCollaborativeTrackChanges', 'RealTimeCollaborativeRevisionHistory',
+                                                'PresenceList', 'Comments', 'TrackChanges', 'TrackChangesData',
+                                                'RevisionHistory', 'Pagination', 'WProofreader', 'MathType',
+                                                'SlashCommand', 'Template', 'DocumentOutline', 'FormatPainter',
+                                                'TableOfContents', 'PasteFromOfficeEnhanced', 'CaseChange'
+                                            ],
+                                        })
+                                        .then(editor => console.log(`CKEditor ${selector} đã khởi tạo thành công!`))
+                                        .catch(error => console.error(`Lỗi khi khởi tạo CKEditor ${selector}:`, error));
+                                }
+
+                                // Khởi tạo CKEditor cho cả hai trường
+                                initCKEditor('#ck_short_description', 200);
+                                initCKEditor('#ck_description', 300);
+                            </script>
+
+
+
 
                             <!-- Giá -->
                             <div class="row mb-3">

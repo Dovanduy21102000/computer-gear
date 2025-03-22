@@ -10,7 +10,7 @@
         <h1>Quản lý banner</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
                 <li class="breadcrumb-item active">Quản lý banners</li>
             </ol>
         </nav>

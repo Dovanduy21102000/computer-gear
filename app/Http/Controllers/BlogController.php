@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 use App\Models\Post;
@@ -26,7 +27,7 @@ class BlogController extends Controller
         $posts = $query->latest()->paginate(5);
     
         // Lấy danh sách danh mục để hiển thị trên form tìm kiếm
-        $categories = \App\Models\Category::all(); 
+        $categories = Category::all();
     
         $template = 'fontend.blog.index';
         return view('fontend.layout', compact('template', 'posts', 'categories'));
@@ -36,7 +37,7 @@ class BlogController extends Controller
     {
         $post = Post::where('slug', $slug)->firstOrFail();
         $recentPosts = Post::where('status', 1)->latest()->take(5)->get();
-        $categories = \App\Models\Category::all(); // Lấy danh sách tất cả danh mục
+        $categories = Category::all(); // Lấy danh sách tất cả danh mục
     
         // Kiểm tra xem có tham số category_id trong request không
         $categoryId = $request->input('category_id');

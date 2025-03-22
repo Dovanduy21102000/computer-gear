@@ -12,6 +12,8 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ContactClientController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -30,6 +32,7 @@ Route::prefix('admin')->group(function () {
     Route::get('login', [AuthController::class, 'index'])->name('auth.admin'); // Hiển thị form đăng nhập
     Route::post('login', [AuthController::class, 'login'])->name('auth.login'); // Xử lý đăng nhập
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
+
 
     // Route admin cần quyền truy cập
     Route::middleware(['admin'])->group(function () {
@@ -52,14 +55,14 @@ Route::prefix('admin')->group(function () {
             Route::resource($object, $controller);
         };
 
-        // Route upload bài viết
+
+       // Route upload bài viết
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
     });
 });
 
 // Client Routes
 Route::middleware(['web'])->group(function () {
-    
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login'); // Form đăng nhập client
     Route::post('login', [LoginController::class, 'login'])->name('login'); // Xử lý đăng nhập client
     Route::post('logout', [LoginController::class, 'logout'])->name('logout'); // Xử lý đăng xuất client
@@ -70,6 +73,7 @@ Route::middleware(['web'])->group(function () {
     
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
 
+
     
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
@@ -78,6 +82,8 @@ Route::middleware(['web'])->group(function () {
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.applyCoupon');
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
+
+
     
     Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
     Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
@@ -85,6 +91,7 @@ Route::middleware(['web'])->group(function () {
     
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
 
     
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -98,3 +105,4 @@ Route::get('/api/districts/{province_id}', function ($province_id) {
 });
 
 Route::get('/get-districts/{provinceId}', [OrderController::class, 'getDistricts'])->name('get.districts');
+
