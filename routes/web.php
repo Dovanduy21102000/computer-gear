@@ -18,6 +18,7 @@ use App\Http\Controllers\ProductClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 
@@ -44,7 +45,8 @@ Route::prefix('admin')->group(function () {
         'posts'             => PostController::class,
         'users'             => UserController::class,
         'orders'            => OrderController::class,
-        'contacts'          => ContactController::class, // Thêm quản lý liên hệ
+        'contacts'          => ContactController::class,
+        'productvariants'   => ProductVariantController::class
      
     ];
     foreach ($objects as $object => $controller) {
@@ -53,6 +55,16 @@ Route::prefix('admin')->group(function () {
 
     Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload')->middleware('admin');
 });
+//Biêns thể
+Route::prefix('products/{product}/variants')->group(function () {
+    Route::get('/', [ProductVariantController::class, 'index'])->name('variants.index');
+    Route::get('/create', [ProductVariantController::class, 'create'])->name('variants.create');
+    Route::post('/store', [ProductVariantController::class, 'store'])->name('variants.store');
+    Route::get('/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
+    Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
+    Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
+});
+
 Route::get('/api/districts/{province_id}', function ($province_id) {
     $response = Http::get("https://provinces.open-api.vn/api/p/{$province_id}?depth=2");
     $data = json_decode($response->body(), true);

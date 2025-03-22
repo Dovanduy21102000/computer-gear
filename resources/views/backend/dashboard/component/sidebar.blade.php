@@ -36,8 +36,6 @@
                 <i class="bi bi-cart"></i><span>Quản lý sản phẩm</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
 
-            <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav" style="">
-
             <ul id="components-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav" style="">
 
                 <li>
@@ -93,6 +91,12 @@
             <a class="nav-link collapsed" href="{{ route('banners.index') }}">
                 <i class="bi bi-chat-left-text"></i>
                 <span>Quản lý bình luận</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ route('productvariants.index') }}">
+                <i class="bi bi-chat-left-text"></i>
+                <span>Quản lý sản phẩm biến thể</span>
             </a>
         </li>
 

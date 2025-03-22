@@ -1,10 +1,10 @@
 <main id="main" class="main">
     <div class="pagetitle">
-        <h1>Danh sách sản phẩm</h1>
+        <h1>Danh sách sản phẩm biến thể</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
-                <li class="breadcrumb-item active">Quản lý sản phẩm</li>
+                <li class="breadcrumb-item"><a href="{{route('dashboard.index')}}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Quản lý sản phẩm biến thể</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -14,11 +14,12 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Danh sách sản phẩm</h5>
+                        <h5 class="card-title">Danh sách sản phẩm biển thể</h5>
                         <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
                             <div class="datatable-top">
                                 <div>
-                                    <a class="btn btn-primary" href="{{ route('products.create') }}">Thêm mới</a>
+                                    <a class="btn btn-primary" href="{{ route('variants.create', ['product' => $product->id]) }}">Thêm mới</a>
+
                                 </div>
                                 <div class="datatable-search">
                                     <input class="datatable-input" placeholder="Tìm kiếm theo tên hoặc SKU..."
@@ -35,55 +36,44 @@
                                             <th class="text-center">Thương hiệu</th>
                                             <th class="text-center">Giá</th>
                                             <th class="text-center">Số lượng</th>
-                                            <th class="text-center">Biến thể</th>
                                             <th class="text-center">Trạng thái</th>
                                             <th class="text-center">Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($products as $product)
+                                        @foreach ($variants as $variant)
                                             <tr>
                                                 <td class="text-center">
-                                                    @if ($product->thumbnail)
-                                                        <img src="{{ Storage::url($product->thumbnail) }}"
+                                                    @if ($variant->thumbnail)
+                                                        <img src="{{ Storage::url($variant->thumbnail) }}"
                                                             width="50" height="50" alt="Ảnh sản phẩm">
                                                     @else
                                                         <span>Không có ảnh</span>
                                                     @endif
                                                 </td>
-                                                <td>{{ $product->name }}</td>
-                                                <td>{{ $product->category->name ?? 'Không có' }}</td>
-                                                <td>{{ $product->brand->name ?? 'Không có' }}</td>
-                                                <td class="text-end">{{ number_format($product->price, 0, ',', '.') }}
+                                                <td>{{ $variant->name }}</td>
+                                                <td>{{ $variant->category->name ?? 'Không có' }}</td>
+                                                <td>{{ $variant->brand->name ?? 'Không có' }}</td>
+                                                <td class="text-end">{{ number_format($variant->price, 0, ',', '.') }}
                                                     VNĐ</td>
-                                                <td class="text-center">{{ $product->quantity }}</td>
+                                                <td class="text-center">{{ $variant->quantity }}</td>
                                                 <td class="text-center">
-                                                    @if ($product->is_variant)
-                                                        <span class="badge bg-info">{{ $product->variants->count() }} biến thể</span>
-                                                        <a href="{{ route('variants.index', $product->id) }}" class="btn btn-info btn-sm mt-1">
-                                                            <i class="fa fa-list"></i> Quản lý Biến thể
-                                                        </a>
-                                                    @else
-                                                        <span class="badge bg-secondary">Không có biến thể</span>
-                                                    @endif
-                                                </td>
-                                                <td class="text-center">
-                                                    @if ($product->status == 1)
+                                                    @if ($variant->status == 1)
                                                         <span class="badge bg-success">Kích hoạt</span>
                                                     @else
                                                         <span class="badge bg-danger">Vô hiệu hóa</span>
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
-                                                    <a href="{{ route('products.show', $product->id) }}"
+                                                    <a href="{{ route('products.show', $variant->id) }}"
                                                         class="btn btn-success btn-sm">
                                                         <i class="fa fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('products.edit', $product->id) }}"
+                                                    <a href="{{ route('products.edit', $variant->id) }}"
                                                         class="btn btn-warning btn-sm">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
-                                                    <form action="{{ route('products.destroy', $product->id) }}"
+                                                    <form action="{{ route('products.destroy', $variant->id) }}"
                                                         method="POST" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')
@@ -98,7 +88,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            {{ $products->links() }}
+                            {{-- {{ $variants->links() }} --}}
                         </div>
                     </div>
                 </div>
