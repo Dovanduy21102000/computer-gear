@@ -33,35 +33,6 @@ class ContactController extends Controller
     /**
      * Lưu thông tin liên hệ từ form.
      */
-    public function store(Request $request)
-    {
-        $messages = [
-            'name.required' => 'Tên không được để trống.',
-            'email.required' => 'Email không được để trống.',
-            'email.email' => 'Email không hợp lệ.',
-            'message.required' => 'Nội dung liên hệ không được để trống.',
-        ];
-
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'phone' => 'nullable|string|max:20',
-            'subject' => 'nullable|string|max:255',
-            'message' => 'required|string',
-        ], $messages);
-
-        // Lưu thông tin user nếu có đăng nhập
-        if (Auth::check()) {
-            $data['user_id'] = Auth::id();
-        }
-
-        $data['ip_address'] = $request->ip(); // Lưu IP người gửi
-        $data['status'] = 'pending'; // Mặc định là chưa xử lý
-
-        Contact::create($data);
-
-        return redirect()->back()->with('success', 'Gửi liên hệ thành công!');
-    }
 
     /**
      * Cập nhật trạng thái liên hệ.
@@ -96,9 +67,16 @@ class ContactController extends Controller
      */
     public function destroy(Contact $contact)
     {
+        // Kiểm tra nếu trạng thái là 'pending' thì không thể xóa
+        if ($contact->status === 'pending') {
+            return redirect()->route('contacts.index')->with('error', 'Liên hệ đang chờ xử lý, không thể xóa!');
+        }
+    
+        // Tiến hành xóa nếu không phải trạng thái 'pending'
         $contact->delete();
         return redirect()->route('contacts.index')->with('success', 'Liên hệ đã được xóa!');
     }
+    
 
     
 }

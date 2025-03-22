@@ -21,8 +21,8 @@ class AuthController extends Controller
     }
     //đăng nhập 
     public function login(Request $request)
-{
-    $email = $request->input('email');
+    {
+        $email = $request->input('email');
     $password = $request->input('password');
 
     $user = DB::table('users')->where('email', $email)->first();
@@ -37,8 +37,8 @@ class AuthController extends Controller
     }
 
     return redirect()->route('auth.admin')->with('error', 'Email hoặc mật khẩu không chính xác!');
-}
-
+    }
+    
 
     //Đăng xuất
     public function logout(Request $request)

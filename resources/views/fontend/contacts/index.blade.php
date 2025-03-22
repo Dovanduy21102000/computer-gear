@@ -43,7 +43,7 @@
                     <p class="max-width-830-xl text-gray-90">
                         Hãy để lại tin nhắn của bạn, chúng tôi sẽ liên hệ lại sớm nhất có thể. Mọi ý kiến đóng góp của bạn đều rất quan trọng đối với chúng tôi.
                     </p>
-                    <form action="{{ route('contacts.store') }}" method="POST">
+                    <form action="{{ route('client.contacts.store') }}" method="POST">
                         @csrf
                         <div class="row">
                             <div class="col-md-6">

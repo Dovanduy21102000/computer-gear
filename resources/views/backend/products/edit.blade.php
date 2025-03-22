@@ -18,7 +18,8 @@
                         <h5 class="card-title">Thông tin sản phẩm</h5>
 
                         <!-- Form Chỉnh Sửa Sản Phẩm -->
-                        <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('products.update', $product->id) }}" method="POST"
+                            enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -28,8 +29,10 @@
                                 <div class="col-sm-10">
                                     <select class="form-select" id="category_id" name="category_id" required>
                                         <option value="">Chọn danh mục</option>
-                                        @foreach($categories as $category)
-                                            <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}"
+                                                {{ $product->category_id == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -41,8 +44,10 @@
                                 <div class="col-sm-10">
                                     <select class="form-select" id="brand_id" name="brand_id" required>
                                         <option value="">Chọn thương hiệu</option>
-                                        @foreach($brands as $brand)
-                                            <option value="{{ $brand->id }}" {{ $product->brand_id == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                                        @foreach ($brands as $brand)
+                                            <option value="{{ $brand->id }}"
+                                                {{ $product->brand_id == $brand->id ? 'selected' : '' }}>
+                                                {{ $brand->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -52,7 +57,8 @@
                             <div class="row mb-3">
                                 <label for="sku" class="col-sm-2 col-form-label">SKU</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="sku" name="sku" value="{{ $product->sku }}" required>
+                                    <input type="text" class="form-control" id="sku" name="sku"
+                                        value="{{ $product->sku }}" required>
                                 </div>
                             </div>
 
@@ -60,7 +66,8 @@
                             <div class="row mb-3">
                                 <label for="name" class="col-sm-2 col-form-label">Tên sản phẩm</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="name" name="name" value="{{ $product->name }}" required>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                        value="{{ $product->name }}" required>
                                 </div>
                             </div>
 
@@ -68,7 +75,8 @@
                             <div class="row mb-3">
                                 <label for="slug" class="col-sm-2 col-form-label">Slug</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="slug" name="slug" value="{{ $product->slug }}" required>
+                                    <input type="text" class="form-control" id="slug" name="slug"
+                                        value="{{ $product->slug }}" required>
                                 </div>
                             </div>
 
@@ -78,7 +86,8 @@
                                 <div class="col-sm-10">
                                     <input type="file" class="form-control" id="thumbnail" name="thumbnail">
                                     @if ($product->thumbnail)
-                                        <img src="{{ Storage::url($product->thumbnail) }}" width="100" class="mt-2">
+                                        <img src="{{ Storage::url($product->thumbnail) }}" width="100"
+                                            class="mt-2">
                                     @endif
                                 </div>
                             </div>
@@ -87,7 +96,9 @@
                             <div class="row mb-3">
                                 <label for="short_description" class="col-sm-2 col-form-label">Mô tả ngắn</label>
                                 <div class="col-sm-10">
-                                    <textarea class="form-control" id="short_description" name="short_description" rows="3">{{ $product->short_description }}</textarea>
+                                    <textarea id="ck_short_description" name="short_description" class="form-control" rows="3">
+            {!! old('short_description', $product->short_description ?? '') !!}
+        </textarea>
                                 </div>
                             </div>
 
@@ -95,15 +106,70 @@
                             <div class="row mb-3">
                                 <label for="description" class="col-sm-2 col-form-label">Mô tả chi tiết</label>
                                 <div class="col-sm-10">
-                                    <textarea class="form-control" id="description" name="description" rows="5">{{ $product->description }}</textarea>
+                                    <textarea id="ck_description" name="description" class="form-control" rows="5">
+            {!! old('description', $product->description ?? '') !!}
+        </textarea>
                                 </div>
                             </div>
+
+                            <script>
+                                function initCKEditor(selector, height, content) {
+                                    CKEDITOR.ClassicEditor
+                                        .create(document.querySelector(selector), {
+                                            htmlSupport: {
+                                                allow: [{
+                                                    name: /.*/,
+                                                    attributes: true,
+                                                    classes: true,
+                                                    styles: true
+                                                }]
+                                            },
+                                            height: height,
+                                            allowedContent: true,
+                                            extraAllowedContent: 'iframe[*]; div[*]; span[*]; style;',
+                                            clipboard: {
+                                                pasteFilter: null
+                                            },
+                                            extraPlugins: ['MediaEmbed', 'Clipboard'],
+                                            toolbar: {
+                                                items: [
+                                                    'undo', 'redo', '|', 'bold', 'italic', '|',
+                                                    'bulletedList', 'numberedList', '|', 'link', 'uploadImage',
+                                                    'blockQuote', 'insertTable', 'mediaEmbed'
+                                                ],
+                                                shouldNotGroupWhenFull: true,
+                                            },
+                                            mediaEmbed: {
+                                                previewsInData: true
+                                            },
+                                            removePlugins: [
+                                                'AIAssistant', 'MultiLevelList', 'RealTimeCollaborativeComments',
+                                                'RealTimeCollaborativeTrackChanges', 'RealTimeCollaborativeRevisionHistory',
+                                                'PresenceList', 'Comments', 'TrackChanges', 'TrackChangesData',
+                                                'RevisionHistory', 'Pagination', 'WProofreader', 'MathType',
+                                                'SlashCommand', 'Template', 'DocumentOutline', 'FormatPainter',
+                                                'TableOfContents', 'PasteFromOfficeEnhanced', 'CaseChange'
+                                            ],
+                                        })
+                                        .then(editor => {
+                                            editor.setData(content); // Gán dữ liệu vào editor khi cập nhật
+                                            console.log(`CKEditor ${selector} đã khởi tạo thành công!`);
+                                        })
+                                        .catch(error => console.error(`Lỗi khi khởi tạo CKEditor ${selector}:`, error));
+                                }
+
+                                // Khởi tạo CKEditor và điền dữ liệu từ biến Blade
+                                initCKEditor('#ck_short_description', 200, `{!! old('short_description', $product->short_description ?? '') !!}`);
+                                initCKEditor('#ck_description', 300, `{!! old('description', $product->description ?? '') !!}`);
+                            </script>
+
 
                             <!-- Giá -->
                             <div class="row mb-3">
                                 <label for="price" class="col-sm-2 col-form-label">Giá</label>
                                 <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="price" name="price" value="{{ $product->price }}" required>
+                                    <input type="number" class="form-control" id="price" name="price"
+                                        value="{{ $product->price }}" required>
                                 </div>
                             </div>
 
@@ -111,7 +177,8 @@
                             <div class="row mb-3">
                                 <label for="price_sale" class="col-sm-2 col-form-label">Giá khuyến mãi</label>
                                 <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="price_sale" name="price_sale" value="{{ $product->price_sale }}">
+                                    <input type="number" class="form-control" id="price_sale" name="price_sale"
+                                        value="{{ $product->price_sale }}">
                                 </div>
                             </div>
 
@@ -119,7 +186,8 @@
                             <div class="row mb-3">
                                 <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
                                 <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="quantity" name="quantity" value="{{ $product->quantity }}" required>
+                                    <input type="number" class="form-control" id="quantity" name="quantity"
+                                        value="{{ $product->quantity }}" required>
                                 </div>
                             </div>
 
@@ -128,8 +196,10 @@
                                 <label for="status" class="col-sm-2 col-form-label">Trạng thái</label>
                                 <div class="col-sm-10">
                                     <select class="form-select" id="status" name="status" required>
-                                        <option value="1" {{ $product->status == 1 ? 'selected' : '' }}>Kích hoạt</option>
-                                        <option value="0" {{ $product->status == 0 ? 'selected' : '' }}>Vô hiệu hóa</option>
+                                        <option value="1" {{ $product->status == 1 ? 'selected' : '' }}>Kích hoạt
+                                        </option>
+                                        <option value="0" {{ $product->status == 0 ? 'selected' : '' }}>Vô hiệu
+                                            hóa</option>
                                     </select>
                                 </div>
                             </div>
@@ -139,8 +209,10 @@
                                 <label for="is_variant" class="col-sm-2 col-form-label">Có biến thể</label>
                                 <div class="col-sm-10">
                                     <select class="form-select" id="is_variant" name="is_variant" required>
-                                        <option value="1" {{ $product->is_variant == 1 ? 'selected' : '' }}>Có</option>
-                                        <option value="0" {{ $product->is_variant == 0 ? 'selected' : '' }}>Không</option>
+                                        <option value="1" {{ $product->is_variant == 1 ? 'selected' : '' }}>Có
+                                        </option>
+                                        <option value="0" {{ $product->is_variant == 0 ? 'selected' : '' }}>Không
+                                        </option>
                                     </select>
                                 </div>
                             </div>
