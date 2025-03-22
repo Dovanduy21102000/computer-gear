@@ -420,7 +420,7 @@
                                 <a class="js-animation-link small text-dark" href="javascript:;" data-target="#login" data-link-group="idForm" data-animation-in="slideInUp" onclick="toggleForm('login')">Login</a>
                             </div>
                 
-                            <div class="text-center">
+                            {{-- <div class="text-center">
                                 <span class="u-divider u-divider--xs u-divider--text mb-4">OR</span>
                             </div>
                 
@@ -432,7 +432,7 @@
                                 <a class="btn btn-block btn-sm btn-soft-google transition-3d-hover ml-1 mt-0" href="#">
                                     <span class="fab fa-google mr-1"></span> Google
                                 </a>
-                            </div>
+                            </div> --}}
                         </form>
 
                         <!-- Form Forgot Password -->

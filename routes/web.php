@@ -24,77 +24,77 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 
-
-//Admin
-//Authentication
-Route::get('dashboard/index', [DashboardController::class,'index'])->name('dashboard.index')
-->middleware('admin');
-Route::get('admin', [AuthController::class,'index'])->name('auth.admin')
-->middleware('login');
-Route::post('login', [AuthController::class,'login'])->name('auth.login');
-Route::get('logout', [AuthController::class,'logout'])->name('auth.logout');
-
+// Admin Routes
 Route::prefix('admin')->group(function () {
-    $objects = [
+    // Đăng nhập và đăng xuất dành cho admin
+    Route::get('login', [AuthController::class, 'index'])->name('auth.admin'); // Hiển thị form đăng nhập
+    Route::post('login', [AuthController::class, 'login'])->name('auth.login'); // Xử lý đăng nhập
+    Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
 
-        'categories'        => CategoryController::class,
-        'attributes'        => AttributeController::class,
-        'attributevalues'   => AttributeValueController::class,
-        'brands'            => BrandController::class,
-        'coupons'           => CouponController::class,
-        'banners'           => BannerController::class,
-        'products'          => ProductController::class,
-        'posts'             => PostController::class,
-        'users'             => UserController::class,
-        'orders'            => OrderController::class,
-    ];
-    foreach ($objects as $object => $controller) {
-        Route::resource($object, $controller);
-    };
+    // Route admin cần quyền truy cập
+    Route::middleware(['admin'])->group(function () {
+        Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
 
-    Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
+        // Các route resource dành cho admin
+        $objects = [
+            'categories'        => CategoryController::class,
+            'attributes'        => AttributeController::class,
+            'attributevalues'   => AttributeValueController::class,
+            'brands'            => BrandController::class,
+            'coupons'           => CouponController::class,
+            'banners'           => BannerController::class,
+            'products'          => ProductController::class,
+            'posts'             => PostController::class,
+            'users'             => UserController::class,
+            'orders'            => OrderController::class,
+        ];
+        foreach ($objects as $object => $controller) {
+            Route::resource($object, $controller);
+        };
+
+        // Route upload bài viết
+        Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
+    });
 });
+
+// Client Routes
+Route::middleware(['web'])->group(function () {
+    
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login'); // Form đăng nhập client
+    Route::post('login', [LoginController::class, 'login'])->name('login'); // Xử lý đăng nhập client
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout'); // Xử lý đăng xuất client
+
+    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register'); // Form đăng ký
+    Route::post('register', [RegisterController::class, 'register']); // Xử lý đăng ký
+
+    
+    Route::get('/', [HomeController::class, 'index'])->name('home.index');
+
+    
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+    Route::get('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.applyCoupon');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+    
+    Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
+    Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
+
+    
+    Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+    
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+});
+
+
 Route::get('/api/districts/{province_id}', function ($province_id) {
     $response = Http::get("https://provinces.open-api.vn/api/p/{$province_id}?depth=2");
     $data = json_decode($response->body(), true);
     return response()->json($data['districts'] ?? []);
 });
+
 Route::get('/get-districts/{provinceId}', [OrderController::class, 'getDistricts'])->name('get.districts');
-
-//Client 
-
-// Trang chủ client
-// Client Routes
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
-Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
-Route::get('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
-Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.applyCoupon');
-Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-Route::get('/', [HomeController::class, 'index'])->name('home.index');
-
-
-Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
-Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
-
-
-Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
-
-Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
-
-
-// Route::prefix('auth')->group(function() {
-//     Auth::routes();
-// });
-Route::middleware(['web'])->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [LoginController::class, 'login'])->name('login');
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-
-    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('register', [RegisterController::class, 'register']);
-});
-
-
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

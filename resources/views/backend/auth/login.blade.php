@@ -23,7 +23,7 @@
             <h3>Chào mừng đến với Computer Gear</h3>
             <p>Đăng nhập để vào trang quản trị</p>
 
-            <form class="m-t" role="form" action="{{ route('auth.login') }}" method="post">
+            <form class="m-t" role="form" action="{{ route('auth.login') }}" method="POST">
                 @csrf
                 <div class="form-group">
                     <input type="text" name="email" class="form-control" placeholder="Nhập email..." value="{{old('email')}}">
