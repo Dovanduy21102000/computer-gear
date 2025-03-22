@@ -22,11 +22,15 @@ class Category extends Model
     ];
     // App\Models\Category.php
 
-public function posts()
-{
-    return $this->hasMany(Post::class);
-}
-public function parent()
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'category_id');
+    }
+    public function parent()
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }

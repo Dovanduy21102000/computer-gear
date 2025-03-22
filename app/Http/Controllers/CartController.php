@@ -56,7 +56,7 @@ class CartController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Product added to cart!');
+        return redirect()->back()->with('success', 'Thêm vào giỏ hàng thành công');
     }
 
     // Update Cart Item Quantity
