@@ -73,10 +73,10 @@
                                         @endif
                                     </li>
                                     <li class="list-group-item">
-                                        <strong>Mô tả ngắn:</strong> {{ $product->short_description }}
+                                        <strong>Mô tả ngắn:</strong> {!! $product->short_description !!}
                                     </li>
                                     <li class="list-group-item">
-                                        <strong>Mô tả chi tiết:</strong> {{ $product->description }}
+                                        <strong>Mô tả chi tiết:</strong> {!! $product->description !!}
                                     </li>
                                 </ul>
                             </div>

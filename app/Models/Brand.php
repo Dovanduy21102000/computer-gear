@@ -20,4 +20,6 @@ class Brand extends Model
     public $attributes = [
         'is_active' => 1
     ];
+
+    
 }
