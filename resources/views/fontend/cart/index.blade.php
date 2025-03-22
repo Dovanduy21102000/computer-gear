@@ -1,5 +1,6 @@
 <main id="content" role="main" class="cart-page">
-    <div class="bg-gray-13 bg-md-transparent">
+    <div class="container bg-md-transparent"
+        style="padding: 10px; border-bottom: 1px solid #9d9c9c;">
         <div class="container">
             <div class="my-md-3">
                 <nav aria-label="breadcrumb">
@@ -21,9 +22,9 @@
         <div class="mb-10 cart-table">
             <form action="{{ route('cart.update') }}" id="cart-form" method="post">
                 @csrf
-                <div class="d-flex justify-content-end mt-3">
+                <div class="d-flex justify-content-end mb-4">
                     <button type="submit" id="delete-selected"
-                        class="btn btn-danger ml-md-2 px-5 px-md-4 px-lg-5 w-100 w-md-auto d-none d-md-inline-block mx-2 mb-2"
+                        class="btn btn-block btn-dark ml-md-2 px-5 px-md-4 px-lg-5 w-100 w-md-auto d-none d-md-inline-block mx-2 mb-2"
                         style="border-radius: 0%">
                         Delete Selected
                     </button>
@@ -35,10 +36,10 @@
                             <!-- Select All Checkbox -->
                             <th class="product-remove">&nbsp;</th>
                             <th class="product-thumbnail">&nbsp;</th>
-                            <th class="product-name">Product</th>
-                            <th class="product-price">Price</th>
-                            <th class="product-quantity w-lg-15">Quantity</th>
-                            <th class="product-subtotal">Total</th>
+                            <th class="product-name">Tên sản phẩm</th>
+                            <th class="product-price">Giá tiền</th>
+                            <th class="product-quantity w-lg-15">Số lượng</th>
+                            <th class="product-subtotal">Tổng tiền</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,7 +55,7 @@
                                 </td>
                                 <td class="d-none d-md-table-cell">
                                     <a href="#">
-                                        <img class="img-fluid max-width-100 p-1 border border-color-1"
+                                        <img class="img-fluid max-width-150 p-1 border border-color-1"
                                             src="{{ asset('storage/' . $item->product->thumbnail ?? 'default-image.jpg') }}"
                                             alt="{{ $item->product->name }}">
                                     </a>
@@ -101,10 +102,11 @@
                                             </button>
 
                                             <!-- Checkout Button -->
-                                            <a href="#"
+                                            <a href="{{ route('checkout.index') }}"
                                                 class="btn btn-primary-dark-w ml-md-2 px-5 px-md-4 px-lg-5 w-100 w-md-auto d-none d-md-inline-block">
                                                 Proceed to Checkout
                                             </a>
+
                                         </div>
                                     </div>
                                 </div>
@@ -161,8 +163,8 @@
                                 <tr class="coupon-discount">
                                     <th>Coupon ({{ session('coupon')['code'] }})</th>
                                     <td data-title="Discount">
-                                        <span class="text-danger">- {{ number_format($discount, 0, ',', '.') }}₫<<
-                                                /span>
+                                        <span class="text-danger">-
+                                            {{ number_format($discount, 0, ',', '.') }}₫</span>
                                     </td>
                                 </tr>
                             @endif
@@ -177,10 +179,11 @@
                         </tbody>
                     </table>
 
-                    <a href="#"
-                        class="btn btn-primary-dark-w ml-md-2 px-5 px-md-4 px-lg-5 w-100 w-md-auto d-md-none">
+                    <a href="{{ route('checkout.index') }}"
+                        class="btn btn-primary-dark-w ml-md-2 px-5 px-md-4 px-lg-5 w-100 w-md-auto d-none d-md-inline-block">
                         Proceed to Checkout
                     </a>
+
                 </div>
             </div>
         </div>
@@ -223,6 +226,7 @@
                     console.error("Form not found!");
                 }
             });
+
         });
     </script>
 </main>

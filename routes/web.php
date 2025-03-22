@@ -8,28 +8,31 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactClientController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MOMOController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\VNPayController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 
 
 //Admin
 //Authentication
-Route::get('dashboard/index', [DashboardController::class,'index'])->name('dashboard.index')
-->middleware('admin');
-Route::get('admin', [AuthController::class,'index'])->name('auth.admin')
-->middleware('login');
-Route::post('login', [AuthController::class,'login'])->name('auth.login');
-Route::get('logout', [AuthController::class,'logout'])->name('auth.logout');
+Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index')
+    ->middleware('admin');
+Route::get('admin', [AuthController::class, 'index'])->name('auth.admin')
+    ->middleware('login');
+Route::post('login', [AuthController::class, 'login'])->name('auth.login');
+Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 Route::prefix('admin')->group(function () {
     $objects = [
@@ -45,7 +48,7 @@ Route::prefix('admin')->group(function () {
         'users'             => UserController::class,
         'orders'            => OrderController::class,
         'contacts'          => ContactController::class, // Thêm quản lý liên hệ
-     
+
     ];
     foreach ($objects as $object => $controller) {
         Route::resource($object, $controller)->middleware('admin');
@@ -69,7 +72,6 @@ Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
 Route::get('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
-
 Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.applyCoupon');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
@@ -86,5 +88,12 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/contact', [ContactClientController::class, 'index'])->name('client.contacts.index');
 Route::post('/contact', [ContactClientController::class, 'store'])->name('client.contacts.store');
 
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout/process', [CheckoutController::class, 'checkout'])->name('checkout.process');
 
+Route::post('/vnpay/create', [VNPayController::class, 'createPayment'])->name('vnpay.create');
+Route::get('/vnpay/return', [VNPayController::class, 'paymentReturn'])->name('vnpay.return');
+Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 
+Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
+Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
