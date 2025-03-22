@@ -93,17 +93,5 @@
                 <span>Quản lý bình luận</span>
             </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ route('productvariants.index') }}">
-                <i class="bi bi-chat-left-text"></i>
-                <span>Quản lý sản phẩm biến thể</span>
-            </a>
-        </li>
-
-
-
-
-
-
     </ul>
 </aside><!-- End Sidebar-->
