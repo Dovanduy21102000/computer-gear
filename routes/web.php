@@ -75,14 +75,20 @@ Route::get('/', [HomeController::class, 'index'])->name('home.index');
 
 Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
 Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
+Route::get('/products/category/{slug}', [ProductClientController::class, 'categoryProducts'])->name('client.products.category');
+
+
+
 
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
+
 Route::get('/contact', [ContactClientController::class, 'index'])->name('client.contacts.index');
 Route::post('/contact', [ContactClientController::class, 'store'])->name('client.contacts.store');
+
 
 
 
