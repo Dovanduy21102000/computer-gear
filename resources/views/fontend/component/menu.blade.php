@@ -525,18 +525,6 @@
                              </li>
                              <!-- End About us -->
 
-                             <!-- FAQs -->
-                             <li class="nav-item u-header__nav-item">
-                                 <a class="nav-link u-header__nav-link" href="faq.html">Câu hỏi thường gặp</a>
-                             </li>
-                             <!-- End FAQs -->
-
-                             <!-- Contact Us -->
-                             <li class="nav-item u-header__nav-item">
-                                 <a class="nav-link u-header__nav-link" href="contact-v1.html">Liên hệ với chúng
-                                     tôi</a>
-                             </li>
-                             <!-- End Contact Us -->
                          </ul>
                      </div>
                      <!-- End Navigation -->
