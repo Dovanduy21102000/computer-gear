@@ -74,7 +74,11 @@ Route::middleware(['web'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
 
 
-    
+    // Route liên hệ client
+    Route::get('/contacts', [ContactClientController::class, 'index'])->name('client.contacts.index');
+    Route::post('/contacts', [ContactClientController::class, 'store'])->name('client.contacts.store');
+
+
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
@@ -83,10 +87,10 @@ Route::middleware(['web'])->group(function () {
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
 
-
-    
     Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
     Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
+    Route::get('/products/category/{categorySlug}', [ProductClientController::class, 'showByCategory'])->name('client.products.category');
+
 
     
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');

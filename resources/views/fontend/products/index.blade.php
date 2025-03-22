@@ -64,7 +64,7 @@
                                     @foreach ($categories as $category)
                                         <li>
                                             <a class="dropdown-item"
-                                                href="{{ route('client.products.category', ['slug' => $category->slug]) }}">
+                                                href="{{ route('client.products.category', ['categorySlug' => $category->slug]) }}">
                                                 {{ $category->name }}
                                                 <span class="text-gray-25 font-size-12 font-weight-normal">
                                                     ({{ $category->products()->count() }})
