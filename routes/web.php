@@ -124,3 +124,11 @@ Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 
 Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
 Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
+<<<<<<< Updated upstream
+=======
+
+Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
+
+
+
+>>>>>>> Stashed changes
