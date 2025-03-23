@@ -197,7 +197,7 @@
                                 <div class="col-sm-10">
                                     <select class="form-select" id="is_variant" name="is_variant" required onchange="toggleVariants(this)">
                                         <option value="1">Có</option>
-                                        <option value="0">Không</option>
+                                        <option value="0" selected>Không</option>
                                     </select>
                                 </div>
                             </div>

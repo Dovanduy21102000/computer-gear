@@ -61,7 +61,7 @@
                                                     @if ($product->is_variant)
                                                         <span class="badge bg-info">{{ $product->variants->count() }} biến thể</span>
                                                         <a href="{{ route('variants.index', $product->id) }}" class="btn btn-info btn-sm mt-1">
-                                                            <i class="fa fa-list"></i> Quản lý Biến thể
+                                                            <i class="fa fa-list"></i>
                                                         </a>
                                                     @else
                                                         <span class="badge bg-secondary">Không có biến thể</span>

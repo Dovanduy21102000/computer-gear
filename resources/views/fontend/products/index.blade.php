@@ -60,7 +60,6 @@
 
                             <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                 <ul id="sidebarNav1" class="list-unstyled dropdown-list">
-                                    <!-- Hiển thị danh mục cha -->
                                     @foreach ($categories as $category)
                                         <li>
                                             <a class="dropdown-item"
@@ -77,7 +76,7 @@
                                                     @foreach ($category->children as $child)
                                                         <li>
                                                             <a class="dropdown-item"
-                                                                href="{{ route('client.products.category', ['slug' => $child->slug]) }}">
+                                                                href="{{ route('client.products.category', ['categorySlug' => $child->slug]) }}">
                                                                 {{ $child->name }}
                                                                 <span
                                                                     class="text-gray-25 font-size-12 font-weight-normal">
