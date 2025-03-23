@@ -24,6 +24,7 @@ use App\Http\Controllers\ProductClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\VNPayController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -35,8 +36,6 @@ Route::prefix('admin')->group(function () {
     Route::get('login', [AuthController::class, 'index'])->name('auth.admin'); // Hiển thị form đăng nhập
     Route::post('login', [AuthController::class, 'login'])->name('auth.login'); // Xử lý đăng nhập
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
-
-
     // Route admin cần quyền truy cập
     Route::middleware(['admin'])->group(function () {
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
@@ -53,6 +52,9 @@ Route::prefix('admin')->group(function () {
             'posts'             => PostController::class,
             'users'             => UserController::class,
             'orders'            => OrderController::class,
+            'contacts'          => ContactController::class,
+        'productvariants'   => ProductVariantController::class
+ 
         ];
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
@@ -63,6 +65,17 @@ Route::prefix('admin')->group(function () {
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
     });
 });
+
+//Biêns thể
+Route::prefix('products/{product}/variants')->group(function () {
+    Route::get('/', [ProductVariantController::class, 'index'])->name('variants.index');
+    Route::get('/create', [ProductVariantController::class, 'create'])->name('variants.create');
+    Route::post('/store', [ProductVariantController::class, 'store'])->name('variants.store');
+    Route::get('/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
+    Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
+    Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
+});
+
 
 // Client Routes
 Route::middleware(['web'])->group(function () {
@@ -104,7 +117,6 @@ Route::middleware(['web'])->group(function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
 
-
 Route::get('/api/districts/{province_id}', function ($province_id) {
     $response = Http::get("https://provinces.open-api.vn/api/p/{$province_id}?depth=2");
     $data = json_decode($response->body(), true);
@@ -124,3 +136,9 @@ Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 
 Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
 Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
+<<<<<<< Updated upstream
+Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
+=======
+
+
+>>>>>>> Stashed changes
