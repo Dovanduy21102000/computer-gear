@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -15,19 +16,50 @@ class CheckoutController extends Controller
     {
         $userId = 10; // Example user ID
         $user = User::find($userId);
+
         // Get the cart for the user
         $cart = Cart::where('user_id', $userId)->first();
+
+        // Check if cart exists and contains items
+        if (!$cart || !CartItem::where('cart_id', $cart->id)->exists()) {
+            return redirect()->route('home.index')->with('error', 'Your cart is empty.');
+        }
+
+        // Retrieve cart items
         $cartItems = CartItem::with(['product', 'productVariant'])->where('cart_id', $cart->id)->get();
 
-        // Retrieve applied coupon from session (if exists)
+
+        $totalPrice = 0;
+        foreach ($cartItems as $item) {
+            $price = $item->productVariant->price ?? $item->product->price ?? 0;
+            $totalPrice += $price * $item->quantity;
+        }
+
+
         $appliedCoupon = session('coupon', null);
-        // dd($appliedCoupon);
-        // Fetch provinces
+        $discount = 0;
+
+        if ($appliedCoupon) {
+            if ($totalPrice >= $appliedCoupon['min_order_total']) { // Check min order total
+                if ($appliedCoupon['type'] === 'percentage') {
+                    $discount = min($totalPrice * ($appliedCoupon['value'] / 100), $appliedCoupon['maximum_amount']);
+                } else { // Fixed amount discount
+                    $discount = min($totalPrice, $appliedCoupon['value']); // Ensure discount doesn't exceed total
+                }
+            }
+        }
+
+
+        $provinces = [];
+        $districtsByProvince = [];
+
+
         $response = Http::get('https://provinces.open-api.vn/api/p');
-        $provinces = json_decode($response->body(), true) ?? [];
+        if ($response->successful()) {
+            $provinces = json_decode($response->body(), true) ?? [];
+        }
 
         // Fetch districts for each province
-        $districtsByProvince = [];
         foreach ($provinces as $province) {
             $provinceId = $province['code'];
             $districtResponse = Http::get("https://provinces.open-api.vn/api/p/{$provinceId}?depth=2");
@@ -38,67 +70,41 @@ class CheckoutController extends Controller
             }
         }
 
+
         $template = 'fontend.checkout.index';
-        return view('fontend.layout', compact('template', 'provinces', 'districtsByProvince', 'cartItems', 'appliedCoupon', 'user'));
+        return view('fontend.layout', compact('template', 'provinces', 'districtsByProvince', 'cartItems', 'appliedCoupon', 'discount', 'user', 'totalPrice'));
     }
 
-    public function checkout(Request $request)
-    {
-        $total = $request->total_price;
-        $paymentMethod = $request->payment_method;
-        $userId = 10; // Example user ID
-        $user = User::find($userId);
-        $cart = Cart::where('user_id', $userId)->first();
-
-        $coupon = session('coupon', []);
-        $coupon_code = $coupon['code'] ?? null;
-        $coupon_discount = isset($coupon['discount']) ? (float) $coupon['discount'] : 0;
-
-        session([
-            'order_data' => [
-                'user_id' => $user->id,
-                'shipping_user_name' => $request->shipping_user_name,
-                'shipping_email' => $request->shipping_email,
-                'shipping_phone' => $request->shipping_phone,
-                'shipping_address' => $request->shipping_address,
-                'province_id' => $request->province_id,
-                'district_id' => $request->district_id,
-                'specific_address' => $request->specific_address,
-                'coupon_code' => $coupon_code,
-                'coupon_discount' => $coupon_discount,
-                'total_price' => $total,
-                'final_price' => max(0, $total - $coupon_discount),
-                'payment_method' => $paymentMethod,
-                'notes' => $request->notes,
-            ]
-        ]);
-
-        if ($paymentMethod === 'vn_pay') {
-            return redirect()->route('vnpay.create');
-        }
-
-        return $this->processCashPayment($cart);
-    }
 
     public function processCheckout(Request $request)
     {
-        $userId = 10;
+
+        // dd($request->all());
+        // Get User ID
+        $userId = 10; // Replace with authenticated user
+
+        // Check if Cart Exists
         $cart = Cart::where('user_id', $userId)->first();
-
-        if (!$cart) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
-        }
-
         $cartItems = CartItem::where('cart_id', $cart->id)->get();
 
-        $subtotal = $cartItems->sum(function ($item) {
-            return $item->quantity * $item->product->price;
-        });
+        if (!$cart || $cartItems->isEmpty()) {
+            return redirect()->back()->with('error', 'Your cart is empty.');
+        }
 
-        $discount = session('coupon')['discount'] ?? 0;
-        $total = max(0, $subtotal - $discount);
+        // Calculate Total Price from Cart Items (Fixing Missing Price Issue)
+        $totalPrice = 0;
+        foreach ($cartItems as $item) {
+            $price = $item->productVariant->price ?? $item->product->price ?? 0; // Use variant price if available, else fallback to product price
+            $totalPrice += $price * $item->quantity;
+        }
 
+        // Apply Coupon Discount
+        $couponDiscount = session('coupon.discount', 0);
+        $finalPrice = max(0, $totalPrice - $couponDiscount); // Prevent negative price
+
+        // Create Order Before Payment
         $order = Order::create([
+            'code' => 'ORD' . time(),
             'user_id' => $userId,
             'shipping_user_name' => $request->shipping_user_name,
             'shipping_email' => $request->shipping_email,
@@ -107,28 +113,28 @@ class CheckoutController extends Controller
             'province_id' => $request->province_id,
             'district_id' => $request->district_id,
             'specific_address' => $request->specific_address,
-            'coupon_code' => session('coupon')['code'] ?? null,
-            'coupon_discount' => $discount,
-            'total_price' => $subtotal,
-            'final_price' => $total,
-            'payment_method' => $request->payment_method,
+            'coupon_code' => session('coupon.code', null),
+            'coupon_discount' => $couponDiscount,
+            'total_price' => $totalPrice,
+            'final_price' => $finalPrice,
             'payment_status' => 0,
             'status' => 'pending',
+            'payment_method' => 'cash',
+            'notes' => $request->notes,
         ]);
 
-        if ($request->payment_method === 'vn_pay') {
-            return redirect()->route('vnpay.create', ['order_id' => $order->id, 'amount' => $total]);
-        } else {
-            return $this->processCashPayment($cart);
+        // Save Order Items (Fixed: Include Products with & without Variants)
+        foreach ($cartItems as $item) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $item->product_id,
+                'product_variant_id' => $item->product_variant_id ?? null, // Allow null for non-variant products
+                'price' => $item->productVariant->price ?? $item->product->price ?? 0, // Use variant price or fallback to product price
+                'price_sale' => $item->productVariant->price_sale ?? null, // Use variant sale price if available
+                'quantity' => $item->quantity,
+                'product_info' => json_encode($item->product->toArray()),
+            ]);
         }
-    }
-
-    private function processCashPayment($cart)
-    {
-        if ($cart) {
-            CartItem::where('cart_id', $cart->id)->delete();
-        }
-
-        return redirect()->route('order.success')->with('success', 'Order placed successfully!');
+        return redirect('/')->with('success', 'Thanh toán thành công!');
     }
 }
