@@ -65,15 +65,15 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
-                                                    <a href="{{ route('products.show', $variant->id) }}"
+                                                    <a href="{{ route('variants.show', $variant->id,['product' => $product->id]) }}"
                                                         class="btn btn-success btn-sm">
                                                         <i class="fa fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('products.edit', $variant->id) }}"
+                                                    <a href="{{ route('variants.edit', $variant->id) }}"
                                                         class="btn btn-warning btn-sm">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
-                                                    <form action="{{ route('products.destroy', $variant->id) }}"
+                                                    <form action="{{ route('variants.destroy', $variant->id) }}"
                                                         method="POST" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')

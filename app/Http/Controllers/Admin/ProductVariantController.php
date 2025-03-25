@@ -1,18 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use Attribute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductVariantController extends Controller
 {
-    /**
-     * Hiển thị danh sách biến thể của sản phẩm.
-     */
     public function index(Product $product)
     {
         $variants = $product->variants;
@@ -31,6 +30,7 @@ class ProductVariantController extends Controller
     {
         $template = 'backend.variants.add';
         $product = Product::findOrFail($productId);
+       
         return view('backend.dashboard.layout', compact('product', 'template'));
     }
 
@@ -68,9 +68,6 @@ class ProductVariantController extends Controller
     }
 
 
-    /**
-     * Hiển thị form chỉnh sửa biến thể.
-     */
     public function edit(Product $product, ProductVariant $variant)
     {
         return view('backend.dashboard.layout', [
@@ -80,9 +77,6 @@ class ProductVariantController extends Controller
         ]);
     }
 
-    /**
-     * Cập nhật biến thể.
-     */
     public function update(Request $request, Product $product, ProductVariant $variant)
 {
     $request->validate([
@@ -95,7 +89,6 @@ class ProductVariantController extends Controller
         'attributes' => 'required|array',
     ]);
 
-    // Kiểm tra nếu có file mới thì xóa file cũ
     if ($request->hasFile('thumbnail')) {
         if ($variant->thumbnail) {
             Storage::disk('public')->delete($variant->thumbnail);
@@ -120,9 +113,6 @@ class ProductVariantController extends Controller
 }
 
 
-    /**
-     * Xóa biến thể.
-     */
     public function destroy(Product $product, ProductVariant $variant)
 {
     if ($variant->thumbnail) {

@@ -25,80 +25,47 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Thông tin biến thể</h5>
-                        <form action="{{ route('variants.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('variants.store', ['product' => $product->id]) }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
-                            <!-- Sản phẩm cha -->
-                            <div class="row mb-3">
-                                <label for="product_id" class="col-sm-2 col-form-label">Sản phẩm</label>
-                                <div class="col-sm-10">
-                                    <select class="form-select" id="product_id" name="product_id" required>
-                                        <option value="">Chọn sản phẩm</option>
-                                        @foreach ($products as $product)
-                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                        @endforeach
-                                    </select>
+                            <div id="variants">
+                                <div class="variant mb-4">
+                                    <div class="row mb-3">
+                                        <label for="variants[0][sku]" class="col-sm-2 col-form-label">SKU Biến thể</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="variants[0][sku]" required>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="variants[0][price]" class="col-sm-2 col-form-label">Giá Biến thể</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control" name="variants[0][price]" required>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="variants[0][quantity]" class="col-sm-2 col-form-label">Số lượng Biến thể</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control" name="variants[0][quantity]" required>
+                                        </div>
+                                    </div>
+                                    {{-- <div class="row mb-3">
+                                        <label for="variants[0][attributes]" class="col-sm-2 col-form-label">Thuộc tính</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-select" name="variants[0][attributes][]" multiple required>
+                                                @foreach ($attributes as $attribute)
+                                                    <optgroup label="{{ $attribute->name }}">
+                                                        @foreach ($attribute->attributeValues as $value)
+                                                            <option value="{{ $value->id }}">{{ $value->value }}</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div> --}}
                                 </div>
                             </div>
-
-                            <!-- Màu sắc -->
-                            <div class="row mb-3">
-                                <label for="color" class="col-sm-2 col-form-label">Màu sắc</label>
-                                <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="color" name="color" required>
-                                </div>
-                            </div>
-
-                            <!-- Kích thước -->
-                            <div class="row mb-3">
-                                <label for="size" class="col-sm-2 col-form-label">Kích thước</label>
-                                <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="size" name="size">
-                                </div>
-                            </div>
-
-                            <!-- Giá -->
-                            <div class="row mb-3">
-                                <label for="price" class="col-sm-2 col-form-label">Giá</label>
-                                <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="price" name="price" required>
-                                </div>
-                            </div>
-
-                            <!-- Số lượng -->
-                            <div class="row mb-3">
-                                <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
-                                <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="quantity" name="quantity" required>
-                                </div>
-                            </div>
-
-                            <!-- Trạng thái -->
-                            <div class="row mb-3">
-                                <label for="status" class="col-sm-2 col-form-label">Trạng thái</label>
-                                <div class="col-sm-10">
-                                    <select class="form-select" id="status" name="status" required>
-                                        <option value="1">Kích hoạt</option>
-                                        <option value="0">Vô hiệu hóa</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Ảnh biến thể -->
-                            <div class="row mb-3">
-                                <label for="image" class="col-sm-2 col-form-label">Ảnh biến thể</label>
-                                <div class="col-sm-10">
-                                    <input type="file" class="form-control" id="image" name="image">
-                                </div>
-                            </div>
-
-                            <!-- Nút Submit -->
-                            <div class="row mb-3">
-                                <div class="col-sm-10 offset-sm-2">
-                                    <button type="submit" class="btn btn-primary">Thêm biến thể</button>
-                                    <a href="{{ route('products.index') }}" class="btn btn-secondary">Hủy bỏ</a>
-                                </div>
-                            </div>
+                            <button type="submitsubmit" class="btn btn-secondary">Thêm biến thể</button>
+                        </div>
                         </form>
                     </div>
                 </div>

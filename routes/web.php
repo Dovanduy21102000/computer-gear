@@ -1,31 +1,31 @@
 <?php
 
-use App\Http\Controllers\AttributeController;
-use App\Http\Controllers\AttributeValueController;
+use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BlogController;
-use App\Http\Controllers\BrandController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\BannerController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\ContactClientController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\CouponController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\MOMOController;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\ProductClientController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProductVariantController;
-use App\Http\Controllers\VNPayController;
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Client\BlogController;
+use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Client\CartController;
+use App\Http\Controllers\Client\CheckoutController;
+use App\Http\Controllers\Client\ContactClientController;
+use App\Http\Controllers\Admin\ContactController;
+use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\MOMOController;
+use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Client\ProductClientController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ProductVariantController;
+use App\Http\Controllers\Client\VNPayController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
@@ -104,7 +104,7 @@ Route::middleware(['web'])->group(function () {
 
     Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
     Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
-    Route::get('/products/category/{categorySlug}', [ProductClientController::class, 'showByCategory'])->name('client.products.category');
+    Route::get('/products/category/{categorySlug}', [ProductClientController::class, 'categoryProducts'])->name('client.products.category');
 
 
     
@@ -113,7 +113,7 @@ Route::middleware(['web'])->group(function () {
 
 
     
-    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
 });
 
 Route::get('/api/districts/{province_id}', function ($province_id) {
