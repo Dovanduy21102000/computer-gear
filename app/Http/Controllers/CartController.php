@@ -95,10 +95,15 @@ class CartController extends Controller
         return redirect()->back()->with('error', 'Item not found.');
     }
 
+    public function bulkDelete(Request $request)
+    {
+        if ($request->selected_items) {
+            CartItem::whereIn('id', $request->selected_items)->delete();
+            return redirect()->back()->with('success', 'Selected items removed from cart.');
+        }
 
-
-
-
+        return redirect()->back()->with('error', 'No items selected.');
+    }
     // Clear Cart
     public function clear()
     {

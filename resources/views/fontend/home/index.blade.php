@@ -283,7 +283,7 @@
                                                                     alt="Image Description"></a>
                                                         </div>
                                                         <div class="mb-2"><a
-                                                                href="https://transvelo.github.io/electro-html/2.0/html/shop/product-categories-7-column-full-width.html"
+                                                                href="{{ route('client.products.brand', ['brandSlug' => $topViewedProduct->brand->slug]) }}"
                                                                 class="font-size-12 text-gray-5">{{ $topViewedProduct->brand ? $topViewedProduct->brand->name : 'Không có thương hiệu' }}</a>
                                                         </div>
                                                         <h5 class="mb-4 product-item__title"><a
@@ -491,7 +491,7 @@
                                             <div class="product-item__inner px-xl-4 p-3">
                                                 <div class="product-item__body pb-xl-2">
                                                     <div class="mb-2"><a
-                                                            href="https://transvelo.github.io/electro-html/2.0/html/shop/product-categories-7-column-full-width.html"
+                                                            href="{{ route('client.products.brand', ['brandSlug' => $topViewedProduct->brand->slug]) }}"
                                                             class="font-size-12 text-gray-5">{{ $topViewedProduct->brand ? $topViewedProduct->brand->name : 'Không có thương hiệu' }}</a>
                                                     </div>
                                                     <h5 class="mb-1 product-item__title"><a
@@ -571,7 +571,7 @@
                                             <div class="product-item__inner px-xl-4 p-3">
                                                 <div class="product-item__body pb-xl-2">
                                                     <div class="mb-2"><a
-                                                            href="https://transvelo.github.io/electro-html/2.0/html/shop/product-categories-7-column-full-width.html"
+                                                            href="{{ route('client.products.brand', ['brandSlug' => $discountedProduct->brand->slug]) }}"
                                                             class="font-size-12 text-gray-5">{{ $discountedProduct->brand ? $discountedProduct->brand->name : 'Không có thương hiệu' }}</a>
                                                     </div>
                                                     <h5 class="mb-1 product-item__title"><a
@@ -693,7 +693,7 @@
                                                         class="col col-xl-7 col-wd product-item__body pl-2 pl-lg-3 pl-xl-0 pl-wd-3 mr-wd-1">
                                                         <div class="mb-4 mb-xl-2 mb-wd-4">
                                                             <div class="mb-2"><a
-                                                                    href="https://transvelo.github.io/electro-html/2.0/html/shop/product-categories-7-column-full-width.html"
+                                                                    href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
                                                                     class="font-size-12 text-gray-5">{{ $topSellingProduct->brand ? $topSellingProduct->brand->name : 'Không có thương hiệu' }}</a>
                                                             </div>
                                                             <h5 class="product-item__title"><a
@@ -776,7 +776,7 @@
                                                         class="col col-xl-7 col-wd product-item__body pl-2 pl-lg-3 pl-xl-0 pl-wd-3 mr-wd-1">
                                                         <div class="mb-4 mb-xl-2 mb-wd-4">
                                                             <div class="mb-2"><a
-                                                                    href="https://transvelo.github.io/electro-html/2.0/html/shop/product-categories-7-column-full-width.html"
+                                                                    href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
                                                                     class="font-size-12 text-gray-5">{{ $topSellingProduct->brand ? $topSellingProduct->brand->name : 'Không có thương hiệu' }}</a>
                                                             </div>
                                                             <h5 class="product-item__title"><a
@@ -849,7 +849,7 @@
                                                         class="col col-xl-7 col-wd product-item__body pl-2 pl-lg-3 pl-xl-0 pl-wd-3 mr-wd-1">
                                                         <div class="mb-4 mb-xl-2 mb-wd-4">
                                                             <div class="mb-2"><a
-                                                                    href="https://transvelo.github.io/electro-html/2.0/html/shop/product-categories-7-column-full-width.html"
+                                                                    href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
                                                                     class="font-size-12 text-gray-5">{{ $topSellingProduct->brand ? $topSellingProduct->brand->name : 'Không có thương hiệu' }}</a>
                                                             </div>
                                                             <h5 class="product-item__title"><a
@@ -928,7 +928,7 @@
                                             <div class="product-item__inner px-xl-4 p-3">
                                                 <div class="product-item__body pb-xl-2">
                                                     <div class="mb-2"><a
-                                                            href="https://transvelo.github.io/electro-html/2.0/html/shop/product-categories-7-column-full-width.html"
+                                                            href="{{ route('client.products.category', ['categorySlug' => $product->category->slug]) }}"
                                                             class="font-size-12 text-gray-5">{{ $product->category ? $product->category->name : 'Không có danh mục' }}</a>
                                                     </div>
                                                     <h5 class="mb-1 product-item__title"><a
@@ -1059,7 +1059,7 @@
                                         <div class="product-item__inner px-wd-4 p-2 p-md-3">
                                             <div class="product-item__body pb-xl-2">
                                                 <div class="mb-2"><a
-                                                        href="https://transvelo.github.io/electro-html/2.0/html/shop/product-categories-7-column-full-width.html"
+                                                        href="{{ route('client.products.category', ['categorySlug' => $keyboardMouseProduct->category->slug]) }}"
                                                         class="font-size-12 text-gray-5">{{ $keyboardMouseProduct->category ? $keyboardMouseProduct->category->name : 'Không có danh mục' }}</a>
                                                 </div>
                                                 <h5 class="mb-1 product-item__title"><a

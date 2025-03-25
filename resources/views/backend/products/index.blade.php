@@ -3,7 +3,7 @@
         <h1>Danh sách sản phẩm</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
                 <li class="breadcrumb-item active">Quản lý sản phẩm</li>
             </ol>
         </nav>
@@ -35,6 +35,7 @@
                                             <th class="text-center">Thương hiệu</th>
                                             <th class="text-center">Giá</th>
                                             <th class="text-center">Số lượng</th>
+                                            <th class="text-center">Biến thể</th>
                                             <th class="text-center">Trạng thái</th>
                                             <th class="text-center">Hành động</th>
                                         </tr>
@@ -56,6 +57,16 @@
                                                 <td class="text-end">{{ number_format($product->price, 0, ',', '.') }}
                                                     VNĐ</td>
                                                 <td class="text-center">{{ $product->quantity }}</td>
+                                                <td class="text-center">
+                                                    @if ($product->is_variant)
+                                                        <span class="badge bg-info">{{ $product->variants->count() }} biến thể</span>
+                                                        <a href="{{ route('variants.index', $product->id) }}" class="btn btn-info btn-sm mt-1">
+                                                            <i class="fa fa-list"></i>
+                                                        </a>
+                                                    @else
+                                                        <span class="badge bg-secondary">Không có biến thể</span>
+                                                    @endif
+                                                </td>
                                                 <td class="text-center">
                                                     @if ($product->status == 1)
                                                         <span class="badge bg-success">Kích hoạt</span>

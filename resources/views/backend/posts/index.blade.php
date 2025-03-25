@@ -48,7 +48,8 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="text-truncate" title="{{ $categories->firstWhere('id', $item->category_id)->name ?? 'Không có' }}">
+                                                <div class="text-truncate"
+                                                    title="{{ $categories->firstWhere('id', $item->category_id)->name ?? 'Không có' }}">
                                                     {{ Str::limit($categories->firstWhere('id', $item->category_id)->name ?? 'Không có', 20, '...') }}
                                                 </div>
                                             </td>
@@ -64,16 +65,20 @@
                                                 </span>
                                             </td>
                                             <td class="text-nowrap">
-                                                 <a href="{{ route($urlBase . 'show', $item) }}" class="btn btn-success btn-sm">
+                                                <a href="{{ route($urlBase . 'show', $item) }}"
+                                                    class="btn btn-success btn-sm">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route($urlBase . 'edit', $item) }}" class="btn btn-warning btn-sm">
+                                                <a href="{{ route($urlBase . 'edit', $item) }}"
+                                                    class="btn btn-warning btn-sm">
                                                     <i class="fa fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route($urlBase . 'destroy', $item) }}" method="post" style="display: inline-block;">
+                                                <form action="{{ route($urlBase . 'destroy', $item) }}" method="post"
+                                                    style="display: inline-block;">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xoá?');">
+                                                    <button class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Bạn có chắc muốn xoá?');">
                                                         <i class="fa fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -99,9 +104,9 @@
 
 <!-- Tooltip Script -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
+        tooltipTriggerList.map(function(tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     });

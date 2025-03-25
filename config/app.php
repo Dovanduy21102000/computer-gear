@@ -212,4 +212,6 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
+    'VNP_RETURN_URL' => env('APP_URL') . 'vnpay/return',
+    'VNP_IPN_URL' => env('APP_URL') . 'vnpay/ipn',
 ];

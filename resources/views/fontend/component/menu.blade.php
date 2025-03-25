@@ -522,22 +522,10 @@
 
                              <!-- About us -->
                              <li class="nav-item u-header__nav-item">
-                                 <a class="nav-link u-header__nav-link" href="about.html">Về chúng tôi</a>
+                                 <a class="nav-link u-header__nav-link" href="{{ route('client.contacts.index') }}">Liên hệ</a>
                              </li>
                              <!-- End About us -->
 
-                             <!-- FAQs -->
-                             <li class="nav-item u-header__nav-item">
-                                 <a class="nav-link u-header__nav-link" href="faq.html">Câu hỏi thường gặp</a>
-                             </li>
-                             <!-- End FAQs -->
-
-                             <!-- Contact Us -->
-                             <li class="nav-item u-header__nav-item">
-                                 <a class="nav-link u-header__nav-link" href="contact-v1.html">Liên hệ với chúng
-                                     tôi</a>
-                             </li>
-                             <!-- End Contact Us -->
                          </ul>
                      </div>
                      <!-- End Navigation -->

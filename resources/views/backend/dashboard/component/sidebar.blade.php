@@ -5,9 +5,10 @@
 
         <li class="nav-item">
             <a class="nav-link collapsed" href="{{ route('dashboard.index') }}">
-                <i class="bi bi-bar-chart"></i>
-                <span>Thống kê</span>
-            </a>
+                <a class="nav-link " href="{{ route('dashboard.index') }}">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Thống kê</span>
+                </a>
         </li>
         <li class="nav-item">
             <a class="nav-link collapsed" href="{{ route('coupons.index') }}">
@@ -26,11 +27,43 @@
                 <span>Quản lý thành viên</span>
             </a>
         </li>
+
         <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ route('posts.index') }}">
+            <a class="nav-link collapsed" href="{{ route('contacts.index') }}">
+                <i class="bi bi-envelope"></i>
+                <span>Quản lý liên hệ</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ route('brands.index') }}">
+                <i class="bi bi-badge-tm"></i>
+                <span>Quản lý thương hiệu</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ route('banners.index') }}">
+                <i class="bi bi-chat-left-text"></i>
+                <span>Quản lý bình luận</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-toggle="collapse" href="#post-management" aria-expanded="false">
                 <i class="bi bi-file-earmark-text"></i>
                 <span>Quản lý bài viết</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
             </a>
+            <ul id="post-management" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="{{ route('posts.index') }}">
+                        <i class="bi bi-circle"></i><span>Danh sách bài viết</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('category_post.index') }}">
+                        <i class="bi bi-circle"></i><span>Quản lý danh mục bài viết</span>
+                    </a>
+                </li>
+            </ul>
         </li>
         <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#orders-nav" data-bs-toggle="collapse" href="#">
@@ -67,6 +100,7 @@
                 </li>
             </ul>
         </li>
+
         <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#attributes-nav" data-bs-toggle="collapse" href="#"
                 aria-expanded="true">
@@ -85,18 +119,6 @@
                     </a>
                 </li>
             </ul>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ route('brands.index') }}">
-                <i class="bi bi-badge-tm"></i>
-                <span>Quản lý thương hiệu</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ route('banners.index') }}">
-                <i class="bi bi-chat-left-text"></i>
-                <span>Quản lý bình luận</span>
-            </a>
         </li>
     </ul>
 </aside><!-- End Sidebar-->

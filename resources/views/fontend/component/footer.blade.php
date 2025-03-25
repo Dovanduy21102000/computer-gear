@@ -261,9 +261,20 @@
                  <!-- End Toggle Button -->
 
                  <!-- Content -->
-                 <div class="js-scrollbar u-sidebar__body">
+                 <div class="js-scrollbar u-sidebar__body" id="footer">
+                     @if ($errors->any())
+                         <div class="alert alert-danger">
+                             <ul>
+                                 @foreach ($errors->all() as $error)
+                                     <li>{{ $error }}</li>
+                                 @endforeach
+                             </ul>
+                         </div>
+                     @endif
                      <div class="u-sidebar__content u-header-sidebar__content">
-                         <form class="js-validate">
+                         <form class="js-validate" method="POST" action="{{ route('login') }}" id="loginForm"
+                             style="display: none;">
+                             @csrf
                              <!-- Login -->
                              <div id="login" data-target-group="idForm">
                                  <!-- Title -->
@@ -275,7 +286,7 @@
 
                                  <!-- Form Group -->
                                  <div class="form-group">
-                                     <div class="js-form-message js-focus-state">
+                                     <div class="">
                                          <label class="sr-only" for="signinEmail">Email</label>
                                          <div class="input-group">
                                              <div class="input-group-prepend">
@@ -284,14 +295,10 @@
                                                  </span>
                                              </div>
                                              <input type="email" class="form-control" name="email"
-                                                 id="signinEmail" placeholder="Email" aria-label="Email"
-                                                 aria-describedby="signinEmailLabel" required
-                                                 data-msg="Please enter a valid email address."
-                                                 data-error-class="u-has-error" data-success-class="u-has-success">
+                                                 placeholder="email" required>
                                          </div>
                                      </div>
                                  </div>
-                                 <!-- End Form Group -->
 
                                  <!-- Form Group -->
                                  <div class="form-group">
@@ -304,14 +311,10 @@
                                                  </span>
                                              </div>
                                              <input type="password" class="form-control" name="password"
-                                                 id="signinPassword" placeholder="Password" aria-label="Password"
-                                                 aria-describedby="signinPasswordLabel" required
-                                                 data-msg="Your password is invalid. Please try again."
-                                                 data-error-class="u-has-error" data-success-class="u-has-success">
+                                                 placeholder="Password" required>
                                          </div>
                                      </div>
                                  </div>
-                                 <!-- End Form Group -->
 
                                  <div class="d-flex justify-content-end mb-4">
                                      <a class="js-animation-link small link-muted" href="javascript:;"
@@ -327,180 +330,155 @@
                                  <div class="text-center mb-4">
                                      <span class="small text-muted">Do not have an account?</span>
                                      <a class="js-animation-link small text-dark" href="javascript:;"
-                                         data-target="#signup" data-link-group="idForm"
-                                         data-animation-in="slideInUp">Signup
-                                     </a>
+                                         data-target="#signup" data-link-group="idForm" data-animation-in="slideInUp"
+                                         onclick="toggleForm('signup')">Signup</a>
                                  </div>
 
-                                 <div class="text-center">
-                                     <span class="u-divider u-divider--xs u-divider--text mb-4">OR</span>
-                                 </div>
-
-                                 <!-- Login Buttons -->
-                                 <div class="d-flex">
-                                     <a class="btn btn-block btn-sm btn-soft-facebook transition-3d-hover mr-1"
-                                         href="#">
-                                         <span class="fab fa-facebook-square mr-1"></span>
-                                         Facebook
-                                     </a>
-                                     <a class="btn btn-block btn-sm btn-soft-google transition-3d-hover ml-1 mt-0"
-                                         href="#">
-                                         <span class="fab fa-google mr-1"></span>
-                                         Google
-                                     </a>
-                                 </div>
-                                 <!-- End Login Buttons -->
+                                 {{-- <div class="text-center">
+                                    <span class="u-divider u-divider--xs u-divider--text mb-4">OR</span>
+                                </div>
+                
+                                <!-- Login Buttons -->
+                                <div class="d-flex">
+                                    <a class="btn btn-block btn-sm btn-soft-facebook transition-3d-hover mr-1" href="#">
+                                        <span class="fab fa-facebook-square mr-1"></span> Facebook
+                                    </a>
+                                    <a class="btn btn-block btn-sm btn-soft-google transition-3d-hover ml-1 mt-0" href="#">
+                                        <span class="fab fa-google mr-1"></span> Google
+                                    </a>
+                                </div> --}}
                              </div>
-
-                             <!-- Signup -->
-                             <div id="signup" style="display: none; opacity: 0;" data-target-group="idForm">
-                                 <!-- Title -->
-                                 <header class="text-center mb-7">
-                                     <h2 class="h4 mb-0">Welcome to Electro.</h2>
-                                     <p>Fill out the form to get started.</p>
-                                 </header>
-                                 <!-- End Title -->
-
-                                 <!-- Form Group -->
-                                 <div class="form-group">
-                                     <div class="js-form-message js-focus-state">
-                                         <label class="sr-only" for="signupEmail">Email</label>
-                                         <div class="input-group">
-                                             <div class="input-group-prepend">
-                                                 <span class="input-group-text" id="signupEmailLabel">
-                                                     <span class="fas fa-user"></span>
-                                                 </span>
-                                             </div>
-                                             <input type="email" class="form-control" name="email"
-                                                 id="signupEmail" placeholder="Email" aria-label="Email"
-                                                 aria-describedby="signupEmailLabel" required
-                                                 data-msg="Please enter a valid email address."
-                                                 data-error-class="u-has-error" data-success-class="u-has-success">
-                                         </div>
-                                     </div>
-                                 </div>
-                                 <!-- End Input -->
-
-                                 <!-- Form Group -->
-                                 <div class="form-group">
-                                     <div class="js-form-message js-focus-state">
-                                         <label class="sr-only" for="signupPassword">Password</label>
-                                         <div class="input-group">
-                                             <div class="input-group-prepend">
-                                                 <span class="input-group-text" id="signupPasswordLabel">
-                                                     <span class="fas fa-lock"></span>
-                                                 </span>
-                                             </div>
-                                             <input type="password" class="form-control" name="password"
-                                                 id="signupPassword" placeholder="Password" aria-label="Password"
-                                                 aria-describedby="signupPasswordLabel" required
-                                                 data-msg="Your password is invalid. Please try again."
-                                                 data-error-class="u-has-error" data-success-class="u-has-success">
-                                         </div>
-                                     </div>
-                                 </div>
-                                 <!-- End Input -->
-
-                                 <!-- Form Group -->
-                                 <div class="form-group">
-                                     <div class="js-form-message js-focus-state">
-                                         <label class="sr-only" for="signupConfirmPassword">Confirm Password</label>
-                                         <div class="input-group">
-                                             <div class="input-group-prepend">
-                                                 <span class="input-group-text" id="signupConfirmPasswordLabel">
-                                                     <span class="fas fa-key"></span>
-                                                 </span>
-                                             </div>
-                                             <input type="password" class="form-control" name="confirmPassword"
-                                                 id="signupConfirmPassword" placeholder="Confirm Password"
-                                                 aria-label="Confirm Password"
-                                                 aria-describedby="signupConfirmPasswordLabel" required
-                                                 data-msg="Password does not match the confirm password."
-                                                 data-error-class="u-has-error" data-success-class="u-has-success">
-                                         </div>
-                                     </div>
-                                 </div>
-                                 <!-- End Input -->
-
-                                 <div class="mb-2">
-                                     <button type="submit"
-                                         class="btn btn-block btn-sm btn-primary transition-3d-hover">Get
-                                         Started</button>
-                                 </div>
-
-                                 <div class="text-center mb-4">
-                                     <span class="small text-muted">Already have an account?</span>
-                                     <a class="js-animation-link small text-dark" href="javascript:;"
-                                         data-target="#login" data-link-group="idForm"
-                                         data-animation-in="slideInUp">Login
-                                     </a>
-                                 </div>
-
-                                 <div class="text-center">
-                                     <span class="u-divider u-divider--xs u-divider--text mb-4">OR</span>
-                                 </div>
-
-                                 <!-- Login Buttons -->
-                                 <div class="d-flex">
-                                     <a class="btn btn-block btn-sm btn-soft-facebook transition-3d-hover mr-1"
-                                         href="#">
-                                         <span class="fab fa-facebook-square mr-1"></span>
-                                         Facebook
-                                     </a>
-                                     <a class="btn btn-block btn-sm btn-soft-google transition-3d-hover ml-1 mt-0"
-                                         href="#">
-                                         <span class="fab fa-google mr-1"></span>
-                                         Google
-                                     </a>
-                                 </div>
-                                 <!-- End Login Buttons -->
-                             </div>
-                             <!-- End Signup -->
-
-                             <!-- Forgot Password -->
-                             <div id="forgotPassword" style="display: none; opacity: 0;" data-target-group="idForm">
-                                 <!-- Title -->
-                                 <header class="text-center mb-7">
-                                     <h2 class="h4 mb-0">Recover Password.</h2>
-                                     <p>Enter your email address and an email with instructions will be sent to you.</p>
-                                 </header>
-                                 <!-- End Title -->
-
-                                 <!-- Form Group -->
-                                 <div class="form-group">
-                                     <div class="js-form-message js-focus-state">
-                                         <label class="sr-only" for="recoverEmail">Your email</label>
-                                         <div class="input-group">
-                                             <div class="input-group-prepend">
-                                                 <span class="input-group-text" id="recoverEmailLabel">
-                                                     <span class="fas fa-user"></span>
-                                                 </span>
-                                             </div>
-                                             <input type="email" class="form-control" name="email"
-                                                 id="recoverEmail" placeholder="Your email" aria-label="Your email"
-                                                 aria-describedby="recoverEmailLabel" required
-                                                 data-msg="Please enter a valid email address."
-                                                 data-error-class="u-has-error" data-success-class="u-has-success">
-                                         </div>
-                                     </div>
-                                 </div>
-                                 <!-- End Form Group -->
-
-                                 <div class="mb-2">
-                                     <button type="submit"
-                                         class="btn btn-block btn-sm btn-primary transition-3d-hover">Recover
-                                         Password</button>
-                                 </div>
-
-                                 <div class="text-center mb-4">
-                                     <span class="small text-muted">Remember your password?</span>
-                                     <a class="js-animation-link small" href="javascript:;" data-target="#login"
-                                         data-link-group="idForm" data-animation-in="slideInUp">Login
-                                     </a>
-                                 </div>
-                             </div>
-                             <!-- End Forgot Password -->
                          </form>
+
+                         <!-- Form Đăng Ký -->
+                         <form method="POST" action="{{ route('register') }}" id="signupForm"
+                             style="display: none;">
+                             @csrf
+                             <!-- Title -->
+                             <header class="text-center mb-7">
+                                 <h2 class="h4 mb-0">Welcome to Electro.</h2>
+                                 <p>Fill out the form to get started.</p>
+                             </header>
+                             <!-- Form Group for name -->
+                             <div class="form-group">
+                                 <div class="js-form-message js-focus-state">
+                                     <label class="sr-only" for="signupName">Name</label>
+                                     <div class="input-group">
+                                         <div class="input-group-prepend">
+                                             <span class="input-group-text" id="signupNameLabel">
+                                                 <!-- Ví dụ có icon cho name, bạn có thể tùy chỉnh -->
+                                                 <span class="fas fa-user"></span>
+                                             </span>
+                                         </div>
+                                         <input type="text" class="form-control" name="name" id="signupName"
+                                             placeholder="Name" required>
+                                     </div>
+                                 </div>
+                             </div>
+
+                             <!-- Form Group for Email -->
+                             <div class="form-group">
+                                 <div class="js-form-message js-focus-state">
+                                     <label class="sr-only" for="signupEmail">Email</label>
+                                     <div class="input-group">
+                                         <div class="input-group-prepend">
+                                             <span class="input-group-text" id="signupEmailLabel">
+                                                 <span class="fas fa-user"></span>
+                                             </span>
+                                         </div>
+                                         <input type="email" class="form-control" name="email" id="signupEmail"
+                                             placeholder="Email" required>
+                                     </div>
+                                 </div>
+                             </div>
+
+                             <!-- Form Group for Password -->
+                             <div class="form-group">
+                                 <div class="js-form-message js-focus-state">
+                                     <label class="sr-only" for="signupPassword">Password</label>
+                                     <div class="input-group">
+                                         <div class="input-group-prepend">
+                                             <span class="input-group-text" id="signupPasswordLabel">
+                                                 <span class="fas fa-lock"></span>
+                                             </span>
+                                         </div>
+                                         <input type="password" class="form-control" name="password"
+                                             id="signupPassword" placeholder="Password" required>
+                                     </div>
+                                 </div>
+                             </div>
+
+                             <!-- Form Group for Confirm Password -->
+                             <div class="form-group">
+                                 <div class="js-form-message js-focus-state">
+                                     <label class="sr-only" for="signupConfirmPassword">Confirm Password</label>
+                                     <div class="input-group">
+                                         <div class="input-group-prepend">
+                                             <span class="input-group-text" id="signupConfirmPasswordLabel">
+                                                 <span class="fas fa-key"></span>
+                                             </span>
+                                         </div>
+                                         <input type="password" class="form-control" name="password_confirmation"
+                                             id="signupConfirmPassword" placeholder="Confirm Password" required>
+                                     </div>
+                                 </div>
+                             </div>
+
+                             <div class="mb-2">
+                                 <button type="submit"
+                                     class="btn btn-block btn-sm btn-primary transition-3d-hover">Get Started</button>
+                             </div>
+
+                             <div class="text-center mb-4">
+                                 <span class="small text-muted">Already have an account?</span>
+                                 <a class="js-animation-link small text-dark" href="javascript:;"
+                                     data-target="#login" data-link-group="idForm" data-animation-in="slideInUp"
+                                     onclick="toggleForm('login')">Login</a>
+                             </div>
+
+                             {{-- <div class="text-center">
+                                <span class="u-divider u-divider--xs u-divider--text mb-4">OR</span>
+                            </div>
+                
+                            <!-- Login Buttons -->
+                            <div class="d-flex">
+                                <a class="btn btn-block btn-sm btn-soft-facebook transition-3d-hover mr-1" href="#">
+                                    <span class="fab fa-facebook-square mr-1"></span> Facebook
+                                </a>
+                                <a class="btn btn-block btn-sm btn-soft-google transition-3d-hover ml-1 mt-0" href="#">
+                                    <span class="fab fa-google mr-1"></span> Google
+                                </a>
+                            </div> --}}
+                         </form>
+
+                         <!-- Form Forgot Password -->
+                         {{-- <div id="forgotPassword" style="display: none; opacity: 0;" data-target-group="idForm">
+                            <!-- Title -->
+                            <header class="text-center mb-7">
+                                <h2 class="h4 mb-0">Recover Password.</h2>
+                                <p>Enter your email address and an email with instructions will be sent to you.</p>
+                            </header>
+                            <!-- End Title -->
+                          
+                            <!-- Form Group -->
+                            <div class="form-group">
+                                <div class="js-form-message js-focus-state">
+                                    <label class="sr-only" for="recoverEmail">Your email</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="recoverEmailLabel">
+                                                <span class="fas fa-user"></span>
+                                            </span>
+                                        </div>
+                                        <input type="email" class="form-control" name="email"
+                                            id="recoverEmail" placeholder="Your email" aria-label="Your email"
+                                            aria-describedby="recoverEmailLabel" required
+                                            data-msg="Please enter a valid email address."
+                                            data-error-class="u-has-error" data-success-class="u-has-success">
+                                    </div>
+                                </div>
+                            </div> --}}
+                         <!-- End Form Group -->
                      </div>
                  </div>
                  <!-- End Content -->
@@ -508,5 +486,17 @@
          </div>
      </div>
  </aside>
- <!-- End Account Sidebar Navigation -->
+
+ <script>
+     function toggleForm(formType) {
+         if (formType === 'signup') {
+             document.getElementById('loginForm').style.display = 'none'; // Ẩn form đăng nhập
+             document.getElementById('signupForm').style.display = 'block'; // Hiện form đăng ký
+         } else if (formType === 'login') {
+             document.getElementById('signupForm').style.display = 'none'; // Ẩn form đăng ký
+             document.getElementById('loginForm').style.display = 'block'; // Hiện form đăng nhập
+         }
+     }
+ </script>
+ <!-- End Account Sidebar Navigation  đây là form đăng ký đăng nhập của phần content footer.blade -->
  <!-- ========== END SECONDARY CONTENTS ========== -->
