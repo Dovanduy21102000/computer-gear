@@ -38,30 +38,50 @@ class CategoryPostController extends BaseCRUDController
         return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'urlBase'));
     }
 
-    public function create()
-    {
-        $category_post = CategoryPost::all();
-        $title      = $this->titleCreate;
-        $urlBase    = $this->urlBase;
-
-        $template = 'backend.category_post.add';
-        return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'category_post'));
+    public function validateStore(Request $request)
+{
+    if (!$request->slug) {
+        $request->merge(['slug' => Str::slug($request->name)]);
     }
 
-    public function edit($id)
-    {
-        $category_post    = CategoryPost::all();
-        $category      = $this->model::findOrFail($id);
-        $title         = $this->titleCreate;
-        $urlBase       = $this->urlBase;
+    // Kiểm tra parent_id có tồn tại trong bảng 'category_post' không
+    return $request->validate([
+        'name' => 'required|string|max:255',
+        'slug' => 'nullable|string|unique:category_post,slug', // sửa bảng đúng
+        'parent_id' => 'nullable|exists:category_post,id', // sửa bảng đúng
+        'is_active' => 'nullable|boolean',
+    ], [
+        'name.required' => 'Tên danh mục là bắt buộc.',
+        'slug.unique' => 'Slug đã tồn tại, vui lòng chọn slug khác.',
+        'parent_id.exists' => 'Danh mục cha không hợp lệ.', // sửa lại thông báo nếu cần
+    ]);
+}
 
-        $template = 'backend.category_post.edit';
-        return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'category_post', 'category'));
-    }
+public function create()
+{
+    // Lấy danh mục cha
+    $category_post = CategoryPost::whereNull('parent_id')->get(); // Lấy danh mục không có parent
+    $title      = $this->titleCreate;
+    $urlBase    = $this->urlBase;
 
+    $template = 'backend.category_post.add';
+    return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'category_post'));
+}
+
+public function edit($id)
+{
+    // Lấy danh mục cha
+    $category_post = CategoryPost::whereNull('parent_id')->get();
+    $category      = $this->model::findOrFail($id);
+    $title         = $this->titleEdit;
+    $urlBase       = $this->urlBase;
+
+    $template = 'backend.category_post.edit';
+    return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'category_post', 'category'));
+}
     public function show($id)
     {
-        $category_post    = CategoryPost::all();
+        $category_post = CategoryPost::whereNull('parent_id')->get();
         $category      = $this->model::findOrFail($id);
         $urlBase       = $this->urlBase;
 
@@ -69,21 +89,5 @@ class CategoryPostController extends BaseCRUDController
         return view('backend.dashboard.layout', compact('template', 'urlBase', 'category_post', 'category'));
     }
 
-    protected function validateStore(Request $request)
-    {
-        if (!$request->slug) {
-            $request->merge(['slug' => Str::slug($request->name)]);
-        }
-
-        return $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|unique:categories,slug',
-            'parent_id' => 'nullable|exists:categories,id',
-            'is_active' => 'nullable|boolean',
-        ], [
-            'name.required' => 'Tên danh mục là bắt buộc.',
-            'slug.unique' => 'Slug đã tồn tại, vui lòng chọn slug khác.',
-            'parent_id.exists' => 'Danh mục cha không hợp lệ.',
-        ]);
-    }
+    
 }
