@@ -12,6 +12,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryPostController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactClientController;
 use App\Http\Controllers\ContactController;
@@ -53,8 +54,9 @@ Route::prefix('admin')->group(function () {
             'users'             => UserController::class,
             'orders'            => OrderController::class,
             'contacts'          => ContactController::class,
-        'productvariants'   => ProductVariantController::class
- 
+            'productvariants'   => ProductVariantController::class,
+            'category_post'     => CategoryPostController::class,
+
         ];
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
@@ -136,9 +138,19 @@ Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 
 Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
 Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
 =======
 
 
 >>>>>>> Stashed changes
+=======
+
+
+Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
+
+
+
+
+>>>>>>> hien-category_post
