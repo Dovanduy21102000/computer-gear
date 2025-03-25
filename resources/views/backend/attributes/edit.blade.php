@@ -55,9 +55,15 @@
                             <!-- Submit Button -->
                             <div class="row mb-3">
                                 <div class="col-sm-10 offset-sm-2">
-                                    <button type="submit" class="btn btn-success">Cập nhật</button>
+                                    <button type="submit" class="btn btn-warning">Cập nhật</button>
                                 </div>
                             </div>
+                            <!-- Back Button -->
+                        <div class="row mb-3">
+                            <div class="col-sm-10 offset-sm-2">
+                                <a href="{{ route($urlBase . 'index') }}" class="btn btn-secondary">Quay lại</a>
+                            </div>
+                        </div>
 
                         </form><!-- End Edit Form -->
 

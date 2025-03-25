@@ -5,6 +5,7 @@
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                <li class="breadcrumb-item active">Quản lý bài viết</li>
                 <li class="breadcrumb-item active">Danh sách bài viết</li>
             </ol>
         </nav>
@@ -19,118 +20,71 @@
                         <h5 class="card-title">{{ $title }}</h5>
                         <a href="{{ route($urlBase . 'create') }}" class="btn btn-primary">Thêm mới</a>
 
-                        <!-- Table with stripped rows -->
-                        <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
-                            <div class="datatable-top">
-                                <div class="datatable-dropdown">
-                                    <label>
-                                        <select class="datatable-selector" name="per-page">
-                                            <option value="5">5</option>
-                                            <option value="10" selected="">10</option>
-                                            <option value="15">15</option>
-                                            <option value="-1">All</option>
-                                        </select> entries per page
-                                    </label>
-                                </div>
-                                <div class="datatable-search">
-                                    <input class="datatable-input" placeholder="Search..." type="search" name="search"
-                                        title="Search within table">
-                                </div>
-                            </div>
-                            <div class="datatable-container">
-                                <table class="table datatable datatable-table">
-                                    <thead>
-                                        <th>
-                                            @foreach ($columns as $col => $name)
-                                                <td>{{ $name }}</td>
-                                            @endforeach
+                        <!-- Table -->
+                        <div class="table-responsive">
+                            <table class="table datatable table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 15%;">Tiêu đề</th>
+                                        <th style="width: 10%;">Slug</th>
+                                        <th style="width: 10%;">Danh mục</th>
+                                        <th style="width: 20%;">Mô tả</th>
+                                        <th style="width: 10%;">Lượt xem</th>
+                                        <th style="width: 10%;">Trạng thái</th>
+                                        <th style="width: 15%;">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($data as $item)
+                                        <tr>
                                             <td>
-                                                Thao tác
+                                                <div class="text-truncate" title="{{ $item->title }}">
+                                                    {{ Str::limit($item->title, 30, '...') }}
+                                                </div>
                                             </td>
-                                        </th>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($data as $item)
-                                            <tr>
-                                                <td>
-                                                    <div class="category_id">
-                                                        {{ $categories->firstWhere('id', $item->category_id)->name ?? 'Không có' }}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="name"><span
-                                                            class="maintitle">{{ $item->title }}</span></div>
-                                                </td>
-                                                <td>
-                                                    <div class="slug">{{ $item->slug }}</div>
-                                                </td>
-                                                <td>
-                                                    <div class="image mr5">
-                                                        <img src="{{ $item->image ? asset('storage/' . $item->image) : asset('backend/img/mvc_logo.png') }}"
-                                                            alt="logo" width="100" height="100px">
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="description">{{ $item->description }}</div>
-                                                </td>
-
-                                                <td>
-                                                    <div class="content">{{ $item->content }}</div>
-                                                </td>
-
-                                                <td>
-                                                    <div class="status">
-                                                        {{ $item->status ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="is_hot">
-                                                        {{ $item->is_hot ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
-                                                    </div>
-                                                </td>
-
-                                                <td>
-                                                    <div class="view">{{ $item->view }}</div>
-                                                </td>
-                                                <td>
-                                                    <div class="created_at">{{ $item->created_at }}</div>
-                                                </td>
-                                                <td>
-                                                    <div class="updated_at">{{ $item->updated_at }}</div>
-                                                </td>
-
-                                                <td>
-                                                    <div class="deleted_at">{{ $item->deleted_at }}</div>
-                                                </td>
-
-                                                <td class="text-center text-nowrap" style="width: 1px;">
-                                                    <a href="{{ route($urlBase . 'edit', $item) }}"
-                                                        class="btn btn-warning">
-                                                        <i class="fa fa-edit"></i> Sửa
-                                                    </a>
-                                                    <a href="{{ route($urlBase . 'show', $item) }}"
-                                                        class="btn btn-info">
-                                                        <i class="fa fa-eye"></i> Xem
-                                                    </a>
-                                                    <form action="{{ route($urlBase . 'destroy', $item) }}"
-                                                        method="post" id="item-{{ $item->id }}"
-                                                        style="display: inline-block;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button class="btn btn-danger"
-                                                            onclick="return confirm('Bạn có chắc muốn xoá?');">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
-
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                            <td>
+                                                <div class="text-truncate" title="{{ $item->slug }}">
+                                                    {{ Str::limit($item->slug, 20, '...') }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="text-truncate" title="{{ $category_post->firstWhere('id', $item->category_post_id)->name ?? 'Không có' }}">
+                                                    {{ Str::limit($category_post->firstWhere('id', $item->category_post_id)->name ?? 'Không có', 20, '...') }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="text-truncate" title="{{ $item->description }}">
+                                                    {{ Str::limit($item->description, 50, '...') }}
+                                                </div>
+                                            </td>
+                                            <td>{{ $item->view }}</td>
+                                            <td>
+                                                <span class="badge {{ $item->status ? 'bg-success' : 'bg-danger' }}">
+                                                    {{ $item->status ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
+                                                </span>
+                                            </td>
+                                            <td class="text-nowrap">
+                                                 <a href="{{ route($urlBase . 'show', $item) }}" class="btn btn-success btn-sm">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route($urlBase . 'edit', $item) }}" class="btn btn-warning btn-sm">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
+                                                <form action="{{ route($urlBase . 'destroy', $item) }}" method="post" style="display: inline-block;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xoá?');">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
-                        <!-- End Table with stripped rows -->
+                        <!-- End Table -->
+
                         <div class="d-flex justify-content-center mt-2">
                             {{ $data->links() }}
                         </div>
@@ -142,3 +96,24 @@
     </section>
 
 </main>
+
+<!-- Tooltip Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+
+<!-- CSS -->
+<style>
+    .text-truncate {
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+</style>

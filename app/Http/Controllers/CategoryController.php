@@ -30,11 +30,10 @@ class CategoryController extends BaseCRUDController
 
     public function index()
     {
-        $data       = Category::paginate(5);
+        $data       = Category::with('parent')->paginate(5);
         $title      = $this->titleIndex;
         $columns    = $this->columns;
         $urlBase    = $this->urlBase;
-
         $template = 'backend.categories.index';
         return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'urlBase'));
     }

@@ -18,4 +18,8 @@ class Attribute extends Model
     public $attributes = [
         'status' => 1
     ];
+    public function attributeValues() {
+        return $this->hasMany(AttributeValue::class);
+    }
+    
 }

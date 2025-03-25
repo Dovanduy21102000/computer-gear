@@ -130,9 +130,15 @@ class BannerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(banner $banner)
+    public function destroy(Banner $banner)
     {
+        // Xóa ảnh nếu tồn tại
+        if (!empty($banner->image) && Storage::exists($banner->image)) {
+            Storage::delete($banner->image);
+        }
+    
         $banner->delete();
-        return redirect()->route('banners.index')->with('success', 'Banner đã được xóa!');
+        return redirect()->route('banners.index')->with('success', 'Banner đã được xóa cùng với ảnh!');
     }
+    
 }

@@ -1,12 +1,12 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Form Elements</h1>
+        <h1>Quản lý bài viết</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Forms</li>
-                <li class="breadcrumb-item active">Elements</li>
+                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                <li class="breadcrumb-item active">Quản lý bài viết</li>
+                <li class="breadcrumb-item active">Chỉnh sửa bài viết</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -51,19 +51,19 @@
 
                             <!-- Parent Category -->
                             <div class="row mb-3">
-                                <label for="category_id" class="col-sm-2 col-form-label">Danh mục</label>
+                                <label for="category_post_id" class="col-sm-2 col-form-label">Danh mục</label>
                                 <div class="col-sm-10">
-                                    <select class="form-control @error('category_id') is-invalid @enderror"
-                                        id="category_id" name="category_id">
+                                    <select class="form-control @error('category_post_id') is-invalid @enderror"
+                                        id="category_post_id" name="category_post_id">
                                         <option value="">-- Chọn danh mục --</option>
-                                        @foreach ($categories as $category)
+                                        @foreach ($category_post as $category)
                                             <option value="{{ $category->id }}"
-                                                {{ old('category_id', $post->category_id) == $category->id ? 'selected' : '' }}>
+                                                {{ old('category_post_id', $post->category_post_id) == $category->id ? 'selected' : '' }}>
                                                 {{ $category->name }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('category_id')
+                                    @error('category_post_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -360,7 +360,12 @@
                             <!-- Submit Button -->
                             <div class="row mb-3">
                                 <div class="col-sm-10 offset-sm-2">
-                                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                                    <button type="submit" class="btn btn-warning">Cập nhật</button>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-10 offset-sm-2">
+                                    <a href="{{ route($urlBase . 'index') }}" class="btn btn-secondary">Quay lại</a>
                                 </div>
                             </div>
 

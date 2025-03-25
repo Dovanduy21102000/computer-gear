@@ -1,12 +1,13 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Form Elements</h1>
+        <h1>Quản lý thuộc tính</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Forms</li>
-                <li class="breadcrumb-item active">Elements</li>
+                <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item">Quản lý thuộc tính</li>
+                <li class="breadcrumb-item">Thêm mới thuộc tính</li>
+
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -38,12 +39,12 @@
 
                             <!-- Active Checkbox -->
                             <div class="row mb-3">
-                                <label for="status" class="col-sm-2 col-form-label">Trạng thái</label>
+                                <label for="status" class="col-sm-2 col-form-label">Kích hoạt</label>
                                 <div class="col-sm-10">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="status" name="status"
                                             value="1" {{ old('status', 1) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="status">Có</label>
+                                        <label class="form-check-label" for="status"></label>
                                     </div>
                                 </div>
                             </div>
@@ -54,6 +55,12 @@
                                     <button type="submit" class="btn btn-primary">Thêm mới</button>
                                 </div>
                             </div>
+                            <!-- Back Button -->
+                        <div class="row mb-3">
+                            <div class="col-sm-10 offset-sm-2">
+                                <a href="{{ route($urlBase . 'index') }}" class="btn btn-secondary">Quay lại</a>
+                            </div>
+                        </div>
 
                         </form><!-- End General Form Elements -->
 

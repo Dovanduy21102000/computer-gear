@@ -1,0 +1,137 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Product;
+use App\Models\ProductVariant;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+class ProductVariantController extends Controller
+{
+    /**
+     * Hiển thị danh sách biến thể của sản phẩm.
+     */
+    public function index(Product $product)
+    {
+        $variants = $product->variants;
+        return view('backend.dashboard.layout', [
+            'variants' => $variants,
+            'product' => $product,
+            'template' => 'backend.variants.index'
+        ]);
+    }
+
+
+    /**
+     * Hiển thị form tạo biến thể.
+     */
+    public function create($productId)
+    {
+        $template = 'backend.variants.add';
+        $product = Product::findOrFail($productId);
+        return view('backend.dashboard.layout', compact('product', 'template'));
+    }
+
+    /**
+     * Lưu biến thể mới.
+     */
+    public function store(Request $request, Product $product)
+    {
+        $request->validate([
+            'sku' => 'required|string|max:255|unique:product_variants',
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'price_sale' => 'nullable|numeric',
+            'quantity' => 'required|integer',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'attributes' => 'required|array',
+        ]);
+
+        $thumbnailPath = $request->hasFile('thumbnail')
+            ? $request->file('thumbnail')->store('variants', 'public')
+            : null;
+
+        $product->variants()->create([
+            'sku' => $request->sku,
+            'name' => $request->name,
+            'price' => $request->price,
+            'price_sale' => $request->price_sale,
+            'quantity' => $request->quantity,
+            'thumbnail' => $thumbnailPath,
+            'attributes' => json_encode($request->attributes),
+        ]);
+
+        return redirect()->route('variants.index', ['product' => $product->id])
+            ->with('success', 'Biến thể đã được thêm thành công.');
+    }
+
+
+    /**
+     * Hiển thị form chỉnh sửa biến thể.
+     */
+    public function edit(Product $product, ProductVariant $variant)
+    {
+        return view('backend.dashboard.layout', [
+            'product' => $product,
+            'variant' => $variant,
+            'template' => 'backend.variants.edit'
+        ]);
+    }
+
+    /**
+     * Cập nhật biến thể.
+     */
+    public function update(Request $request, Product $product, ProductVariant $variant)
+{
+    $request->validate([
+        'sku' => 'required|string|max:255|unique:product_variants,sku,' . $variant->id,
+        'name' => 'required|string|max:255',
+        'price' => 'required|numeric',
+        'price_sale' => 'nullable|numeric',
+        'quantity' => 'required|integer',
+        'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'attributes' => 'required|array',
+    ]);
+
+    // Kiểm tra nếu có file mới thì xóa file cũ
+    if ($request->hasFile('thumbnail')) {
+        if ($variant->thumbnail) {
+            Storage::disk('public')->delete($variant->thumbnail);
+        }
+        $thumbnailPath = $request->file('thumbnail')->store('variants', 'public');
+    } else {
+        $thumbnailPath = $variant->thumbnail;
+    }
+
+    $variant->update([
+        'sku' => $request->sku,
+        'name' => $request->name,
+        'price' => $request->price,
+        'price_sale' => $request->price_sale,
+        'quantity' => $request->quantity,
+        'thumbnail' => $thumbnailPath,
+        'attributes' => json_encode($request->attributes),
+    ]);
+
+    return redirect()->route('variants.index', ['product' => $product->id])
+                     ->with('success', 'Biến thể đã được cập nhật.');
+}
+
+
+    /**
+     * Xóa biến thể.
+     */
+    public function destroy(Product $product, ProductVariant $variant)
+{
+    if ($variant->thumbnail) {
+        Storage::disk('public')->delete($variant->thumbnail);
+    }
+    $variant->delete();
+
+    return redirect()->route('variants.index', ['product' => $product->id])
+                     ->with('success', 'Biến thể đã được xóa.');
+}
+
+}

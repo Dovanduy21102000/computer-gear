@@ -21,23 +21,24 @@ class AuthController extends Controller
     }
     //đăng nhập 
     public function login(Request $request)
-{
-    $email = $request->input('email');
-    $password = $request->input('password');
+    {
+        $email = $request->input('email');
 
-    $user = DB::table('users')->where('email', $email)->first();
+        $password = $request->input('password');
 
-    if ($user && $user->password === $password) {
-        Auth::loginUsingId($user->id);
-        if ($user->role === 'admin') {
-            return redirect()->route('dashboard.index')->with('success', 'Đăng nhập thành công');
+        $user = DB::table('users')->where('email', $email)->first();
+
+        if ($user && $user->password === $password) {
+            Auth::loginUsingId($user->id);
+            if ($user->role === 'admin') {
+                return redirect()->route('dashboard.index')->with('success', 'Đăng nhập thành công');
+            }
+            Auth::logout();
+            return redirect()->route('auth.admin')->with('error', 'Bạn không có quyền truy cập!');
         }
-        Auth::logout();
-        return redirect()->route('auth.admin')->with('error', 'Bạn không có quyền truy cập!');
-    }
 
-    return redirect()->route('auth.admin')->with('error', 'Email hoặc mật khẩu không chính xác!');
-}
+        return redirect()->route('auth.admin')->with('error', 'Email hoặc mật khẩu không chính xác!');
+    }
 
 
     //Đăng xuất

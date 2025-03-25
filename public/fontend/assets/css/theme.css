@@ -33060,7 +33060,7 @@ blockquote:not(.blockquote) p {
 
 .u-header-topbar__nav-item + .u-header-topbar__nav-item-border::before,
 .u-header-topbar__nav-item + .u-header-topbar__nav-item-border-single > div::before {
-  content: '|';
+  /* content: '|'; */
   color: #e5c100;
   margin: 0 .875rem;
   -webkit-font-smoothing: antialiased;
@@ -33132,7 +33132,7 @@ blockquote:not(.blockquote) p {
 }
 
 .u-header__navbar-nav-divider .u-header__nav-item:not(:last-child)::after {
-  content: '|';
+  /* content: '|'; */
   color: #cad5d5;
   line-height: 1;
 }

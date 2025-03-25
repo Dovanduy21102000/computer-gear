@@ -6,13 +6,39 @@
             <!-- breadcrumb -->
             <div class="my-md-3">
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-3 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble">
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a
-                                href="{{ route('home.index') }}">Home</a></li>
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">Smart
-                            Phones & Tablets</li>
+                    <ol class="breadcrumb mb-3 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visible">
+                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                            <a href="{{ route('home.index') }}">Home</a>
+                        </li>
+
+                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                            <a href="{{ route('client.products.index') }}">Sản phẩm</a>
+                        </li>
+
+                        @if (isset($category) && $category)
+                            @if ($category->parent)
+                                <!-- Nếu danh mục có danh mục cha, hiển thị danh mục cha -->
+                                <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                    <a
+                                        href="{{ route('client.products.category', ['slug' => $category->parent->slug]) }}">
+                                        {{ $category->parent->name }}
+                                    </a>
+                                </li>
+                            @endif
+
+                            <!-- Hiển thị danh mục hiện tại -->
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">
+                                {{ $category->name }}
+                            </li>
+                        @else
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">
+                                Tất cả sản phẩm
+                            </li>
+                        @endif
+
                     </ol>
                 </nav>
+
             </div>
             <!-- End breadcrumb -->
         </div>
@@ -29,242 +55,95 @@
                             <a class="dropdown-toggle dropdown-toggle-collapse dropdown-title" href="javascript:;"
                                 role="button" data-toggle="collapse" aria-expanded="false"
                                 aria-controls="sidebarNav1Collapse" data-target="#sidebarNav1Collapse">
-                                Show All Categories
+                                Tất cả danh mục
                             </a>
 
                             <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                 <ul id="sidebarNav1" class="list-unstyled dropdown-list">
-                                    <!-- Menu List -->
-                                    <li><a class="dropdown-item" href="#">Accessories<span
-                                                class="text-gray-25 font-size-12 font-weight-normal"> (56)</span></a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#">Cameras & Photography<span
-                                                class="text-gray-25 font-size-12 font-weight-normal"> (11)</span></a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#">Computer Components<span
-                                                class="text-gray-25 font-size-12 font-weight-normal"> (22)</span></a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#">Gadgets<span
-                                                class="text-gray-25 font-size-12 font-weight-normal"> (5)</span></a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#">Home Entertainment<span
-                                                class="text-gray-25 font-size-12 font-weight-normal"> (7)</span></a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#">Laptops & Computers<span
-                                                class="text-gray-25 font-size-12 font-weight-normal"> (42)</span></a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#">Printers & Ink<span
-                                                class="text-gray-25 font-size-12 font-weight-normal"> (63)</span></a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#">Smart Phones & Tablets<span
-                                                class="text-gray-25 font-size-12 font-weight-normal"> (11)</span></a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#">TV & Audio<span
-                                                class="text-gray-25 font-size-12 font-weight-normal"> (66)</span></a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="#">Video Games & Consoles<span
-                                                class="text-gray-25 font-size-12 font-weight-normal"> (31)</span></a>
-                                    </li>
-                                    <!-- End Menu List -->
+                                    @foreach ($categories as $category)
+                                        <li>
+                                            <a class="dropdown-item"
+                                                href="{{ route('client.products.category', ['categorySlug' => $category->slug]) }}">
+                                                {{ $category->name }}
+                                                <span class="text-gray-25 font-size-12 font-weight-normal">
+                                                    ({{ $category->products()->count() }})
+                                                </span>
+                                            </a>
+
+                                            <!-- Nếu có danh mục con, hiển thị danh mục con -->
+                                            @if ($category->children->count())
+                                                <ul class="list-unstyled dropdown-list">
+                                                    @foreach ($category->children as $child)
+                                                        <li>
+                                                            <a class="dropdown-item"
+                                                                href="{{ route('client.products.category', ['categorySlug' => $child->slug]) }}">
+                                                                {{ $child->name }}
+                                                                <span
+                                                                    class="text-gray-25 font-size-12 font-weight-normal">
+                                                                    ({{ $child->products()->count() }})
+                                                                </span>
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </li>
+                                    @endforeach
                                 </ul>
                             </div>
                         </li>
-                        <li>
-                            <a class="dropdown-current active" href="#">Smart Phones & Tablets <span
-                                    class="text-gray-25 font-size-12 font-weight-normal"> (50)</span></a>
-
-                            <ul class="list-unstyled dropdown-list">
-                                <!-- Menu List -->
-                                <li><a class="dropdown-item" href="#">Smartphones<span
-                                            class="text-gray-25 font-size-12 font-weight-normal"> (30)</span></a></li>
-                                <li><a class="dropdown-item" href="#">Tablets<span
-                                            class="text-gray-25 font-size-12 font-weight-normal"> (20)</span></a></li>
-                                <!-- End Menu List -->
-                            </ul>
-                        </li>
                     </ul>
                     <!-- End List -->
+
                 </div>
                 <div class="mb-6">
                     <div class="border-bottom border-color-1 mb-5">
-                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Filters</h3>
+                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Bộ lọc</h3>
                     </div>
-                    <div class="border-bottom pb-4 mb-4">
-                        <h4 class="font-size-14 mb-3 font-weight-bold">Brands</h4>
+                    <form method="GET" action="{{ route('client.products.index') }}">
+                        <!-- Giữ category_id khi lọc thương hiệu -->
+                        <input type="hidden" name="category_id" value="{{ request()->has('category_id') ? request('category_id') : '' }}">
 
-                        <!-- Checkboxes -->
-                        <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="brandAdidas">
-                                <label class="custom-control-label" for="brandAdidas">Adidas
-                                    <span class="text-gray-25 font-size-12 font-weight-normal"> (56)</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="brandNewBalance">
-                                <label class="custom-control-label" for="brandNewBalance">New Balance
-                                    <span class="text-gray-25 font-size-12 font-weight-normal"> (56)</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="brandNike">
-                                <label class="custom-control-label" for="brandNike">Nike
-                                    <span class="text-gray-25 font-size-12 font-weight-normal"> (56)</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="brandFredPerry">
-                                <label class="custom-control-label" for="brandFredPerry">Fred Perry
-                                    <span class="text-gray-25 font-size-12 font-weight-normal"> (56)</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="brandTnf">
-                                <label class="custom-control-label" for="brandTnf">The North Face
-                                    <span class="text-gray-25 font-size-12 font-weight-normal"> (56)</span>
-                                </label>
-                            </div>
-                        </div>
-                        <!-- End Checkboxes -->
 
-                        <!-- View More - Collapse -->
-                        <div class="collapse" id="collapseBrand">
-                            <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="brandGucci">
-                                    <label class="custom-control-label" for="brandGucci">Gucci
-                                        <span class="text-gray-25 font-size-12 font-weight-normal"> (56)</span>
-                                    </label>
+                        <div class="border-bottom pb-4 mb-4">
+                            <h4 class="font-size-14 mb-3 font-weight-bold">Thương hiệu</h4>
+
+                            @foreach ($brands as $brand)
+                                <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input"
+                                            id="brand{{ $brand->id }}" name="brand[]" value="{{ $brand->id }}"
+                                            {{ in_array($brand->id, (array) request('brand', [])) ? 'checked' : '' }}>
+                                        <label class="custom-control-label" for="brand{{ $brand->id }}">
+                                            {{ $brand->name }}
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="brandMango">
-                                    <label class="custom-control-label" for="brandMango">Mango
-                                        <span class="text-gray-25 font-size-12 font-weight-normal"> (56)</span>
-                                    </label>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
-                        <!-- End View More - Collapse -->
 
-                        <!-- Link -->
-                        <a class="link link-collapse small font-size-13 text-gray-27 d-inline-flex mt-2"
-                            data-toggle="collapse" href="#collapseBrand" role="button" aria-expanded="false"
-                            aria-controls="collapseBrand">
-                            <span class="link__icon text-gray-27 bg-white">
-                                <span class="link__icon-inner">+</span>
-                            </span>
-                            <span class="link-collapse__default">Show more</span>
-                            <span class="link-collapse__active">Show less</span>
-                        </a>
-                        <!-- End Link -->
-                    </div>
-                    <div class="border-bottom pb-4 mb-4">
-                        <h4 class="font-size-14 mb-3 font-weight-bold">Color</h4>
+                        <button type="submit" class="btn btn-primary">Lọc</button>
+                    </form>
 
-                        <!-- Checkboxes -->
-                        <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="categoryTshirt">
-                                <label class="custom-control-label" for="categoryTshirt">Black <span
-                                        class="text-gray-25 font-size-12 font-weight-normal"> (56)</span></label>
-                            </div>
-                        </div>
-                        <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="categoryShoes">
-                                <label class="custom-control-label" for="categoryShoes">Black Leather <span
-                                        class="text-gray-25 font-size-12 font-weight-normal"> (56)</span></label>
-                            </div>
-                        </div>
-                        <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="categoryAccessories">
-                                <label class="custom-control-label" for="categoryAccessories">Black with Red <span
-                                        class="text-gray-25 font-size-12 font-weight-normal"> (56)</span></label>
-                            </div>
-                        </div>
-                        <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="categoryTops">
-                                <label class="custom-control-label" for="categoryTops">Gold <span
-                                        class="text-gray-25 font-size-12 font-weight-normal"> (56)</span></label>
-                            </div>
-                        </div>
-                        <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="categoryBottom">
-                                <label class="custom-control-label" for="categoryBottom">Spacegrey <span
-                                        class="text-gray-25 font-size-12 font-weight-normal"> (56)</span></label>
-                            </div>
-                        </div>
-                        <!-- End Checkboxes -->
 
-                        <!-- View More - Collapse -->
-                        <div class="collapse" id="collapseColor">
-                            <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="categoryShorts">
-                                    <label class="custom-control-label" for="categoryShorts">Turquoise <span
-                                            class="text-gray-25 font-size-12 font-weight-normal"> (56)</span></label>
-                                </div>
-                            </div>
-                            <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="categoryHats">
-                                    <label class="custom-control-label" for="categoryHats">White <span
-                                            class="text-gray-25 font-size-12 font-weight-normal"> (56)</span></label>
-                                </div>
-                            </div>
-                            <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="categorySocks">
-                                    <label class="custom-control-label" for="categorySocks">White with Gold <span
-                                            class="text-gray-25 font-size-12 font-weight-normal"> (56)</span></label>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End View More - Collapse -->
-
-                        <!-- Link -->
-                        <a class="link link-collapse small font-size-13 text-gray-27 d-inline-flex mt-2"
-                            data-toggle="collapse" href="#collapseColor" role="button" aria-expanded="false"
-                            aria-controls="collapseColor">
-                            <span class="link__icon text-gray-27 bg-white">
-                                <span class="link__icon-inner">+</span>
-                            </span>
-                            <span class="link-collapse__default">Show more</span>
-                            <span class="link-collapse__active">Show less</span>
-                        </a>
-                        <!-- End Link -->
-                    </div>
 
                 </div>
+
+
+
+
 
             </div>
             <div class="col-xl-9 col-wd-9gdot5">
-                <!-- Shop-control-bar Title -->
-                <div class="d-block d-md-flex flex-center-between mb-3">
-                    <h3 class="font-size-25 mb-2 mb-md-0">Smart Phones & Tablets</h3>
-                    <p class="font-size-14 text-gray-90 mb-0">Showing 1–25 of 56 results</p>
-                </div>
-                <!-- End shop-control-bar Title -->
+
+
                 <!-- Shop-control-bar -->
                 <div class="bg-gray-1 flex-center-between borders-radius-9 py-1">
                     <div class="d-xl-none">
                         <!-- Account Sidebar Toggle Button -->
                         <a id="sidebarNavToggler1" class="btn btn-sm py-1 font-weight-normal" href="javascript:;"
-                            role="button" aria-controls="sidebarContent1" aria-haspopup="true"
-                            aria-expanded="false" data-unfold-event="click" data-unfold-hide-on-scroll="false"
+                            role="button" aria-controls="sidebarContent1" aria-haspopup="true" aria-expanded="false"
+                            data-unfold-event="click" data-unfold-hide-on-scroll="false"
                             data-unfold-target="#sidebarContent1" data-unfold-type="css-animation"
                             data-unfold-animation-in="fadeInLeft" data-unfold-animation-out="fadeOutLeft"
                             data-unfold-duration="500">
@@ -356,9 +235,11 @@
                                                 <div class="mb-2">
                                                     <a href="{{ route('client.products.detail', $product->slug) }}"
                                                         class="d-block text-center">
-                                                        <img class="img-fluid"
+                                                        <img class="img-fluid w-100"
+                                                            style="height: 150px; object-fit: cover;"
                                                             src="{{ asset('storage/' . $product->thumbnail) }}"
                                                             alt="{{ $product->name }}">
+
 
                                                     </a>
                                                 </div>
@@ -372,7 +253,8 @@
                                                                 class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
                                                         @else
                                                             <div class="text-gray-100">
-                                                                {{ number_format($product->price, 0, ',', '.') }}đ</div>
+                                                                {{ number_format($product->price, 0, ',', '.') }}đ
+                                                            </div>
                                                         @endif
                                                     </div>
 
@@ -422,7 +304,8 @@
                                                 <div class="mb-2">
                                                     <a href="{{ route('client.products.detail', $product->slug) }}"
                                                         class="d-block text-center">
-                                                        <img class="img-fluid" src="{{ asset($product->thumbnail) }}"
+                                                        <img class="img-fluid"
+                                                            src="{{ asset('storage/' . $product->thumbnail) }}"
                                                             alt="{{ $product->name }}">
                                                     </a>
                                                 </div>

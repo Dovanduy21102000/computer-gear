@@ -13,8 +13,8 @@ class AttributeController extends BaseCRUDController
     public $folderImage;
     public $urlBase     = 'attributes.';
     public $titleIndex  = 'Danh sách thuộc tính';
-    public $titleCreate = 'Tạo mới thuộc tính';
-    public $titleEdit   = 'Chỉnh sửa thuộc tính';
+    public $titleCreate = 'Nhập thông tin thuộc tính';
+    public $titleEdit   = 'Nhập thông tin chỉnh sửa';
 
     public $columns = [
         'name'          => 'Tên thuộc tính',
@@ -27,7 +27,7 @@ class AttributeController extends BaseCRUDController
 
     public function index()
     {
-        $data       = Attribute::paginate(2);
+        $data       = Attribute::paginate(10);
         $title      = $this->titleIndex;
         $columns    = $this->columns;
         $urlBase    = $this->urlBase;
