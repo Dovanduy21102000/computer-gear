@@ -349,7 +349,6 @@
                                 </div> --}}
                              </div>
                          </form>
-
                          <!-- Form Đăng Ký -->
                          <form method="POST" action="{{ route('register') }}" id="signupForm"
                              style="display: none;">
@@ -450,7 +449,6 @@
                                 </a>
                             </div> --}}
                          </form>
-
                          <!-- Form Forgot Password -->
                          {{-- <div id="forgotPassword" style="display: none; opacity: 0;" data-target-group="idForm">
                             <!-- Title -->

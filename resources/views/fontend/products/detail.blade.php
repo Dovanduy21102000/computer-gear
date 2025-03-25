@@ -7,7 +7,6 @@
             <div class="my-md-3">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-3 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble">
-
                         <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a
                                 href="{{ route('home.index') }}">Trang chủ</a></li>
                         <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
@@ -188,31 +187,35 @@
                 <div class="bg-white pt-4 pb-6 px-xl-11 px-md-5 px-4 mb-6 overflow-hidden">
                     <div id="Description" class="mx-md-2">
                         <div class="position-relative mb-6">
-                            <!-- Tabs -->
-                            <ul class="nav nav-classic nav-tab nav-tab-lg justify-content-xl-center mb-6 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble border-lg-down-bottom-0 pb-1 pb-xl-0 mb-n1 mb-xl-0"
-                                role="tablist">
-                                <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                    <a class="nav-link active" data-toggle="tab" href="#Description" role="tab">
-                                        <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                            Description
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                    <a class="nav-link" data-toggle="tab" href="#Specification" role="tab">
-                                        <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                            Specification
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                    <a class="nav-link" data-toggle="tab" href="#Reviews" role="tab">
-                                        <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                            Reviews
-                                        </div>
-                                    </a>
-                                </li>
-                            </ul>
+                            <ul
+                                class="nav nav-classic nav-tab nav-tab-lg justify-content-xl-center mb-6 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble border-lg-down-bottom-0 pb-1 pb-xl-0 mb-n1 mb-xl-0">
+
+                                <!-- Tabs -->
+                                <ul class="nav nav-classic nav-tab nav-tab-lg justify-content-xl-center mb-6 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble border-lg-down-bottom-0 pb-1 pb-xl-0 mb-n1 mb-xl-0"
+                                    role="tablist">
+                                    <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
+                                        <a class="nav-link active" data-toggle="tab" href="#Description"
+                                            role="tab">
+                                            <div class="d-md-flex justify-content-md-center align-items-md-center">
+                                                Description
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
+                                        <a class="nav-link" data-toggle="tab" href="#Specification" role="tab">
+                                            <div class="d-md-flex justify-content-md-center align-items-md-center">
+                                                Specification
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
+                                        <a class="nav-link" data-toggle="tab" href="#Reviews" role="tab">
+                                            <div class="d-md-flex justify-content-md-center align-items-md-center">
+                                                Reviews
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
                         </div>
                         <div class="mx-md-4 pt-1">
                             <h3 class="font-size-24 mb-3">Perfectly Done</h3>
@@ -758,9 +761,6 @@
                                 </div>
                                 <!-- End Reviewer -->
                             </div>
-                            <!-- End Review -->
-                            =======
-
                             <!-- Nội dung Tab -->
                             <div class="tab-content">
                                 <div class="tab-pane fade show active" id="Description" role="tabpanel">
@@ -1241,6 +1241,7 @@
                 class="d-flex justify-content-between align-items-center border-bottom border-color-1 flex-lg-nowrap flex-wrap mb-4">
                 <h3 class="section-title mb-0 pb-2 font-size-22">Related Products</h3>
             </div>
+
             <ul class="row list-unstyled products-group no-gutters">
                 @foreach ($relatedProducts as $related)
                     <li class="col-6 col-md-3 col-xl-2gdot4-only col-wd-2 product-item">
@@ -1252,6 +1253,7 @@
                                             class="font-size-12 text-gray-5">
                                             {{ $related->category->name }}
                                         </a>
+
                                     </div>
                                     <h5 class="mb-1 product-item__title">
                                         <a href="{{ route('client.products.detail', $related->slug) }}"
@@ -1270,7 +1272,8 @@
                                     <div class="flex-center-between mb-1">
                                         <div class="prodcut-price">
                                             <div class="text-gray-100">
-                                                {{ number_format($related->price, 0, ',', '.') }}đ</div>
+                                                {{ number_format($related->price, 0, ',', '.') }}đ
+                                            </div>
                                         </div>
                                         <div class="d-none d-xl-block prodcut-add-cart">
                                             <a href="#" class="btn-add-cart btn-primary transition-3d-hover">
@@ -1292,7 +1295,8 @@
                 @endforeach
             </ul>
         </div>
-        <!-- End Related products -->
+    </div>
+    <!-- End Related products -->
     </div>
 
 </main>

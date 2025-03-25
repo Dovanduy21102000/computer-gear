@@ -112,9 +112,6 @@ Route::middleware(['web'])->group(function () {
     Route::get('/products/category/{categorySlug}', [ProductClientController::class, 'showByCategory'])->name('client.products.category');
     Route::get('/products/brand/{brandSlug}', [ProductClientController::class, 'showByBrand'])->name('client.products.brand');
 
-
-
-
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 

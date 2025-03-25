@@ -56,14 +56,13 @@
                                 </div>
                             @endauth
                         </a>
-
-                        <!-- End Account Sidebar Toggle Button -->
                     </li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
+<!-- End Topbar -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
