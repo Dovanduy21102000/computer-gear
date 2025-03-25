@@ -47,7 +47,12 @@
                 </li>
                 <li>
                     <a href="{{ route('categories.index') }}">
-                        <i class="bi bi-circle"></i><span>Quản lý danh mục</span>
+                        <i class="bi bi-circle"></i><span>Quản lý danh mục sản phẩm</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('category_post.index') }}">
+                        <i class="bi bi-circle"></i><span>Quản lý danh mục bài viết</span>
                     </a>
                 </li>
             </ul>
