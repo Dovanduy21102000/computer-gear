@@ -25,7 +25,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Thông tin biến thể</h5>
-                        <form action="{{ route('variants.store', ['product' => $product->id]) }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('variants.store', ['product' => $product->id,'variant'=>$variant->id]) }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
                             <div id="variants">

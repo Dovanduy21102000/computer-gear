@@ -29,6 +29,8 @@ use App\Http\Controllers\Client\VNPayController;
 
 
 use App\Http\Controllers\Admin\CategoryPostController;
+use App\Http\Controllers\CategoryPostController as ControllersCategoryPostController;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 // Admin Routes
@@ -76,6 +78,7 @@ Route::prefix('products/{product}/variants')->group(function () {
     Route::get('/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
     Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
     Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
+    Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
 });
 
 
