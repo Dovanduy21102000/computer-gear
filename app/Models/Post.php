@@ -11,7 +11,7 @@ class Post extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'category_id',
+        'category_post_id',
         'title',
         'slug',
         'image',
@@ -27,8 +27,8 @@ class Post extends Model
         return $query->where('status', 1);
     }
 
-    public function categories()
+    public function category_post()
     {
-        return $this->belongsTo(Category::class, 'category_id');
+        return $this->belongsTo(CategoryPost::class, 'category_post_id');
     }
 }

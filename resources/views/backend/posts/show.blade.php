@@ -51,19 +51,19 @@
 
                             <!-- Parent Category -->
                             <div class="row mb-3">
-                                <label for="category_id" class="col-sm-2 col-form-label">Danh mục</label>
+                                <label for="category_post_id" class="col-sm-2 col-form-label">Danh mục</label>
                                 <div class="col-sm-10">
-                                    <select disabled class="form-control @error('category_id') is-invalid @enderror"
-                                        id="category_id" name="category_id">
+                                    <select disabled class="form-control @error('category_post_id') is-invalid @enderror"
+                                        id="category_post_id" name="category_post_id">
                                         <option value="">-- Chọn danh mục --</option>
-                                        @foreach ($categories as $category)
+                                        @foreach ($category_post as $category)
                                             <option value="{{ $category->id }}"
-                                                {{ old('category_id', $post->category_id) == $category->id ? 'selected' : '' }}>
+                                                {{ old('category_post_id', $post->category_post_id) == $category->id ? 'selected' : '' }}>
                                                 {{ $category->name }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('category_id')
+                                    @error('category_post_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

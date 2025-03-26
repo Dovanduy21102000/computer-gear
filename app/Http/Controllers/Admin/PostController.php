@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\BaseCRUDController;
 use App\Models\Category;
+use App\Models\CategoryPost;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -41,47 +42,47 @@ class PostController extends BaseCRUDController
     public function index()
     {
         $data           = Post::paginate(8);
-        $categories     = Category::all();
+        $category_post     = CategoryPost::all();
         $title          = $this->titleIndex;
         $columns        = $this->columns;
         $urlBase        = $this->urlBase;
 
         $template = 'backend.posts.index';
-        return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'urlBase', 'categories'));
+        return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'urlBase', 'category_post'));
     }
 
     public function create()
     {
-        $categories     = Category::all();
+        $category_post     = CategoryPost::all();
         $title          = $this->titleCreate;
         $urlBase        = $this->urlBase;
         $fieldImage     = $this->fieldImage;
         $folderImage    = $this->folderImage;
 
         $template = 'backend.posts.add';
-        return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'categories', 'fieldImage', 'folderImage'));
+        return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'category_post', 'fieldImage', 'folderImage'));
     }
 
     public function edit($id)
     {
-        $categories    = Category::all();
+        $category_post     = CategoryPost::all();
         $post          = $this->model::findOrFail($id);
         $title         = $this->titleEdit;
         $urlBase       = $this->urlBase;
 
         $template = 'backend.posts.edit';
-        return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'post', 'categories'));
+        return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'post', 'category_post'));
     }
 
     public function show($id)
     {
-        $categories     = Category::all();
+        $category_post     = CategoryPost::all();
         $post           = $this->model::findOrFail($id);
         $urlBase        = $this->urlBase;
         $title          = $this->titleShow;
 
         $template = 'backend.posts.show';
-        return view('backend.dashboard.layout', compact('template', 'urlBase', 'post', 'categories', 'title'))->with('isShowMode', true);;
+        return view('backend.dashboard.layout', compact('template', 'urlBase', 'post', 'category_post', 'title'))->with('isShowMode', true);;
     }
 
 
@@ -94,7 +95,7 @@ class PostController extends BaseCRUDController
         }
 
         return $request->validate([
-            'category_id' => 'nullable|exists:categories,id',
+            'category_post_id' => 'nullable|exists:category_post,id',
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|unique:posts,slug',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
@@ -106,7 +107,7 @@ class PostController extends BaseCRUDController
         ], [
             'title.required' => 'Tiêu đề là bắt buộc.',
             'slug.unique' => 'Slug đã tồn tại, vui lòng chọn slug khác.',
-            'category_id.exists' => 'Danh mục không hợp lệ.',
+            'category_post_id.exists' => 'Danh mục không hợp lệ.',
             'image.image' => 'Ảnh phải là định dạng hợp lệ (jpeg, png, jpg, gif).',
             'image.max' => 'Ảnh không được vượt quá 5MB.',
             'content.required' => 'Nội dung bài viết là bắt buộc.',

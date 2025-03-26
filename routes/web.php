@@ -26,9 +26,10 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\VNPayController;
-use Illuminate\Support\Facades\Auth;
+
+
+use App\Http\Controllers\Admin\CategoryPostController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http;
 
 // Admin Routes
 Route::prefix('admin')->group(function () {
@@ -53,7 +54,9 @@ Route::prefix('admin')->group(function () {
             'users'             => UserController::class,
             'orders'            => OrderController::class,
             'contacts'          => ContactController::class,
-        'productvariants'   => ProductVariantController::class
+            'productvariants'   => ProductVariantController::class,
+            'category_post'     => CategoryPostController::class,
+
         ];
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
@@ -135,4 +138,7 @@ Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 
 Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
 Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
+
 Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
+
+
