@@ -176,8 +176,7 @@
                             <div class="row mb-3">
                                 <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
                                 <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="quantity" name="quantity"
-                                        required>
+                                    <input type="number" class="form-control" id="quantity" name="quantity" required>
                                 </div>
                             </div>
 
@@ -196,11 +195,53 @@
                             <div class="row mb-3">
                                 <label for="is_variant" class="col-sm-2 col-form-label">Có biến thể</label>
                                 <div class="col-sm-10">
-                                    <select class="form-select" id="is_variant" name="is_variant" required>
+                                    <select class="form-select" id="is_variant" name="is_variant" required onchange="toggleVariants(this)">
                                         <option value="1">Có</option>
-                                        <option value="0">Không</option>
+                                        <option value="0" selected>Không</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <!-- Phần Nhập Liệu Cho Biến Thể -->
+                            <div id="variants-section" style="display: none;">
+                                <h5 class="card-title">Thông tin biến thể</h5>
+                                <div id="variants">
+                                    <div class="variant mb-4">
+                                        <div class="row mb-3">
+                                            <label for="variants[0][sku]" class="col-sm-2 col-form-label">SKU Biến thể</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="variants[0][sku]" required>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label for="variants[0][price]" class="col-sm-2 col-form-label">Giá Biến thể</label>
+                                            <div class="col-sm-10">
+                                                <input type="number" class="form-control" name="variants[0][price]" required>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label for="variants[0][quantity]" class="col-sm-2 col-form-label">Số lượng Biến thể</label>
+                                            <div class="col-sm-10">
+                                                <input type="number" class="form-control" name="variants[0][quantity]" required>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label for="variants[0][attributes]" class="col-sm-2 col-form-label">Thuộc tính</label>
+                                            <div class="col-sm-10">
+                                                <select class="form-select" name="variants[0][attributes][]" multiple required>
+                                                    @foreach ($attributes as $attribute)
+                                                        <optgroup label="{{ $attribute->name }}">
+                                                            @foreach ($attribute->attributeValues as $value)
+                                                                <option value="{{ $value->id }}">{{ $value->value }}</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-secondary" onclick="addVariant()">Thêm biến thể</button>
                             </div>
 
                             <!-- Nút Submit -->
@@ -217,3 +258,58 @@
         </div>
     </section>
 </main>
+
+<script>
+    let variantCount = 1;
+
+    function toggleVariants(select) {
+        const variantsSection = document.getElementById('variants-section');
+        if (select.value === '1') {
+            variantsSection.style.display = 'block';
+        } else {
+            variantsSection.style.display = 'none';
+        }
+    }
+
+    function addVariant() {
+        const variantsDiv = document.getElementById('variants');
+        const newVariant = document.createElement('div');
+        newVariant.classList.add('variant', 'mb-4');
+        newVariant.innerHTML = `
+            <div class="row mb-3">
+                <label for="variants[${variantCount}][sku]" class="col-sm-2 col-form-label">SKU Biến thể</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" name="variants[${variantCount}][sku]" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="variants[${variantCount}][price]" class="col-sm-2 col-form-label">Giá Biến thể</label>
+                <div class="col-sm-10">
+                    <input type="number" class="form-control" name="variants[${variantCount}][price]" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="variants[${variantCount}][quantity]" class="col-sm-2 col-form-label">Số lượng Biến thể</label>
+                <div class="col-sm-10">
+                    <input type="number" class="form-control" name="variants[${variantCount}][quantity]" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="variants[${variantCount}][attributes]" class="col-sm-2 col-form-label">Thuộc tính</label>
+                <div class="col-sm-10">
+                    <select class="form-select" name="variants[${variantCount}][attributes][]" multiple required>
+                        @foreach ($attributes as $attribute)
+                            <optgroup label="{{ $attribute->name }}">
+                                @foreach ($attribute->attributeValues as $value)
+                                    <option value="{{ $value->id }}">{{ $value->value }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        `;
+        variantsDiv.appendChild(newVariant);
+        variantCount++;
+    }
+</script>

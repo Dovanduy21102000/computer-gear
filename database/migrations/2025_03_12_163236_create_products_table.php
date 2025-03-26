@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->decimal('price', 10, 2)->default(0);
             $table->decimal('price_sale', 10, 2)->nullable();
             $table->integer('quantity')->default(0);
+            $table->integer('quantity_sold')->default(0);
             $table->boolean('status')->default(true);
             $table->unsignedBigInteger('views')->nullable()->default(0);
             $table->boolean('is_variant')->default(0);

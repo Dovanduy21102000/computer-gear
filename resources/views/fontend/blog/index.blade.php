@@ -70,14 +70,15 @@
                     <form action="{{ route('blog.index') }}" method="GET">
                         <div class="form-group">
                             <label for="category">Chọn danh mục:</label>
-                            <select name="category_id" id="category" class="form-control">
+                            <select name="category_post_id" id="category" class="form-control">
                                 <option value="">-- Tất cả danh mục --</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                @foreach($category_post as $category)
+                                    <option value="{{ $category->id }}" {{ request('category_post_id') == $category->id ? 'selected' : '' }}>
                                         {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
+                            
                         </div>
                         <div class="form-group">
                             <label for="search">Tìm kiếm bài viết:</label>
@@ -100,8 +101,8 @@
                         <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Danh Mục Bài Viết</h3>
                     </div>
                     <div class="list-group">
-                        @foreach($categories as $category)
-                            <a href="{{ route('blog.index', ['category_id' => $category->id]) }}" 
+                        @foreach($category_post as $category)
+                            <a href="{{ route('blog.index', ['category_post_id' => $category->id]) }}" 
                                class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-0">
                                 <i class="mr-2 fas fa-angle-right"></i> {{ $category->name }}
                             </a>

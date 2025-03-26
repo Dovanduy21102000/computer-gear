@@ -83,8 +83,8 @@
                             <label for="category">Chọn danh mục:</label>
                             <select name="category_id" id="category" class="form-control">
                                 <option value="">-- Tất cả danh mục --</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                @foreach($category_post as $category)
+                                    <option value="{{ $category->id }}" {{ request('category_post_id') == $category->id ? 'selected' : '' }}>
                                         {{ $category->name }}
                                     </option>
                                 @endforeach
@@ -111,7 +111,7 @@
                         <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Categories</h3>
                     </div>
                     <div class="list-group">
-                        @foreach($categories as $category)
+                        @foreach($category_post as $category)
                             <a href="{{ route('blog.show', ['slug' => $post->slug, 'category_id' => $category->id]) }}"
                                class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-0">
                                 <i class="mr-2 fas fa-angle-right"></i> {{ $category->name }}

@@ -12,6 +12,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryPostController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactClientController;
 use App\Http\Controllers\ContactController;
@@ -24,6 +25,8 @@ use App\Http\Controllers\ProductClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\VNPayController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -35,8 +38,6 @@ Route::prefix('admin')->group(function () {
     Route::get('login', [AuthController::class, 'index'])->name('auth.admin'); // Hiển thị form đăng nhập
     Route::post('login', [AuthController::class, 'login'])->name('auth.login'); // Xử lý đăng nhập
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
-
-
     // Route admin cần quyền truy cập
     Route::middleware(['admin'])->group(function () {
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
@@ -53,7 +54,11 @@ Route::prefix('admin')->group(function () {
             'posts'             => PostController::class,
             'users'             => UserController::class,
             'orders'            => OrderController::class,
-            'contacts'          => ContactController::class
+            'orderitems'        => OrderItemController::class,
+            'contacts'          => ContactController::class,
+            'productvariants'   => ProductVariantController::class,
+            'category_post'     => CategoryPostController::class,
+
         ];
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
@@ -64,6 +69,17 @@ Route::prefix('admin')->group(function () {
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
     });
 });
+
+//Biêns thể
+Route::prefix('products/{product}/variants')->group(function () {
+    Route::get('/', [ProductVariantController::class, 'index'])->name('variants.index');
+    Route::get('/create', [ProductVariantController::class, 'create'])->name('variants.create');
+    Route::post('/store', [ProductVariantController::class, 'store'])->name('variants.store');
+    Route::get('/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
+    Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
+    Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
+});
+
 
 // Client Routes
 Route::middleware(['web'])->group(function () {
@@ -79,8 +95,8 @@ Route::middleware(['web'])->group(function () {
 
 
     // Route liên hệ client
-    Route::get('/contacts', [ContactClientController::class, 'index'])->name('client.contacts.index');
-    Route::post('/contacts', [ContactClientController::class, 'store'])->name('client.contacts.store');
+    // Route::get('/contacts', [ContactClientController::class, 'index'])->name('client.contacts.index');
+    // Route::post('/contacts', [ContactClientController::class, 'store'])->name('client.contacts.store');
 
 
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -95,8 +111,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
     Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
     Route::get('/products/category/{categorySlug}', [ProductClientController::class, 'showByCategory'])->name('client.products.category');
-
-
+    Route::get('/products/brand/{brandSlug}', [ProductClientController::class, 'showByBrand'])->name('client.products.brand');
 
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
@@ -105,7 +120,6 @@ Route::middleware(['web'])->group(function () {
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
-
 
 Route::get('/api/districts/{province_id}', function ($province_id) {
     $response = Http::get("https://provinces.open-api.vn/api/p/{$province_id}?depth=2");
@@ -127,3 +141,4 @@ Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
 Route::get('/momo-return', [MOMOController::class, 'handleReturn'])->name('momo.return');
 Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
+Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');

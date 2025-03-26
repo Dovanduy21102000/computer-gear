@@ -60,7 +60,6 @@
 
                             <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                 <ul id="sidebarNav1" class="list-unstyled dropdown-list">
-                                    <!-- Hiển thị danh mục cha -->
                                     @foreach ($categories as $category)
                                         <li>
                                             <a class="dropdown-item"
