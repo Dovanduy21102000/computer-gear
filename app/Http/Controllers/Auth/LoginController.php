@@ -41,14 +41,13 @@ class LoginController extends Controller
         // Cố gắng đăng nhập người dùng
         if (Auth::attempt($credentials)) {
             // Đăng nhập thành công, chuyển hướng người dùng
-            return redirect()->route('home') ;
+            return redirect()->route('home');
         }
 
         // Đăng nhập thất bại
         return back()->withInput($request->only('email'))->withErrors([
             'email' => 'Email hoặc mật khẩu không chính xác.',
         ]);
-        
     }
 
     // Xử lý đăng xuất
@@ -59,5 +58,4 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
         return redirect('/');
     }
-    
 }

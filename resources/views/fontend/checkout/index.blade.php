@@ -124,7 +124,7 @@
                                 <!-- Payment Methods -->
                                 <div class="border-top border-width-3 border-color-1 pt-3 mb-3">
                                     <div id="basicsAccordion1">
-                                        <div class="border-bottom border-color-1 border-dotted-bottom">
+                                        {{-- <div class="border-bottom border-color-1 border-dotted-bottom">
                                             <div class="p-3">
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="vnpay"
@@ -133,7 +133,7 @@
                                                         toán qua VNPay</label>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> --}}
 
                                         <div class="border-bottom border-color-1 border-dotted-bottom">
                                             <div class="p-3">
@@ -194,7 +194,7 @@
                             <div class="col-md-12">
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Tỉnh thành <span class="text-danger">*</span></label>
-                                    <select id="provinceSelect"
+                                    <select id="provinceSelect" name="province_id"
                                         class="form-control js-select selectpicker dropdown-select" required>
                                         <option value="">-- Chọn tỉnh thành --</option>
                                         @foreach ($provinces as $province)
@@ -210,7 +210,7 @@
                             <div class="col-md-12">
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
-                                    <select id="districtSelect"
+                                    <select id="districtSelect" name="district_id"
                                         class="form-control js-select selectpicker dropdown-select" required>
                                         <option value="">-- Chọn quận/huyện --</option>
                                     </select>
@@ -291,7 +291,7 @@
                     } else if (paymentMethod === "vn_pay") {
                         checkoutForm.action = "{{ route('vnpay.create') }}";
                     } else {
-                        checkoutForm.action = "";
+                        checkoutForm.action = "{{ route('checkout.process') }}";
                     }
 
                     checkoutForm.submit();

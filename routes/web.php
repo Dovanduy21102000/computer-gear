@@ -26,10 +26,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\VNPayController;
-
-
 use App\Http\Controllers\Admin\CategoryPostController;
-use App\Http\Controllers\CategoryPostController as ControllersCategoryPostController;
+use App\Http\Controllers\OrderItemController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -55,6 +53,7 @@ Route::prefix('admin')->group(function () {
             'posts'             => PostController::class,
             'users'             => UserController::class,
             'orders'            => OrderController::class,
+            'orderitems'        => OrderItemController::class,
             'contacts'          => ContactController::class,
             'productvariants'   => ProductVariantController::class,
             'category_post'     => CategoryPostController::class,
@@ -65,7 +64,7 @@ Route::prefix('admin')->group(function () {
         };
 
 
-       // Route upload bài viết
+        // Route upload bài viết
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
     });
 });
@@ -91,35 +90,36 @@ Route::middleware(['web'])->group(function () {
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register'); // Form đăng ký
     Route::post('register', [RegisterController::class, 'register']); // Xử lý đăng ký
 
-    
+
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
 
 
     // Route liên hệ client
-    Route::get('/contacts', [ContactClientController::class, 'index'])->name('client.contacts.index');
-    Route::post('/contacts', [ContactClientController::class, 'store'])->name('client.contacts.store');
+    // Route::get('/contacts', [ContactClientController::class, 'index'])->name('client.contacts.index');
+    // Route::post('/contacts', [ContactClientController::class, 'store'])->name('client.contacts.store');
 
 
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
     Route::get('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.applyCoupon');
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
 
     Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
     Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
-    Route::get('/products/category/{categorySlug}', [ProductClientController::class, 'categoryProducts'])->name('client.products.category');
+    Route::get('/products/category/{categorySlug}', [ProductClientController::class, 'showByCategory'])->name('client.products.category');
+    Route::get('/products/brand/{brandSlug}', [ProductClientController::class, 'showByBrand'])->name('client.products.brand');
 
 
-    
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-
     
     Route::get('/home', [HomeController::class, 'index'])->name('home');
+
 });
 
 Route::get('/api/districts/{province_id}', function ($province_id) {
@@ -133,15 +133,17 @@ Route::get('/contact', [ContactClientController::class, 'index'])->name('client.
 Route::post('/contact', [ContactClientController::class, 'store'])->name('client.contacts.store');
 
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('/checkout/process', [CheckoutController::class, 'checkout'])->name('checkout.process');
+Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
 
 Route::post('/vnpay/create', [VNPayController::class, 'createPayment'])->name('vnpay.create');
 Route::get('/vnpay/return', [VNPayController::class, 'paymentReturn'])->name('vnpay.return');
 Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 
 Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
+Route::get('/momo-return', [MOMOController::class, 'handleReturn'])->name('momo.return');
 Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
 
 Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
+
 
 

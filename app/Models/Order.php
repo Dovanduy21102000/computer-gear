@@ -29,7 +29,13 @@ class Order extends Model
         'notes',
     ];
     public $attributes = [
-        'payment_status' => 1
+        'payment_status' => 'pending'
+    ];
+
+    protected $casts = [
+        'payment_status' => 'integer',
+        'status' => 'string',
+
     ];
 
     // Liên kết với bảng users (Người dùng)

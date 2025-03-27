@@ -17,7 +17,7 @@ class ProductClientController extends Controller
         // dd($request->all()); // Kiểm tra dữ liệu request
         $query = Product::where('status', true);
         $category = null;
-    
+
         // Lọc theo danh mục nếu có category_id
         if ($request->filled('category_id')) {
             $category = Category::find($request->category_id);
@@ -25,28 +25,20 @@ class ProductClientController extends Controller
                 $query->where('category_id', $category->id);
             }
         }
-    
+
         // Lọc theo thương hiệu nếu có brand[]
         if ($request->filled('brand')) {
             $brandsFilter = is_array($request->brand) ? $request->brand : explode(',', $request->brand);
             $query->whereIn('brand_id', $brandsFilter);
         }
-    
+
         $products = $query->get();
         $categories = Category::where('is_active', true)->whereNull('parent_id')->with('children')->get();
         $brands = Brand::all();
         $template = 'fontend.products.index';
-    
+
         return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category'));
     }
-    
-
-
-
-
-
-
-
 
     public function show($slug)
     {
@@ -68,24 +60,49 @@ class ProductClientController extends Controller
 
 
 
-    public function categoryProducts($slug)
+    public function showByCategory($slug)
     {
         // Lấy danh mục theo slug
         $category = Category::where('slug', $slug)->firstOrFail();
 
-        // Lấy danh sách sản phẩm thuộc danh mục này
-        $products = Product::where('category_id', $category->id)
-            ->where('status', true)
-            ->get();
+        // Lấy danh sách thương hiệu (để sử dụng cho filter)
+        $brands = Brand::where('is_active', 1)->get();
 
         // Lấy danh sách danh mục cha
         $categories = Category::where('is_active', true)->whereNull('parent_id')->with('children')->get();
 
-        // Lấy danh sách thương hiệu (CẦN DÒNG NÀY ĐỂ TRÁNH LỖI Undefined variable $brands)
-        $brands = \App\Models\Brand::all();
+        // Lấy danh sách sản phẩm thuộc danh mục này, với bộ lọc nếu có thương hiệu
+        $productsQuery = Product::where('category_id', $category->id)
+            ->where('status', true);
 
+        // Nếu có thương hiệu trong request, lọc theo thương hiệu
+        if ($brandIds = request('brand')) {
+            $productsQuery->whereIn('brand_id', $brandIds);
+        }
+
+        // Lấy các sản phẩm theo bộ lọc
+        $products = $productsQuery->get();
+
+        // Đặt tên template
         $template = 'fontend.products.index';
 
         return view('fontend.layout', compact('template', 'products', 'categories', 'category', 'brands'));
+    }
+
+    public function showByBrand($brandSlug)
+    {
+        $brand = Brand::where('slug', $brandSlug)->firstOrFail();
+
+        $products = Product::where('brand_id', $brand->id)
+            ->where('status', true)
+            ->get();
+
+        $categories = Category::where('is_active', true)->whereNull('parent_id')->with('children')->get();
+
+        $brands = Brand::all();
+
+        $template = 'fontend.products.index';
+
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brand', 'brands'));
     }
 }

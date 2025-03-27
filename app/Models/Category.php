@@ -21,9 +21,10 @@ class Category extends Model
         'is_active' => 1
     ];
     // App\Models\Category.php
-
-
-
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
 
     public function children()
     {
@@ -36,6 +37,5 @@ class Category extends Model
     public function products()
     {
         return $this->hasMany(Product::class, 'category_id');
-
     }
 }

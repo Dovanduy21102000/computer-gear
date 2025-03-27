@@ -91,6 +91,7 @@
                                     @endforeach
                                 </ul>
                             </div>
+
                         </li>
                     </ul>
                     <!-- End List -->
@@ -102,7 +103,8 @@
                     </div>
                     <form method="GET" action="{{ route('client.products.index') }}">
                         <!-- Giữ category_id khi lọc thương hiệu -->
-                        <input type="hidden" name="category_id" value="{{ request()->has('category_id') ? request('category_id') : '' }}">
+                        <input type="hidden" name="category_id"
+                            value="{{ request()->has('category_id') ? request('category_id') : '' }}">
 
 
                         <div class="border-bottom pb-4 mb-4">
