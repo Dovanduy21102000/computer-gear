@@ -24,9 +24,11 @@ class AuthController extends Controller
     {
         $email = $request->input('email');
 
+
         $password = $request->input('password');
 
         $user = DB::table('users')->where('email', $email)->first();
+
 
         if ($user && $user->password === $password) {
             Auth::loginUsingId($user->id);

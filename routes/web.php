@@ -110,8 +110,14 @@ Route::middleware(['web'])->group(function () {
 
     Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
     Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
-    Route::get('/products/category/{categorySlug}', [ProductClientController::class, 'showByCategory'])->name('client.products.category');
+
     Route::get('/products/brand/{brandSlug}', [ProductClientController::class, 'showByBrand'])->name('client.products.brand');
+
+
+    Route::get('/products/category/{slug}', [ProductClientController::class, 'categoryProducts'])->name('client.products.category');
+    Route::get('/get-variant', [ProductClientController::class, 'getVariant'])->name('getVariant');
+    Route::get('/search', [ProductClientController::class, 'search'])->name('search');
+
 
 
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
@@ -120,6 +126,11 @@ Route::middleware(['web'])->group(function () {
     
     Route::get('/home', [HomeController::class, 'index'])->name('home');
 
+
+
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/about_us', [HomeController::class, 'about_us'])->name('about_us');
+    Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
 });
 
 Route::get('/api/districts/{province_id}', function ($province_id) {
@@ -144,6 +155,4 @@ Route::get('/momo-return', [MOMOController::class, 'handleReturn'])->name('momo.
 Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
 
 Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
-
-
 

@@ -102,6 +102,7 @@ class HomeController extends Controller
     }
 
 
+
     public function add(Request $request)
     {
         $request->validate([
@@ -150,4 +151,16 @@ class HomeController extends Controller
 
     //     return view('fontend.layout', compact('template', 'products', 'categories', 'category', 'brands'));
     // }
+
+
+    public function faqs(){
+        $template = 'fontend.home.faqs';
+        return view('fontend.layout', compact('template'));
+    }
+
+    public function about_us(){
+        $template = 'fontend.home.about_us';
+        return view('fontend.layout', compact('template'));
+    }
 }
+
