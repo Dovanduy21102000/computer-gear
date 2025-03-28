@@ -18,4 +18,15 @@ class HomeController extends Controller
         $template = 'fontend.home.index';
         return view('fontend.layout', compact('template', 'banners'));
     }
+
+
+    public function faqs(){
+        $template = 'fontend.home.faqs';
+        return view('fontend.layout', compact('template'));
+    }
+
+    public function about_us(){
+        $template = 'fontend.home.about_us';
+        return view('fontend.layout', compact('template'));
+    }
 }

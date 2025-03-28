@@ -518,12 +518,18 @@
                                      aria-haspopup="true" aria-expanded="false">Bài viết</a>
                              </li>
                              <!-- End Blog -->
+                             <li class="nav-item u-header__nav-item">
+                                <a class="nav-link u-header__nav-link" href="{{ route('about_us') }}">Về chúng tôi</a>
+                            </li>
 
-                             <!-- About us -->
+                            <li class="nav-item u-header__nav-item">
+                                <a class="nav-link u-header__nav-link" href="{{ route('faqs') }}">Câu hỏi thường gặp</a>
+                            </li>
+                           
                              <li class="nav-item u-header__nav-item">
                                  <a class="nav-link u-header__nav-link" href="{{ route('client.contacts.index') }}">Liên hệ</a>
                              </li>
-                             <!-- End About us -->
+                             
 
                          </ul>
                      </div>

@@ -43,37 +43,23 @@
                         <div class="js-slide">
                             <img class="img-fluid" src="../../assets/img/720X660/img2.jpg" alt="Image Description">
                         </div>
-                        <div class="js-slide">
-                            <img class="img-fluid" src="../../assets/img/720X660/img3.jpg" alt="Image Description">
-                        </div>
-                        <div class="js-slide">
-                            <img class="img-fluid" src="../../assets/img/720X660/img4.jpg" alt="Image Description">
-                        </div>
-                        <div class="js-slide">
-                            <img class="img-fluid" src="../../assets/img/720X660/img5.jpg" alt="Image Description">
-                        </div>
+
                     </div>
 
                     <div id="sliderSyncingThumb"
                         class="js-slick-carousel u-slick u-slick--slider-syncing u-slick--slider-syncing-size u-slick--gutters-1 u-slick--transform-off"
                         data-infinite="true" data-slides-show="5" data-is-thumbs="true"
                         data-nav-for="#sliderSyncingNav">
-                        <div class="js-slide" style="cursor: pointer;">
-                            <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
-                                alt="{{ $product->name }}">
-                        </div>
-                        <div class="js-slide" style="cursor: pointer;">
-                            <img class="img-fluid" src="../../assets/img/720X660/img2.jpg" alt="Image Description">
-                        </div>
-                        <div class="js-slide" style="cursor: pointer;">
-                            <img class="img-fluid" src="../../assets/img/720X660/img3.jpg" alt="Image Description">
-                        </div>
-                        <div class="js-slide" style="cursor: pointer;">
-                            <img class="img-fluid" src="../../assets/img/720X660/img4.jpg" alt="Image Description">
-                        </div>
-                        <div class="js-slide" style="cursor: pointer;">
-                            <img class="img-fluid" src="../../assets/img/720X660/img5.jpg" alt="Image Description">
-                        </div>
+                        @foreach ($images as $image)
+                            @foreach ($image->images as $img)
+                                <div class="js-slide">
+                                    <img class="img-fluid" src="{{ asset('storage/' . $img) }}" alt="Product Image">
+                                </div>
+                            @endforeach
+                        @endforeach
+
+
+
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 col-xl-4 mb-md-6 mb-lg-0">
@@ -93,9 +79,18 @@
                                 <span class="text-secondary font-size-13">(3 customer reviews)</span>
                             </a>
                         </div>
-                        <a href="#" class="d-inline-block max-width-150 ml-n2 mb-2"><img
-                                class="img-fluid"src="{{ asset('storage/' . $product->thumbnail) }}"
-                                alt="{{ $product->name }}"></a>
+                        <div class="d-flex align-items-center">
+                            <!-- Ảnh thương hiệu với kích thước nhỏ hơn -->
+
+
+                            <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
+                            @if ($product->brand)
+                                <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
+                                    Thương hiệu: <a href="#" class="text-dark">{{ $product->brand->name }}</a>
+                                </p>
+                            @endif
+                        </div>
+
                         <div class="mb-2">
                             <p>{!! $product->short_description !!}</p>
                         </div>
@@ -106,14 +101,15 @@
                 <div class="mx-md-auto mx-lg-0 col-md-6 col-lg-4 col-xl-3">
                     <div class="mb-2">
                         <div class="card p-5 border-width-2 border-color-1 borders-radius-17">
-                            <div class="text-gray-9 font-size-14 pb-2 border-color-1 border-bottom mb-3">Số lượng:
-                                <span
+                            <div class="text-gray-9 font-size-14 pb-2 border-color-1 border-bottom mb-3">Kho :
+                                <span id="productStock"
                                     class="{{ $product->quantity > 0 ? 'text-green' : 'text-danger' }} font-weight-bold">
                                     {{ $product->quantity }}
-                                </span> sản phẩm
+                                </span>
                             </div>
+
                             <div class="mb-3">
-                                <div class="font-size-24">
+                                <div class="font-size-24" id="productPrice">
                                     @if ($product->price_sale)
                                         <del
                                             class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
@@ -123,62 +119,98 @@
                                         {{ number_format($product->price, 0, ',', '.') }}₫
                                     @endif
                                 </div>
-
                             </div>
+
                             <div class="mb-3">
                                 <h6 class="font-size-14">Số lượng</h6>
                                 <!-- Quantity -->
                                 <div class="border rounded-pill py-1 w-md-60 height-35 px-3 border-color-1">
                                     <div class="js-quantity row align-items-center">
                                         <div class="col">
-                                            <input
+                                            <input id="quantityInput"
                                                 class="js-result form-control h-auto border-0 rounded p-0 shadow-none"
-                                                type="text" value="1">
+                                                type="number" value="1" min="1"
+                                                max="{{ $product->quantity }}">
                                         </div>
-                                        <div class="col-auto pr-1">
-                                            <a class="js-minus btn btn-icon btn-xs btn-outline-secondary rounded-circle border-0"
-                                                href="javascript:;">
-                                                <small class="fas fa-minus btn-icon__inner"></small>
-                                            </a>
-                                            <a class="js-plus btn btn-icon btn-xs btn-outline-secondary rounded-circle border-0"
-                                                href="javascript:;">
-                                                <small class="fas fa-plus btn-icon__inner"></small>
-                                            </a>
-                                        </div>
+
                                     </div>
                                 </div>
+                                <small id="quantityError" class="text-danger d-none">Số lượng không được vượt quá tồn
+                                    kho</small>
                                 <!-- End Quantity -->
                             </div>
-                            <div class="mb-3">
-                                <h6 class="font-size-14">Color</h6>
-                                <!-- Select -->
-                                <select class="js-select selectpicker dropdown-select btn-block col-12 px-0"
-                                    data-style="btn-sm bg-white font-weight-normal py-2 border">
-                                    <option value="one" selected>White with Gold</option>
-                                    <option value="two">Red</option>
-                                    <option value="three">Green</option>
-                                    <option value="four">Blue</option>
-                                </select>
-                                <!-- End Select -->
-                            </div>
-                            <div class="mb-2 pb-0dot5">
-                                <a href="#" class="btn btn-block btn-primary-dark"><i
-                                        class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng</a>
-                            </div>
-                            <div class="mb-3">
-                                <a href="#" class="btn btn-block btn-dark">Mua ngay</a>
-                            </div>
-                            <div class="flex-content-center flex-wrap">
-                                <a href="#" class="text-gray-6 font-size-13 mr-2"><i
-                                        class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích</a>
+                            <!-- End Quantity -->
+                        </div>
+                        @php
+                            $colors = [];
+                            $rams = [];
 
+                            foreach ($variants as $variant) {
+                                foreach ($variant->attributeValues as $attributeValue) {
+                                    if (isset($attributeValue->attribute)) {
+                                        $attributeName = trim($attributeValue->attribute->name);
+                                        $attributeValueText = trim($attributeValue->value);
+
+                                        if ($attributeName === 'màu sắc') {
+                                            $colors[$attributeValueText] = $attributeValueText;
+                                        }
+                                        if ($attributeName === 'RAM') {
+                                            $rams[$attributeValueText] = $attributeValueText;
+                                        }
+                                    }
+                                }
+                            }
+                        @endphp
+
+                        @if (!empty($colors) || !empty($rams))
+                            <div class="mb-3">
+                                <h6 class="font-size-14">Chọn màu</h6>
+                                <select id="colorSelect"
+                                    class="js-select selectpicker dropdown-select btn-block col-12 px-0"
+                                    data-style="btn-sm bg-white font-weight-normal py-2 border">
+                                    <option value="" selected disabled>Vui lòng chọn màu</option>
+                                    <!-- Đổi nội dung -->
+                                    @foreach ($colors as $color)
+                                        <option value="{{ $color }}">{{ $color }}</option>
+                                    @endforeach
+                                </select>
                             </div>
+
+                            <div class="mb-3">
+                                <h6 class="font-size-14">Chọn RAM</h6>
+                                <select id="ramSelect"
+                                    class="js-select selectpicker dropdown-select btn-block col-12 px-0"
+                                    data-style="btn-sm bg-white font-weight-normal py-2 border">
+                                    <option value="" selected disabled>Vui lòng chọn RAM</option>
+                                    <!-- Đổi nội dung -->
+                                    @foreach ($rams as $ram)
+                                        <option value="{{ $ram }}">{{ $ram }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+
+                        @endif
+
+                        <div class="mb-2 pb-0dot5" style="margin-top: 10px">
+                            <a href="#" id="addToCartBtn" class="btn btn-block btn-primary-dark">
+                                <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
+                            </a>
+                        </div>
+                        <div class="mb-3">
+                            <a href="#" id="buyNowBtn" class="btn btn-block btn-dark">Mua ngay</a>
+                        </div>
+                        <div class="flex-content-center flex-wrap">
+                            <a href="#" class="text-gray-6 font-size-13 mr-2"><i
+                                    class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích</a>
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- End Single Product Body -->
+    </div>
+    <!-- End Single Product Body -->
     </div>
     <div class="bg-gray-7 pt-6 pb-3 mb-6">
         <div class="container">
@@ -740,3 +772,190 @@
 
 </main>
 <!-- ========== END MAIN CONTENT ========== -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let quantityInput = document.getElementById("quantityInput");
+        let maxQuantity = parseInt(quantityInput.getAttribute("max"));
+        let quantityError = document.getElementById("quantityError");
+
+        // Kiểm tra khi nhập tay vào input
+        quantityInput.addEventListener("input", function() {
+            let currentValue = parseInt(this.value);
+            if (currentValue > maxQuantity) {
+                this.value = maxQuantity;
+                quantityError.classList.remove("d-none");
+            } else {
+                quantityError.classList.add("d-none");
+            }
+        });
+
+
+    });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        let variantCache = {}; // Bộ nhớ đệm để lưu trữ kết quả biến thể
+
+        $('#colorSelect, #ramSelect').change(function() {
+            let color = $('#colorSelect').val();
+            let ram = $('#ramSelect').val();
+
+            console.log("🎨 Chọn màu:", color, "💾 Chọn RAM:", ram);
+
+            if (color && ram) {
+                let cacheKey = color + "_" + ram;
+
+                if (variantCache[cacheKey]) {
+                    console.log("⚡ Dữ liệu lấy từ cache:", variantCache[cacheKey]);
+                    updateUI(variantCache[cacheKey]); // Cập nhật giao diện ngay
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ route('getVariant') }}',
+                    type: 'GET',
+                    data: {
+                        product_id: {{ $product->id }},
+                        color: color,
+                        ram: ram
+                    },
+                    beforeSend: function() {
+                        console.log("⏳ Gửi request đến server...");
+                        $('#productPrice').html(
+                            '<span class="text-muted">Đang tải...</span>');
+                    },
+                    success: function(response) {
+                        console.log("✅ Phản hồi từ server:", response);
+
+                        if (!response || Object.keys(response).length === 0) {
+                            console.warn("⚠️ Không có dữ liệu biến thể!");
+                            return;
+                        }
+
+                        variantCache[cacheKey] = response; // Lưu vào cache
+                        updateUI(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("❌ Lỗi AJAX:", error);
+                        console.error("📌 Chi tiết lỗi:", xhr.responseText);
+                    }
+                });
+            }
+        });
+
+        function updateUI(response) {
+            $('#productPrice').html(
+                response.price_sale ?
+                `<del class="text-muted">${response.price}</del> 
+     <span class="text-danger">${response.price_sale}</span>` :
+                `${response.price}`
+            );
+
+            let quantity = response.quantity ?? 0;
+            let quantityInput = $('#quantityInput');
+
+            // Cập nhật giá trị `max`
+            quantityInput.attr('max', quantity);
+
+            // Nếu số lượng đang nhập lớn hơn max mới, đặt lại bằng max
+            if (parseInt(quantityInput.val()) > quantity) {
+                quantityInput.val(quantity);
+            }
+
+            $('#productStock').html(quantity > 0 ?
+                `<span class="text-green font-weight-bold">${quantity}</span> sản phẩm` :
+                `<span class="text-danger font-weight-bold">Hết hàng</span>`
+            );
+
+            // Nếu hết hàng, disable nút mua hàng
+            $('#addToCartBtn, #buyNowBtn').prop('disabled', quantity <= 0);
+            $('#quantityError').addClass('d-none'); // Ẩn lỗi nếu có
+        }
+
+        // Kiểm tra số lượng nhập tay
+        $('#quantityInput').on('input', function() {
+            let max = parseInt($(this).attr('max'), 10);
+            let min = parseInt($(this).attr('min'), 10);
+            let value = $(this).val();
+
+            if (value === "") return; // Cho phép xóa tạm thời
+
+            value = parseInt(value, 10);
+
+            if (isNaN(value) || value < min) {
+                $(this).val(min);
+                $('#quantityError').addClass('d-none');
+            } else if (value > max) {
+                $(this).val(max);
+                $('#quantityError').removeClass('d-none');
+            } else {
+                $('#quantityError').addClass('d-none');
+            }
+        });
+
+        // Khi mất focus, nếu rỗng thì đặt về min
+        $('#quantityInput').on('blur', function() {
+            if ($(this).val() === "") {
+                $(this).val($(this).attr('min'));
+            }
+        });
+
+
+        function validateSelection(showAlert = false) {
+            let colorSelect = $('#colorSelect');
+            let ramSelect = $('#ramSelect');
+            let color = colorSelect.val();
+            let ram = ramSelect.val();
+            let quantity = parseInt($('#quantityInput').attr('max')) || 0;
+
+            let hasVariants = (colorSelect.length > 0 && colorSelect.find('option').length > 1) ||
+                (ramSelect.length > 0 && ramSelect.find('option').length > 1);
+
+            // Nếu sản phẩm không có biến thể, chỉ kiểm tra tồn kho
+            if (!hasVariants) {
+                if (quantity <= 0) {
+                    if (showAlert) alert("⚠️ Sản phẩm đã hết hàng! Không thể mua.");
+                    return false;
+                }
+                return true;
+            }
+
+            // Kiểm tra nếu sản phẩm có biến thể nhưng chưa chọn đủ
+            if (colorSelect.length > 0 && !color) {
+                if (showAlert) alert("⚠️ Vui lòng chọn màu sắc trước khi tiếp tục!");
+                return false;
+            }
+            if (ramSelect.length > 0 && !ram) {
+                if (showAlert) alert("⚠️ Vui lòng chọn bộ nhớ RAM trước khi tiếp tục!");
+                return false;
+            }
+            if (quantity <= 0) {
+                if (showAlert) alert("⚠️ Sản phẩm đã hết hàng! Không thể mua.");
+                return false;
+            }
+
+            return true;
+        }
+
+        function updateButtonState() {
+            if (validateSelection(false)) {
+                $('#addToCartBtn, #buyNowBtn').prop('disabled', false);
+            } else {
+                $('#addToCartBtn, #buyNowBtn').prop('disabled', true);
+            }
+        }
+
+        $('#addToCartBtn, #buyNowBtn').click(function(event) {
+            if (!validateSelection(true)) {
+                event.preventDefault();
+            } else {
+                console.log("✅ Điều kiện hợp lệ, tiếp tục...");
+            }
+        });
+
+        // Kiểm tra trạng thái ngay từ đầu
+        updateButtonState();
+    });
+</script>
