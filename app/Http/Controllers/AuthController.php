@@ -23,11 +23,18 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $email = $request->input('email');
+<<<<<<< HEAD
 
         $password = $request->input('password');
 
         $user = DB::table('users')->where('email', $email)->first();
 
+=======
+        $password = $request->input('password');
+
+        $user = DB::table('users')->where('email', $email)->first();
+
+>>>>>>> duc-complete-product
         if ($user && $user->password === $password) {
             Auth::loginUsingId($user->id);
             if ($user->role === 'admin') {
