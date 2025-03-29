@@ -28,7 +28,7 @@ class RegisterController extends Controller
     }
     public function register(Request $request)
     {
-        // Validate dữ liệu
+       
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -40,7 +40,6 @@ class RegisterController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Tạo tài khoản mới
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
