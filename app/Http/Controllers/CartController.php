@@ -17,13 +17,20 @@ class CartController extends Controller
     // Show Cart Page
     public function index()
     {
-        $userId = 10;
-
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để thêm vào giỏ hàng.');
+        }
+        $userId = Auth::id();
         // Get the cart for the user
         $cart = Cart::where('user_id', $userId)->first();
 
         // If the cart exists, get its items with associated products
-        $cartItems = CartItem::with(['product', 'productVariant'])->get();
+        $cartItems = [];
+        if ($cart) {
+            $cartItems = CartItem::where('cart_id', $cart->id)
+                ->with(['product', 'productVariant'])
+                ->get();
+        }
 
         $template = 'fontend.cart.index';
         return view('fontend.layout', compact('template', 'cart', 'cartItems'));
@@ -37,7 +44,10 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $userId = 10;
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để thêm vào giỏ hàng.');
+        }
+        $userId = Auth::id();
 
         $cart = Cart::firstOrCreate(['user_id' => $userId]);
 
@@ -116,43 +126,42 @@ class CartController extends Controller
     }
 
     public function applyCoupon(Request $request)
-{
-    $request->validate([
-        'coupon_code' => 'required|string|exists:coupons,code',
-    ]);
+    {
+        $request->validate([
+            'coupon_code' => 'required|string|exists:coupons,code',
+        ]);
 
-    $coupon = Coupon::where('code', $request->coupon_code)
-        ->where('status', 1)
-        ->where('expire_date', '>=', now())
-        ->first();
+        $coupon = Coupon::where('code', $request->coupon_code)
+            ->where('status', 1)
+            ->where('expire_date', '>=', now())
+            ->first();
 
-    if (!$coupon) {
-        return back()->with('error', 'Invalid or expired coupon.');
-    }
-
-    // Ensure user hasn't used the coupon before
-    if (Auth::check()) {
-        $couponUsed = CouponUser::where('user_id', Auth::id())
-            ->where('coupon_id', $coupon->id)
-            ->exists();
-        if ($couponUsed) {
-            return back()->with('error', 'You have already used this coupon.');
+        if (!$coupon) {
+            return back()->with('error', 'Invalid or expired coupon.');
         }
+
+        // Ensure user hasn't used the coupon before
+        if (Auth::check()) {
+            $couponUsed = CouponUser::where('user_id', Auth::id())
+                ->where('coupon_id', $coupon->id)
+                ->exists();
+            if ($couponUsed) {
+                return back()->with('error', 'You have already used this coupon.');
+            }
+        }
+
+        // Store coupon details in session
+        session([
+            'coupon' => [
+                'id' => $coupon->id,
+                'code' => $coupon->code,
+                'type' => $coupon->type, // 'fixed' or 'percentage'
+                'value' => $coupon->price, // Discount value (amount or percentage)
+                'maximum_amount' => $coupon->maximum_amount, // Limit discount for percentage type
+                'min_order_total' => $coupon->min_order_total // Minimum order value required
+            ]
+        ]);
+
+        return back()->with('success', 'Coupon applied successfully!');
     }
-
-    // Store coupon details in session
-    session([
-        'coupon' => [
-            'id' => $coupon->id,
-            'code' => $coupon->code,
-            'type' => $coupon->type, // 'fixed' or 'percentage'
-            'value' => $coupon->price, // Discount value (amount or percentage)
-            'maximum_amount' => $coupon->maximum_amount, // Limit discount for percentage type
-            'min_order_total' => $coupon->min_order_total // Minimum order value required
-        ]
-    ]);
-
-    return back()->with('success', 'Coupon applied successfully!');
-}
-
 }
