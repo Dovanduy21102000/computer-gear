@@ -94,8 +94,7 @@
                                     <textarea id="ck_content" name="content" placeholder="CONTENT" rows="" class="form-control"></textarea>
                                     <style>
                                         .ck-editor__editable {
-                                            min-height: 600px !important;
-                                            max-height: 800px;
+                                            min-height: 400px !important;
                                             /* Optional */
                                             height: auto !important;
                                         }
@@ -297,15 +296,12 @@
 
                             <!-- Submit Button -->
                             <div class="row mb-3">
-                                <div class="col-sm-10 offset-sm-2">
+                                <div class="col-sm-10 offset-sm-2 d-flex gap-2">
                                     <button type="submit" class="btn btn-primary">Thêm mới</button>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-10 offset-sm-2">
                                     <a href="{{ route($urlBase . 'index') }}" class="btn btn-secondary">Quay lại</a>
                                 </div>
                             </div>
+
 
                         </form><!-- End General Form Elements -->
 

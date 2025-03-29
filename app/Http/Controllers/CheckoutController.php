@@ -9,13 +9,14 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class CheckoutController extends Controller
 {
     public function index()
     {
-        $userId = 10; // Example user ID
+        $userId = Auth::id();; // Example user ID
         $user = User::find($userId);
 
         // Get the cart for the user
@@ -107,7 +108,7 @@ class CheckoutController extends Controller
 
         // dd($request->all());
         // Get User ID
-        $userId = 10; // Replace with authenticated user
+        $userId = Auth::id(); // Replace with authenticated user
 
         // Check if Cart Exists
         $cart = Cart::where('user_id', $userId)->first();
