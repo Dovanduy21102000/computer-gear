@@ -43,25 +43,22 @@ class LoginController extends Controller
         'email' => 'required|email',
         'password' => 'required|min:6',
     ]);
-
     
     $user = User::where('email', $request->email)->first();
-
     
+   
     if (!$user) {
         return back()->withErrors(['login_error' => 'Email không tồn tại!']);
     }
-
     
-    if ($request->password !== $user->password) {
+    if (!Hash::check($request->password, $user->password)) {
         return back()->withErrors(['login_error' => 'Mật khẩu không chính xác!']);
     }
-
     
     Auth::login($user);
     Session::put('user', $user);
-
-    return redirect()->route('home.index')->with('success', 'Đăng nhập thành công!');
+    
+    return redirect()->route('home.index')->with('success', 'Đăng nhập thành công. Xin chào '.$user->name);
 }
 
     
