@@ -2,40 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\AuthRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
-    public function __construct() {}
-    // function index 
     public function index()
     {
-        if (Auth::id() > 0) {
+        if (Auth::check()) { // Use Auth::check() instead of checking Auth::id() > 0
             return redirect()->route('dashboard.index');
         }
         return view('backend.auth.login');
     }
-    //đăng nhập 
+
     public function login(Request $request)
     {
-        $email = $request->input('email');
-<<<<<<< HEAD
+        $credentials = $request->only('email', 'password'); // Retrieve email & password
 
-        if (Auth::attempt($credentials)) {  // Laravel's built-in authentication
+        if (Auth::attempt($credentials)) { // Laravel's built-in authentication
             $user = Auth::user();
 
-=======
-        $password = $request->input('password');
-
-        $user = DB::table('users')->where('email', $email)->first();
-
->>>>>>> duc-complete-product
-        if ($user && $user->password === $password) {
-            Auth::loginUsingId($user->id);
             if ($user->role === 'admin') {
                 return redirect()->route('dashboard.index')->with('success', 'Đăng nhập thành công');
             }
@@ -47,8 +33,6 @@ class AuthController extends Controller
         return redirect()->route('auth.admin')->with('error', 'Email hoặc mật khẩu không chính xác!');
     }
 
-
-    //Đăng xuất
     public function logout(Request $request)
     {
         Auth::logout();

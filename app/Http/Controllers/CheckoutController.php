@@ -76,6 +76,31 @@ class CheckoutController extends Controller
         return view('fontend.layout', compact('template', 'provinces', 'districtsByProvince', 'cartItems', 'appliedCoupon', 'discount', 'user', 'totalPrice'));
     }
 
+    public function trackOrderView(Request $request)
+    {
+        $template = 'fontend.home.check_order';
+        return view('fontend.layout', compact('template'));
+    }
+
+    public function trackOrder(Request $request)
+    {
+        $request->validate([
+            'order_code' => 'required|string'
+        ]);
+
+        $order = Order::where('code', $request->order_code)
+            ->with(['orderItems.product']) // Load related products
+            ->first();
+
+        if (!$order) {
+            return redirect()->route('order.track')->with('error', 'Order not found. Please check your Order ID.');
+        }
+
+
+        $template = 'fontend.home.check_order';
+        return view('fontend.layout', compact('template', 'order'));
+    }
+
 
     public function processCheckout(Request $request)
     {
