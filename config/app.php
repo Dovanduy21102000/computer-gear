@@ -214,4 +214,6 @@ return [
 
     'VNP_RETURN_URL' => env('APP_URL') . 'vnpay/return',
     'VNP_IPN_URL' => env('APP_URL') . 'vnpay/ipn',
+    'pagination' => 'bootstrap-5',
+
 ];

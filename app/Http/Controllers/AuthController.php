@@ -22,11 +22,20 @@ class AuthController extends Controller
     //đăng nhập 
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $email = $request->input('email');
+<<<<<<< HEAD
 
         if (Auth::attempt($credentials)) {  // Laravel's built-in authentication
             $user = Auth::user();
 
+=======
+        $password = $request->input('password');
+
+        $user = DB::table('users')->where('email', $email)->first();
+
+>>>>>>> duc-complete-product
+        if ($user && $user->password === $password) {
+            Auth::loginUsingId($user->id);
             if ($user->role === 'admin') {
                 return redirect()->route('dashboard.index')->with('success', 'Đăng nhập thành công');
             }
