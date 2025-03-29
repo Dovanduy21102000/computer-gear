@@ -91,8 +91,15 @@
                             <div class="row mb-3">
                                 <label for="content" class="col-sm-2 col-form-label">Nội dung</label>
                                 <div class="editor-container">
-                                    <textarea id="ck_content" name="content" placeholder="CONTENT" class="form-control"></textarea>
-
+                                    <textarea id="ck_content" name="content" placeholder="CONTENT" rows="" class="form-control"></textarea>
+                                    <style>
+                                        .ck-editor__editable {
+                                            min-height: 600px !important;
+                                            max-height: 800px;
+                                            /* Optional */
+                                            height: auto !important;
+                                        }
+                                    </style>
 
                                     <!-- CKEditor 5 Initialization Script -->
                                     <script>

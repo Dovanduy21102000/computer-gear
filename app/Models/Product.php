@@ -22,6 +22,7 @@ class Product extends Model
         'price',
         'price_sale',
         'quantity',
+        'quantity_sold',
         'status',
         'views',
         'is_variant',
@@ -42,7 +43,8 @@ class Product extends Model
     {
         return $this->belongsTo(Brand::class, 'brand_id');
     }
-    public function variants() {
+    public function variants()
+    {
         return $this->hasMany(ProductVariant::class);
     }
 }

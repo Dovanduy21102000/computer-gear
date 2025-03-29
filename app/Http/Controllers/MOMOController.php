@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -71,7 +72,6 @@ class MOMOController extends Controller
             'shipping_address' => $request->shipping_address,
             'province_id' => $request->province_id,
             'district_id' => $request->district_id,
-            'specific_address' => $request->specific_address,
             'coupon_code' => session('coupon.code', null),
             'coupon_discount' => $couponDiscount,
             'total_price' => $totalPrice,
@@ -93,6 +93,7 @@ class MOMOController extends Controller
                 'quantity' => $item->quantity,
                 'product_info' => json_encode($item->product->toArray()),
             ]);
+            Product::where('id', $item->product_id)->increment('quantity_sold', $item->quantity);
         }
 
         // MoMo API Request
