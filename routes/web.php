@@ -83,12 +83,12 @@ Route::prefix('products/{product}/variants')->group(function () {
 
 // Client Routes
 Route::middleware(['web'])->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login'); // Form đăng nhập client
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login.form'); // Form đăng nhập client
     Route::post('login', [LoginController::class, 'login'])->name('login'); // Xử lý đăng nhập client
     Route::post('logout', [LoginController::class, 'logout'])->name('logout'); // Xử lý đăng xuất client
 
-    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register'); // Form đăng ký
-    Route::post('register', [RegisterController::class, 'register']); // Xử lý đăng ký
+    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register.form'); // Form đăng ký
+    Route::post('register', [RegisterController::class, 'register'])->name('register'); // Xử lý đăng ký
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
