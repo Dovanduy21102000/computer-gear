@@ -18,4 +18,12 @@ class OrderItem extends Model
         'price_sale',
         'product_info'
     ];
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 }

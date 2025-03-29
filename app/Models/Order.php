@@ -29,12 +29,22 @@ class Order extends Model
         'notes',
     ];
     public $attributes = [
-        'payment_status' => 1
+        'payment_status' => 'pending'
+    ];
+
+    protected $casts = [
+        'payment_status' => 'integer',
+        'status' => 'string',
+
     ];
 
     // Liên kết với bảng users (Người dùng)
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function product()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

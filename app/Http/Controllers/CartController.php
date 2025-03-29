@@ -116,39 +116,43 @@ class CartController extends Controller
     }
 
     public function applyCoupon(Request $request)
-    {
-        $request->validate([
-            'coupon_code' => 'required|string|exists:coupons,code',
-        ]);
+{
+    $request->validate([
+        'coupon_code' => 'required|string|exists:coupons,code',
+    ]);
 
-        $coupon = Coupon::where('code', $request->coupon_code)
-            ->where('status', 1)
-            ->where('expire_date', '>=', now())
-            ->first();
+    $coupon = Coupon::where('code', $request->coupon_code)
+        ->where('status', 1)
+        ->where('expire_date', '>=', now())
+        ->first();
 
-        if (!$coupon) {
-            return back()->with('error', 'Invalid or expired coupon.');
-        }
-
-        // Check if the user already used this coupon
-        if (Auth::check()) {
-            $couponUsed = CouponUser::where('user_id', Auth::id())
-                ->where('coupon_id', $coupon->id)
-                ->exists();
-            if ($couponUsed) {
-                return back()->with('error', 'You have already used this coupon.');
-            }
-        }
-
-        // Store coupon in session
-        session([
-            'coupon' => [
-                'id' => $coupon->id,
-                'code' => $coupon->code,
-                'discount' => $coupon->price, // Assuming price is the discount amount
-            ]
-        ]);
-
-        return back()->with('success', 'Coupon applied successfully!');
+    if (!$coupon) {
+        return back()->with('error', 'Invalid or expired coupon.');
     }
+
+    // Ensure user hasn't used the coupon before
+    if (Auth::check()) {
+        $couponUsed = CouponUser::where('user_id', Auth::id())
+            ->where('coupon_id', $coupon->id)
+            ->exists();
+        if ($couponUsed) {
+            return back()->with('error', 'You have already used this coupon.');
+        }
+    }
+
+    // Store coupon details in session
+    session([
+        'coupon' => [
+            'id' => $coupon->id,
+            'code' => $coupon->code,
+            'type' => $coupon->type, // 'fixed' or 'percentage'
+            'value' => $coupon->price, // Discount value (amount or percentage)
+            'maximum_amount' => $coupon->maximum_amount, // Limit discount for percentage type
+            'min_order_total' => $coupon->min_order_total // Minimum order value required
+        ]
+    ]);
+
+    return back()->with('success', 'Coupon applied successfully!');
+}
+
 }
