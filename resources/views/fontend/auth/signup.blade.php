@@ -32,12 +32,6 @@
                 <label for="phone">Số điện thoại</label>
                 <input type="text" class="form-control" name="phone" id="phone" placeholder="Nhập số điện thoại">
             </div>
-
-            <div class="form-group">
-                <label for="avatar">Ảnh đại diện</label>
-                <input type="file" class="form-control-file" name="avatar" id="avatar">
-            </div>
-
             <div class="form-group">
                 <label for="password">Mật khẩu <span class="text-danger">*</span></label>
                 <input type="password" class="form-control" name="password" id="password" placeholder="Nhập mật khẩu" required>
