@@ -18,4 +18,18 @@ class OrderItem extends Model
         'price_sale',
         'product_info'
     ];
+
+    protected $casts = [
+        'product_info' => 'array',
+    ];
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

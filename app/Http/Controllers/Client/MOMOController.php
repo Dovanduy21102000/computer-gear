@@ -8,7 +8,9 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -30,7 +32,7 @@ class MOMOController extends Controller
     public function createPayment(Request $request)
     {
         // Get User ID
-        $userId = 10; // Replace with authenticated user
+        $userId = Auth::id();
 
         // Check if Cart Exists
         $cart = Cart::where('user_id', $userId)->first();
@@ -50,7 +52,7 @@ class MOMOController extends Controller
         // Apply Coupon Discount
         $coupon = session('coupon', null);
         $couponDiscount = 0;
-        
+
         if ($coupon) {
             if ($totalPrice >= $coupon['min_order_total']) { // Check min order total condition
                 if ($coupon['type'] === 'percentage') {
@@ -60,7 +62,7 @@ class MOMOController extends Controller
                 }
             }
         }
-        
+
         $finalPrice = max(0, $totalPrice - $couponDiscount); // Prevent negative prices
 
         // Create Order Before Payment
@@ -73,7 +75,6 @@ class MOMOController extends Controller
             'shipping_address' => $request->shipping_address,
             'province_id' => $request->province_id,
             'district_id' => $request->district_id,
-            'specific_address' => $request->specific_address,
             'coupon_code' => session('coupon.code', null),
             'coupon_discount' => $couponDiscount,
             'total_price' => $totalPrice,
@@ -95,6 +96,7 @@ class MOMOController extends Controller
                 'quantity' => $item->quantity,
                 'product_info' => json_encode($item->product->toArray()),
             ]);
+            Product::where('id', $item->product_id)->increment('quantity_sold', $item->quantity);
         }
 
         // MoMo API Request
@@ -156,10 +158,10 @@ class MOMOController extends Controller
             // dd(1123);
             $order->update([
                 'payment_status' => 1,
-                'status' => 'completed'
+                'status' => 'pending'
             ]);
 
-           
+
             $cart = Cart::where('user_id', $order->user_id)->first();
             if ($cart) {
                 CartItem::where('cart_id', $cart->id)->delete();
@@ -186,7 +188,7 @@ class MOMOController extends Controller
         if ($request->input('resultCode') == 0) {
             $order->update([
                 'payment_status' => 1,
-                'status' => 'completed'
+                'status' => 'pending'
             ]);
 
             return response()->json(['message' => 'Order confirmed'], 200);

@@ -7,15 +7,17 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class CheckoutController extends Controller
 {
     public function index()
     {
-        $userId = 10; // Example user ID
+        $userId = Auth::id();; // Example user ID
         $user = User::find($userId);
 
         // Get the cart for the user
@@ -76,13 +78,38 @@ class CheckoutController extends Controller
         return view('fontend.layout', compact('template', 'provinces', 'districtsByProvince', 'cartItems', 'appliedCoupon', 'discount', 'user', 'totalPrice'));
     }
 
+    public function trackOrderView(Request $request)
+    {
+        $template = 'fontend.home.check_order';
+        return view('fontend.layout', compact('template'));
+    }
+
+    public function trackOrder(Request $request)
+    {
+        $request->validate([
+            'order_code' => 'required|string'
+        ]);
+
+        $order = Order::where('code', $request->order_code)
+            ->with(['orderItems.product']) // Load related products
+            ->first();
+
+        if (!$order) {
+            return redirect()->route('order.track')->with('error', 'Order not found. Please check your Order ID.');
+        }
+
+
+        $template = 'fontend.home.check_order';
+        return view('fontend.layout', compact('template', 'order'));
+    }
+
 
     public function processCheckout(Request $request)
     {
 
         // dd($request->all());
         // Get User ID
-        $userId = 10; // Replace with authenticated user
+        $userId = Auth::id(); // Replace with authenticated user
 
         // Check if Cart Exists
         $cart = Cart::where('user_id', $userId)->first();
@@ -113,7 +140,6 @@ class CheckoutController extends Controller
             'shipping_address' => $request->shipping_address,
             'province_id' => $request->province_id,
             'district_id' => $request->district_id,
-            'specific_address' => $request->specific_address,
             'coupon_code' => session('coupon.code', null),
             'coupon_discount' => $couponDiscount,
             'total_price' => $totalPrice,
@@ -135,6 +161,7 @@ class CheckoutController extends Controller
                 'quantity' => $item->quantity,
                 'product_info' => json_encode($item->product->toArray()),
             ]);
+            Product::where('id', $item->product_id)->increment('quantity_sold', $item->quantity);
         }
         return redirect('/')->with('success', 'Thanh toán thành công!');
     }

@@ -22,6 +22,7 @@ class Product extends Model
         'price',
         'price_sale',
         'quantity',
+        'quantity_sold',
         'status',
         'views',
         'is_variant',

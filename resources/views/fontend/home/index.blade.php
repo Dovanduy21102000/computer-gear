@@ -937,7 +937,7 @@
                                                     </h5>
                                                     <div class="mb-2">
                                                         <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                            class="d-block text-center"><img class="img-fluid"
+                                                            class="d-block text-center "><img class="img-fluid"
                                                                 src="{{ asset('storage/' . $product->thumbnail) }}"
                                                                 alt="Image Description"></a>
                                                     </div>

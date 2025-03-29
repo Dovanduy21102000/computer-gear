@@ -89,10 +89,6 @@
                             </table>
                         </div>
                         <!-- End Table -->
-
-                        <div class="d-flex justify-content-center mt-2">
-                            {{ $data->links() }}
-                        </div>
                     </div>
                 </div>
 
