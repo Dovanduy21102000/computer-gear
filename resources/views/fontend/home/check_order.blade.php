@@ -52,7 +52,7 @@
                 <!-- End Order Tracking Form -->
 
                 <!-- Order Details Section -->
-                @if ($order)
+                @if (isset($order))
                     <h3>Order Details</h3>
                     <p><strong>Order Code:</strong> {{ $order->code }}</p>
                     <p><strong>Status:</strong>
@@ -82,13 +82,15 @@
                         <tbody>
                             @foreach ($order->orderItems as $item)
                                 @php
-                                    $product = $item->product_info; // Decoded JSON data as array
+                                    $product = json_decode($item->product_info, true) ?? [];
                                 @endphp
                                 <tr>
                                     <td>{{ $product['name'] ?? 'Unknown' }}</td>
                                     <td>{{ $product['sku'] ?? 'N/A' }}</td>
                                     <td>{{ $item->quantity }}</td>
-                                    <td>{{ number_format($product['price'] * $item->quantity, 0, ',', '.') }} đ</td>
+                                    <td>
+                                        {{ isset($product['price']) ? number_format(floatval($product['price']) * $item->quantity, 0, ',', '.') . ' đ' : 'N/A' }}
+                                    </td>
                                     <td>
                                         @if (!empty($product['thumbnail']))
                                             <img src="{{ asset('storage/' . $product['thumbnail']) }}" width="50"
@@ -101,8 +103,6 @@
                             @endforeach
                         </tbody>
                     </table>
-                @else
-                    <p>No order found.</p>
                 @endif
             </div>
         </div>
