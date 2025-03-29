@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -17,11 +18,16 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password'); // Retrieve email & password
+        $email = $request->input('email');
 
-        if (Auth::attempt($credentials)) { // Laravel's built-in authentication
-            $user = Auth::user();
 
+        $password = $request->input('password');
+
+        $user = DB::table('users')->where('email', $email)->first();
+
+
+        if ($user && $user->password === $password) {
+            Auth::loginUsingId($user->id);
             if ($user->role === 'admin') {
                 return redirect()->route('dashboard.index')->with('success', 'Đăng nhập thành công');
             }
@@ -33,6 +39,8 @@ class AuthController extends Controller
         return redirect()->route('auth.admin')->with('error', 'Email hoặc mật khẩu không chính xác!');
     }
 
+
+    //Đăng xuất
     public function logout(Request $request)
     {
         Auth::logout();

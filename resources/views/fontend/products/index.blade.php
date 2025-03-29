@@ -190,7 +190,9 @@
 
                     </div>
                     <nav class="px-3 flex-horizontal-center text-gray-20">
-                        <span>Trang {{ $products->currentPage() }} / {{ $products->lastPage() }}</span>
+                        @if ($products->count())
+                            <span>Trang {{ $products->currentPage() }} / {{ $products->lastPage() }}</span>
+                        @endif
                     </nav>
 
                 </div>
@@ -209,7 +211,7 @@
                                         <div class="product-item__inner px-xl-4 p-3">
                                             <div class="product-item__body pb-xl-2">
                                                 <div class="mb-2">
-                                                    <a href="{{ route('client.products.category', $product->category->slug ?? '#') }}"
+                                                    <a href="{{ route('client.products.category', ['slug' => $product->category->slug]) }}"
                                                         class="font-size-12 text-gray-5">{{ $product->category->name ?? 'Danh mục' }}</a>
                                                 </div>
                                                 <h5 class="mb-1 product-item__title">
@@ -247,8 +249,8 @@
                                                             </div>
                                                         @endif
                                                     </div>
-                                                    
-                                                    
+
+
                                                     <div class="d-none d-xl-block prodcut-add-cart">
                                                         <form action="{{ route('cart.add') }}" method="POST">
                                                             @csrf
@@ -324,14 +326,15 @@
                                                             <div class="text-danger font-weight-bold">
                                                                 {{ number_format($product->price_sale, 0, ',', '.') }}đ
                                                             </div>
-                                                            <del class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                                            <del
+                                                                class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
                                                         @else
                                                             <div class="text-gray-100 font-weight-bold">
                                                                 {{ number_format($product->price, 0, ',', '.') }}đ
                                                             </div>
                                                         @endif
                                                     </div>
-                                                    
+
                                                     <ul class="font-size-12 p-0 text-gray-110 mb-4 d-none d-md-block">
                                                         <li class="line-clamp-1 mb-1 list-bullet">Chất lượng cao cấp
                                                         </li>
@@ -345,7 +348,8 @@
                                             <div class="product-item__footer col-md-3 d-md-block">
                                                 <div class="mb-3 d-flex flex-column align-items-center text-center">
                                                     <!-- Giá sản phẩm -->
-                                                    <div class="prodcut-price mb-3 d-flex flex-column align-items-start">
+                                                    <div
+                                                        class="prodcut-price mb-3 d-flex flex-column align-items-start">
                                                         @if ($product->price_sale)
                                                             <div class="text-danger font-weight-bold">
                                                                 {{ number_format($product->price_sale, 0, ',', '.') }}đ
@@ -364,9 +368,9 @@
                                                             </div>
                                                         @endif
                                                     </div>
-                                                    
-                                                    
-                                                    
+
+
+
 
                                                     <!-- Nút thêm vào giỏ hàng -->
                                                     <div class="d-none d-xl-block prodcut-add-cart w-100">
@@ -407,12 +411,7 @@
                     </div>
                 </div>
 
-                <!-- Phân trang -->
-                {{-- <div class="d-flex justify-content-center mt-4">
-                    {{ $products->links() }}
-                </div> --}}
-                <!-- End Tab Content -->
-                <!-- End Shop Body -->
+               
 
             </div>
         </div>
@@ -424,10 +423,10 @@
     document.addEventListener("DOMContentLoaded", function() {
         const sortSelect = document.getElementById("sortSelect");
         const productList = document.querySelector(".products-group");
-        const originalProducts = Array.from(productList.children); // Lưu trữ danh sách gốc
+        const originalProducts = Array.from(productList.children); 
 
         sortSelect.addEventListener("change", function() {
-            let products = [...originalProducts]; // Luôn khởi tạo từ danh sách gốc
+            let products = [...originalProducts]; 
             let sortBy = sortSelect.value;
 
             if (sortBy !== "default") {
