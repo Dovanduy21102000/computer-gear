@@ -7,59 +7,36 @@
             </div>
             <div class="topbar-right ml-auto">
                 <ul class="list-inline mb-0">
-                    <li class="list-inline-item mr-2 u-header-topbar__nav-item u-header-topbar__nav-item-border">
+                    <li class="list-inline-item u-header-topbar__nav-item u-header-topbar__nav-item-border">
                         <a href="#" class="u-header-topbar__nav-link"><i class="ec ec-map-pointer mr-1"></i> Vị trí cửa hàng</a>
                     </li>
-                    <li class="list-inline-item mr-2 u-header-topbar__nav-item u-header-topbar__nav-item-border">
-                        <a href="https://transvelo.github.io/electro-html/2.0/html/shop/track-your-order.html" class="u-header-topbar__nav-link"><i class="ec ec-transport mr-1"></i> Theo dõi đơn hàng của bạn</a>
+                    <li class="list-inline-item u-header-topbar__nav-item u-header-topbar__nav-item-border">
+                        <a href="#" class="u-header-topbar__nav-link"><i class="ec ec-transport mr-1"></i> Theo dõi đơn hàng</a>
                     </li>
-                    <li class="list-inline-item mr-2 u-header-topbar__nav-item u-header-topbar__nav-item-border">
-                        <!-- Account Sidebar Toggle Button -->
-                        <a id="profileDropdown" href="javascript:;" role="button" class="u-header-topbar__nav-link"
-                        aria-controls="sidebarContent"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        data-unfold-event="click"
-                        data-unfold-hide-on-scroll="false"
-                        data-unfold-target="#sidebarContent"
-                        data-unfold-type="css-animation"
-                        data-unfold-animation-in="fadeInRight"
-                        data-unfold-animation-out="fadeOutRight"
-                        data-unfold-duration="500"
-                        data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false"
-                        aria-controls="profileDropdownMenu"
-                        >
-                        @auth
-                        <!-- Khi người dùng đã đăng nhập -->
-
-                        <div class="dropdown">
-                            <a id="userDropdown" href="javascript:;" class="dropdown-toggle d-flex align-items-center"
-                               role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
-                            </a>
-                            
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">Quản lý tài khoản</a>
-                                <a class="dropdown-item" href="{{ route('logout') }}"
-                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Đăng xuất</a>
+                    <li class="list-inline-item u-header-topbar__nav-item u-header-topbar__nav-item-border">
+                        <a id="sidebarNavToggler" href="javascript:;" class="u-header-topbar__nav-link">
+                            @auth
+                            <div class="dropdown">
+                                <a id="userDropdown" href="javascript:;" class="dropdown-toggle d-flex align-items-center" role="button" data-toggle="dropdown">
+                                    <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="#">Quản lý tài khoản</a>
+                                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        Đăng xuất
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <!-- Form đăng xuất -->
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                            @csrf
-                        </form>
-                        @else
-                            <!-- Khi người dùng chưa đăng nhập -->
-                            <div id="topbar">
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
+                            @else
+                            <div>
                                 <i class="ec ec-user mr-1"></i>
-                                <span onclick="toggleForm('login')">Đăng nhập</span>
+                                <a href="{{route('login.form')}}">Đăng nhập</a>
                             </div>
-                        @endauth
+                            @endauth
                         </a>
-
-                        <!-- End Account Sidebar Toggle Button -->
                     </li>
                 </ul>
             </div>
@@ -67,22 +44,19 @@
     </div>
 </div>
 
-<script>
+<!-- Script -->
+{{-- <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Kiểm tra trạng thái đăng nhập
-        const isLoggedIn = {{ Auth::check() ? 'true' : 'false' }}; // Laravel kiểm tra đăng nhập
-        
+        const isLoggedIn = @json(Auth::check()); // Kiểm tra đăng nhập
+        const userName = @json(Auth::user()->name ?? ''); // Lấy tên user nếu có
         const sidebarNavToggler = document.getElementById('sidebarNavToggler');
-        
-        if (isLoggedIn) {
-            // Chỉ truy cập 'name' khi người dùng đã đăng nhập
-            const userName = "{{ Auth::user()->name ?? ''}}"; // Lấy tên người dùng nếu đã đăng nhập
-            sidebarNavToggler.innerHTML = '<i class="ec ec-user mr-1"></i> Xin chào, ' + userName;
-        } else {
-            sidebarNavToggler.innerHTML = '<i class="ec ec-user mr-1"></i> Đăng ký<span class="text-gray-50">hoặc</span> Đăng nhập';
+
+        if (sidebarNavToggler) {
+            if (isLoggedIn) {
+                sidebarNavToggler.innerHTML = `<i class="ec ec-user mr-1"></i> Xin chào, ${userName}`;
+            } else {
+                sidebarNavToggler.innerHTML = `<i class="ec ec-user mr-1"></i> <a href="{{ route('login.form') }}">Đăng nhập</a>`;
+            }
         }
     });
-</script>
-
-
-<!-- End Topbar -->
+</script> --}}

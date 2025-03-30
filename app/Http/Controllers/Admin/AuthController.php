@@ -1,38 +1,38 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\AuthRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
-    public function __construct() {}
-    // function index 
     public function index()
     {
-        if (Auth::id() > 0) {
+        if (Auth::check()) { // Use Auth::check() instead of checking Auth::id() > 0
             return redirect()->route('dashboard.index');
         }
         return view('backend.auth.login');
     }
-    //đăng nhập 
+
     public function login(Request $request)
     {
         $email = $request->input('email');
 
+
         $password = $request->input('password');
 
         $user = DB::table('users')->where('email', $email)->first();
+
 
         if ($user && $user->password === $password) {
             Auth::loginUsingId($user->id);
             if ($user->role === 'admin') {
                 return redirect()->route('dashboard.index')->with('success', 'Đăng nhập thành công');
             }
+
             Auth::logout();
             return redirect()->route('auth.admin')->with('error', 'Bạn không có quyền truy cập!');
         }

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Client;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\CartItem;
@@ -17,13 +18,20 @@ class CartController extends Controller
     // Show Cart Page
     public function index()
     {
-        $userId = 10;
-
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để thêm vào giỏ hàng.');
+        }
+        $userId = Auth::id();
         // Get the cart for the user
         $cart = Cart::where('user_id', $userId)->first();
 
         // If the cart exists, get its items with associated products
-        $cartItems = CartItem::with(['product', 'productVariant'])->get();
+        $cartItems = [];
+        if ($cart) {
+            $cartItems = CartItem::where('cart_id', $cart->id)
+                ->with(['product', 'productVariant'])
+                ->get();
+        }
 
         $template = 'fontend.cart.index';
         return view('fontend.layout', compact('template', 'cart', 'cartItems'));
@@ -37,7 +45,10 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $userId = 10;
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để thêm vào giỏ hàng.');
+        }
+        $userId = Auth::id();
 
         $cart = Cart::firstOrCreate(['user_id' => $userId]);
 
@@ -56,7 +67,7 @@ class CartController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Product added to cart!');
+        return redirect()->back()->with('success', 'Thêm vào giỏ hàng thành công');
     }
 
     // Update Cart Item Quantity
@@ -130,7 +141,7 @@ class CartController extends Controller
             return back()->with('error', 'Invalid or expired coupon.');
         }
 
-        // Check if the user already used this coupon
+        // Ensure user hasn't used the coupon before
         if (Auth::check()) {
             $couponUsed = CouponUser::where('user_id', Auth::id())
                 ->where('coupon_id', $coupon->id)
@@ -140,12 +151,15 @@ class CartController extends Controller
             }
         }
 
-        // Store coupon in session
+        // Store coupon details in session
         session([
             'coupon' => [
                 'id' => $coupon->id,
                 'code' => $coupon->code,
-                'discount' => $coupon->price, // Assuming price is the discount amount
+                'type' => $coupon->type, // 'fixed' or 'percentage'
+                'value' => $coupon->price, // Discount value (amount or percentage)
+                'maximum_amount' => $coupon->maximum_amount, // Limit discount for percentage type
+                'min_order_total' => $coupon->min_order_total // Minimum order value required
             ]
         ]);
 

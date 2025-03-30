@@ -63,7 +63,7 @@
                                     @foreach ($categories as $category)
                                         <li>
                                             <a class="dropdown-item"
-                                                href="{{ route('client.products.category', ['categorySlug' => $category->slug]) }}">
+                                                href="{{ route('client.products.category', ['slug' => $category->slug]) }}">
                                                 {{ $category->name }}
                                                 <span class="text-gray-25 font-size-12 font-weight-normal">
                                                     ({{ $category->products()->count() }})
@@ -76,7 +76,7 @@
                                                     @foreach ($category->children as $child)
                                                         <li>
                                                             <a class="dropdown-item"
-                                                                href="{{ route('client.products.category', ['categorySlug' => $child->slug]) }}">
+                                                                href="{{ route('client.products.category', ['slug' => $child->slug]) }}">
                                                                 {{ $child->name }}
                                                                 <span
                                                                     class="text-gray-25 font-size-12 font-weight-normal">
@@ -91,6 +91,7 @@
                                     @endforeach
                                 </ul>
                             </div>
+
                         </li>
                     </ul>
                     <!-- End List -->
@@ -102,7 +103,8 @@
                     </div>
                     <form method="GET" action="{{ route('client.products.index') }}">
                         <!-- Giữ category_id khi lọc thương hiệu -->
-                        <input type="hidden" name="category_id" value="{{ request()->has('category_id') ? request('category_id') : '' }}">
+                        <input type="hidden" name="category_id"
+                            value="{{ request()->has('category_id') ? request('category_id') : '' }}">
 
 
                         <div class="border-bottom pb-4 mb-4">
@@ -176,38 +178,23 @@
                         </ul>
                     </div>
                     <div class="d-flex">
-                        <form method="get">
-                            <!-- Select -->
-                            <select
-                                class="js-select selectpicker dropdown-select max-width-200 max-width-160-sm right-dropdown-0 px-2 px-xl-0"
-                                data-style="btn-sm bg-white font-weight-normal py-2 border text-gray-20 bg-lg-down-transparent border-lg-down-0">
-                                <option value="one" selected>Default sorting</option>
-                                <option value="two">Sort by popularity</option>
-                                <option value="three">Sort by average rating</option>
-                                <option value="four">Sort by latest</option>
-                                <option value="five">Sort by price: low to high</option>
-                                <option value="six">Sort by price: high to low</option>
-                            </select>
-                            <!-- End Select -->
-                        </form>
-                        <form method="POST" class="ml-2 d-none d-xl-block">
-                            <!-- Select -->
-                            <select class="js-select selectpicker dropdown-select max-width-120"
-                                data-style="btn-sm bg-white font-weight-normal py-2 border text-gray-20 bg-lg-down-transparent border-lg-down-0">
-                                <option value="one" selected>Show 20</option>
-                                <option value="two">Show 40</option>
-                                <option value="three">Show All</option>
-                            </select>
-                            <!-- End Select -->
-                        </form>
+                        <select id="sortSelect"
+                            class="js-select selectpicker dropdown-select max-width-200 max-width-160-sm right-dropdown-0 px-2 px-xl-0"
+                            data-style="btn-sm bg-white font-weight-normal py-2 border text-gray-20 bg-lg-down-transparent border-lg-down-0">
+                            <option value="default" selected>Sắp xếp mặc định</option>
+                            <option value="newest">Sắp xếp theo mới nhất</option>
+                            <option value="price_asc">Sắp xếp từ thấp tới cao</option>
+                            <option value="price_desc">Sắp xếp từ cao tới thấp</option>
+                        </select>
+
+
                     </div>
-                    <nav class="px-3 flex-horizontal-center text-gray-20 d-none d-xl-flex">
-                        <form method="post" class="min-width-50 mr-1">
-                            <input size="2" min="1" max="3" step="1" type="number"
-                                class="form-control text-center px-2 height-35" value="1">
-                        </form> of 3
-                        <a class="text-gray-30 font-size-20 ml-2" href="#">→</a>
+                    <nav class="px-3 flex-horizontal-center text-gray-20">
+                        @if ($products->count())
+                            <span>Trang {{ $products->currentPage() }} / {{ $products->lastPage() }}</span>
+                        @endif
                     </nav>
+
                 </div>
                 <!-- End Shop-control-bar -->
                 <!-- Shop Body -->
@@ -218,12 +205,13 @@
                         aria-labelledby="pills-one-example1-tab" data-target-group="groups">
                         <ul class="row list-unstyled products-group no-gutters">
                             @foreach ($products as $product)
-                                <li class="col-6 col-md-3 col-wd-2gdot4 product-item">
+                                <li class="col-6 col-md-3 col-wd-2gdot4 product-item"
+                                    data-created-at="{{ $product->created_at }}">
                                     <div class="product-item__outer h-100">
                                         <div class="product-item__inner px-xl-4 p-3">
                                             <div class="product-item__body pb-xl-2">
                                                 <div class="mb-2">
-                                                    <a href="#"
+                                                    <a href="{{ route('client.products.category', ['slug' => $product->category->slug]) }}"
                                                         class="font-size-12 text-gray-5">{{ $product->category->name ?? 'Danh mục' }}</a>
                                                 </div>
                                                 <h5 class="mb-1 product-item__title">
@@ -239,24 +227,29 @@
                                                             style="height: 150px; object-fit: cover;"
                                                             src="{{ asset('storage/' . $product->thumbnail) }}"
                                                             alt="{{ $product->name }}">
-
-
                                                     </a>
                                                 </div>
                                                 <div class="flex-center-between mb-1">
                                                     <div class="prodcut-price">
                                                         @if ($product->price_sale)
-                                                            <div class="text-danger">
+                                                            <div class="text-danger fw-bold fs-5">
                                                                 {{ number_format($product->price_sale, 0, ',', '.') }}đ
                                                             </div>
-                                                            <del
-                                                                class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                                            <div>
+                                                                <del class="text-muted fw-semibold fs-6 me-2">
+                                                                    {{ number_format($product->price, 0, ',', '.') }}đ
+                                                                </del>
+                                                                <span class="badge bg-danger text-white fs-6 fw-bold">
+                                                                    -{{ round((1 - $product->price_sale / $product->price) * 100) }}%
+                                                                </span>
+                                                            </div>
                                                         @else
-                                                            <div class="text-gray-100">
+                                                            <div class="text-dark fw-bold fs-5">
                                                                 {{ number_format($product->price, 0, ',', '.') }}đ
                                                             </div>
                                                         @endif
                                                     </div>
+
 
                                                     <div class="d-none d-xl-block prodcut-add-cart">
                                                         <form action="{{ route('cart.add') }}" method="POST">
@@ -276,8 +269,6 @@
                                             <div class="product-item__footer">
                                                 <div class="border-top pt-2 flex-center-between flex-wrap">
                                                     <a href="#" class="text-gray-6 font-size-13"><i
-                                                            class="ec ec-compare mr-1 font-size-15"></i> So sánh</a>
-                                                    <a href="#" class="text-gray-6 font-size-13"><i
                                                             class="ec ec-favorites mr-1 font-size-15"></i> Yêu
                                                         thích</a>
                                                 </div>
@@ -289,9 +280,17 @@
 
 
 
+
                         </ul>
+
+
+                        <!-- Hiển thị phân trang -->
+                        <div class="pagination-container d-flex justify-content-center">
+                            {{ $products->links('pagination::bootstrap-5') }}
+                        </div>
                     </div>
 
+                    <!-- List View -->
                     <!-- List View -->
                     <div class="tab-pane fade pt-2" id="pills-three-example1" role="tabpanel"
                         aria-labelledby="pills-three-example1-tab" data-target-group="groups">
@@ -322,19 +321,20 @@
                                                             {{ $product->name }}
                                                         </a>
                                                     </h5>
-                                                    <div class="prodcut-price mb-2 d-md-none">
+                                                    <div class="prodcut-price mb-2">
                                                         @if ($product->price_sale)
-                                                            <div class="text-danger">
+                                                            <div class="text-danger font-weight-bold">
                                                                 {{ number_format($product->price_sale, 0, ',', '.') }}đ
                                                             </div>
                                                             <del
                                                                 class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
                                                         @else
-                                                            <div class="text-gray-100">
+                                                            <div class="text-gray-100 font-weight-bold">
                                                                 {{ number_format($product->price, 0, ',', '.') }}đ
                                                             </div>
                                                         @endif
                                                     </div>
+
                                                     <ul class="font-size-12 p-0 text-gray-110 mb-4 d-none d-md-block">
                                                         <li class="line-clamp-1 mb-1 list-bullet">Chất lượng cao cấp
                                                         </li>
@@ -346,70 +346,142 @@
                                                 </div>
                                             </div>
                                             <div class="product-item__footer col-md-3 d-md-block">
-                                                <div class="mb-3">
-                                                    <div class="prodcut-price mb-2">
+                                                <div class="mb-3 d-flex flex-column align-items-center text-center">
+                                                    <!-- Giá sản phẩm -->
+                                                    <div
+                                                        class="prodcut-price mb-3 d-flex flex-column align-items-start">
                                                         @if ($product->price_sale)
-                                                            <div class="text-danger">
+                                                            <div class="text-danger font-weight-bold">
                                                                 {{ number_format($product->price_sale, 0, ',', '.') }}đ
                                                             </div>
-                                                            <del
-                                                                class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                                            <div class="d-flex align-items-center">
+                                                                <del class="text-muted fw-semibold fs-5 me-2">
+                                                                    {{ number_format($product->price, 0, ',', '.') }}đ
+                                                                </del>
+                                                                <span class="badge bg-danger text-white fs-6 fw-bold">
+                                                                    -{{ round((1 - $product->price_sale / $product->price) * 100) }}%
+                                                                </span>
+                                                            </div>
                                                         @else
-                                                            <div class="text-gray-100">
+                                                            <div class="text-dark font-weight-bold">
                                                                 {{ number_format($product->price, 0, ',', '.') }}đ
                                                             </div>
                                                         @endif
                                                     </div>
-                                                    <div class="d-none d-xl-block prodcut-add-cart">
+
+
+
+
+                                                    <!-- Nút thêm vào giỏ hàng -->
+                                                    <div class="d-none d-xl-block prodcut-add-cart w-100">
                                                         <form action="{{ route('cart.add') }}" method="POST">
                                                             @csrf
                                                             <input type="hidden" name="product_id"
                                                                 value="{{ $product->id }}">
                                                             <input type="hidden" name="quantity" value="1">
-                                                            <!-- Default to 1 -->
-                                                            <button type="submit"
-                                                                class="btn-add-cart btn-primary transition-3d-hover">
-                                                                <i class="ec ec-add-to-cart"></i>
+                                                            <button
+                                                                class="btn btn-warning w-100 py-2 rounded-pill shadow-sm transition-3d-hover"
+                                                                type="submit"
+                                                                style="font-size: 1rem; font-weight: 600; background: #ffc107; border: none;">
+                                                                <i class="ec ec-add-to-cart mr-2"></i> Thêm vào giỏ
+                                                                hàng
                                                             </button>
+
                                                         </form>
                                                     </div>
                                                 </div>
-                                                <div
-                                                    class="flex-horizontal-center justify-content-between justify-content-wd-center flex-wrap">
-                                                    <a href="#" class="text-gray-6 font-size-13 mx-wd-3"><i
-                                                            class="ec ec-compare mr-1 font-size-15"></i> So sánh</a>
-                                                    <a href="#" class="text-gray-6 font-size-13 mx-wd-3"><i
-                                                            class="ec ec-favorites mr-1 font-size-15"></i> Yêu
-                                                        thích</a>
+
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    <a href="#"
+                                                        class="text-gray-6 font-size-13 mx-wd-3 d-flex align-items-center">
+                                                        <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
+                                                    </a>
                                                 </div>
+
                                             </div>
                                         </div>
                                     </div>
                                 </li>
                             @endforeach
                         </ul>
+                        <!-- Hiển thị phân trang -->
+                        <div class="pagination-container d-flex justify-content-center">
+                            {{ $products->links('pagination::bootstrap-5') }}
+                        </div>
                     </div>
                 </div>
 
-                <!-- Phân trang -->
-                {{-- <div class="d-flex justify-content-center mt-4">
-                    {{ $products->links() }}
-                </div> --}}
-                <!-- End Tab Content -->
-                <!-- End Shop Body -->
-                <!-- Shop Pagination -->
-                <nav class="d-md-flex justify-content-between align-items-center border-top pt-3"
-                    aria-label="Page navigation example">
-                    <div class="text-center text-md-left mb-3 mb-md-0">Showing 1–25 of 56 results</div>
-                    <ul class="pagination mb-0 pagination-shop justify-content-center justify-content-md-start">
-                        <li class="page-item"><a class="page-link current" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    </ul>
-                </nav>
-                <!-- End Shop Pagination -->
+               
+
             </div>
         </div>
     </div>
 </main>
 <!-- ========== END MAIN CONTENT ========== -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const sortSelect = document.getElementById("sortSelect");
+        const productList = document.querySelector(".products-group");
+        const originalProducts = Array.from(productList.children); 
+
+        sortSelect.addEventListener("change", function() {
+            let products = [...originalProducts]; 
+            let sortBy = sortSelect.value;
+
+            if (sortBy !== "default") {
+                products.sort((a, b) => {
+                    let priceA = parseInt(a.querySelector(".prodcut-price div")?.textContent
+                        .replace(/\D/g, "")) || 0;
+                    let priceB = parseInt(b.querySelector(".prodcut-price div")?.textContent
+                        .replace(/\D/g, "")) || 0;
+                    let dateA = a.dataset.createdAt ? new Date(a.dataset.createdAt) : new Date(
+                        0);
+                    let dateB = b.dataset.createdAt ? new Date(b.dataset.createdAt) : new Date(
+                        0);
+
+                    if (sortBy === "price_asc") return priceA - priceB;
+                    if (sortBy === "price_desc") return priceB - priceA;
+                    if (sortBy === "newest") return dateB - dateA;
+                    return 0;
+                });
+            }
+
+            // Xóa & thêm lại sản phẩm theo thứ tự mới
+            productList.replaceChildren(...products);
+        });
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const sortSelect = document.getElementById("sortSelect");
+        const productList = document.querySelector(".prodcut-list-view");
+        const originalProducts = Array.from(productList.children); // Lưu trữ danh sách gốc
+
+        sortSelect.addEventListener("change", function() {
+            let products = [...originalProducts]; // Luôn khởi tạo từ danh sách gốc
+            let sortBy = sortSelect.value;
+
+            if (sortBy !== "default") {
+                products.sort((a, b) => {
+                    let priceA = parseInt(a.querySelector(".prodcut-price div")?.textContent
+                        .replace(/\D/g, "")) || 0;
+                    let priceB = parseInt(b.querySelector(".prodcut-price div")?.textContent
+                        .replace(/\D/g, "")) || 0;
+                    let dateA = a.dataset.createdAt ? new Date(a.dataset.createdAt) : new Date(
+                        0);
+                    let dateB = b.dataset.createdAt ? new Date(b.dataset.createdAt) : new Date(
+                        0);
+
+                    if (sortBy === "price_asc") return priceA - priceB;
+                    if (sortBy === "price_desc") return priceB - priceA;
+                    if (sortBy === "newest") return dateB - dateA;
+                    return 0;
+                });
+            }
+
+            // Xóa & thêm lại sản phẩm theo thứ tự mới
+            productList.replaceChildren(...products);
+        });
+    });
+</script>

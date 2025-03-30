@@ -15,11 +15,16 @@ class Attribute extends Model
         'status'
     ];
 
-    public $attributes = [
-        'status' => 1
+    protected $casts = [
+        'status' => 'boolean', // Đảm bảo status luôn là boolean
     ];
-    public function attributeValues() {
+
+    protected $attributes = [
+        'status' => true, // Đặt mặc định là true
+    ];
+
+    public function attributeValues()
+    {
         return $this->hasMany(AttributeValue::class);
     }
-    
 }

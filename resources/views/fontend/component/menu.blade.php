@@ -9,7 +9,7 @@
                      class="navbar navbar-expand u-header__navbar py-0 justify-content-xl-between max-width-270 min-width-270">
                      <!-- Logo -->
                      <a class="order-1 order-xl-0 navbar-brand u-header__navbar-brand u-header__navbar-brand-center"
-                         href="index.html" aria-label="Computer Gear">
+                         href="{{ route('home.index') }}" aria-label="Computer Gear">
                          <svg version="1.1" width="350px" height="60px" viewBox="0 0 350 60"
                              xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 0;">
 
@@ -506,24 +506,31 @@
                              <li class="nav-item hs-has-mega-menu u-header__nav-item">
 
 
-                                 <a class="nav-link u-header__nav-link" href="{{ route('client.products.index') }}">Sản
+                                 <a class="nav-link u-header__nav-link"
+                                     href="{{ route('client.products.index') }}">Sản
 
                                      phẩm</a>
                              </li>
                              <!-- End Pages -->
 
                              <!-- Blog -->
-                             <li class="nav-item hs-has-sub-menu u-header__nav-item" >
-                                 <a  class="nav-link u-header__nav-link " href="{{ route('blog.index') }}"
+                             <li class="nav-item hs-has-sub-menu u-header__nav-item">
+                                 <a class="nav-link u-header__nav-link " href="{{ route('blog.index') }}"
                                      aria-haspopup="true" aria-expanded="false">Bài viết</a>
                              </li>
                              <!-- End Blog -->
+                             <li class="nav-item u-header__nav-item">
+                                <a class="nav-link u-header__nav-link" href="{{ route('about_us') }}">Về chúng tôi</a>
+                            </li>
 
-                             <!-- About us -->
+                            <li class="nav-item u-header__nav-item">
+                                <a class="nav-link u-header__nav-link" href="{{ route('faqs') }}">Câu hỏi thường gặp</a>
+                            </li>
+                           
                              <li class="nav-item u-header__nav-item">
                                  <a class="nav-link u-header__nav-link" href="{{ route('client.contacts.index') }}">Liên hệ</a>
                              </li>
-                             <!-- End About us -->
+                             
 
                          </ul>
                      </div>
