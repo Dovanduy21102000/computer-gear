@@ -69,22 +69,19 @@
                                                         <i class="fa fa-eye"></i>
                                                     </a>
 
-                                                    @if (auth()->user()->role !== 'admin')
-                                                        <a href="{{ route('users.edit', $user->id) }}"
-                                                            class="btn btn-warning">
-                                                            <i class="fa fa-edit"></i>
-                                                        </a>
-
-                                                        <form action="{{ route('users.destroy', $user->id) }}"
-                                                            method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm"
-                                                                onclick="return confirm('Bạn có chắc muốn xóa?')">
-                                                                <i class="fa fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endif
+                                                    @if (auth()->user()->role === 'admin')
+                                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning"><i
+                                                        class="bi bi-wrench"></i></a>
+                        
+                                                    <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa thành viên này?')">
+                                                            <i
+                                                            class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
 
                                                 </td>
 
