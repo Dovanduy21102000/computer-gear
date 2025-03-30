@@ -38,7 +38,7 @@ Route::prefix('admin')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('auth.login'); // Xử lý đăng nhập
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
     // Route admin cần quyền truy cập
-    Route::middleware(['admin'])->group(function () {
+    Route::middleware(['auth', 'admin'])->group(function () { 
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
 
         // Các route resource dành cho admin
@@ -57,12 +57,10 @@ Route::prefix('admin')->group(function () {
             'contacts'          => ContactController::class,
             'productvariants'   => ProductVariantController::class,
             'category_post'     => CategoryPostController::class,
-
         ];
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
         };
-
 
         // Route upload bài viết
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');

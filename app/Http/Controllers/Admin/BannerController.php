@@ -15,6 +15,7 @@ class BannerController extends Controller
         $template = 'backend.banners.index';
 
         return view('backend.dashboard.layout', compact('banners', 'template'));
+        
     }
 
     /**

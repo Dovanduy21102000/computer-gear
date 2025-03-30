@@ -19,7 +19,7 @@
                         <h5 class="card-title">Danh sách thành viên</h5>
                         <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
                             <div class="datatable-top">
-                                <div >
+                                <div>
                                     <a class="btn btn-primary" href="{{ route('users.create') }}">Thêm mới</a>
                                 </div>
                                 <div class="datatable-search">
@@ -44,8 +44,8 @@
                                             <tr>
                                                 <td>
                                                     @if ($user->avatar)
-                                                    <img src="{{ Storage::url($user->avatar) }}" width="50" height="50">
-
+                                                        <img src="{{ Storage::url($user->avatar) }}" width="50"
+                                                            height="50">
                                                     @else
                                                         <span>Không có ảnh</span>
                                                     @endif
@@ -65,19 +65,29 @@
                                                 </td>
                                                 <td>
                                                     <a href="{{ route('users.show', $user->id) }}"
-                                                        class="btn btn-success"><i class="fa fa-eye"></i></a>
-                                                    <a href="{{ route('users.edit', $user->id) }}"
-                                                        class="btn btn-warning"><i class="fa fa-edit"></i></a>
+                                                        class="btn btn-success">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
 
-                                                    <form action="{{ route('users.destroy', $user->id) }}"
-                                                        method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('Bạn có chắc muốn xóa?')"><i
-                                                                class="fa fa-trash"></i></button>
-                                                    </form>
+                                                    @if (auth()->user()->role !== 'admin')
+                                                        <a href="{{ route('users.edit', $user->id) }}"
+                                                            class="btn btn-warning">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
+
+                                                        <form action="{{ route('users.destroy', $user->id) }}"
+                                                            method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                                onclick="return confirm('Bạn có chắc muốn xóa?')">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+
                                                 </td>
+
                                             </tr>
                                         @endforeach
                                     </tbody>
