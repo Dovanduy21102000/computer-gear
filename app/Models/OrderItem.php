@@ -18,6 +18,11 @@ class OrderItem extends Model
         'price_sale',
         'product_info'
     ];
+
+    protected $casts = [
+        'product_info' => 'array',
+    ];
+    
     public function order()
     {
         return $this->belongsTo(Order::class);
@@ -29,5 +34,6 @@ class OrderItem extends Model
     public function productVariant()
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+
     }
 }

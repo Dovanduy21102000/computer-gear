@@ -49,8 +49,8 @@
                                             </td>
                                             <td>
                                                 <div class="text-truncate"
-                                                    title="{{ $categories->firstWhere('id', $item->category_id)->name ?? 'Không có' }}">
-                                                    {{ Str::limit($categories->firstWhere('id', $item->category_id)->name ?? 'Không có', 20, '...') }}
+                                                    title="{{ $category_post->firstWhere('id', $item->category_id)->name ?? 'Không có' }}">
+                                                    {{ Str::limit($category_post->firstWhere('id', $item->category_id)->name ?? 'Không có', 20, '...') }}
                                                 </div>
                                             </td>
                                             <td>
@@ -89,10 +89,6 @@
                             </table>
                         </div>
                         <!-- End Table -->
-
-                        <div class="d-flex justify-content-center mt-2">
-                            {{ $data->links() }}
-                        </div>
                     </div>
                 </div>
 

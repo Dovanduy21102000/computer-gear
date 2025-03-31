@@ -151,8 +151,7 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="cash"
                                                         name="payment_method" value="cash">
-                                                    <label class="custom-control-label form-label"
-                                                        for="cash">Thanh
+                                                    <label class="custom-control-label form-label" for="cash">Thanh
                                                         toán trực tiếp</label>
                                                 </div>
                                             </div>
@@ -179,8 +178,8 @@
                             <div class="col-md-12">
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Họ tên <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="fullName"
-                                        value="{{ old('fullName', $user->name ?? '') }}" required>
+                                    <input type="text" class="form-control" name="shipping_user_name"
+                                        value="{{ old('shipping_user_name', $user->name ?? '') }}" required>
                                 </div>
                             </div>
 

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -94,6 +95,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
+        if (auth()->user()->role === 'admin') {
+            return redirect()->route('users.index')->with('error', 'Admin không có quyền chỉnh sửa người dùng.');
+        }
         $template = 'backend.users.edit';
         return view('backend.dashboard.layout', compact('user', 'template'));
     }
@@ -161,7 +165,12 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        if (auth()->user()->role === 'admin') {
+            return redirect()->back()->with('error', 'Admin không có quyền xóa người dùng.');
+        }
+    
         $user->delete();
-        return redirect()->route('users.index')->with('success', 'Xóa thành công');
+        return redirect()->route('users.index')->with('success', 'Xóa người dùng thành công.');
     }
+    
 }

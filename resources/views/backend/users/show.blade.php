@@ -1,5 +1,4 @@
 <main id="main" class="main">
-
     <div class="pagetitle">
         <h1>Chi tiết thành viên</h1>
     </div><!-- End Page Title -->
@@ -45,18 +44,22 @@
                         </table>
 
                         <a href="{{ route('users.index') }}" class="btn btn-secondary">Quay lại</a>
-                        <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning">Chỉnh sửa</a>
 
-                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa thành viên này?')">Xóa</button>
-                        </form>
+                        @if (auth()->user()->role === 'admin')
+                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning">Chỉnh sửa</a>
+
+                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa thành viên này?')">
+                                    Xóa
+                                </button>
+                            </form>
+                        @endif
 
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
 </main>

@@ -7,6 +7,11 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Session as FacadesSession;
+use Symfony\Component\HttpFoundation\Session\Session as SessionSession;
 
 class LoginController extends Controller
 {
@@ -21,36 +26,42 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
+    // use AuthenticatesUsers;
 
     // Hiển thị form đăng nhập
     public function showLoginForm()
     {
-        return view('auth.login');  // Trả về view của bạn (ví dụ: footer.blade.php hoặc một view khác)
+        $template = 'fontend.auth.login';
+        return view('fontend.layout', compact('template'));
     }
 
-    // Xử lý đăng nhập
+    
     public function login(Request $request)
-    {
-        // Validate dữ liệu nhập vào
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-        // dd($credentials);
-        // Cố gắng đăng nhập người dùng
-        if (Auth::attempt($credentials)) {
-            // Đăng nhập thành công, chuyển hướng người dùng
-            return redirect()->route('home');
-        }
-
-        // Đăng nhập thất bại
-        return back()->withInput($request->only('email'))->withErrors([
-            'email' => 'Email hoặc mật khẩu không chính xác.',
-        ]);
+{
+    
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|min:6',
+    ]);
+    
+    $user = User::where('email', $request->email)->first();
+    
+   
+    if (!$user) {
+        return back()->withErrors(['login_error' => 'Email không tồn tại!']);
     }
+    
+    if (!Hash::check($request->password, $user->password)) {
+        return back()->withErrors(['login_error' => 'Mật khẩu không chính xác!']);
+    }
+    
+    Auth::login($user);
+    Session::put('user', $user);
+    
+    return redirect()->route('home.index')->with('success', 'Đăng nhập thành công. Xin chào '.$user->name);
+}
 
-    // Xử lý đăng xuất
+    
     public function logout(Request $request)
     {
         Auth::logout();

@@ -104,7 +104,14 @@
                                 <label for="content" class="col-sm-2 col-form-label">Nội dung</label>
                                 <div class="editor-container">
                                     <textarea id="ck_content" name="content" placeholder="CONTENT" class="form-control">{{ old('content', $post->content) }}</textarea>
-
+                                    <style>
+                                        .ck-editor__editable {
+                                            min-height: 600px !important;
+                                            max-height: 800px;
+                                            /* Optional */
+                                            height: auto !important;
+                                        }
+                                    </style>
                                     <script>
                                         CKEDITOR.ClassicEditor
                                             .create(document.querySelector('#ck_content'), {

@@ -37,8 +37,6 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
-
-    // Quan hệ với Brand (Một sản phẩm thuộc về một thương hiệu)
     public function brand()
     {
         return $this->belongsTo(Brand::class, 'brand_id');
@@ -46,5 +44,11 @@ class Product extends Model
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);
+    }
+
+    // Model Product
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
     }
 }
