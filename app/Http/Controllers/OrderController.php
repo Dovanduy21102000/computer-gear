@@ -56,7 +56,7 @@ class OrderController extends Controller
                 break;
             }
         }
-        $orderItems = $order->product;
+        $orderItems = $order->items()->with('product', 'productVariant')->get();
         $template = 'backend.orders.show';
         return view('backend.dashboard.layout', compact(
             'template',
