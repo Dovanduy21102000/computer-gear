@@ -16,7 +16,8 @@ class RoleHasAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::user() || !Auth::user()->role === 'admin') {
+        // Kiểm tra nếu người dùng chưa đăng nhập hoặc không phải admin
+        if (!Auth::user() || Auth::user()->role !== 'admin') {
             return abort(403, 'Bạn không có quyền truy cập');
         }
 
