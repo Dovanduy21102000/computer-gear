@@ -14,26 +14,10 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::all();
+        $orders = Order::orderBy('created_at', 'desc')->get();
         $template = 'backend.orders.index';
         // dd($orders);
         return view('backend.dashboard.layout', compact('orders', 'template'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        // 
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        // 
     }
 
     /**
@@ -73,6 +57,7 @@ class OrderController extends Controller
                 break;
             }
         }
+        $orderItems = $order->items()->with('product', 'productVariant')->get();
         $template = 'backend.orders.show';
         return view('backend.dashboard.layout', compact(
             'template',
@@ -81,7 +66,8 @@ class OrderController extends Controller
             'provinces',
             'districts',
             'provinceName',
-            'districtName'
+            'districtName',
+            'orderItems'
         ));
     }
 

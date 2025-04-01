@@ -145,6 +145,7 @@
                         @php
                             $colors = [];
                             $rams = [];
+                            
 
                             foreach ($variants as $variant) {
                                 foreach ($variant->attributeValues as $attributeValue) {

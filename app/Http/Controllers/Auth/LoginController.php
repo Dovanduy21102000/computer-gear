@@ -12,7 +12,20 @@ use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
 {
-    use AuthenticatesUsers;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Login Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller handles authenticating users for the application and
+    | redirecting them to your home screen. The controller uses a trait
+    | to conveniently provide its functionality to your applications.
+    |
+    */
+
+    // use AuthenticatesUsers;
+
 
     // Hiển thị form đăng nhập
     public function showLoginForm()
