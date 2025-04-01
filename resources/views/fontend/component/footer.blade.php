@@ -350,7 +350,7 @@
                              </div>
                          </form>
                          <!-- Form Đăng Ký -->
-                         <form method="POST" action="{{ route('register') }}" id="signupForm"
+                         <form method="POST" action="{{ route('register.form') }}" id="signupForm"
                              style="display: none;">
                              @csrf
                              <!-- Title -->

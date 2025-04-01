@@ -1,36 +1,35 @@
 <?php
 
-use App\Http\Controllers\AttributeController;
-use App\Http\Controllers\AttributeValueController;
+use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BlogController;
-use App\Http\Controllers\BrandController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\BannerController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CategoryPostController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\ContactClientController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\CouponController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\MOMOController;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\ProductClientController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Client\BlogController;
+use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Client\CartController;
+use App\Http\Controllers\Client\CheckoutController;
+use App\Http\Controllers\Client\ContactClientController;
+use App\Http\Controllers\Admin\ContactController;
+use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\MOMOController;
+use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Client\ProductClientController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ProductVariantController;
+use App\Http\Controllers\Client\VNPayController;
+use App\Http\Controllers\Admin\CategoryPostController;
 use App\Http\Controllers\OrderItemController;
-use App\Http\Controllers\ProductVariantController;
-use App\Http\Controllers\VNPayController;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
 
 // Admin Routes
 Route::prefix('admin')->group(function () {
@@ -78,17 +77,18 @@ Route::prefix('products/{product}/variants')->group(function () {
     Route::get('/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
     Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
     Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
+    Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
 });
 
 
 // Client Routes
 Route::middleware(['web'])->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login'); // Form đăng nhập client
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login.form'); // Form đăng nhập client
     Route::post('login', [LoginController::class, 'login'])->name('login'); // Xử lý đăng nhập client
     Route::post('logout', [LoginController::class, 'logout'])->name('logout'); // Xử lý đăng xuất client
 
-    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register'); // Form đăng ký
-    Route::post('register', [RegisterController::class, 'register']); // Xử lý đăng ký
+    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register.form'); // Form đăng ký
+    Route::post('register', [RegisterController::class, 'register'])->name('register'); // Xử lý đăng ký
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
@@ -113,6 +113,7 @@ Route::middleware(['web'])->group(function () {
 
     Route::get('/products/brand/{brandSlug}', [ProductClientController::class, 'showByBrand'])->name('client.products.brand');
 
+
     Route::get('/products/category/{slug}', [ProductClientController::class, 'categoryProducts'])->name('client.products.category');
     Route::get('/get-variant', [ProductClientController::class, 'getVariant'])->name('getVariant');
     Route::get('/search', [ProductClientController::class, 'search'])->name('search');
@@ -122,13 +123,17 @@ Route::middleware(['web'])->group(function () {
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
+    
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 
-    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-    Route::get('/about_us', [App\Http\Controllers\HomeController::class, 'about_us'])->name('about_us');
-    Route::get('/faqs', [App\Http\Controllers\HomeController::class, 'faqs'])->name('faqs');
+
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/about_us', [HomeController::class, 'about_us'])->name('about_us');
+    Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
     Route::get('/track-order', [CheckoutController::class, 'trackOrderView'])->name('order.track');
     Route::match(['get', 'post'], '/track-order/check', [CheckoutController::class, 'trackOrder'])->name('order.trackOrder');
+
 });
 
 Route::get('/api/districts/{province_id}', function ($province_id) {

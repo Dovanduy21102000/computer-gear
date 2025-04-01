@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\BaseCRUDController;
 use App\Models\Category;
 use App\Models\CategoryPost;
 use App\Models\Post;

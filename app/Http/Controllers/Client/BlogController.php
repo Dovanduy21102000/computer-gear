@@ -1,10 +1,14 @@
 <?php
 
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Client;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category;
 
 // use App\Models\Category;
 use App\Models\CategoryPost;
+
 use Illuminate\Http\Request;
 
 use App\Models\Post;

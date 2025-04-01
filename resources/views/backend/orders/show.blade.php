@@ -13,7 +13,10 @@
                             <label class="col-sm-2 col-form-label">ID Đơn Hàng</label>
                             <div class="col-sm-10">{{ $order->id }}</div>
                         </div>
-
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label">Mã đơn Hàng</label>
+                            <div class="col-sm-10">{{ $order->code }}</div>
+                        </div>
                         <div class="row mb-3">
                             <label class="col-sm-2 col-form-label">Người mua</label>
                             <div class="col-sm-10">{{ $order->user->name ?? 'N/A' }}</div>

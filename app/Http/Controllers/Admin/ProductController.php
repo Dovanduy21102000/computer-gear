@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
@@ -69,10 +70,8 @@ class ProductController extends Controller
             $request->merge(['slug' => Str::slug($request->name)]);
         }
 
-        // Xử lý upload ảnh
         $thumbnailPath = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('products', 'public') : null;
 
-        // Tạo sản phẩm mới
         $product = Product::create([
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
@@ -90,7 +89,6 @@ class ProductController extends Controller
             'views' => 0
         ]);
 
-        // Xử lý các biến thể nếu có
         if ($request->is_variant && $request->variants) {
             foreach ($request->variants as $variantData) {
                 $variant = ProductVariant::create([
@@ -164,7 +162,6 @@ class ProductController extends Controller
             'variants.*.attributes.*' => 'exists:attribute_values,id',
         ]);
 
-        // Xử lý upload ảnh mới (nếu có)
         if ($request->hasFile('thumbnail')) {
             if ($product->thumbnail) {
                 Storage::disk('public')->delete($product->thumbnail);
@@ -173,7 +170,6 @@ class ProductController extends Controller
             $product->thumbnail = $thumbnailPath;
         }
 
-        // Cập nhật thông tin sản phẩm
         $product->update([
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
@@ -189,10 +185,8 @@ class ProductController extends Controller
             'is_variant' => $request->is_variant,
         ]);
 
-        // Xóa các biến thể cũ (nếu có)
         $product->variants()->delete();
 
-        // Xử lý các biến thể mới (nếu có)
         if ($request->is_variant && $request->variants) {
             foreach ($request->variants as $variantData) {
                 $variant = ProductVariant::create([
