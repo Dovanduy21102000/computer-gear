@@ -63,7 +63,7 @@
                                                         <span class="badge bg-danger">Bị khóa</span>
                                                     @endif
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <a href="{{ route('users.show', $user->id) }}"
                                                         class="btn btn-success">
                                                         <i class="fa fa-eye"></i>

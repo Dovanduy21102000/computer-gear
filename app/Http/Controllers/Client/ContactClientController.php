@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Mail\ContactMail;
+use App\Mail\ContactReplyMail;
 use Illuminate\Http\Request;
 use App\Models\Contact;
 use Illuminate\Support\Facades\Auth;
@@ -45,10 +46,18 @@ class ContactClientController extends Controller
         // Lưu vào database
         $contact = Contact::create($data);
     
-        // Gửi email thông báo
+        // Gửi email thông báo cho admin
         Mail::to('hiencoi250404@gmail.com')->send(new ContactMail($contact));
     
-        return redirect()->route('client.contacts.index')->with('success', 'Gửi liên hệ thành công!');
+        // Gửi email phản hồi lại cho người gửi
+        Mail::to($contact->email)->send(new ContactReplyMail($contact));
+    
+        // Trả lại thông tin form cho người dùng và chuyển hướng
+        return redirect()->route('client.contacts.index')
+                         ->with('success', 'Gửi liên hệ thành công! Chúng tôi sẽ phản hồi lại sớm.')
+                         ->withInput(); // Giữ lại các giá trị đã nhập vào form
     }
+    
+
 }
 

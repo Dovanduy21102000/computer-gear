@@ -5,23 +5,14 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
-    /**
-     * Handle an incoming request.
-     */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
-        // Kiểm tra nếu chưa đăng nhập
-        if (!Auth::check()) {
-            return redirect('/login')->with('error', 'Bạn cần đăng nhập để tiếp tục.');
-        }
-
-        // Kiểm tra nếu user không phải admin
-        if (Auth::user()->role !== 'admin') {
-            return redirect('/')->with('error', 'Bạn không có quyền truy cập!');
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            Auth::logout(); // Đăng xuất nếu không phải admin
+            return redirect()->route('auth.admin')->withErrors(['access_denied' => 'Bạn không có quyền truy cập trang này!']);
         }
 
         return $next($request);

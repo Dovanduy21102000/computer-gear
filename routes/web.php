@@ -121,12 +121,9 @@ Route::middleware(['web'])->group(function () {
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
-
-
-
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    
+    Route::get('/', [HomeController::class, 'index'])->name('home.index')->middleware('auth'); // Yêu cầu đăng nhập
+    Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth'); // Yêu cầu đăng nhập
     Route::get('/about_us', [HomeController::class, 'about_us'])->name('about_us');
     Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
     Route::get('/track-order', [CheckoutController::class, 'trackOrderView'])->name('order.track');

@@ -21,7 +21,6 @@ return new class extends Migration {
     //         if (Schema::hasColumn('orders', 'code')) {
     //             $table->dropColumn('code');
     //         }
-
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
@@ -33,7 +32,6 @@ return new class extends Migration {
     {
         Schema::table('orders', function (Blueprint $table) {
             $table->dropColumn('code'); // Xóa cột nếu rollback
-
         });
     }
 };

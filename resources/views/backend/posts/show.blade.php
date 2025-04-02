@@ -103,7 +103,7 @@
                             <div class="row mb-3">
                                 <label for="content" class="col-sm-2 col-form-label">Nội dung</label>
                                 <div class="editor-container">
-                                    <textarea id="ck_content" name="content" placeholder="CONTENT" class="form-control" disabled>{{ old('content', $post->content) }}</textarea>
+                                    <textarea id="ck_content" name="content" class="form-control" readonly>{!! old('content', $post->content) !!}</textarea>
 
                                     <script>
                                         var isShowMode = {{ $isShowMode ? 'true' : 'false' }};
