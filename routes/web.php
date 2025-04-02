@@ -90,6 +90,9 @@ Route::middleware(['web'])->group(function () {
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
+    Route::get('/show_user', [\App\Http\Controllers\Client\UserController::class, 'show'])->name('user.show'); 
+    Route::post('/save_user', [\App\Http\Controllers\Client\UserController::class, 'save'])->name('user.save'); 
+    Route::post('/change_password', [\App\Http\Controllers\Client\UserController::class, 'changePassword'])->name('user.change-password');
 
 
     // Route liên hệ client
