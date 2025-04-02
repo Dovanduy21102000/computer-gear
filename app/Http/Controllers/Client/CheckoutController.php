@@ -8,6 +8,7 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +16,9 @@ use Illuminate\Support\Facades\Http;
 
 class CheckoutController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $userId = Auth::id();; // Example user ID
+        $userId = Auth::id(); // Get authenticated user ID
         $user = User::find($userId);
 
         // Get the cart for the user
@@ -28,22 +29,38 @@ class CheckoutController extends Controller
             return redirect()->route('home.index')->with('error', 'Your cart is empty.');
         }
 
-        // Retrieve cart items
-        $cartItems = CartItem::with(['product', 'productVariant'])->where('cart_id', $cart->id)->get();
+        // Get selected items from the cart
+        $selectedItemIds = $request->input('selected_items', []); // Get the selected item IDs
+        if (empty($selectedItemIds)) {
+            return redirect()->route('cart.index')->with('error', 'No items selected.');
+        }
 
+        // Retrieve only selected items
+        $cartItems = CartItem::with(['product', 'productVariant'])
+            ->where('cart_id', $cart->id)
+            ->whereIn('id', $selectedItemIds) // Filter by selected items
+            ->get();
 
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'No valid items selected.');
+        }
+
+        // Calculate the total price of selected items
         $totalPrice = 0;
         foreach ($cartItems as $item) {
-            $price = $item->productVariant->price ?? $item->product->price ?? 0;
+            // Check if the product has a sale price (price_sale)
+            $price = $item->productVariant->price_sale ?? $item->productVariant->price ?? $item->product->price_sale ?? $item->product->price ?? 0;
+
+            // Add the price multiplied by the quantity to the total price
             $totalPrice += $price * $item->quantity;
         }
 
-
+        // Apply Coupon Discount
         $appliedCoupon = session('coupon', null);
         $discount = 0;
 
         if ($appliedCoupon) {
-            if ($totalPrice >= $appliedCoupon['min_order_total']) { // Check min order total
+            if ($totalPrice >= $appliedCoupon['min_order_total']) { // Check if minimum order total is met
                 if ($appliedCoupon['type'] === 'percentage') {
                     $discount = min($totalPrice * ($appliedCoupon['value'] / 100), $appliedCoupon['maximum_amount']);
                 } else { // Fixed amount discount
@@ -52,10 +69,12 @@ class CheckoutController extends Controller
             }
         }
 
+        // Final price after discount
+        $finalPrice = max(0, $totalPrice - $discount);
 
+        // Fetch provinces and districts for shipping information
         $provinces = [];
         $districtsByProvince = [];
-
 
         $response = Http::get('https://provinces.open-api.vn/api/p');
         if ($response->successful()) {
@@ -73,10 +92,11 @@ class CheckoutController extends Controller
             }
         }
 
-
+        // Prepare the view with necessary data
         $template = 'fontend.checkout.index';
-        return view('fontend.layout', compact('template', 'provinces', 'districtsByProvince', 'cartItems', 'appliedCoupon', 'discount', 'user', 'totalPrice'));
+        return view('fontend.layout', compact('template', 'provinces', 'districtsByProvince', 'cartItems', 'appliedCoupon', 'discount', 'user', 'totalPrice', 'finalPrice'));
     }
+
 
     public function trackOrderView(Request $request)
     {
@@ -161,6 +181,17 @@ class CheckoutController extends Controller
                 'quantity' => $item->quantity,
                 'product_info' => json_encode($item->product->toArray()),
             ]);
+            $product = Product::find($item->product_id);
+
+            if ($item->product_variant_id) {
+                $productVariant = ProductVariant::find($item->product_variant_id);
+                if ($productVariant) {
+                    $productVariant->decrement('quantity', $item->quantity);
+                }
+            } else {
+                $product->decrement('quantity', $item->quantity);
+            }
+
             Product::where('id', $item->product_id)->increment('quantity_sold', $item->quantity);
         }
         return redirect('/')->with('success', 'Thanh toán thành công!');

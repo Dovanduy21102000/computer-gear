@@ -9,6 +9,7 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -96,6 +97,17 @@ class MOMOController extends Controller
                 'quantity' => $item->quantity,
                 'product_info' => json_encode($item->product->toArray()),
             ]);
+            $product = Product::find($item->product_id);
+
+            if ($item->product_variant_id) {
+                $productVariant = ProductVariant::find($item->product_variant_id);
+                if ($productVariant) {
+                    $productVariant->decrement('quantity', $item->quantity);
+                }
+            } else {
+                $product->decrement('quantity', $item->quantity);
+            }
+
             Product::where('id', $item->product_id)->increment('quantity_sold', $item->quantity);
         }
 

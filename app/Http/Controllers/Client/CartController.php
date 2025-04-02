@@ -50,6 +50,13 @@ class CartController extends Controller
         }
         $userId = Auth::id();
 
+        $product = Product::findOrFail($request->product_id);
+
+        // Ensure the requested quantity does not exceed available stock
+        if ($request->quantity > $product->quantity) {
+            return redirect()->back()->with('error', 'Sản phẩm không còn tồn hàng   ');
+        }
+
         $cart = Cart::firstOrCreate(['user_id' => $userId]);
 
         $cartItem = CartItem::where('cart_id', $cart->id)
@@ -57,7 +64,12 @@ class CartController extends Controller
             ->first();
 
         if ($cartItem) {
-            $cartItem->quantity += $request->quantity;
+            $newQuantity = $cartItem->quantity + $request->quantity;
+
+            if ($newQuantity > $product->quantity) {
+                return redirect()->back()->with('error', 'Không thể thêm quá số lượng tồn kho.');
+            }
+            $cartItem->quantity = $newQuantity;
             $cartItem->save();
         } else {
             CartItem::create([
@@ -78,11 +90,19 @@ class CartController extends Controller
         }
 
         foreach ($request->cart as $cartItem) {
-            $cartItemModel = CartItem::where('id', $cartItem['id'])->first(); // Find cart item by ID
+            $cartItemModel = CartItem::where('id', $cartItem['id'])->first();
 
             if ($cartItemModel) {
-                $cartItemModel->quantity = (int) $cartItem['quantity']; // Convert quantity to integer
-                $cartItemModel->save(); // Save the updated quantity
+                $product = Product::findOrFail($cartItemModel->product_id);
+                $newQuantity = (int) $cartItem['quantity'];
+
+                // Check stock limit
+                if ($newQuantity > $product->quantity) {
+                    return back()->with('error', 'Số lượng sản phẩm không đủ.');
+                }
+
+                $cartItemModel->quantity = $newQuantity;
+                $cartItemModel->save();
             }
         }
 
