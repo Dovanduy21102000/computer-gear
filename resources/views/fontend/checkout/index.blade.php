@@ -25,7 +25,6 @@
 
         <!-- Accordion -->
         <div id="shopCartAccordion1" class="accordion rounded mb-6">
-            <!-- Card -->
             <div class="card border-0">
                 <div id="shopCartHeadingTwo" class="alert alert-primary mb-0" role="alert">
                     Have a coupon? <a href="#" class="alert-link" data-toggle="collapse"
@@ -33,12 +32,13 @@
                         your code</a>
                 </div>
                 <div id="shopCartTwo" class="collapse border border-top-0" aria-labelledby="shopCartHeadingTwo"
-                    data-parent="#shopCartAccordion1" style="">
-                    <form class="js-validate p-5" novalidate="novalidate">
+                    data-parent="#shopCartAccordion1">
+                    <form action="{{ route('applyCoupon') }}" method="POST" class="p-5">
+                        @csrf
                         <p class="w-100 text-gray-90">If you have a coupon code, please apply it below.</p>
                         <div class="input-group input-group-pill max-width-660-xl">
-                            <input type="text" class="form-control" name="name" placeholder="Coupon code"
-                                aria-label="Promo code">
+                            <input type="text" class="form-control" name="coupon_code" placeholder="Coupon code"
+                                aria-label="Promo code" required>
                             <div class="input-group-append">
                                 <button type="submit" class="btn btn-block btn-dark font-weight-normal btn-pill px-4">
                                     <i class="fas fa-tags d-md-none"></i>
@@ -46,13 +46,22 @@
                                 </button>
                             </div>
                         </div>
+
+                        <!-- Display validation messages -->
+                        @if (session('success'))
+                            <div class="mt-3 text-success">{{ session('success') }}</div>
+                        @endif
+                        @if (session('error'))
+                            <div class="mt-3 text-danger">{{ session('error') }}</div>
+                        @endif
                     </form>
                 </div>
             </div>
-            <!-- End Card -->
         </div>
+
+        <!-- End Card -->
         <!-- End Accordion -->
-        <form id="checkout-form" method="POST" class="js-validate">
+        <form action="{{ route('checkout.method') }}" id="checkout-form" method="POST" class="js-validate">
             @csrf
 
             <div class="row">
@@ -94,9 +103,25 @@
                                             $subtotal = $cartItems->sum(
                                                 fn($item) => $item->quantity * $item->product->price,
                                             );
-                                            $discount = $appliedCoupon['discount'] ?? 0;
+                                            $appliedCoupon = session('coupon') ?? null;
+                                            $discount = 0;
+
+                                            if ($appliedCoupon) {
+                                                if ($appliedCoupon['type'] === 'percentage') {
+                                                    // Apply percentage discount, but limit it by maximum_amount if set
+                                                    $discount = min(
+                                                        $subtotal * ($appliedCoupon['value'] / 100),
+                                                        $appliedCoupon['maximum_amount'] ?? $subtotal,
+                                                    );
+                                                } else {
+                                                    // Fixed discount
+                                                    $discount = min($appliedCoupon['value'], $subtotal); // Ensure discount doesn't exceed subtotal
+                                                }
+                                            }
+
                                             $total = max(0, $subtotal - $discount);
                                         @endphp
+
                                         <tr>
                                             <th>Subtotal</th>
                                             <td>{{ number_format($subtotal, 0, ',', '.') }}₫</td>
@@ -120,6 +145,7 @@
                                         </tr>
                                     </tfoot>
                                 </table>
+
 
                                 <!-- Payment Methods -->
                                 <div class="border-top border-width-3 border-color-1 pt-3 mb-3">
@@ -186,7 +212,8 @@
                             <div class="col-md-12">
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="shipping_address" required>
+                                    <input type="text" class="form-control" name="shipping_address"
+                                    value="{{ old('shipping_address', '') }}" required>
                                 </div>
                             </div>
 
@@ -255,7 +282,7 @@
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Email <span class="text-danger">*</span></label>
                                     <input type="email" class="form-control" name="shipping_email"
-                                        value="{{ old('email', $user->email ?? '') }}" required>
+                                        value="{{ old('shipping_email', $user->email ?? '') }}" required>
                                 </div>
                             </div>
 
@@ -263,14 +290,14 @@
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" name="shipping_phone"
-                                        value="{{ old('phone', $user->phone ?? '') }}" required>
+                                        value="{{ old('shipping_phone', $user->phone ?? '') }}" required>
                                 </div>
                             </div>
 
                             <div class="col-md-12">
                                 <div class="js-form-message mb-6">
-                                    <label class="form-label">Order notes (optional)</label>
-                                    <textarea class="form-control" name="notes" rows="4"></textarea>
+                                    <label class="form-label">Ghi chú đơn hàng (không bắt buộc)</label>
+                                    <textarea class="form-control" name="notes" rows="4" value="{{ old('notes', '') }}"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -278,16 +305,22 @@
                 </div>
             </div>
         </form>
-        <script>
+        {{-- <script>
             document.addEventListener("DOMContentLoaded", function() {
                 let checkoutForm = document.getElementById("checkout-form");
-                checkoutForm.addEventListener("submit", function(event) {
-                    event.preventDefault();
-                    let paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
 
-                    if (paymentMethod === "momo") {
+                checkoutForm.addEventListener("submit", function(event) {
+                    let paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+
+                    if (!paymentMethod) {
+                        event.preventDefault();
+                        alert("Please select a payment method before proceeding.");
+                        return;
+                    }
+
+                    if (paymentMethod.value === "momo") {
                         checkoutForm.action = "{{ route('momo.create') }}";
-                    } else if (paymentMethod === "vn_pay") {
+                    } else if (paymentMethod.value === "vn_pay") {
                         checkoutForm.action = "{{ route('vnpay.create') }}";
                     } else {
                         checkoutForm.action = "{{ route('checkout.process') }}";
@@ -296,6 +329,7 @@
                     checkoutForm.submit();
                 });
             });
-        </script>
+        </script> --}}
+
     </div>
 </main>

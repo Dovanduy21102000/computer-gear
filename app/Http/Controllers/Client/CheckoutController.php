@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Coupon;
+use App\Models\CouponUser;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -26,13 +28,13 @@ class CheckoutController extends Controller
 
         // Check if cart exists and contains items
         if (!$cart || !CartItem::where('cart_id', $cart->id)->exists()) {
-            return redirect()->route('home.index')->with('error', 'Your cart is empty.');
+            return redirect()->route('home.index')->with('error', 'Giỏ hàng của bạn đang trống');
         }
 
         // Get selected items from the cart
         $selectedItemIds = $request->input('selected_items', []); // Get the selected item IDs
         if (empty($selectedItemIds)) {
-            return redirect()->route('cart.index')->with('error', 'No items selected.');
+            return redirect()->route('cart.index')->with('error', 'Chưa có sản phẩm được chọn');
         }
 
         // Retrieve only selected items
@@ -42,7 +44,7 @@ class CheckoutController extends Controller
             ->get();
 
         if ($cartItems->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'No valid items selected.');
+            return redirect()->route('cart.index')->with('error', 'Không có sản phẩm hợp lệ.');
         }
 
         // Calculate the total price of selected items
@@ -115,7 +117,7 @@ class CheckoutController extends Controller
             ->first();
 
         if (!$order) {
-            return redirect()->route('order.track')->with('error', 'Order not found. Please check your Order ID.');
+            return redirect()->route('order.track')->with('error', 'Không tìm thấy đơn hàng, vui lòng kiểm tra lại mã đơn hàng');
         }
 
 
@@ -123,9 +125,42 @@ class CheckoutController extends Controller
         return view('fontend.layout', compact('template', 'order'));
     }
 
+    public function checkoutMethod(Request $request)
+    {
+        $request->validate([
+            'payment_method' => 'required|in:momo,vn_pay,cash',
+        ], [
+            'payment_method.required' => 'Vui lòng chọn phương thức thanh toán',
+            'payment_method.in' => 'Invalid payment method selected.',
+        ]);
+
+        // Handle different payment methods
+        if ($request->payment_method === 'momo') {
+            return $this->redirectToPost(route('momo.create'), $request->all());
+        } elseif ($request->payment_method === 'vn_pay') {
+            return $this->redirectToPost(route('vnpay.create'), $request->all());
+        } else {
+            return redirect()->route('checkout.process')->with('success', 'Order placed successfully.');
+        }
+    }
+
+    private function redirectToPost($url, $data)
+    {
+        return response()->view('fontend.checkout.post', ['url' => $url, 'data' => $data]);
+    }
 
     public function processCheckout(Request $request)
     {
+
+        $request->validate([
+            'payment_method' => 'required|in:momo,cash,vnpay',
+            'shipping_user_name' => 'required|string|max:255',
+            'shipping_email' => 'required|email|max:255',
+            'shipping_phone' => 'required|string|max:15',
+            'shipping_address' => 'required|string',
+            'province_id' => 'required|integer',
+            'district_id' => 'required|integer',
+        ]);
 
         // dd($request->all());
         // Get User ID
@@ -136,7 +171,7 @@ class CheckoutController extends Controller
         $cartItems = CartItem::where('cart_id', $cart->id)->get();
 
         if (!$cart || $cartItems->isEmpty()) {
-            return redirect()->back()->with('error', 'Your cart is empty.');
+            return redirect()->back()->with('error', 'Giỏ hàng của bạn đang trống');
         }
 
         // Calculate Total Price from Cart Items (Fixing Missing Price Issue)
@@ -195,5 +230,45 @@ class CheckoutController extends Controller
             Product::where('id', $item->product_id)->increment('quantity_sold', $item->quantity);
         }
         return redirect('/')->with('success', 'Thanh toán thành công!');
+    }
+
+    public function applyCoupon(Request $request)
+    {
+        $request->validate([
+            'coupon_code' => 'required|string|exists:coupons,code',
+        ]);
+
+        $coupon = Coupon::where('code', $request->coupon_code)
+            ->where('status', 1)
+            ->where('expire_date', '>=', now())
+            ->first();
+
+        if (!$coupon) {
+            return back()->with('error', 'Mã khuyến mại không hợp lệ hoặc đã hết hạn.');
+        }
+
+        // Ensure user hasn't used the coupon before
+        if (Auth::check()) {
+            $couponUsed = CouponUser::where('user_id', Auth::id())
+                ->where('coupon_id', $coupon->id)
+                ->exists();
+            if ($couponUsed) {
+                return back()->with('error', 'Bạn dã sử dụng mã khuyến mại này rồi!');
+            }
+        }
+
+        // Store coupon details in session
+        session([
+            'coupon' => [
+                'id' => $coupon->id,
+                'code' => $coupon->code,
+                'type' => $coupon->type, // 'fixed' or 'percentage'
+                'value' => $coupon->price, // Discount value (amount or percentage)
+                'maximum_amount' => $coupon->maximum_amount, // Limit discount for percentage type
+                'min_order_total' => $coupon->min_order_total // Minimum order value required
+            ]
+        ]);
+
+        return back()->with('success', 'Mã khuyến mại đã được áp dụng!');
     }
 }

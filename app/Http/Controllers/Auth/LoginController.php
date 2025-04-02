@@ -34,23 +34,24 @@ class LoginController extends Controller
         return view('fontend.layout', compact('template'));
     }
 
+
     public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
-    
+
         $user = User::where('email', $request->email)->first();
-    
+
         if (!$user) {
             return back()->withErrors(['login_error' => 'Email không tồn tại!']);
         }
-    
+
         if (!Hash::check($request->password, $user->password)) {
             return back()->withErrors(['login_error' => 'Mật khẩu không chính xác!']);
         }
-    
+
         // Kiểm tra nếu đang đăng nhập ở trang admin
         if ($request->is('admin/*')) {
             if ($user->role !== 'admin') {
@@ -60,17 +61,17 @@ class LoginController extends Controller
             session(['admin_logged_in' => true]); // Đánh dấu session cho admin
             return redirect()->route('admin.dashboard')->with('success', 'Đăng nhập admin thành công!');
         }
-    
+
         // Đăng nhập cho member
         if ($user->role === 'member') {
             Auth::guard('web')->login($user);
             session(['user_logged_in' => true]); // Đánh dấu session cho member
             return redirect()->route('home.index')->with('success', 'Đăng nhập thành công. Xin chào ' . $user->name);
         }
-    
+
         return back()->withErrors(['login_error' => 'Không thể đăng nhập vào hệ thống.']);
     }
-    
+
 
     public function logout(Request $request)
     {
@@ -78,17 +79,15 @@ class LoginController extends Controller
             Auth::guard('admin')->logout();
             session()->forget('admin_logged_in');
         }
-    
+
         if (session('user_logged_in')) {
             Auth::guard('web')->logout();
             session()->forget('user_logged_in');
         }
-    
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-    
+
         return redirect('/');
     }
-    
 }
-

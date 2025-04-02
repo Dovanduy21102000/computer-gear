@@ -20,7 +20,7 @@
                     <h1 class="text-center">Giỏ hàng</h1>
                 </div>
                 <div class="mb-10 cart-table">
-                    <form action="" id="cart-form" method="GET-">
+                    <form action="" id="cart-form" method="GET">
                         @csrf
                         <div class="d-flex justify-content-end mb-4">
                             <button type="submit" id="delete-selected"
@@ -98,7 +98,7 @@
                                                 <!-- Update Cart Button -->
                                                 <div class="d-md-flex">
 
-                                                    <button type="submit"
+                                                    <button type="submit" id="update-cart"
                                                         class="btn btn-soft-secondary mb-3 mb-md-0 font-weight-normal px-5 px-md-4 px-lg-5 w-100 w-md-auto">
                                                         Cập nhật giỏ hàng
                                                     </button>
@@ -170,6 +170,7 @@
                         event.preventDefault();
                         let form = document.getElementById('cart-form');
                         if (form) {
+                            form.method = "POST";
                             form.action = "{{ route('cart.update') }}"; // Ensure update action
                             form.submit();
                         } else {
