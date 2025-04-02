@@ -9,8 +9,7 @@
             <div class="topbar-right ml-auto">
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item u-header-topbar__nav-item u-header-topbar__nav-item-border">
-                        <a href="#" class="u-header-topbar__nav-link"><i class="ec ec-map-pointer mr-1"></i> Vị trí
-                            cửa hàng</a>
+                        <a href="{{ route('client.contacts.index') }}" class="u-header-topbar__nav-link"><i class="ec ec-map-pointer mr-1"></i> Vị trí cửa hàng</a>
                     </li>
                     <li class="list-inline-item u-header-topbar__nav-item u-header-topbar__nav-item-border">
                         <a href="{{ route('order.track') }}" class="u-header-topbar__nav-link"><i

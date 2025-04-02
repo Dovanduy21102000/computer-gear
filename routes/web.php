@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\VNPayController;
 use App\Http\Controllers\Admin\CategoryPostController;
+use App\Http\Controllers\Admin\SpecificationController;
 use App\Http\Controllers\OrderItemController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +58,7 @@ Route::prefix('admin')->group(function () {
             'contacts'          => ContactController::class,
             'productvariants'   => ProductVariantController::class,
             'category_post'     => CategoryPostController::class,
+
         ];
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
@@ -64,8 +66,30 @@ Route::prefix('admin')->group(function () {
 
         // Route upload bài viết
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
+        // Route quản lý thông số sản phẩm
+        Route::prefix('specifications')->name('admin.specifications.')->group(function () {
+            Route::get('product/{product_id}', [SpecificationController::class, 'index'])
+                ->name('index');
+        
+            Route::get('product/{product_id}/create', [SpecificationController::class, 'create'])
+                ->name('create');
+        
+            Route::post('product/{product_id}', [SpecificationController::class, 'store'])
+                ->name('store');
+        
+            Route::get('product/{product_id}/specification/{id}/edit', [SpecificationController::class, 'edit'])
+                ->name('edit');
+
+            Route::put('product/{product_id}/bulk-update', [SpecificationController::class, 'bulkUpdate'])
+                ->name('bulkUpdate');
+        
+        });
+        
+        
     });
 });
+
+
 
 //Biêns thể
 Route::prefix('products/{product}/variants')->group(function () {
@@ -122,8 +146,11 @@ Route::middleware(['web'])->group(function () {
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 
+
+
     Route::get('/', [HomeController::class, 'index'])->name('home.index')->middleware('auth'); // Yêu cầu đăng nhập
     Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth'); // Yêu cầu đăng nhập
+
     Route::get('/about_us', [HomeController::class, 'about_us'])->name('about_us');
     Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
     Route::get('/track-order', [CheckoutController::class, 'trackOrderView'])->name('order.track');
