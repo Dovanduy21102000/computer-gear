@@ -187,24 +187,24 @@
                                         @if ($order->status == 'pending')
                                             <option value="pending" selected>Chờ xử lý</option>
                                             <option value="processing">Đang xử lý</option>
-                                            <option value="canceled">Đã hủy</option>
+                                            <option value="canceled">Hủy đơn</option>
                                             <!-- Trạng thái "processing" chỉ có thể chuyển sang "delivered" hoặc "canceled" -->
                                         @elseif($order->status == 'processing')
                                             <option value="processing" selected>Đang xử lý</option>
                                             <option value="delivered">Đang giao hàng</option>
                                             <option value="completed">Hoàn thành</option>
-                                            <option value="canceled">Đã hủy</option>
+                                            <option value="canceled">Hủy đơn</option>
                                             <!-- Trạng thái "delivered" không thể quay lại trạng thái "processing", chỉ có thể chuyển sang "completed","delivered" hoặc "canceled" -->
                                         @elseif($order->status == 'delivered')
                                             <option value="delivered" selected>Đang giao hàng</option>
                                             <option value="completed">Hoàn thành</option>
-                                            <option value="canceled">Đã hủy</option>
+                                            <option value="canceled">Hủy đơn</option>
                                             <!-- Trạng thái "completed" không thể thay đổi, chỉ có thể giữ nguyên -->
                                         @elseif($order->status == 'completed')
                                             <option value="completed" selected>Hoàn thành</option>
                                             <!-- Trạng thái "canceled" có thể quay lại "pending", "processing", hoặc "delivered" -->
                                         @elseif($order->status == 'canceled')
-                                            <option value="canceled" selected>Đã hủy</option>
+                                            <option value="canceled" selected>Hủy đơn</option>
                                             <option value="pending">Chờ xử lý</option>
                                             <option value="processing">Đang xử lý</option>
                                             <option value="delivered">Đang giao hàng</option>

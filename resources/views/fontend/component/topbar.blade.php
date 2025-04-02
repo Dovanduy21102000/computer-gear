@@ -21,7 +21,7 @@
                                     <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#">Quản lý tài khoản</a>
+                                    <a class="dropdown-item" href="{{ route('user.show') }}">Quản lý tài khoản</a>
                                     <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         Đăng xuất
                                     </a>
