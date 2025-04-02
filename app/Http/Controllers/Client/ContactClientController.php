@@ -46,7 +46,7 @@ class ContactClientController extends Controller
         $contact = Contact::create($data);
     
         // Gửi email thông báo
-        Mail::to('hiencoi250404@gmail.com')->send(new ContactMail($contact));
+        Mail::to('Ducngph46559@fpt.edu.vn')->send(new ContactMail($contact));
     
         return redirect()->route('client.contacts.index')->with('success', 'Gửi liên hệ thành công!');
     }

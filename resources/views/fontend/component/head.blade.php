@@ -25,7 +25,5 @@
     <link rel="stylesheet" href="{{ asset('fontend/assets/vendor/fancybox/jquery.fancybox.css') }}">
     <link rel="stylesheet" href="{{ asset('fontend/assets/vendor/slick-carousel/slick/slick.css') }}">
     <link rel="stylesheet" href="{{ asset('fontend/assets/vendor/bootstrap-select/dist/css/bootstrap-select.min.css') }}">
-
     <link rel="stylesheet" href="{{ asset('fontend/assets/css/theme.css') }}">
-
 </head>

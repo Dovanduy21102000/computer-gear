@@ -41,6 +41,7 @@
         <script src="{{ asset('fontend/assets/js/components/hs.svg-injector.js') }}"></script>
         <script src="{{ asset('fontend/assets/js/components/hs.go-to.js') }}"></script>
         <script src="{{ asset('fontend/assets/js/components/hs.selectpicker.js') }}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <!-- JS Plugins Init. -->
         <script>
