@@ -121,8 +121,13 @@
                                                         class="btn btn-warning btn-sm">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
+                                                    <!-- Nút xem thông số sản phẩm -->
+                                                    <a href="{{ route('admin.specifications.index', ['product_id' => $product->id]) }}" 
+                                                        class="btn btn-info btn-sm">
+                                                        <i class="bi bi-cpu"></i>
+                                                     </a>
                                                     <form action="{{ route('products.destroy', $product->id) }}"
-                                                        method="POST" class="d-inline">
+                                                        method="POST" class="d-inline mt-1">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm"

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attribute;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product; // Import model Product
@@ -93,29 +94,43 @@ class ProductClientController extends Controller
 
     public function getVariant(Request $request)
     {
-        $variant = ProductVariant::where('product_id', $request->product_id)
-            ->whereHas('attributeValues', function ($query) use ($request) {
-                $query->whereHas('attribute', function ($subQuery) {
-                    $subQuery->where('name', 'RAM');
-                })->where('value', $request->ram);
-            })
-            ->whereHas('attributeValues', function ($query) use ($request) {
-                $query->whereHas('attribute', function ($subQuery) {
-                    $subQuery->where('name', 'Màu sắc');
-                })->where('value', $request->color);
-            })
-            ->first();
+        // Log để kiểm tra request
+        \Log::info('Received request:', $request->all());
 
-        if (!$variant) {
-            return response()->json(['error' => '❌ Không tìm thấy biến thể'], 404);
+        // Truy vấn biến thể sản phẩm dựa trên product_id
+        $query = ProductVariant::where('product_id', $request->product_id);
+
+        // Duyệt qua tất cả các tham số của request (trừ product_id) và thêm điều kiện vào truy vấn
+        foreach ($request->except('product_id') as $key => $value) {
+            if (!empty($value)) {
+                \Log::info('Áp dụng điều kiện: ' . $key . ' = ' . $value);  // Log điều kiện tìm kiếm
+                $query->whereHas('attributeValues', function ($query) use ($key, $value) {
+                    $query->where('value', $value)
+                        ->whereHas('attribute', function ($subQuery) use ($key) {
+                            // Điều kiện tìm kiếm linh hoạt cho tên thuộc tính
+                            $subQuery->where('name', 'like', '%' . $key . '%');
+                        });
+                });
+            }
         }
 
+        // Trả về biến thể đầu tiên thỏa mãn điều kiện
+        $variant = $query->first();
+
+        // Log kết quả
+        \Log::info('Kết quả truy vấn biến thể:', ['variant' => $variant]);
+
+        // Nếu không tìm thấy biến thể
+        if (!$variant) {
+            \Log::error('Không tìm thấy biến thể cho sản phẩm:', ['request' => $request->all()]);
+            return response()->json(['error' => 'Không tìm thấy biến thể'], 404);
+        }
+
+        // Trả về thông tin biến thể
         return response()->json([
             'price' => number_format($variant->price, 0, ',', '.') . '₫',
-            'price_sale' => $variant->price_sale
-                ? number_format($variant->price_sale, 0, ',', '.') . '₫'
-                : null,
-            'quantity' => $variant->quantity ?? 0 // Lấy giá trị từ quantity thay vì stock
+            'price_sale' => $variant->price_sale ? number_format($variant->price_sale, 0, ',', '.') . '₫' : null,
+            'quantity' => $variant->quantity ?? 0,
         ]);
     }
 
@@ -153,7 +168,7 @@ class ProductClientController extends Controller
 
 
 
-   
+
     public function showByBrand($brandSlug)
     {
         $brand = Brand::where('slug', $brandSlug)->firstOrFail();
