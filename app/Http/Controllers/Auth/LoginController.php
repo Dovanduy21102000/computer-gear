@@ -26,7 +26,7 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
+    // use AuthenticatesUsers;
 
     // Hiển thị form đăng nhập
     public function showLoginForm()

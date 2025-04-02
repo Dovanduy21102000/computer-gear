@@ -38,7 +38,7 @@ Route::prefix('admin')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('auth.login'); // Xử lý đăng nhập
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
     // Route admin cần quyền truy cập
-    Route::middleware(['admin'])->group(function () {
+    Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
 
         // Các route resource dành cho admin
@@ -57,28 +57,27 @@ Route::prefix('admin')->group(function () {
             'contacts'          => ContactController::class,
             'productvariants'   => ProductVariantController::class,
             'category_post'     => CategoryPostController::class,
-
         ];
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
         };
 
-
         // Route upload bài viết
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
     });
+    //Biêns thể
+    Route::prefix('products/{product}/variants')->group(function () {
+        Route::get('/', [ProductVariantController::class, 'index'])->name('variants.index');
+        Route::get('/create', [ProductVariantController::class, 'create'])->name('variants.create');
+        Route::post('/store', [ProductVariantController::class, 'store'])->name('variants.store');
+        Route::get('/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
+        Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
+        Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
+        Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
+    });
 });
 
-//Biêns thể
-Route::prefix('products/{product}/variants')->group(function () {
-    Route::get('/', [ProductVariantController::class, 'index'])->name('variants.index');
-    Route::get('/create', [ProductVariantController::class, 'create'])->name('variants.create');
-    Route::post('/store', [ProductVariantController::class, 'store'])->name('variants.store');
-    Route::get('/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
-    Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
-    Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
-    Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
-});
+
 
 
 // Client Routes
@@ -123,7 +122,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-    
+
     Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 
@@ -133,7 +132,6 @@ Route::middleware(['web'])->group(function () {
     Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
     Route::get('/track-order', [CheckoutController::class, 'trackOrderView'])->name('order.track');
     Route::match(['get', 'post'], '/track-order/check', [CheckoutController::class, 'trackOrder'])->name('order.trackOrder');
-
 });
 
 Route::get('/api/districts/{province_id}', function ($province_id) {
@@ -157,5 +155,7 @@ Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
 Route::get('/momo-return', [MOMOController::class, 'handleReturn'])->name('momo.return');
 Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
+
+
 
 Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');

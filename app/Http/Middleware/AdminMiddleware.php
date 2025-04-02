@@ -11,15 +11,19 @@ class AdminMiddleware
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role === 'admin') {
-            return $next($request);
+        // Kiểm tra nếu chưa đăng nhập
+        if (!Auth::check()) {
+            return redirect('/login')->with('error', 'Bạn cần đăng nhập để tiếp tục.');
         }
 
-        return redirect('/')->with('error', 'Bạn không có quyền truy cập!');
+        // Kiểm tra nếu user không phải admin
+        if (Auth::user()->role !== 'admin') {
+            return redirect('/')->with('error', 'Bạn không có quyền truy cập!');
+        }
+
+        return $next($request);
     }
 }

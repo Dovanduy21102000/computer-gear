@@ -18,20 +18,18 @@ class ProductVariant extends Model
         'image',
         'status',
     ];
-    public function product() {
+    public function product()
+    {
         return $this->belongsTo(Product::class);
     }
 
-    public function attributes() {
+
+    public function attributes()
+    {
         return $this->belongsToMany(AttributeValue::class, 'product_variant_attribute_values', 'product_variant_id', 'attribute_value_id');
     }
     public function attributeValues()
-{
-    return $this->belongsToMany(AttributeValue::class, 'product_variant_attribute_values', 'product_variant_id', 'attribute_value_id')
-        ->with('attribute'); // Load luôn attribute
-}
-
-    
-
-
+    {
+        return $this->hasMany(ProductVariantAttributeValue::class, 'attribute_value_id');
+    }
 }
