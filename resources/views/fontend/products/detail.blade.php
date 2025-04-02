@@ -215,7 +215,7 @@
                                     @foreach ($values as $value)
                                         <label class="attribute-option">
                                             <input type="radio"
-                                                name="{{ strtolower(str_replace(' ', '_', $attributeName)) }}"
+                                                name="{{ strtolower(string: str_replace(' ', '_', $attributeName)) }}"
                                                 value="{{ $value }}" class="d-none">
                                             <span class="attribute-box">{{ $value }}</span>
                                         </label>
@@ -641,7 +641,7 @@
             let productId = {{ $product->id }}; // ID sản phẩm
 
             console.log("Selected Attributes:",
-            selectedAttributes); // Log để kiểm tra giá trị thuộc tính
+                selectedAttributes); // Log để kiểm tra giá trị thuộc tính
 
             // Kiểm tra bộ nhớ đệm
             if (variantCache[cacheKey]) {
