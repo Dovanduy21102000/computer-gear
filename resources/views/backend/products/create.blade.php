@@ -57,14 +57,6 @@
                                 </div>
                             </div>
 
-                            <!-- SKU -->
-                            <div class="row mb-3">
-                                <label for="sku" class="col-sm-2 col-form-label">SKU</label>
-                                <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="sku" name="sku" required>
-                                </div>
-                            </div>
-
                             <!-- Tên sản phẩm -->
                             <div class="row mb-3">
                                 <label for="name" class="col-sm-2 col-form-label">Tên sản phẩm</label>
@@ -81,6 +73,14 @@
                                 </div>
                             </div>
 
+                            <!-- SKU -->
+                            <div class="row mb-3">
+                                <label for="sku" class="col-sm-2 col-form-label">SKU</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="sku" name="sku" required>
+                                </div>
+                            </div>
+
                             <!-- Ảnh đại diện -->
                             <div class="row mb-3">
                                 <label for="thumbnail" class="col-sm-2 col-form-label">Ảnh đại diện</label>
@@ -88,7 +88,17 @@
                                     <input type="file" class="form-control" id="thumbnail" name="thumbnail">
                                 </div>
                             </div>
-
+                            <!-- Có biến thể -->
+                            <div class="row mb-3">
+                                <label for="is_variant" class="col-sm-2 col-form-label">Có biến thể</label>
+                                <div class="col-sm-10">
+                                    <select class="form-select" id="is_variant" name="is_variant" required
+                                        onchange="toggleVariants(this)">
+                                        <option value="1">Có</option>
+                                        <option value="0" selected>Không</option>
+                                    </select>
+                                </div>
+                            </div>
                             <!-- Mô tả ngắn -->
                             <div class="row mb-3">
                                 <label for="short_description" class="col-sm-2 col-form-label">Mô tả ngắn</label>
@@ -152,15 +162,12 @@
                                 initCKEditor('#ck_short_description', 200);
                                 initCKEditor('#ck_description', 300);
                             </script>
-
-
-
-
                             <!-- Giá -->
                             <div class="row mb-3">
                                 <label for="price" class="col-sm-2 col-form-label">Giá</label>
                                 <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="price" name="price" required>
+                                    <input type="number" class="form-control" id="price" name="price"
+                                        >
                                 </div>
                             </div>
 
@@ -173,10 +180,10 @@
                             </div>
 
                             <!-- Số lượng -->
-                            <div class="row mb-3">
+                            <div class="row mb-3" id="quantity-section">
                                 <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
                                 <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="quantity" name="quantity" required>
+                                    <input type="number" class="form-control" id="quantity" name="quantity">
                                 </div>
                             </div>
 
@@ -191,16 +198,7 @@
                                 </div>
                             </div>
 
-                            <!-- Có biến thể -->
-                            <div class="row mb-3">
-                                <label for="is_variant" class="col-sm-2 col-form-label">Có biến thể</label>
-                                <div class="col-sm-10">
-                                    <select class="form-select" id="is_variant" name="is_variant" required onchange="toggleVariants(this)">
-                                        <option value="1">Có</option>
-                                        <option value="0" selected>Không</option>
-                                    </select>
-                                </div>
-                            </div>
+
 
                             <!-- Phần Nhập Liệu Cho Biến Thể -->
                             <div id="variants-section" style="display: none;">
@@ -208,40 +206,57 @@
                                 <div id="variants">
                                     <div class="variant mb-4">
                                         <div class="row mb-3">
-                                            <label for="variants[0][sku]" class="col-sm-2 col-form-label">SKU Biến thể</label>
+                                            <label for="variants[0][sku]" class="col-sm-2 col-form-label">SKU Biến
+                                                thể</label>
                                             <div class="col-sm-10">
-                                                <input type="text" class="form-control" name="variants[0][sku]" required>
+                                                <input type="text" class="form-control" name="variants[0][sku]">
                                             </div>
                                         </div>
                                         <div class="row mb-3">
-                                            <label for="variants[0][price]" class="col-sm-2 col-form-label">Giá Biến thể</label>
+                                            <label for="variants[0][price]" class="col-sm-2 col-form-label">Giá Biến
+                                                thể</label>
                                             <div class="col-sm-10">
-                                                <input type="number" class="form-control" name="variants[0][price]" required>
+                                                <input type="number" class="form-control" name="variants[0][price]">
                                             </div>
                                         </div>
                                         <div class="row mb-3">
-                                            <label for="variants[0][quantity]" class="col-sm-2 col-form-label">Số lượng Biến thể</label>
+                                            <label for="variants[0][quantity]" class="col-sm-2 col-form-label">Số
+                                                lượng Biến thể</label>
                                             <div class="col-sm-10">
-                                                <input type="number" class="form-control" name="variants[0][quantity]" required>
+                                                <input type="number" class="form-control"
+                                                    name="variants[0][quantity]">
                                             </div>
                                         </div>
+                                        <!-- Có biến thể -->
                                         <div class="row mb-3">
-                                            <label for="variants[0][attributes]" class="col-sm-2 col-form-label">Thuộc tính</label>
+                                            <label for="variants[0][attributes]" class="col-sm-2 col-form-label">Thuộc
+                                                tính</label>
                                             <div class="col-sm-10">
-                                                <select class="form-select" name="variants[0][attributes][]" multiple required>
-                                                    @foreach ($attributes as $attribute)
-                                                        <optgroup label="{{ $attribute->name }}">
+                                                @foreach ($attributes as $attribute)
+                                                    <div class="mb-2">
+                                                        <strong>{{ $attribute->name }}</strong>
+                                                        <div>
                                                             @foreach ($attribute->attributeValues as $value)
-                                                                <option value="{{ $value->id }}">{{ $value->value }}</option>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="attribute_{{ $attribute->id }}_{{ $value->id }}"
+                                                                        name="variants[0][attributes][{{ $attribute->id }}]"
+                                                                        value="{{ $value->id }}">
+                                                                    <label class="form-check-label"
+                                                                        for="attribute_{{ $attribute->id }}_{{ $value->id }}">
+                                                                        {{ $value->value }}
+                                                                    </label>
+                                                                </div>
                                                             @endforeach
-                                                        </optgroup>
-                                                    @endforeach
-                                                </select>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-secondary" onclick="addVariant()">Thêm biến thể</button>
+                                <button type="button" class="btn btn-secondary" onclick="addVariant()">Thêm biến
+                                    thể</button>
                             </div>
 
                             <!-- Nút Submit -->
@@ -261,54 +276,136 @@
 
 <script>
     let variantCount = 1;
+    document.addEventListener('DOMContentLoaded', function() {
+        const baseSKU = document.getElementById('sku').value;
+        const variantSKUInput = document.querySelector('input[name="variants[0][sku]"]');
+
+        if (variantSKUInput) {
+            const variantSKU = `${baseSKU}-1`; // 
+            variantSKUInput.value = variantSKU;
+        }
+    });
+    document.getElementById('name').addEventListener('input', function() {
+        const baseSKU = generateSKU(this.value);
+        const skuInput = document.getElementById('sku');
+        skuInput.value = baseSKU;
+
+        // Cập nhật SKU cho biến thể đầu tiên
+        const variantSKUInput = document.querySelector('input[name="variants[0][sku]"]');
+        if (variantSKUInput) {
+            const variantSKU = `${baseSKU}-1`;
+            variantSKUInput.value = variantSKU;
+        }
+    });
 
     function toggleVariants(select) {
         const variantsSection = document.getElementById('variants-section');
+        const quantitySection = document.getElementById('quantity-section');
+
         if (select.value === '1') {
             variantsSection.style.display = 'block';
+            quantitySection.style.display = 'none';
         } else {
             variantsSection.style.display = 'none';
+            quantitySection.style.display = 'block';
         }
+    }
+
+    function generateSlug(value) {
+        return value
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+    }
+
+    document.getElementById('name').addEventListener('input', function() {
+        const slugInput = document.getElementById('slug');
+        slugInput.value = generateSlug(this.value);
+    });
+
+    function generateSKU(value) {
+        const baseSKU = value
+            .toUpperCase()
+            .trim()
+            .replace(/[^A-Z0-9]/g, '')
+            .substring(0, 3);
+        return baseSKU;
+    }
+
+    document.getElementById('name').addEventListener('input', function() {
+        const baseSKU = generateSKU(this.value);
+        const skuInput = document.getElementById('sku');
+        skuInput.value = baseSKU;
+
+        const variantSKUInput = document.querySelector('input[name="variants[0][sku]"]');
+        if (variantSKUInput) {
+            const variantSKU = `${baseSKU}-1`;
+            variantSKUInput.value = variantSKU;
+        }
+    });
+
+    function generateVariantSKU(baseSKU, attributes) {
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000); 
+        const attributePart = attributes.map(attr => attr.toUpperCase().substring(0, 11)).join(
+            '-'); 
+        return `${baseSKU}-${attributePart}-${randomSuffix}`;
     }
 
     function addVariant() {
         const variantsDiv = document.getElementById('variants');
+        const baseSKU = document.getElementById('sku').value;
         const newVariant = document.createElement('div');
         newVariant.classList.add('variant', 'mb-4');
+
+        const variantSKU = `${baseSKU}-${variantCount+1}`;
+
         newVariant.innerHTML = `
-            <div class="row mb-3">
-                <label for="variants[${variantCount}][sku]" class="col-sm-2 col-form-label">SKU Biến thể</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" name="variants[${variantCount}][sku]" required>
-                </div>
+        <div class="row mb-3">
+            <label for="variants[${variantCount}][sku]" class="col-sm-2 col-form-label">SKU Biến thể</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" name="variants[${variantCount}][sku]" value="${variantSKU}" >
             </div>
-            <div class="row mb-3">
-                <label for="variants[${variantCount}][price]" class="col-sm-2 col-form-label">Giá Biến thể</label>
-                <div class="col-sm-10">
-                    <input type="number" class="form-control" name="variants[${variantCount}][price]" required>
-                </div>
+        </div>
+        <div class="row mb-3">
+            <label for="variants[${variantCount}][price]" class="col-sm-2 col-form-label">Giá Biến thể</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" name="variants[${variantCount}][price]" >
             </div>
-            <div class="row mb-3">
-                <label for="variants[${variantCount}][quantity]" class="col-sm-2 col-form-label">Số lượng Biến thể</label>
-                <div class="col-sm-10">
-                    <input type="number" class="form-control" name="variants[${variantCount}][quantity]" required>
-                </div>
+        </div>
+        <div class="row mb-3">
+            <label for="variants[${variantCount}][quantity]" class="col-sm-2 col-form-label">Số lượng Biến thể</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" name="variants[${variantCount}][quantity]">
             </div>
-            <div class="row mb-3">
-                <label for="variants[${variantCount}][attributes]" class="col-sm-2 col-form-label">Thuộc tính</label>
-                <div class="col-sm-10">
-                    <select class="form-select" name="variants[${variantCount}][attributes][]" multiple required>
-                        @foreach ($attributes as $attribute)
-                            <optgroup label="{{ $attribute->name }}">
-                                @foreach ($attribute->attributeValues as $value)
-                                    <option value="{{ $value->id }}">{{ $value->value }}</option>
-                                @endforeach
-                            </optgroup>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-        `;
+        </div>
+        <div class="row mb-3">
+                                            <label for="variants[0][attributes]" class="col-sm-2 col-form-label">Thuộc
+                                                tính</label>
+                                            <div class="col-sm-10">
+                                                @foreach ($attributes as $attribute)
+                                                    <div class="mb-2">
+                                                        <strong>{{ $attribute->name }}</strong>
+                                                        <div>
+                                                            @foreach ($attribute->attributeValues as $value)
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="attribute_{{ $value->id }}"
+                                                                        name="variants[0][attributes][]"
+                                                                        value="{{ $value->id }}">
+                                                                    <label class="form-check-label"
+                                                                        for="attribute_{{ $value->id }}">
+                                                                        {{ $value->value }}
+                                                                    </label>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+    `;
         variantsDiv.appendChild(newVariant);
         variantCount++;
     }

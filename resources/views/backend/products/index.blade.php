@@ -56,11 +56,20 @@
                                                 <td>{{ $product->brand->name ?? 'Không có' }}</td>
                                                 <td class="text-end">{{ number_format($product->price, 0, ',', '.') }}
                                                     VNĐ</td>
-                                                <td class="text-center">{{ $product->quantity }}</td>
                                                 <td class="text-center">
                                                     @if ($product->is_variant)
-                                                        <span class="badge bg-info">{{ $product->variants->count() }} biến thể</span>
-                                                        <a href="{{ route('variants.index', $product->id) }}" class="btn btn-info btn-sm mt-1">
+                                                        {{ $product->variants->sum('quantity') }}
+                                                        <!-- Tổng số lượng biến thể -->
+                                                    @else
+                                                        {{ $product->quantity }}
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if ($product->is_variant)
+                                                        <span class="badge bg-info">{{ $product->variants->count() }}
+                                                            biến thể</span>
+                                                        <a href="{{ route('variants.index', $product->id) }}"
+                                                            class="btn btn-info btn-sm mt-1">
                                                             <i class="fa fa-list"></i>
                                                         </a>
                                                     @else
@@ -83,8 +92,13 @@
                                                         class="btn btn-warning btn-sm">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
+                                                    <!-- Nút xem thông số sản phẩm -->
+                                                    <a href="{{ route('admin.specifications.index', ['product_id' => $product->id]) }}"
+                                                        class="btn btn-info btn-sm">
+                                                        <i class="bi bi-cpu"></i>
+                                                    </a>
                                                     <form action="{{ route('products.destroy', $product->id) }}"
-                                                        method="POST" class="d-inline">
+                                                        method="POST" class="d-inline mt-1">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm"
