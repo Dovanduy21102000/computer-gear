@@ -46,8 +46,10 @@ class ContactClientController extends Controller
         // Lưu vào database
         $contact = Contact::create($data);
     
-        // Gửi email thông báo cho admin
-        Mail::to('hiencoi250404@gmail.com')->send(new ContactMail($contact));
+
+        // Gửi email thông báo
+        Mail::to('Ducngph46559@fpt.edu.vn')->send(new ContactMail($contact));
+
     
         // Gửi email phản hồi lại cho người gửi
         Mail::to($contact->email)->send(new ContactReplyMail($contact));

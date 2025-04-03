@@ -24,6 +24,42 @@
                                     <input class="datatable-input" placeholder="Tìm kiếm theo tên hoặc SKU..."
                                         type="search" name="search" title="Tìm kiếm trong bảng">
                                 </div>
+                                <form method="GET" action="{{ route('products.index') }}" class="mb-1">
+                                    <div class="row">
+                                        <!-- Lọc danh mục -->
+                                        <div class="col-md-4">
+                                            <select name="category" id="category" class="form-control">
+                                                <option value="">-- Danh mục --</option>
+                                                @foreach ($categories as $category)
+                                                    <option value="{{ $category->id }}"
+                                                        {{ request('category') == $category->id ? 'selected' : '' }}>
+                                                        {{ $category->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- Lọc thương hiệu -->
+                                        <div class="col-md-4">
+                                            <select name="brand" id="brand" class="form-control">
+                                                <option value="">-- Thương hiệu --</option>
+                                                @foreach ($brands as $brand)
+                                                    <option value="{{ $brand->id }}"
+                                                        {{ request('brand') == $brand->id ? 'selected' : '' }}>
+                                                        {{ $brand->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- Nút lọc -->
+                                        <div class="col-md-4 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary">Lọc</button>
+                                            <a href="{{ route('products.index') }}"
+                                                class="btn btn-secondary ms-2">Reset</a>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                             <div class="datatable-container">
                                 <table class="table datatable datatable-table table-bordered">
@@ -59,8 +95,10 @@
                                                 <td class="text-center">{{ $product->quantity }}</td>
                                                 <td class="text-center">
                                                     @if ($product->is_variant)
-                                                        <span class="badge bg-info">{{ $product->variants->count() }} biến thể</span>
-                                                        <a href="{{ route('variants.index', $product->id) }}" class="btn btn-info btn-sm mt-1">
+                                                        <span class="badge bg-info">{{ $product->variants->count() }}
+                                                            biến thể</span>
+                                                        <a href="{{ route('variants.index', $product->id) }}"
+                                                            class="btn btn-info btn-sm mt-1">
                                                             <i class="fa fa-list"></i>
                                                         </a>
                                                     @else
@@ -83,8 +121,13 @@
                                                         class="btn btn-warning btn-sm">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
+                                                    <!-- Nút xem thông số sản phẩm -->
+                                                    <a href="{{ route('admin.specifications.index', ['product_id' => $product->id]) }}" 
+                                                        class="btn btn-info btn-sm">
+                                                        <i class="bi bi-cpu"></i>
+                                                     </a>
                                                     <form action="{{ route('products.destroy', $product->id) }}"
-                                                        method="POST" class="d-inline">
+                                                        method="POST" class="d-inline mt-1">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm"

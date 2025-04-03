@@ -59,7 +59,7 @@ class HomeController extends Controller
             ->whereHas('brand', function ($query) {
                 $query->where('is_active', 1);
             })
-            ->orderBy('quantity_sold', 'desc')
+            // ->orderBy('quantity_sold', 'desc')
             ->paginate(9);
 
         // Lấy 4 sản phẩm bất kỳ (chỉ lấy khi danh mục và thương hiệu is_active = 1)

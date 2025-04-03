@@ -1,3 +1,47 @@
+<style>
+    /* Định dạng mặc định của các ô */
+    .attribute-option {
+        display: inline-block;
+        margin-right: 10px;
+        padding: 8px 15px;
+        border: 2px solid #ddd;
+        /* Viền mặc định */
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: normal;
+        /* Giữ font chữ không in đậm mặc định */
+    }
+
+    /* Thay đổi viền khi ô được chọn, không thay đổi nội dung */
+    .attribute-option input[type="radio"]:checked+.attribute-box {
+        background-color: white;
+        /* Giữ nền trắng */
+        color: black;
+        /* Giữ màu chữ không thay đổi */
+        border-color: #ffda08;
+        /* Màu viền khi chọn */
+        font-weight: normal;
+        /* Đảm bảo chữ không bị in đậm */
+    }
+
+    /* Thêm hiệu ứng hover */
+    .attribute-option:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* Thay đổi viền khi được chọn */
+    .attribute-option.selected {
+        border-color: yellow;
+        /* Viền màu khi được chọn */
+    }
+
+    /* Định dạng khi di chuột qua ô */
+    .attribute-option:hover {
+        border-color: #ebf306;
+        /* Viền đổi màu khi hover */
+    }
+</style>
 <!-- ========== MAIN CONTENT ========== -->
 <main id="content" role="main">
     <!-- breadcrumb -->
@@ -90,6 +134,12 @@
                                 </p>
                             @endif
                         </div>
+                        <!-- Thêm thông tin bảo hành và hỗ trợ -->
+                        <div class="mb-2">
+                            <p class="mb-1 fw-bold">✔ Bảo hành chính hãng 12 tháng.</p>
+                            <p class="mb-1 fw-bold">✔ Hỗ trợ đổi mới trong 7 ngày.</p>
+                            <p class="mb-1 fw-bold">✔ Windows bản quyền tích hợp.</p>
+                        </div>
 
                         <div class="mb-2">
                             <p>{!! $product->short_description !!}</p>
@@ -143,9 +193,7 @@
                             <!-- End Quantity -->
                         </div>
                         @php
-                            $colors = [];
-                            $rams = [];
-                            
+                            $attributes = [];
 
                             foreach ($variants as $variant) {
                                 foreach ($variant->attributeValues as $attributeValue) {
@@ -153,59 +201,47 @@
                                         $attributeName = trim($attributeValue->attribute->name);
                                         $attributeValueText = trim($attributeValue->value);
 
-                                        if ($attributeName === 'màu sắc') {
-                                            $colors[$attributeValueText] = $attributeValueText;
-                                        }
-                                        if ($attributeName === 'RAM') {
-                                            $rams[$attributeValueText] = $attributeValueText;
-                                        }
+                                        // Lưu các giá trị vào nhóm thuộc tính
+                                        $attributes[$attributeName][$attributeValueText] = $attributeValueText;
                                     }
                                 }
                             }
                         @endphp
 
-                        @if (!empty($colors) || !empty($rams))
+                        @foreach ($attributes as $attributeName => $values)
                             <div class="mb-3">
-                                <h6 class="font-size-14">Chọn màu</h6>
-                                <select id="colorSelect"
-                                    class="js-select selectpicker dropdown-select btn-block col-12 px-0"
-                                    data-style="btn-sm bg-white font-weight-normal py-2 border">
-                                    <option value="" selected disabled>Vui lòng chọn màu</option>
-                                    <!-- Đổi nội dung -->
-                                    @foreach ($colors as $color)
-                                        <option value="{{ $color }}">{{ $color }}</option>
+                                <h6 class="font-size-14">Chọn {{ ucfirst($attributeName) }}</h6>
+                                <div class="attribute-options">
+                                    @foreach ($values as $value)
+                                        <label class="attribute-option">
+                                            <input type="radio"
+                                                name="{{ strtolower(string: str_replace(' ', '_', $attributeName)) }}"
+                                                value="{{ $value }}" class="d-none">
+                                            <span class="attribute-box">{{ $value }}</span>
+                                        </label>
                                     @endforeach
-                                </select>
+                                </div>
                             </div>
-
-                            <div class="mb-3">
-                                <h6 class="font-size-14">Chọn RAM</h6>
-                                <select id="ramSelect"
-                                    class="js-select selectpicker dropdown-select btn-block col-12 px-0"
-                                    data-style="btn-sm bg-white font-weight-normal py-2 border">
-                                    <option value="" selected disabled>Vui lòng chọn RAM</option>
-                                    <!-- Đổi nội dung -->
-                                    @foreach ($rams as $ram)
-                                        <option value="{{ $ram }}">{{ $ram }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        @endforeach
 
 
-                        @endif
+
+
+
+
 
                         <div class="mb-2 pb-0dot5" style="margin-top: 10px">
-                            <a href="#" id="addToCartBtn" class="btn btn-block btn-primary-dark">
+                            <a href="#" id="addToCartBtn" class="btn btn-block btn-primary-dark" disabled>
                                 <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
                             </a>
                         </div>
                         <div class="mb-3">
-                            <a href="#" id="buyNowBtn" class="btn btn-block btn-dark">Mua ngay</a>
+                            <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
                         </div>
                         <div class="flex-content-center flex-wrap">
-                            <a href="#" class="text-gray-6 font-size-13 mr-2"><i
-                                    class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích</a>
-
+                            <a href="#" class="text-gray-6 font-size-13 mr-2">
+                                <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -220,35 +256,36 @@
 
                 <div class="bg-white pt-4 pb-6 px-xl-11 px-md-5 px-4  overflow-hidden">
                     {{-- <div id="Description" class="mx-md-2"> --}}
-                        <div class="position-relative mb-1">
+                    <div class="position-relative mb-1">
 
 
-                            <!-- Tabs -->
-                            <ul class="nav nav-classic nav-tab nav-tab-lg justify-content-xl-center mb-6 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble border-lg-down-bottom-0 pb-1 pb-xl-0 mb-n1 mb-xl-0" role="tablist">
-                                <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                    <a class="nav-link active" data-bs-toggle="tab" href="#Description" role="tab">
-                                        <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                            Mô Tả 
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                    <a class="nav-link" data-bs-toggle="tab" href="#Specification" role="tab">
-                                        <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                            Thông Số 
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                    <a class="nav-link" data-bs-toggle="tab" href="#Reviews" role="tab">
-                                        <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                            Đánh Giá
-                                        </div>
-                                    </a>
-                                </li>
-                            </ul>
+                        <!-- Tabs -->
+                        <ul class="nav nav-classic nav-tab nav-tab-lg justify-content-xl-center mb-6 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble border-lg-down-bottom-0 pb-1 pb-xl-0 mb-n1 mb-xl-0"
+                            role="tablist">
+                            <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#Description" role="tab">
+                                    <div class="d-md-flex justify-content-md-center align-items-md-center">
+                                        Mô Tả
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
+                                <a class="nav-link" data-bs-toggle="tab" href="#Specification" role="tab">
+                                    <div class="d-md-flex justify-content-md-center align-items-md-center">
+                                        Thông Số
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
+                                <a class="nav-link" data-bs-toggle="tab" href="#Reviews" role="tab">
+                                    <div class="d-md-flex justify-content-md-center align-items-md-center">
+                                        Đánh Giá
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
 
-                        </div>
+                    </div>
 
                     {{-- </div> --}}
                 </div>
@@ -287,34 +324,31 @@
                     <div class="tab-pane fade" id="Specification" role="tabpanel">
                         <div class="mx-md-5 pt-1">
                             <div class="table-responsive mb-4">
-                                <table class="table table-hover">
+                                <table class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="font-weight-bold px-4 px-xl-5">Thông số</th>
+                                            <th class="font-weight-bold">Chi tiết</th>
+                                        </tr>
+                                    </thead>
                                     <tbody>
-                                        <tr>
-                                            <th class="px-4 px-xl-5 border-top-0">Weight</th>
-                                            <td class="border-top-0">7.25kg</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="px-4 px-xl-5">Dimensions</th>
-                                            <td>90 x 60 x 90 cm</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="px-4 px-xl-5">Size</th>
-                                            <td>One Size Fits all</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="px-4 px-xl-5">color</th>
-                                            <td>Black with Red, White with Gold</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="px-4 px-xl-5">Guarantee</th>
-                                            <td>5 years</td>
-                                        </tr>
+                                        @foreach ($product->specifications as $specification)
+                                            <tr>
+                                                <td class="px-4 px-xl-5 {{ $loop->first ? 'border-top-0' : '' }}">
+                                                    <strong>{{ $specification->key }}</strong>
+                                                </td>
+                                                <td class="{{ $loop->last ? 'border-top-0' : '' }}">
+                                                    {{ $specification->value }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
-
                         </div>
                     </div>
+
+
                     <div class="tab-pane fade" id="Reviews" role="tabpanel">
                         <div class="mb-4 px-lg-4">
                             <div class="row mb-8">
@@ -471,7 +505,7 @@
         <div class="mb-6">
             <div
                 class="d-flex justify-content-between align-items-center border-bottom border-color-1 flex-lg-nowrap flex-wrap mb-4">
-                <h3 class="section-title mb-0 pb-2 font-size-22">Related Products</h3>
+                <h3 class="section-title mb-0 pb-2 font-size-22">Sản phẩm liên quan</h3>
             </div>
 
             <ul class="row list-unstyled products-group no-gutters">
@@ -554,173 +588,214 @@
 
     });
     //Tab 
-    
 </script>
 
 
+//
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        let variantCache = {}; // Bộ nhớ đệm để lưu trữ kết quả biến thể
-
-        $('#colorSelect, #ramSelect').change(function() {
-            let color = $('#colorSelect').val();
-            let ram = $('#ramSelect').val();
-
-            console.log("🎨 Chọn màu:", color, "💾 Chọn RAM:", ram);
-
-            if (color && ram) {
-                let cacheKey = color + "_" + ram;
-
-                if (variantCache[cacheKey]) {
-                    console.log("⚡ Dữ liệu lấy từ cache:", variantCache[cacheKey]);
-                    updateUI(variantCache[cacheKey]); // Cập nhật giao diện ngay
-                    return;
+        // Lắng nghe sự kiện thay đổi trên các ô radio
+        $(".attribute-option input[type='radio']").change(function() {
+            // Lưu trữ tất cả các ô đã chọn
+            $(".attribute-option").each(function() {
+                // Kiểm tra nếu ô radio được chọn
+                if ($(this).find('input[type="radio"]').is(":checked")) {
+                    $(this).addClass("selected"); // Thêm lớp selected để thay đổi viền
+                } else {
+                    $(this).removeClass("selected"); // Bỏ lớp selected nếu không chọn
                 }
+            });
+        });
+    });
+    $(document).ready(function() {
+        let variantCache = {}; // Bộ nhớ đệm biến thể
 
-                $.ajax({
-                    url: '{{ route('getVariant') }}',
-                    type: 'GET',
-                    data: {
-                        product_id: {{ $product->id }},
-                        color: color,
-                        ram: ram
-                    },
-                    beforeSend: function() {
-                        console.log("⏳ Gửi request đến server...");
-                        $('#productPrice').html(
-                            '<span class="text-muted">Đang tải...</span>');
-                    },
-                    success: function(response) {
-                        console.log("✅ Phản hồi từ server:", response);
+        // Kiểm tra các thuộc tính đã chọn
+        function checkVariants() {
+            let selectedAttributes = {}; // Lưu biến thể đã chọn
 
-                        if (!response || Object.keys(response).length === 0) {
-                            console.warn("⚠️ Không có dữ liệu biến thể!");
-                            return;
-                        }
+            $(".attribute-option input[type='radio']:checked").each(function() {
+                let attributeName = $(this).attr("name");
+                let attributeValue = $(this).val();
+                selectedAttributes[attributeName] = attributeValue;
+            });
 
-                        variantCache[cacheKey] = response; // Lưu vào cache
-                        updateUI(response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("❌ Lỗi AJAX:", error);
-                        console.error("📌 Chi tiết lỗi:", xhr.responseText);
-                    }
-                });
+            // Kiểm tra nếu chưa chọn đủ thuộc tính
+            if (Object.keys(selectedAttributes).length < $(".attribute-options").length) {
+                $("#variantAlert").show();
+                disablePurchase();
+                return false;
+            }
+
+            $("#variantAlert").hide();
+            return selectedAttributes;
+        }
+
+        // Xử lý khi thay đổi thuộc tính (Màu sắc, RAM, v.v.)
+        $(".attribute-option input[type='radio']").change(function() {
+            let selectedAttributes = checkVariants();
+            if (!selectedAttributes) return;
+
+            let cacheKey = JSON.stringify(selectedAttributes);
+            let productId = {{ $product->id }}; // ID sản phẩm
+
+            console.log("Selected Attributes:",
+                selectedAttributes); // Log để kiểm tra giá trị thuộc tính
+
+            // Kiểm tra bộ nhớ đệm
+            if (variantCache[cacheKey]) {
+                updateUI(variantCache[cacheKey]);
+            } else {
+                fetchVariantData(productId, selectedAttributes, cacheKey);
             }
         });
 
+        // Hàm gửi request và cập nhật UI
+        function fetchVariantData(productId, selectedAttributes, cacheKey) {
+            // Khởi tạo queryParams với product_id
+            let queryParams = `product_id=${encodeURIComponent(productId)}`;
+
+            // Duyệt qua các thuộc tính đã chọn và tạo query string
+            for (let [key, value] of Object.entries(selectedAttributes)) {
+                queryParams += `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+            }
+
+            let url = '{{ route('getVariant') }}' + '?' + queryParams;
+            console.log("Request URL:", url); // In URL ra console để kiểm tra
+
+            $.ajax({
+                url: url, // Sử dụng URL đã mã hóa
+                type: 'GET',
+                beforeSend: function() {
+                    // Bạn có thể cập nhật giá trị giao diện ngay tại đây để không bị hiển thị "Đang tải..."
+                    // Ví dụ: Đổi màu viền, hoặc thay đổi nút "Thêm vào giỏ" ngay lập tức.
+                    // Cập nhật giao diện ngay lập tức
+                    $(".attribute-option").each(function() {
+                        $(this).addClass("loading");
+                    });
+                },
+                success: function(response) {
+                    console.log("Response from API:", response);
+                    if (!response || Object.keys(response).length === 0) {
+                        disablePurchase();
+                        return;
+                    }
+                    variantCache[cacheKey] = response;
+                    updateUI(response);
+                    // Loại bỏ trạng thái loading khi hoàn tất
+                    $(".attribute-option").each(function() {
+                        $(this).removeClass("loading");
+                    });
+                },
+                error: function(xhr) {
+                    console.error("❌ Lỗi AJAX:", xhr.responseText);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi!",
+                        text: "Có lỗi xảy ra khi tải thông tin biến thể.",
+                        confirmButtonText: "OK"
+                    });
+                    disablePurchase();
+                    // Loại bỏ trạng thái loading khi có lỗi
+                    $(".attribute-option").each(function() {
+                        $(this).removeClass("loading");
+                    });
+                }
+            });
+        }
+
+        // Cập nhật giao diện UI
         function updateUI(response) {
-            $('#productPrice').html(
-                response.price_sale ?
-                `<del class="text-muted">${response.price}</del> 
-     <span class="text-danger">${response.price_sale}</span>` :
-                `${response.price}`
-            );
+            console.log("🏆 UI đang cập nhật...", response); // Debug log
 
             let quantity = response.quantity ?? 0;
-            let quantityInput = $('#quantityInput');
 
-            // Cập nhật giá trị `max`
-            quantityInput.attr('max', quantity);
+            // Kiểm tra giá
+            let price = response.price_sale ?
+                `<del class="text-muted">${response.price}</del> 
+                <span class="text-danger">${response.price_sale}</span>` :
+                `${response.price}`;
 
-            // Nếu số lượng đang nhập lớn hơn max mới, đặt lại bằng max
-            if (parseInt(quantityInput.val()) > quantity) {
-                quantityInput.val(quantity);
-            }
-
-            $('#productStock').html(quantity > 0 ?
-                `<span class="text-green font-weight-bold">${quantity}</span> sản phẩm` :
-                `<span class="text-danger font-weight-bold">Hết hàng</span>`
+            // Cập nhật giá và số lượng
+            $("#productPrice").html(price);
+            $("#productStock").html(
+                `<span class="font-weight-bold ${quantity > 0 ? 'text-green' : 'text-danger'}">${quantity}</span>`
             );
 
-            // Nếu hết hàng, disable nút mua hàng
-            $('#addToCartBtn, #buyNowBtn').prop('disabled', quantity <= 0);
-            $('#quantityError').addClass('d-none'); // Ẩn lỗi nếu có
-        }
+            // Cập nhật số lượng tối đa có thể chọn
+            $("#quantityInput").attr("max", quantity);
 
-        // Kiểm tra số lượng nhập tay
-        $('#quantityInput').on('input', function() {
-            let max = parseInt($(this).attr('max'), 10);
-            let min = parseInt($(this).attr('min'), 10);
-            let value = $(this).val();
-
-            if (value === "") return; // Cho phép xóa tạm thời
-
-            value = parseInt(value, 10);
-
-            if (isNaN(value) || value < min) {
-                $(this).val(min);
-                $('#quantityError').addClass('d-none');
-            } else if (value > max) {
-                $(this).val(max);
-                $('#quantityError').removeClass('d-none');
+            // Kiểm tra nếu có hàng, kích hoạt mua
+            if (quantity > 0) {
+                $("#quantityInput").prop("disabled", false).val(1);
+                enablePurchase();
             } else {
-                $('#quantityError').addClass('d-none');
-            }
-        });
-
-        // Khi mất focus, nếu rỗng thì đặt về min
-        $('#quantityInput').on('blur', function() {
-            if ($(this).val() === "") {
-                $(this).val($(this).attr('min'));
-            }
-        });
-
-
-        function validateSelection(showAlert = false) {
-            let colorSelect = $('#colorSelect');
-            let ramSelect = $('#ramSelect');
-            let color = colorSelect.val();
-            let ram = ramSelect.val();
-            let quantity = parseInt($('#quantityInput').attr('max')) || 0;
-
-            let hasVariants = (colorSelect.length > 0 && colorSelect.find('option').length > 1) ||
-                (ramSelect.length > 0 && ramSelect.find('option').length > 1);
-
-            // Nếu sản phẩm không có biến thể, chỉ kiểm tra tồn kho
-            if (!hasVariants) {
-                if (quantity <= 0) {
-                    if (showAlert) alert("⚠️ Sản phẩm đã hết hàng! Không thể mua.");
-                    return false;
-                }
-                return true;
-            }
-
-            // Kiểm tra nếu sản phẩm có biến thể nhưng chưa chọn đủ
-            if (colorSelect.length > 0 && !color) {
-                if (showAlert) alert("⚠️ Vui lòng chọn màu sắc trước khi tiếp tục!");
-                return false;
-            }
-            if (ramSelect.length > 0 && !ram) {
-                if (showAlert) alert("⚠️ Vui lòng chọn bộ nhớ RAM trước khi tiếp tục!");
-                return false;
-            }
-            if (quantity <= 0) {
-                if (showAlert) alert("⚠️ Sản phẩm đã hết hàng! Không thể mua.");
-                return false;
-            }
-
-            return true;
-        }
-
-        function updateButtonState() {
-            if (validateSelection(false)) {
-                $('#addToCartBtn, #buyNowBtn').prop('disabled', false);
-            } else {
-                $('#addToCartBtn, #buyNowBtn').prop('disabled', true);
+                $("#quantityInput").val("").prop("disabled", true);
+                disablePurchase();
             }
         }
 
-        $('#addToCartBtn, #buyNowBtn').click(function(event) {
-            if (!validateSelection(true)) {
-                event.preventDefault();
+        // Vô hiệu hóa các nút "Thêm vào giỏ" và "Mua ngay"
+        function disablePurchase() {
+            $("#addToCartBtn, #buyNowBtn").prop("disabled", true);
+        }
+
+        // Kích hoạt các nút nếu đủ điều kiện
+        function enablePurchase() {
+            let selectedAttributes = checkVariants();
+            let quantity = parseInt($("#quantityInput").val(), 10) || 0;
+            let stockQuantity = parseInt($("#quantityInput").attr("max"), 10);
+
+            if (!selectedAttributes || quantity < 1 || stockQuantity === 0) {
+                disablePurchase();
             } else {
-                console.log("✅ Điều kiện hợp lệ, tiếp tục...");
+                $("#addToCartBtn, #buyNowBtn").prop("disabled", false);
             }
+        }
+
+        // Xử lý thay đổi số lượng
+        $("#quantityInput").on("input", function() {
+            let max = parseInt($(this).attr("max"), 10);
+            let value = $(this).val().replace(/\D/g, "");
+
+            if (max === 0 || value === "") {
+                $(this).val("");
+                disablePurchase();
+                return;
+            }
+
+            value = Math.max(1, Math.min(max, parseInt(value, 10)));
+            $(this).val(value);
+            enablePurchase();
         });
 
-        // Kiểm tra trạng thái ngay từ đầu
-        updateButtonState();
+        // Khi nhấn "Thêm vào giỏ hàng" hoặc "Mua ngay"
+        $("#addToCartBtn, #buyNowBtn").click(function(event) {
+            event.preventDefault();
+
+            let selectedAttributes = checkVariants();
+            let quantity = parseInt($("#quantityInput").val(), 10) || 1;
+
+            if (!selectedAttributes || parseInt($("#quantityInput").attr("max"), 10) === 0) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi!",
+                    text: "⚠️ Vui lòng chọn đầy đủ biến thể hoặc sản phẩm đã hết hàng!",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+
+            // Hiển thị thông báo thành công (KHÔNG GỬI REQUEST)
+            Swal.fire({
+                icon: "success",
+                title: "Thành công!",
+                text: "✅ Sản phẩm đã được thêm vào giỏ hàng!",
+                confirmButtonText: "OK"
+            });
+        });
+
+        disablePurchase(); // Đảm bảo các nút bị vô hiệu hóa khi chưa chọn gì
     });
 </script>
