@@ -1,87 +1,79 @@
-<main id="content" role="main">
-    <!-- breadcrumb -->
-    <div class="bg-gray-13 bg-md-transparent">
+<main id="content" role="main">   
+
+    <div class="bg-gray-13 bg-md-transparent py-3">
         <div class="container">
-            <!-- breadcrumb -->
-            <div class="my-md-3">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-3 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble">
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a href="{{route('home.index')}}">Home</a></li>
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a href="{{route('blog.index')}}">Blog</a></li>
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a href="#">BlogShow</a></li>
-                    </ol>
-                </nav>
-            </div>
-            <!-- End breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-3">
+                    <li class="breadcrumb-item"><a href="{{ route('home.index') }}">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('blog.index') }}">Blog</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ $post->title }}</li>
+                </ol>
+            </nav>
         </div>
     </div>
-    <!-- End breadcrumb -->
 
     <div class="container">
         <div class="row">
-            <div class="col-xl-9 col-wd">
-                <div class="min-width-1100-wd">
-                    <article class="card mb-8 border-0">
-                        <!-- Hiển thị ảnh bài viết -->
-                        <img class="img-fluid" src="{{ asset('storage/' . $post->image) }}" alt="{{ $post->title }}" style="width: 1000px; height: 500px;">
-                       <br>
-            
-                        <div class="card-body pt-5 pb-0 px-0">
-                            <div class="d-block d-md-flex flex-center-between mb-4 mb-md-0">
-                                <!-- Hiển thị tiêu đề bài viết -->
-                                <h4 class="mb-md-3 mb-1">{{ $post->title }}</h4>
-                                <a href="#" class="font-size-12 text-gray-5 ml-md-4">
-                                    <i class="far fa-comment"></i> Leave a comment
-                                </a>
-                            </div>
-            
-                            <div class="mb-3 pb-3 border-bottom">
-                                <div class="list-group list-group-horizontal flex-wrap list-group-borderless align-items-center mx-n0dot5">
-                                    <!-- Hiển thị thể loại bài viết (category) -->
-                                    {{-- @foreach($post->categories as $category)
-                                        <a href="#" class="mx-0dot5 text-gray-5">{{ $category->name }}</a>
-                                    @endforeach --}}
-                                    <span class="mx-2 font-size-n5 mt-1 text-gray-5"><i class="fas fa-circle"></i></span>
-                                    <!-- Hiển thị ngày đăng -->
-                                    <a href="#" class="mx-0dot5 text-gray-5">{{ $post->created_at->format('F j, Y') }}</a>
-                                </div>
-                            </div>
-            
-                            <!-- Hiển thị mô tả bài viết -->
-                            <p><strong>{{ $post->description }}</strong></p>
-                            <!-- Hiển thị nội dung bài viết -->
-                            <p>{!! $post->content !!}</p>
-                            
-                            
+            <div class="col-lg-9">
+                <article class="card mb-8 border-0">
+                    <!-- Hiển thị ảnh bài viết -->
+                    <img class="img-fluid img-small" src="{{ asset('storage/' . $post->image) }}" alt="{{ $post->title }}" 
+                    style="width: 90%; height: auto; max-height: 480px;  " 
+                    onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)'">
+               
+                    <div class="card-body pt-5 pb-0 px-0">
+                        <div class="d-block d-md-flex flex-center-between mb-4 mb-md-0">
+                            <!-- Tiêu đề bài viết -->
+                            <h4 class="mb-md-3 mb-1">{{ $post->title }}</h4>
+                            <a href="#" class="font-size-12 text-gray-5 ml-md-4">
+                                <i class="far fa-comment"></i> Leave a comment
+                            </a>
                         </div>
-                    </article>
-            
-                    <ul class="nav justify-content-between mb-11">
-                        <!-- Hiển thị bài viết trước và sau -->
-                        @if($recentPosts->count() > 0)
+
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="list-group list-group-horizontal flex-wrap list-group-borderless align-items-center mx-n0dot5">
+                                <!-- Thể loại bài viết (category) -->
+                                {{-- @foreach($post->categories as $category)
+                                    <a href="{{ route('blog.index', ['category_post_id' => $category->id]) }}" class="mx-0dot5 text-gray-5">{{ $category->name }}</a>
+                                @endforeach --}}
+                                <span class="mx-2 font-size-n5 mt-1 text-gray-5"><i class="fas fa-circle"></i></span>
+                                <!-- Ngày đăng bài viết -->
+                                <a href="#" class="mx-0dot5 text-gray-5">{{ $post->created_at->format('F j, Y') }}</a>
+                            </div>
+                        </div>
+
+                        <!-- Mô tả bài viết -->
+                        <p><strong>{{ $post->description }}</strong></p>
+                        <!-- Nội dung bài viết -->
+                        <p>{!! $post->content !!}</p>
+                    </div>
+                </article>
+
+                <!-- Bài viết trước và sau -->
+                <ul class="nav justify-content-between mb-11">
+                    @if($recentPosts->count() > 0)
+                        <li class="nav-item m-0">
+                            <a class="nav-link text-gray-27 px-0" href="{{ route('blog.show', ['slug' => $recentPosts[0]->slug]) }}">
+                                <span class="mr-1">←</span> {{ $recentPosts[0]->title }}
+                            </a>
+                        </li>
+                        @if($recentPosts->count() > 1)
                             <li class="nav-item m-0">
-                                <a class="nav-link text-gray-27 px-0" href="{{ route('blog.show', ['slug' => $recentPosts[0]->slug]) }}">
-                                    <span class="mr-1">←</span> {{ $recentPosts[0]->title }}
+                                <a class="nav-link text-gray-27 px-0" href="{{ route('blog.show', ['slug' => $recentPosts[1]->slug]) }}">
+                                    {{ $recentPosts[1]->title }} <span class="ml-1">→</span>
                                 </a>
                             </li>
-                            @if($recentPosts->count() > 1)
-                                <li class="nav-item m-0">
-                                    <a class="nav-link text-gray-27 px-0" href="{{ route('blog.show', ['slug' => $recentPosts[1]->slug]) }}">
-                                        {{ $recentPosts[1]->title }} <span class="ml-1">→</span>
-                                    </a>
-                                </li>
-                            @endif
                         @endif
-                    </ul>
-                </div>
+                    @endif
+                </ul>
             </div>
-            
-            <div class="col-xl-3 col-wd">
-                <aside class="mb-7">
+
+            <div class="col-lg-3">
+                <aside class="mb-4">
                     <form action="{{ route('blog.index') }}" method="GET">
                         <div class="form-group">
                             <label for="category">Chọn danh mục:</label>
-                            <select name="category_id" id="category" class="form-control">
+                            <select name="category_post_id" id="category" class="form-control">
                                 <option value="">-- Tất cả danh mục --</option>
                                 @foreach($category_post as $category)
                                     <option value="{{ $category->id }}" {{ request('category_post_id') == $category->id ? 'selected' : '' }}>
@@ -94,45 +86,30 @@
                             <label for="search">Tìm kiếm bài viết:</label>
                             <input type="text" name="search" id="search" class="form-control" placeholder="Nhập từ khóa..." value="{{ request('search') }}">
                         </div>
-                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                        <button type="submit" class="btn btn-primary btn-block">Tìm kiếm</button>
                     </form>
-                    
                 </aside>
-                <aside class="mb-7">
+
+                <!-- Khám Phá Blog Của Chúng Tôi -->
+                <aside class="mb-4">
                     <div class="border-bottom border-color-1 mb-5">
                         <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Khám Phá Blog Của Chúng Tôi</h3>
                     </div>
                     <p class="text-gray-90 mb-0">Chào mừng bạn đến với blog của cửa hàng chúng tôi! Tại đây, bạn sẽ tìm thấy các bài viết chia sẻ thông tin về những sản phẩm máy tính mới nhất, các xu hướng công nghệ hiện đại, cùng những mẹo hay giúp bạn sử dụng máy tính hiệu quả hơn. Chúng tôi cam kết mang đến những kiến thức bổ ích và những sản phẩm chất lượng, giúp bạn có trải nghiệm công nghệ tuyệt vời nhất. Hãy theo dõi blog để luôn cập nhật những thông tin mới nhất nhé!</p>
                 </aside>
-                
-                
-                <aside class="mb-7">
-                    <div class="border-bottom border-color-1 mb-5">
-                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Categories</h3>
-                    </div>
+
+                <!-- Các danh mục bài viết -->
+                <aside class="mb-4">
+                    <h3 class="font-size-18 mb-3">Danh Mục Bài Viết</h3>
                     <div class="list-group">
                         @foreach($category_post as $category)
-                            <a href="{{ route('blog.show', ['slug' => $post->slug, 'category_id' => $category->id]) }}"
-                               class="font-bold-on-hover px-3 py-2 list-group-item list-group-item-action border-0">
-                                <i class="mr-2 fas fa-angle-right"></i> {{ $category->name }}
+                            <a href="{{ route('blog.index', ['category_post_id' => $category->id]) }}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-angle-right mr-2"></i> {{ $category->name }}
                             </a>
                         @endforeach
                     </div>
                 </aside>
-                
-                @if($filteredPosts->isNotEmpty())
-                    <div class="filtered-posts">
-                        <h4>Bài viết theo danh mục:</h4>
-                        <ul>
-                            @foreach($filteredPosts as $filteredPost)
-                                <li><a href="{{ route('blog.show', ['slug' => $filteredPost->slug]) }}">{{ $filteredPost->title }}</a></li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-                
             </div>
         </div>
-        
     </div>
 </main>

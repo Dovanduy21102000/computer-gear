@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Product; // Import model Product
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ProductClientController extends Controller
 {
@@ -95,7 +96,7 @@ class ProductClientController extends Controller
     public function getVariant(Request $request)
     {
         // Log để kiểm tra request
-        \Log::info('Received request:', $request->all());
+        Log::info('Received request:', $request->all());
 
         // Truy vấn biến thể sản phẩm dựa trên product_id
         $query = ProductVariant::where('product_id', $request->product_id);
@@ -103,7 +104,7 @@ class ProductClientController extends Controller
         // Duyệt qua tất cả các tham số của request (trừ product_id) và thêm điều kiện vào truy vấn
         foreach ($request->except('product_id') as $key => $value) {
             if (!empty($value)) {
-                \Log::info('Áp dụng điều kiện: ' . $key . ' = ' . $value);  // Log điều kiện tìm kiếm
+                Log::info('Áp dụng điều kiện: ' . $key . ' = ' . $value);  // Log điều kiện tìm kiếm
                 $query->whereHas('attributeValues', function ($query) use ($key, $value) {
                     $query->where('value', $value)
                         ->whereHas('attribute', function ($subQuery) use ($key) {
@@ -118,11 +119,11 @@ class ProductClientController extends Controller
         $variant = $query->first();
 
         // Log kết quả
-        \Log::info('Kết quả truy vấn biến thể:', ['variant' => $variant]);
+        Log::info('Kết quả truy vấn biến thể:', ['variant' => $variant]);
 
         // Nếu không tìm thấy biến thể
         if (!$variant) {
-            \Log::error('Không tìm thấy biến thể cho sản phẩm:', ['request' => $request->all()]);
+            Log::error('Không tìm thấy biến thể cho sản phẩm:', ['request' => $request->all()]);
             return response()->json(['error' => 'Không tìm thấy biến thể'], 404);
         }
 
