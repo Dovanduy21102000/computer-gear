@@ -25,27 +25,34 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Thông tin biến thể</h5>
-                        <form action="{{ route('variants.store', ['product' => $product->id,'variant'=>$variant->id]) }}" method="POST" enctype="multipart/form-data">
+                        <form
+                            action="{{ route('variants.store', ['product' => $product->id]) }}"
+                            method="POST" enctype="multipart/form-data">
                             @csrf
 
                             <div id="variants">
                                 <div class="variant mb-4">
                                     <div class="row mb-3">
-                                        <label for="variants[0][sku]" class="col-sm-2 col-form-label">SKU Biến thể</label>
+                                        <label for="variants[0][sku]" class="col-sm-2 col-form-label">SKU Biến
+                                            thể</label>
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control" name="variants[0][sku]" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
-                                        <label for="variants[0][price]" class="col-sm-2 col-form-label">Giá Biến thể</label>
+                                        <label for="variants[0][price]" class="col-sm-2 col-form-label">Giá Biến
+                                            thể</label>
                                         <div class="col-sm-10">
-                                            <input type="number" class="form-control" name="variants[0][price]" required>
+                                            <input type="number" class="form-control" name="variants[0][price]"
+                                                required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
-                                        <label for="variants[0][quantity]" class="col-sm-2 col-form-label">Số lượng Biến thể</label>
+                                        <label for="variants[0][quantity]" class="col-sm-2 col-form-label">Số lượng Biến
+                                            thể</label>
                                         <div class="col-sm-10">
-                                            <input type="number" class="form-control" name="variants[0][quantity]" required>
+                                            <input type="number" class="form-control" name="variants[0][quantity]"
+                                                required>
                                         </div>
                                     </div>
                                     {{-- <div class="row mb-3">
@@ -65,11 +72,11 @@
                                 </div>
                             </div>
                             <button type="submitsubmit" class="btn btn-secondary">Thêm biến thể</button>
-                        </div>
-                        </form>
                     </div>
+                    </form>
                 </div>
             </div>
+        </div>
         </div>
     </section>
 </main>

@@ -19,19 +19,20 @@ class LoginController extends Controller
         return view('fontend.layout', compact('template'));
     }
 
+
     public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
-    
+
         $user = User::where('email', $request->email)->first();
-    
+
         if (!$user) {
             return back()->withErrors(['login_error' => 'Email không tồn tại!']);
         }
-    
+
         if (!Hash::check($request->password, $user->password)) {
             return back()->withErrors(['login_error' => 'Mật khẩu không chính xác!']);
         }
@@ -68,7 +69,7 @@ class LoginController extends Controller
     
         return back()->withErrors(['login_error' => 'Bạn không có quyền truy cập.']);
     }
-    
+
 
     // Đăng xuất
     public function logout(Request $request)
@@ -89,6 +90,7 @@ class LoginController extends Controller
         // Nếu không có guard nào được đăng nhập, reset session
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
 
         return redirect('/');
     }

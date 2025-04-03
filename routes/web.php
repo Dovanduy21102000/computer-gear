@@ -170,6 +170,8 @@ Route::middleware(['web'])->group(function () {
 
 
 
+
+
     Route::get('/', [HomeController::class, 'index'])->name('home.index')->middleware('auth'); // Yêu cầu đăng nhập
     Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth'); // Yêu cầu đăng nhập
 
@@ -191,7 +193,10 @@ Route::post('/contact', [ContactClientController::class, 'store'])->name('client
 
 
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout/method', [CheckoutController::class, 'checkoutMethod'])->name('checkout.method');
 Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
+Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('applyCoupon');
+
 
 Route::post('/vnpay/create', [VNPayController::class, 'createPayment'])->name('vnpay.create');
 Route::get('/vnpay/return', [VNPayController::class, 'paymentReturn'])->name('vnpay.return');
