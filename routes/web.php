@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\VNPayController;
 use App\Http\Controllers\Admin\CategoryPostController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\OrderItemController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -39,8 +40,9 @@ Route::prefix('admin')->group(function () {
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
     // Route admin cần quyền truy cập
     Route::middleware(['auth', 'admin'])->group(function () { 
+        Route::get('profile', [ProfileController::class, 'show'])->name('backend.profile.show'); // Trang profile
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
-
+      
         // Các route resource dành cho admin
         $objects = [
             'categories'        => CategoryController::class,
@@ -57,12 +59,11 @@ Route::prefix('admin')->group(function () {
             'contacts'          => ContactController::class,
             'productvariants'   => ProductVariantController::class,
             'category_post'     => CategoryPostController::class,
+            
         ];
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
         };
-
-        // Route upload bài viết
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
     });
 });

@@ -10,10 +10,8 @@
 
     <link href="auth/css/bootstrap.min.css" rel="stylesheet">
     <link href="auth/font-awesome/css/font-awesome.css" rel="stylesheet">
-
     <link href="auth/css/animate.css" rel="stylesheet">
     <link href="auth/css/style.css" rel="stylesheet">
-
 </head>
 
 <body class="gray-bg">
@@ -23,34 +21,27 @@
             <h3>Chào mừng đến với Computer Gear</h3>
             <p>Đăng nhập để vào trang quản trị</p>
 
+            <!-- Hiển thị thông báo lỗi -->
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <form class="m-t" role="form" action="{{ route('auth.login') }}" method="POST">
                 @csrf
                 <div class="form-group">
-                    <input type="text" name="email" class="form-control" placeholder="Nhập email..." value="{{old('email')}}">
+                    <input type="text" name="email" class="form-control" placeholder="Nhập email..." value="{{ old('email') }}">
                     @if ($errors->has('email'))
-                        <span class="error-message">!{{$errors->first('email')}}</span>
+                        <span class="error-message">!{{ $errors->first('email') }}</span>
                     @endif
                 </div>
                 <div class="form-group">
                     <input type="password" name="password" class="form-control" placeholder="Mật khẩu...">
                     @if ($errors->has('password'))
-                        <span class="error-message">!{{$errors->first('password')}}</span>
+                        <span class="error-message">!{{ $errors->first('password') }}</span>
                     @endif
                 </div>
                 <button type="submit" class="btn btn-primary block full-width m-b">Đăng nhập</button>
 
-                <a href="#"><small>Quên mật khẩu?</small></a>
-                <p class="text-muted text-center"><small>Bạn chưa có tài khoản?</small></p>
-                <a class="btn btn-sm btn-white btn-block" href="register.html">Tạo một tài khoản</a>
-            </form>
-            <p class="m-t"> <small>Uy tín- Chất lượng- Hiện đại</small> </p>
-        </div>
-    </div>
-
-    <!-- Mainly scripts -->
-    <script src="auth/js/jquery-3.1.1.min.js"></script>
-    <script src="auth/js/bootstrap.min.js"></script>
-
-</body>
-
-</html>
+                <a href="#"><small>Quên mật khẩu?</small
