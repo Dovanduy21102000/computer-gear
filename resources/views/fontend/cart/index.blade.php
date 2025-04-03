@@ -64,9 +64,16 @@
                                             <a href="#" class="text-gray-90">{{ $item->product->name }}</a>
                                         </td>
                                         <td data-title="Price">
-                                            <span
-                                                class="">{{ number_format($item->product->price, 0, ',', '.') }}₫</span>
+                                            @if ($item->product->price_sale)
+                                                <del
+                                                    class="text-muted">{{ number_format($item->product->price, 0, ',', '.') }}₫</del>
+                                                <span
+                                                    class="text-danger">{{ number_format($item->product->price_sale, 0, ',', '.') }}₫</span>
+                                            @else
+                                                <span>{{ number_format($item->product->price, 0, ',', '.') }}₫</span>
+                                            @endif
                                         </td>
+
                                         <td data-title="Quantity">
                                             <div class="border rounded-pill py-1 width-122 w-xl-80 px-3 border-color-1">
                                                 <div class="js-quantity row align-items-center">
@@ -83,8 +90,11 @@
                                             </div>
                                         </td>
                                         <td data-title="Total">
-                                            <span
-                                                class="">{{ number_format($item->quantity * $item->product->price, 0, ',', '.') }}₫</span>
+                                            @php
+                                                $price = $item->product->price_sale ?? $item->product->price;
+                                                $total = $item->quantity * $price;
+                                            @endphp
+                                            <span class="">{{ number_format($total, 0, ',', '.') }}₫</span>
                                         </td>
                                     </tr>
                                 @endforeach

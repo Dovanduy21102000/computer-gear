@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -61,6 +62,7 @@ class MOMOController extends Controller
                 } else { // Fixed amount discount
                     $couponDiscount = min($totalPrice, $coupon['value']); // Ensure it doesn't exceed total price
                 }
+                $couponId = $coupon['id'];
             }
         }
 
@@ -85,6 +87,14 @@ class MOMOController extends Controller
             'payment_method' => 'momo',
             'notes' => $request->notes,
         ]);
+
+        if (!empty($couponId)) {
+            DB::table('coupon_user')->insert([
+                'user_id' => $userId,
+                'coupon_id' => $couponId,
+                'created_at' => now(),
+            ]);
+        }
 
         // Save Order Items (Fixed: Include Products with & without Variants)
         foreach ($cartItems as $item) {

@@ -14,6 +14,7 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class CheckoutController extends Controller
@@ -182,7 +183,18 @@ class CheckoutController extends Controller
         }
 
         // Apply Coupon Discount
+        $coupon = session('coupon', null);
         $couponDiscount = session('coupon.discount', 0);
+        if ($coupon) {
+            if ($totalPrice >= $coupon['min_order_total']) { // Check min order total condition
+                if ($coupon['type'] === 'percentage') {
+                    $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                } else { // Fixed amount discount
+                    $couponDiscount = min($totalPrice, $coupon['value']); // Ensure it doesn't exceed total price
+                }
+                $couponId = $coupon['id'];
+            }
+        }
         $finalPrice = max(0, $totalPrice - $couponDiscount); // Prevent negative price
 
         // Create Order Before Payment
@@ -204,6 +216,14 @@ class CheckoutController extends Controller
             'payment_method' => 'cash',
             'notes' => $request->notes,
         ]);
+
+        if (!empty($couponId)) {
+            DB::table('coupon_user')->insert([
+                'user_id' => $userId,
+                'coupon_id' => $couponId,
+                'created_at' => now(),
+            ]);
+        }        
 
         // Save Order Items (Fixed: Include Products with & without Variants)
         foreach ($cartItems as $item) {
