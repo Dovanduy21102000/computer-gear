@@ -46,11 +46,16 @@ Route::prefix('admin')->group(function () {
     // Route admin cần quyền truy cập
 
     Route::middleware(['auth', 'admin'])->group(function () {
-        Route::get('profile', [ProfileController::class, 'show'])->name('backend.profile.show'); // Trang profile
-
+        // Routes cho Profile Admin
 
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
-
+      
+        Route::prefix('profile')->name('backend.profile.')->group(function () {
+            Route::get('/', [ProfileController::class, 'show'])->name('show'); // Trang hiển thị Profile
+            Route::put('/update', [ProfileController::class, 'update'])->name('update'); // Xử lý cập nhật Profile
+            Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('changePassword');
+            Route::get('/delete-image', [ProfileController::class, 'deleteImage'])->name('deleteImage');
+        });
         // Các route resource dành cho admin
         $objects = [
             'categories'        => CategoryController::class,
@@ -104,8 +109,6 @@ Route::prefix('admin')->group(function () {
             Route::put('update/{id}', [AlbumImageController::class, 'update'])->name('update');
             Route::delete('destroy/{id}', [AlbumImageController::class, 'destroy'])->name('destroy');
         });
-        
-
     });
 });
 
