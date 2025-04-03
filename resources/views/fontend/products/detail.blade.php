@@ -777,6 +777,8 @@
             let selectedAttributes = checkVariants();
             let quantity = parseInt($("#quantityInput").val(), 10) || 1;
 
+            console.log("Selected Attributes:", selectedAttributes); // Debug log
+
             if (!selectedAttributes || parseInt($("#quantityInput").attr("max"), 10) === 0) {
                 Swal.fire({
                     icon: "error",
@@ -787,12 +789,45 @@
                 return;
             }
 
-            // Hiển thị thông báo thành công (KHÔNG GỬI REQUEST)
-            Swal.fire({
-                icon: "success",
-                title: "Thành công!",
-                text: "✅ Sản phẩm đã được thêm vào giỏ hàng!",
-                confirmButtonText: "OK"
+            // Prepare the data to send to the cart
+            let formData = {
+                product_id: {{ $product->id }},
+                quantity: quantity,
+                attributes: selectedAttributes
+            };
+
+            console.log("Sending to cart:", formData); // Debug log
+
+            // Send POST request to add to cart
+            $.ajax({
+                url: '{{ route('cart.add') }}',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    console.log("Cart response:", response); // Debug log
+                    Swal.fire({
+                        icon: "success",
+                        title: "Thành công!",
+                        text: "✅ Sản phẩm đã được thêm vào giỏ hàng!",
+                        confirmButtonText: "OK"
+                    });
+                },
+                error: function(xhr) {
+                    console.error("Cart error:", xhr.responseText); // Debug log
+                    let errorMessage = "Có lỗi xảy ra khi thêm vào giỏ hàng.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi!",
+                        text: errorMessage,
+                        confirmButtonText: "OK"
+                    });
+                }
             });
         });
 

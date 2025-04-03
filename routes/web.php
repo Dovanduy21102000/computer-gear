@@ -104,8 +104,6 @@ Route::prefix('admin')->group(function () {
             Route::put('update/{id}', [AlbumImageController::class, 'update'])->name('update');
             Route::delete('destroy/{id}', [AlbumImageController::class, 'destroy'])->name('destroy');
         });
-        
-
     });
 });
 
@@ -195,6 +193,7 @@ Route::post('/contact', [ContactClientController::class, 'store'])->name('client
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout/method', [CheckoutController::class, 'checkoutMethod'])->name('checkout.method');
 Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
+Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('applyCoupon');
 
 
