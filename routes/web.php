@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AlbumImageController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -44,12 +45,12 @@ Route::prefix('admin')->group(function () {
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
     // Route admin cần quyền truy cập
 
-    Route::middleware(['auth', 'admin'])->group(function () { 
+    Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('profile', [ProfileController::class, 'show'])->name('backend.profile.show'); // Trang profile
 
 
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
-      
+
         // Các route resource dành cho admin
         $objects = [
             'categories'        => CategoryController::class,
@@ -67,11 +68,12 @@ Route::prefix('admin')->group(function () {
             'productvariants'   => ProductVariantController::class,
             'category_post'     => CategoryPostController::class,
 
-            
+
 
 
 
         ];
+
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
         };
@@ -80,22 +82,30 @@ Route::prefix('admin')->group(function () {
         Route::prefix('specifications')->name('admin.specifications.')->group(function () {
             Route::get('product/{product_id}', [SpecificationController::class, 'index'])
                 ->name('index');
-        
+
             Route::get('product/{product_id}/create', [SpecificationController::class, 'create'])
                 ->name('create');
-        
+
             Route::post('product/{product_id}', [SpecificationController::class, 'store'])
                 ->name('store');
-        
+
             Route::get('product/{product_id}/specification/{id}/edit', [SpecificationController::class, 'edit'])
                 ->name('edit');
 
             Route::put('product/{product_id}/bulk-update', [SpecificationController::class, 'bulkUpdate'])
                 ->name('bulkUpdate');
-        
+        });
+        // Route album image
+        Route::prefix('album')->name('backend.album.')->group(function () {
+            Route::get('product/{product_id}', [AlbumImageController::class, 'index'])->name('index');
+            Route::get('product/{product_id}/create', [AlbumImageController::class, 'create'])->name('create');
+            Route::post('product/{product_id}', [AlbumImageController::class, 'store'])->name('store');
+            Route::get('edit/{id}', [AlbumImageController::class, 'edit'])->name('edit');
+            Route::put('update/{id}', [AlbumImageController::class, 'update'])->name('update');
+            Route::delete('destroy/{id}', [AlbumImageController::class, 'destroy'])->name('destroy');
         });
         
-        
+
     });
 });
 
@@ -124,8 +134,8 @@ Route::middleware(['web'])->group(function () {
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
-    Route::get('/show_user', [\App\Http\Controllers\Client\UserController::class, 'show'])->name('user.show'); 
-    Route::post('/save_user', [\App\Http\Controllers\Client\UserController::class, 'save'])->name('user.save'); 
+    Route::get('/show_user', [\App\Http\Controllers\Client\UserController::class, 'show'])->name('user.show');
+    Route::post('/save_user', [\App\Http\Controllers\Client\UserController::class, 'save'])->name('user.save');
     Route::post('/change_password', [\App\Http\Controllers\Client\UserController::class, 'changePassword'])->name('user.change-password');
 
 
@@ -159,7 +169,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 
-    
+
     Route::get('/', [HomeController::class, 'index'])->name('home.index')->middleware('auth'); // Yêu cầu đăng nhập
     Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth'); // Yêu cầu đăng nhập
 
