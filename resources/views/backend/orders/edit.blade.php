@@ -246,6 +246,31 @@
                             </div>
 
                         </form><!-- End Form -->
+                        <!-- Modal Confirm Cancel -->
+                        <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="cancelModalLabel">Xác nhận hủy đơn</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="cancelReason" class="form-label">Lý do hủy đơn:</label>
+                                            <textarea id="cancelReason" class="form-control" rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Đóng</button>
+                                        <button type="button" class="btn btn-primary" id="confirmCancelBtn">Đồng ý
+                                            hủy</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -289,29 +314,34 @@
             });
         });
         // $(document).ready(function() {
-        //     $('#provinceSelect').change(function() {
-        //         var provinceId = $(this).val();
-        //         if (provinceId) {
-        //             $.ajax({
-        //                 url: "https://provinces.open-api.vn/api/p/" + provinceId + "?depth=2",
-        //                 type: "GET",
-        //                 success: function(data) {
-        //                     $('#districtSelect').empty();
-        //                     $('#districtSelect').append(
-        //                         '<option value="">Chọn quận/huyện</option>');
+        //     // Lắng nghe sự kiện submit của form
+        //     $('form').submit(function(event) {
+        //         var status = $('select[name="status"]').val(); // Lấy trạng thái đơn hàng
+        //         if (status === 'canceled') {
+        //             event.preventDefault(); // Ngừng việc gửi form
+        //             $('#cancelModal').modal('show'); // Hiển thị modal xác nhận hủy
+        //         }
+        //     });
 
-        //                     if (data.districts && data.districts.length > 0) {
-        //                         $.each(data.districts, function(key, district) {
-        //                             $('#districtSelect').append('<option value="' +
-        //                                 district.code + '">' + district.name +
-        //                                 '</option>');
-        //                         });
-        //                     }
-        //                 }
-        //             });
+        //     // Xử lý khi bấm "Đồng ý hủy" trong modal
+        //     $('#confirmCancelBtn').click(function() {
+        //         var cancelReason = $('#cancelReason').val(); // Lấy lý do hủy
+
+        //         if (cancelReason) {
+        //             // Gửi dữ liệu lý do hủy vào mục "Ghi chú"
+        //             $('textarea[name="notes"]').val(cancelReason);
+
+        //             // Cập nhật trạng thái đơn hàng thành "Hủy đơn"
+        //             $('select[name="status"]').val('canceled');
+
+        //             // Đóng modal sau khi xử lý
+        //             $('#cancelModal').modal('hide');
+
+        //             // Gửi form lại sau khi cập nhật lý do hủy
+        //             $('form')[0]
+        //         .submit(); // Dùng cách này để gửi form mà không cần người dùng bấm lại nút submit
         //         } else {
-        //             $('#districtSelect').empty();
-        //             $('#districtSelect').append('<option value="">Chọn quận/huyện</option>');
+        //             alert("Vui lòng nhập lý do hủy đơn.");
         //         }
         //     });
         // });

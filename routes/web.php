@@ -150,8 +150,8 @@ Route::middleware(['web'])->group(function () {
 
 
     
-    Route::get('/', [HomeController::class, 'index'])->name('home.index')->middleware('auth'); // Yêu cầu đăng nhập
-    Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth'); // Yêu cầu đăng nhập
+    // Route::get('/', [HomeController::class, 'index'])->name('home.index')->middleware('auth'); // Yêu cầu đăng nhập
+    // Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth'); // Yêu cầu đăng nhập
 
     Route::get('/about_us', [HomeController::class, 'about_us'])->name('about_us');
     Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
