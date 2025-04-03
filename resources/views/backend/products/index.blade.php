@@ -121,6 +121,10 @@
                                                         class="btn btn-warning btn-sm">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
+                                                    <a href="{{ route('backend.album.index', ['product_id' => $product->id]) }}"
+                                                        class="btn btn-primary btn-sm">
+                                                        <i class="bi bi-image"></i> 
+                                                    </a>
                                                     <!-- Nút xem thông số sản phẩm -->
                                                     <a href="{{ route('admin.specifications.index', ['product_id' => $product->id]) }}" 
                                                         class="btn btn-info btn-sm">

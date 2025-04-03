@@ -9,8 +9,10 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -60,6 +62,7 @@ class MOMOController extends Controller
                 } else { // Fixed amount discount
                     $couponDiscount = min($totalPrice, $coupon['value']); // Ensure it doesn't exceed total price
                 }
+                $couponId = $coupon['id'];
             }
         }
 
@@ -85,6 +88,14 @@ class MOMOController extends Controller
             'notes' => $request->notes,
         ]);
 
+        if (!empty($couponId)) {
+            DB::table('coupon_user')->insert([
+                'user_id' => $userId,
+                'coupon_id' => $couponId,
+                'created_at' => now(),
+            ]);
+        }
+
         // Save Order Items (Fixed: Include Products with & without Variants)
         foreach ($cartItems as $item) {
             OrderItem::create([
@@ -96,6 +107,17 @@ class MOMOController extends Controller
                 'quantity' => $item->quantity,
                 'product_info' => json_encode($item->product->toArray()),
             ]);
+            $product = Product::find($item->product_id);
+
+            if ($item->product_variant_id) {
+                $productVariant = ProductVariant::find($item->product_variant_id);
+                if ($productVariant) {
+                    $productVariant->decrement('quantity', $item->quantity);
+                }
+            } else {
+                $product->decrement('quantity', $item->quantity);
+            }
+
             Product::where('id', $item->product_id)->increment('quantity_sold', $item->quantity);
         }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AlbumImageController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -27,7 +28,11 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\VNPayController;
 use App\Http\Controllers\Admin\CategoryPostController;
+
+use App\Http\Controllers\Admin\ProfileController;
+
 use App\Http\Controllers\Admin\SpecificationController;
+
 use App\Http\Controllers\OrderItemController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -39,9 +44,18 @@ Route::prefix('admin')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('auth.login'); // Xử lý đăng nhập
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
     // Route admin cần quyền truy cập
+
     Route::middleware(['auth', 'admin'])->group(function () {
+        // Routes cho Profile Admin
+
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
 
+        Route::prefix('profile')->name('backend.profile.')->group(function () {
+            Route::get('/', [ProfileController::class, 'show'])->name('show'); // Trang hiển thị Profile
+            Route::put('/update', [ProfileController::class, 'update'])->name('update'); // Xử lý cập nhật Profile
+            Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('changePassword');
+            Route::get('/delete-image', [ProfileController::class, 'deleteImage'])->name('deleteImage');
+        });
         // Các route resource dành cho admin
         $objects = [
             'categories'        => CategoryController::class,
@@ -59,33 +73,42 @@ Route::prefix('admin')->group(function () {
             'productvariants'   => ProductVariantController::class,
             'category_post'     => CategoryPostController::class,
 
+
+
+
+
         ];
+
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
         };
-
-        // Route upload bài viết
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
         // Route quản lý thông số sản phẩm
         Route::prefix('specifications')->name('admin.specifications.')->group(function () {
             Route::get('product/{product_id}', [SpecificationController::class, 'index'])
                 ->name('index');
-        
+
             Route::get('product/{product_id}/create', [SpecificationController::class, 'create'])
                 ->name('create');
-        
+
             Route::post('product/{product_id}', [SpecificationController::class, 'store'])
                 ->name('store');
-        
+
             Route::get('product/{product_id}/specification/{id}/edit', [SpecificationController::class, 'edit'])
                 ->name('edit');
 
             Route::put('product/{product_id}/bulk-update', [SpecificationController::class, 'bulkUpdate'])
                 ->name('bulkUpdate');
-        
         });
-        
-        
+        // Route album image
+        Route::prefix('album')->name('backend.album.')->group(function () {
+            Route::get('product/{product_id}', [AlbumImageController::class, 'index'])->name('index');
+            Route::get('product/{product_id}/create', [AlbumImageController::class, 'create'])->name('create');
+            Route::post('product/{product_id}', [AlbumImageController::class, 'store'])->name('store');
+            Route::get('edit/{id}', [AlbumImageController::class, 'edit'])->name('edit');
+            Route::put('update/{id}', [AlbumImageController::class, 'update'])->name('update');
+            Route::delete('destroy/{id}', [AlbumImageController::class, 'destroy'])->name('destroy');
+        });
     });
 });
 
@@ -114,8 +137,8 @@ Route::middleware(['web'])->group(function () {
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
-    Route::get('/show_user', [\App\Http\Controllers\Client\UserController::class, 'show'])->name('user.show'); 
-    Route::post('/save_user', [\App\Http\Controllers\Client\UserController::class, 'save'])->name('user.save'); 
+    Route::get('/show_user', [\App\Http\Controllers\Client\UserController::class, 'show'])->name('user.show');
+    Route::post('/save_user', [\App\Http\Controllers\Client\UserController::class, 'save'])->name('user.save');
     Route::post('/change_password', [\App\Http\Controllers\Client\UserController::class, 'changePassword'])->name('user.change-password');
 
 
@@ -148,11 +171,6 @@ Route::middleware(['web'])->group(function () {
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-
-    
-    // Route::get('/', [HomeController::class, 'index'])->name('home.index')->middleware('auth'); // Yêu cầu đăng nhập
-    // Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth'); // Yêu cầu đăng nhập
-
     Route::get('/about_us', [HomeController::class, 'about_us'])->name('about_us');
     Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
     Route::get('/track-order', [CheckoutController::class, 'trackOrderView'])->name('order.track');
@@ -171,7 +189,10 @@ Route::post('/contact', [ContactClientController::class, 'store'])->name('client
 
 
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout/method', [CheckoutController::class, 'checkoutMethod'])->name('checkout.method');
 Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
+Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('applyCoupon');
+
 
 Route::post('/vnpay/create', [VNPayController::class, 'createPayment'])->name('vnpay.create');
 Route::get('/vnpay/return', [VNPayController::class, 'paymentReturn'])->name('vnpay.return');
