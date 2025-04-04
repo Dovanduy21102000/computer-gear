@@ -246,13 +246,12 @@ class ProductClientController extends Controller
 
     $products = $productsQuery->paginate(20);
 
-    // Danh mục cấp cha và danh mục con
+   
     $categories = Category::where('is_active', true)
         ->whereNull('parent_id')
         ->with('children')
         ->get();
 
-    // Lấy danh sách thương hiệu
     $brands = Brand::where('is_active', 1)->get();
 
     $template = 'fontend.products.index';
