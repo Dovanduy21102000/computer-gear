@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\AlbumImage;
 use App\Models\Attribute;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Product; // Import model Product
+use App\Models\ProductImage;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -75,7 +77,7 @@ class ProductClientController extends Controller
             ->get();
 
         // Lấy danh sách ảnh của sản phẩm
-        $images = $product->images;
+        $images = AlbumImage::where('product_id', $product->id)->get(); // Lấy tất cả ảnh của sản phẩm
 
         // Lấy các sản phẩm liên quan
         $relatedProducts = Product::where('category_id', $product->category_id)

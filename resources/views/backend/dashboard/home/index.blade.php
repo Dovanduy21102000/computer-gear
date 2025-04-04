@@ -372,8 +372,8 @@
                         <div class="activity">
                             @foreach ($recentActivities as $activity)
                                 <div class="activity-item d-flex">
-                                    <div class="activite-label">
-                                        {{ $activity['created_at']->locale('vi')->diffForHumans() }}</div>
+                                    {{-- <div class="activite-label">
+                                        {{ $activity['created_at']->locale('vi')->diffForHumans() }}</div> --}}
                                     <i
                                         class='bi {{ $activity['type'] === 'order' ? 'bi-cart-fill text-success' : 'bi-person-fill text-primary' }} activity-badge align-self-start'></i>
                                     <div class="activity-content">

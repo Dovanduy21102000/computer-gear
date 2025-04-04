@@ -41,11 +41,34 @@
         border-color: #ebf306;
         /* Viền đổi màu khi hover */
     }
+
+    /* Chỉnh sửa kích thước ảnh chính trong slider */
+    #sliderSyncingNav .js-slide img {
+        width: 100%;
+        height: 400px;
+        /* Hoặc chiều cao phù hợp */
+        object-fit: cover;
+        /* Giúp ảnh đầy khung mà không bị méo */
+        border-radius: 8px;
+    }
+
+    /* Thumbnails */
+    #sliderSyncingThumb .js-slide img {
+        width: 100%;
+        height: 80px;
+        /* Giữ chiều cao cố định cho thumbnail */
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    /* Khi nhấn vào ảnh, giữ kích thước đồng nhất */
+    #sliderSyncingNav .slick-current img {
+        object-fit: contain;
+        /* Giữ cho ảnh phóng to không bị méo */
+        max-height: 100%;
+        /* Đảm bảo ảnh không bị kéo dài quá mức */
+    }
 </style>
-
-
-
-
 
 <!-- CSS CMT -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
@@ -109,38 +132,38 @@
 
     <div class="container">
         <!-- Single Product Body -->
-        <div class="mb-14">
+        <div class="mb-7">
             <div class="row">
                 <div class="col-md-6 col-lg-4 col-xl-5 mb-4 mb-md-0">
+                    <!-- Slider for main product image -->
                     <div id="sliderSyncingNav" class="js-slick-carousel u-slick mb-2" data-infinite="true"
                         data-arrows-classes="d-none d-lg-inline-block u-slick__arrow-classic u-slick__arrow-centered--y rounded-circle"
                         data-arrow-left-classes="fas fa-arrow-left u-slick__arrow-classic-inner u-slick__arrow-classic-inner--left ml-lg-2 ml-xl-4"
                         data-arrow-right-classes="fas fa-arrow-right u-slick__arrow-classic-inner u-slick__arrow-classic-inner--right mr-lg-2 mr-xl-4"
                         data-nav-for="#sliderSyncingThumb">
-                        <div class="js-slide">
-                            <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
-                                alt="{{ $product->name }}">
-                        </div>
-                        <div class="js-slide">
-                            <img class="img-fluid" src="../../assets/img/720X660/img2.jpg" alt="Image Description">
-                        </div>
 
+                        @foreach ($images as $image)
+                            <div class="js-slide">
+                                <!-- Main product image -->
+                                <img class="img-fluid" src="{{ asset('storage/' . $image->image) }}"
+                                    alt="Product Image">
+                            </div>
+                        @endforeach
                     </div>
 
+                    <!-- Thumbnail slider for syncing -->
                     <div id="sliderSyncingThumb"
                         class="js-slick-carousel u-slick u-slick--slider-syncing u-slick--slider-syncing-size u-slick--gutters-1 u-slick--transform-off"
                         data-infinite="true" data-slides-show="5" data-is-thumbs="true"
                         data-nav-for="#sliderSyncingNav">
+
                         @foreach ($images as $image)
-                            @foreach ($image->images as $img)
-                                <div class="js-slide">
-                                    <img class="img-fluid" src="{{ asset('storage/' . $img) }}" alt="Product Image">
-                                </div>
-                            @endforeach
+                            <div class="js-slide">
+                                <!-- Thumbnails for product images -->
+                                <img class="img-fluid" src="{{ asset('storage/' . $image->image) }}"
+                                    alt="Product Image Thumbnail">
+                            </div>
                         @endforeach
-
-
-
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 col-xl-4 mb-md-6 mb-lg-0">
@@ -160,6 +183,7 @@
                                 <span class="text-secondary font-size-13">(3 customer reviews)</span>
                             </a>
                         </div>
+
                         <div class="d-flex align-items-center">
                             <!-- Ảnh thương hiệu với kích thước nhỏ hơn -->
 
@@ -171,6 +195,11 @@
                                 </p>
                             @endif
                         </div>
+                        <div class="product-main-image mb-3">
+                            <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
+                                alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
+                        </div>
+
                         <!-- Thêm thông tin bảo hành và hỗ trợ -->
                         <div class="mb-2">
                             <p class="mb-1 fw-bold">✔ Bảo hành chính hãng 12 tháng.</p>
@@ -182,7 +211,7 @@
                             <p>{!! $product->short_description !!}</p>
                         </div>
 
-                        <p><strong>SKU</strong>{{ $product->sku }}</p>
+                        <p><strong>SKU: </strong>{{ $product->sku }}</p>
                     </div>
                 </div>
                 <div class="mx-md-auto mx-lg-0 col-md-6 col-lg-4 col-xl-3">
@@ -332,11 +361,13 @@
                         <div class="mx-md-4 pt-1">
 
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10 text-center">
 
                                     <p>{!! $product->description !!}</p>
 
                                 </div>
+                                <div class="col-md-1"></div>
 
 
                             </div>
@@ -905,7 +936,6 @@
             enablePurchase();
         });
 
-        // Khi nhấn "Thêm vào giỏ hàng" hoặc "Mua ngay"
         $("#addToCartBtn, #buyNowBtn").click(function(event) {
             event.preventDefault();
 
@@ -922,14 +952,39 @@
                 return;
             }
 
-            // Hiển thị thông báo thành công (KHÔNG GỬI REQUEST)
-            Swal.fire({
-                icon: "success",
-                title: "Thành công!",
-                text: "✅ Sản phẩm đã được thêm vào giỏ hàng!",
-                confirmButtonText: "OK"
-            });
+            // Kiểm tra nếu là "Thêm vào giỏ hàng"
+            if ($(this).is("#addToCartBtn")) {
+                // Hiển thị thông báo thành công và chuyển hướng đến trang giỏ hàng
+                Swal.fire({
+                    icon: "success",
+                    title: "Thành công!",
+                    text: "✅ Sản phẩm đã được thêm vào giỏ hàng!",
+                    confirmButtonText: "OK"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Chuyển hướng đến trang giỏ hàng
+                        window.location.href = "/cart"; // Thay đường dẫn nếu cần
+                    }
+                });
+            }
+
+            // Kiểm tra nếu là "Mua ngay"
+            if ($(this).is("#buyNowBtn")) {
+                // Hiển thị thông báo thành công và thực hiện hành động "Mua ngay"
+                Swal.fire({
+                    icon: "success",
+                    title: "Thành công!",
+                    text: "✅ Bạn đã mua sản phẩm này!",
+                    confirmButtonText: "OK"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Chuyển hướng đến trang thanh toán hoặc trang khác
+                        window.location.href = "/thanh-toan"; // Thay đường dẫn nếu cần
+                    }
+                });
+            }
         });
+
 
         disablePurchase(); // Đảm bảo các nút bị vô hiệu hóa khi chưa chọn gì
     });
