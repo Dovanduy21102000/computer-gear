@@ -41,7 +41,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ route('banners.index') }}">
+            <a class="nav-link collapsed" href="{{ route('comments.index') }}">
                 <i class="bi bi-chat-left-text"></i>
                 <span>Quản lý bình luận</span>
             </a>

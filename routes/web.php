@@ -5,7 +5,7 @@ use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\ResetPasswordController;
+
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Admin\BrandController;
@@ -27,7 +27,9 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\VNPayController;
 use App\Http\Controllers\Admin\CategoryPostController;
+use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\SpecificationController;
+
 use App\Http\Controllers\OrderItemController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -70,22 +72,25 @@ Route::prefix('admin')->group(function () {
         Route::prefix('specifications')->name('admin.specifications.')->group(function () {
             Route::get('product/{product_id}', [SpecificationController::class, 'index'])
                 ->name('index');
-        
+
             Route::get('product/{product_id}/create', [SpecificationController::class, 'create'])
                 ->name('create');
-        
+
             Route::post('product/{product_id}', [SpecificationController::class, 'store'])
                 ->name('store');
-        
+
             Route::get('product/{product_id}/specification/{id}/edit', [SpecificationController::class, 'edit'])
                 ->name('edit');
 
             Route::put('product/{product_id}/bulk-update', [SpecificationController::class, 'bulkUpdate'])
                 ->name('bulkUpdate');
-        
         });
-        
-        
+        // Đảm bảo rằng route này đã được thêm vào trong routes/web.php
+        Route::put('/comments/{id}/toggle-status', [CommentController::class, 'toggleStatus'])->name('admin.comments.toggleStatus');
+
+        Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
+        Route::get('/comments/{id}/show', [CommentController::class, 'show'])->name('comments.show');
+
     });
 });
 
@@ -114,8 +119,8 @@ Route::middleware(['web'])->group(function () {
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
-    Route::get('/show_user', [\App\Http\Controllers\Client\UserController::class, 'show'])->name('user.show'); 
-    Route::post('/save_user', [\App\Http\Controllers\Client\UserController::class, 'save'])->name('user.save'); 
+    Route::get('/show_user', [\App\Http\Controllers\Client\UserController::class, 'show'])->name('user.show');
+    Route::post('/save_user', [\App\Http\Controllers\Client\UserController::class, 'save'])->name('user.save');
     Route::post('/change_password', [\App\Http\Controllers\Client\UserController::class, 'changePassword'])->name('user.change-password');
 
 
@@ -142,8 +147,9 @@ Route::middleware(['web'])->group(function () {
     Route::get('/products/category/{slug}', [ProductClientController::class, 'categoryProducts'])->name('client.products.category');
     Route::get('/get-variant', [ProductClientController::class, 'getVariant'])->name('getVariant');
     Route::get('/search', [ProductClientController::class, 'search'])->name('search');
-
-
+    //
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
 
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
@@ -180,3 +186,7 @@ Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
 
 
 Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
+
+
+//
+Route::get('/comments/{productId}', [CommentController::class, 'getComments']);

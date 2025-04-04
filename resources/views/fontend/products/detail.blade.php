@@ -42,6 +42,43 @@
         /* Viền đổi màu khi hover */
     }
 </style>
+
+
+
+
+
+<!-- CSS CMT -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<style>
+    .rating input {
+        display: none;
+    }
+
+    .rating label {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+    }
+
+    .rating input:checked~label {
+        color: #ffbb33;
+        /* Yellow color for selected stars */
+    }
+
+    .rating label:hover,
+    .rating label:hover~label {
+        color: #ffbb33;
+        /* Highlight on hover */
+    }
+
+    /* Ensure stars are in left-to-right order */
+    .rating {
+        display: flex;
+        direction: ltr;
+        /* Set left-to-right direction */
+    }
+</style>
+
 <!-- ========== MAIN CONTENT ========== -->
 <main id="content" role="main">
     <!-- breadcrumb -->
@@ -354,145 +391,243 @@
                             <div class="row mb-8">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <h3 class="font-size-18 mb-6">Based on 3 reviews</h3>
-                                        <h2 class="font-size-30 font-weight-bold text-lh-1 mb-0">4.3
+                                        <h3 class="font-size-18 mb-6">Dựa trên {{ $totalReviews }} đánh giá</h3>
+                                        <h2 class="font-size-30 font-weight-bold text-lh-1 mb-0">{{ $averageRating }}
                                         </h2>
-                                        <div class="text-lh-1">overall</div>
+                                        <div class="text-lh-1">Tổng thể</div>
                                     </div>
 
                                     <!-- Ratings -->
                                     <ul class="list-unstyled">
-                                        <li class="py-1">
-                                            <a class="row align-items-center mx-gutters-2 font-size-1"
-                                                href="javascript:;">
-                                                <div class="col-auto mb-2 mb-md-0">
-                                                    <div class="text-warning text-ls-n2 font-size-16"
-                                                        style="width: 80px;">
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                    </div>
-                                                </div>
-                                                <div class="col-auto mb-2 mb-md-0">
-                                                    <div class="progress ml-xl-5" style="height: 10px; width: 200px;">
-                                                        <div class="progress-bar" role="progressbar"
-                                                            style="width: 100%;" aria-valuenow="100"
-                                                            aria-valuemin="0" aria-valuemax="100">
+                                        @for ($i = 5; $i >= 1; $i--)
+                                            @php
+                                                $ratingCount = $ratingsCount[$i] ?? 0;
+                                                $percentage =
+                                                    $totalReviews > 0 ? ($ratingCount / $totalReviews) * 100 : 0;
+                                            @endphp
+                                            <li class="py-1">
+                                                <a class="row align-items-center mx-gutters-2 font-size-1"
+                                                    href="javascript:;">
+                                                    <div class="col-auto mb-2 mb-md-0">
+                                                        <div class="text-warning text-ls-n2 font-size-16"
+                                                            style="width: 80px;">
+                                                            @for ($j = 1; $j <= 5; $j++)
+                                                                @if ($j <= $i)
+                                                                    <small class="fas fa-star"></small>
+                                                                @else
+                                                                    <small class="far fa-star text-muted"></small>
+                                                                @endif
+                                                            @endfor
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-auto text-right">
-                                                    <span class="text-gray-90">205</span>
-                                                </div>
-                                            </a>
-                                        </li>
-
+                                                    <div class="col-auto mb-2 mb-md-0">
+                                                        <div class="progress ml-xl-5"
+                                                            style="height: 10px; width: 200px;">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: {{ $percentage }}%;"
+                                                                aria-valuenow="{{ $percentage }}" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-auto text-right">
+                                                        <span class="text-gray-90">{{ $ratingCount }}</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        @endfor
                                     </ul>
                                     <!-- End Ratings -->
                                 </div>
+
+
                                 <div class="col-md-6">
-                                    <h3 class="font-size-18 mb-5">Add a review</h3>
-                                    <!-- Form -->
-                                    <form class="js-validate">
-                                        <div class="row align-items-center mb-4">
-                                            <div class="col-md-4 col-lg-3">
-                                                <label for="rating" class="form-label mb-0">Your
-                                                    Review</label>
-                                            </div>
-                                            <div class="col-md-8 col-lg-9">
-                                                <a href="#" class="d-block">
-                                                    <div class="text-warning text-ls-n2 font-size-16">
-                                                        <small class="far fa-star text-muted"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="js-form-message form-group mb-3 row">
-                                            <div class="col-md-4 col-lg-3">
-                                                <label for="descriptionTextarea" class="form-label">Your
-                                                    Review</label>
-                                            </div>
-                                            <div class="col-md-8 col-lg-9">
-                                                <textarea class="form-control" rows="3" id="descriptionTextarea" data-msg="Please enter your message."
-                                                    data-error-class="u-has-error" data-success-class="u-has-success"></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="js-form-message form-group mb-3 row">
-                                            <div class="col-md-4 col-lg-3">
-                                                <label for="inputName" class="form-label">Name <span
-                                                        class="text-danger">*</span></label>
-                                            </div>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input type="text" class="form-control" name="name"
-                                                    id="inputName" aria-label="Alex Hecker" required
-                                                    data-msg="Please enter your name." data-error-class="u-has-error"
-                                                    data-success-class="u-has-success">
-                                            </div>
-                                        </div>
-                                        <div class="js-form-message form-group mb-3 row">
-                                            <div class="col-md-4 col-lg-3">
-                                                <label for="emailAddress" class="form-label">Email
-                                                    <span class="text-danger">*</span></label>
-                                            </div>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input type="email" class="form-control" name="emailAddress"
-                                                    id="emailAddress" aria-label="alexhecker@pixeel.com" required
-                                                    data-msg="Please enter a valid email address."
-                                                    data-error-class="u-has-error" data-success-class="u-has-success">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="offset-md-4 offset-lg-3 col-auto">
-                                                <button type="submit"
-                                                    class="btn btn-primary-dark btn-wide transition-3d-hover">Add
-                                                    Review</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <!-- End Form -->
-                                </div>
-                            </div>
-                            <!-- Review -->
-                            <div class="border-bottom border-color-1 pb-4 mb-4">
-                                <!-- Review Rating -->
-                                <div
-                                    class="d-flex justify-content-between align-items-center text-secondary font-size-1 mb-2">
-                                    <div class="text-warning text-ls-n2 font-size-16" style="width: 80px;">
-                                        <small class="fas fa-star"></small>
-                                        <small class="fas fa-star"></small>
-                                        <small class="fas fa-star"></small>
-                                        <small class="far fa-star text-muted"></small>
-                                        <small class="far fa-star text-muted"></small>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h3 class="font-size-18 mb-0">
+                                            @if ($comment)
+                                                <span class="text">Cập nhật đánh giá của bạn</span> <small
+                                                    class="text-muted">(Chỉ có thể cập nhật 1 lần)</small>
+                                            @else
+                                                <span class="text-success">Thêm một đánh giá</span>
+                                            @endif
+                                        </h3>
                                     </div>
-                                </div>
-                                <!-- End Review Rating -->
 
-                                <p class="text-gray-90">Fusce vitae nibh mi. Integer posuere, libero et
-                                    ullamcorper
-                                    facilisis, enim eros tincidunt orci, eget vestibulum sapien nisi ut
-                                    leo.
-                                    Cras
-                                    finibus vel est ut mollis. Donec luctus condimentum ante et euismod.
-                                </p>
 
-                                <!-- Reviewer -->
-                                <div class="mb-2">
-                                    <strong>John Doe</strong>
-                                    <span class="font-size-13 text-gray-23">- April 3, 2019</span>
+                                    <!-- Form -->
+                                    @if ($comment)
+                                        <!-- Form chỉnh sửa bình luận -->
+                                        <form class="js-validate"
+                                            action="{{ route('comments.update', $comment->id) }}" method="POST"
+                                            enctype="multipart/form-data">
+                                            @csrf
+                                            @method('PUT') <!-- Đặt phương thức PUT cho chỉnh sửa -->
+                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+
+                                            <div class="row align-items-center mb-4">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="rating" class="form-label mb-0">Đánh giá của
+                                                        bạn</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <div class="rating">
+                                                        @for ($i = 5; $i >= 1; $i--)
+                                                            <input type="radio" id="star{{ $i }}"
+                                                                name="rating" value="{{ $i }}"
+                                                                {{ $comment->rating == $i ? 'checked' : '' }}>
+                                                            <label for="star{{ $i }}"
+                                                                class="fa fa-star"></label>
+                                                        @endfor
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="js-form-message form-group mb-3 row">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="descriptionTextarea" class="form-label">Bình
+                                                        luận</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <textarea class="form-control" rows="3" id="descriptionTextarea" name="content" required>{{ $comment->content }}</textarea>
+                                                </div>
+                                            </div>
+
+                                            <!-- Thêm trường hình ảnh -->
+                                            <div class="js-form-message form-group mb-3 row">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="image" class="form-label">Hình ảnh</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <input type="file" class="form-control" id="image"
+                                                        name="image">
+                                                    @if ($comment->image)
+                                                        <img src="{{ asset('storage/' . $comment->image) }}"
+                                                            alt="Image" width="100">
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="offset-md-4 offset-lg-3 col-auto">
+                                                    <button type="submit" class="btn btn-primary-dark btn-wide">Cập
+                                                        nhật bình luận</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @else
+                                        <!-- Form tạo mới bình luận -->
+                                        <form class="js-validate" action="{{ route('comments.store') }}"
+                                            method="POST" enctype="multipart/form-data">
+                                            @csrf
+                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+
+                                            <div class="row align-items-center mb-4">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="rating" class="form-label mb-0">Đánh giá của
+                                                        bạn</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <div class="rating">
+                                                        @for ($i = 5; $i >= 1; $i--)
+                                                            <input type="radio" id="star{{ $i }}"
+                                                                name="rating" value="{{ $i }}">
+                                                            <label for="star{{ $i }}"
+                                                                class="fa fa-star"></label>
+                                                        @endfor
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="js-form-message form-group mb-3 row">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="descriptionTextarea" class="form-label">Bình
+                                                        luận</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <textarea class="form-control" rows="3" id="descriptionTextarea" name="content" required></textarea>
+                                                </div>
+                                            </div>
+
+                                            <!-- Thêm trường hình ảnh -->
+                                            <div class="js-form-message form-group mb-3 row">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="image" class="form-label">Hình ảnh</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <input type="file" class="form-control" id="image"
+                                                        name="image">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="offset-md-4 offset-lg-3 col-auto">
+                                                    <button type="submit" class="btn btn-primary-dark btn-wide">Thêm
+                                                        bình luận</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @endif
                                 </div>
-                                <!-- End Reviewer -->
+
+
                             </div>
-                            <!-- End Review -->
+
+                            @foreach ($comments as $comment)
+                                <!-- Review -->
+                                <div class="row justify-content-center">
+                                    <div class="col-12 col-md-8">
+                                        <!-- Giới hạn chiều rộng ở 7 phần trên 12 của grid -->
+                                        <div class="border-bottom border-color-1 pb-4 mb-4">
+                                            <!-- Review Rating -->
+                                            <div
+                                                class="d-flex justify-content-between align-items-center text-secondary font-size-1 mb-2">
+                                                <div class="text-warning text-ls-n2 font-size-16"
+                                                    style="width: 80px;">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        @if ($i <= $comment->rating)
+                                                            <small class="fas fa-star"></small>
+                                                        @else
+                                                            <small class="far fa-star text-muted"></small>
+                                                        @endif
+                                                    @endfor
+                                                </div>
+                                            </div>
+                                            <!-- End Review Rating -->
+
+                                            <p class="text-gray-90">{{ $comment->content }}</p>
+
+                                            <!-- Display image if exists -->
+                                            @if ($comment->image)
+                                                <div class="comment-image">
+                                                    <img src="{{ Storage::url($comment->image) }}"
+                                                        alt="Comment Image" class="img-fluid" />
+                                                </div>
+                                            @endif
+
+                                            <!-- Reviewer -->
+                                            <div class="mb-2">
+                                                <strong>{{ $comment->user->name ?? 'Ẩn danh' }}</strong>
+                                                <span class="font-size-13 text-gray-23">
+                                                    -
+                                                    {{ \Carbon\Carbon::parse($comment->created_at)->locale('vi')->isoFormat('D MMMM YYYY') }}
+                                                </span>
+                                            </div>
+                                            <!-- End Reviewer -->
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4"></div>
+                                </div>
+                                <!-- End Review -->
+                            @endforeach
+                            <div class="pagination">
+                                {{ $comments->links() }}
+                            </div>
+
 
 
                         </div>
                     </div>
+
+
                 </div>
             </div>
 
@@ -591,7 +726,7 @@
 </script>
 
 
-//
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
