@@ -130,7 +130,7 @@
                                                                     $formattedAttributes[] = $name . ': ' . $value;
                                                                 }
                                                             @endphp
-                                                            <small class="text-muted">
+                                                            <small class="text-dark">
                                                                 {{ implode(' | ', $formattedAttributes) }}
                                                             </small>
                                                         </div>

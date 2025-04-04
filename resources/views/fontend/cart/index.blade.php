@@ -14,7 +14,40 @@
                     </div>
                 </div>
             </div>
+            <style>
+                .table {
+                    background-color: #FFF6DC;
+                    /* Soft Golden Cream */
+                    border: 1.2px solid #D9B867;
+                    /* Balanced Gold Borders */
+                    border-radius: 6px;
+                }
 
+                .table th {
+                    background-color: #F8D472;
+                    /* Warm Gold */
+                    color: #3D3D3D;
+                    /* Clear but Soft Dark Gray */
+                    border-bottom: 1.2px solid #D9B867;
+                    padding: 12px;
+                }
+
+                .table td {
+                    border-top: 1px solid #D9B867;
+                    /* Defined but Not Harsh */
+                    color: #3D3D3D;
+                    padding: 10px;
+                }
+
+
+                .btn-primary-dark-w {
+                    background-color: #F8D472;
+                    /* Rich Warm Gold */
+                    color: #3D3D3D;
+                    border: none;
+                    border-radius: 5px;
+                }
+            </style>
             <div class="container">
                 <div class="mb-4">
                     <h1 class="text-center">Giỏ hàng</h1>
@@ -66,15 +99,11 @@
                                                 <div class="variant-attributes">
                                                     @php
                                                         $groupedAttributes = [];
-                                                        foreach (
-                                                            $item->productVariant->attributeValues
-                                                            as $attributeValue
-                                                        ) {
-                                                            if (isset($attributeValue->attribute)) {
-                                                                $attrName = $attributeValue->attribute->name;
+                                                        foreach ($item->productVariant->attributeValues as $value) {
+                                                            if (isset($value->attribute)) {
+                                                                $attrName = $value->attribute->name;
                                                                 if (!isset($groupedAttributes[$attrName])) {
-                                                                    $groupedAttributes[$attrName] =
-                                                                        $attributeValue->value;
+                                                                    $groupedAttributes[$attrName] = $value->value;
                                                                 }
                                                             }
                                                         }
@@ -83,7 +112,7 @@
                                                             $formattedAttributes[] = $name . ': ' . $value;
                                                         }
                                                     @endphp
-                                                    <small class="text-muted">
+                                                    <small class="text-dark">
                                                         {{ implode(' | ', $formattedAttributes) }}
                                                     </small>
                                                 </div>
@@ -114,7 +143,8 @@
                                         </td>
 
                                         <td data-title="Quantity">
-                                            <div class="border rounded-pill py-1 width-122 w-xl-80 px-3 border-color-1">
+                                            <div class="border rounded-pill py-1 width-122 w-xl-80 px-3 border-color-1"
+                                                style="background: white;">
                                                 <div class="js-quantity row align-items-center">
                                                     <div class="col">
                                                         <input type="hidden" name="cart[{{ $item->id }}][id]"
