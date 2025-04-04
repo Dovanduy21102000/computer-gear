@@ -111,9 +111,6 @@ class ProductClientController extends Controller
         return view('fontend.layout', compact('template', 'product', 'variants', 'relatedProducts', 'images', 'comments','totalReviews', 'averageRating', 'ratingsCount','comment'));
     }
 
-
-
-
     public function getVariant(Request $request)
     {
         // Log để kiểm tra request
@@ -187,10 +184,6 @@ class ProductClientController extends Controller
         return view('fontend.layout', compact('template', 'products', 'categories', 'category', 'brands'));
     }
 
-
-
-
-
     public function showByBrand($brandSlug)
     {
         $brand = Brand::where('slug', $brandSlug)->firstOrFail();
@@ -207,9 +200,6 @@ class ProductClientController extends Controller
 
         return view('fontend.layout', compact('template', 'products', 'categories', 'brand', 'brands'));
     }
-
-
-
 
     public function search(Request $request)
     {
@@ -237,4 +227,37 @@ class ProductClientController extends Controller
 
         return view('fontend.layout', compact('template', 'products', 'categories', 'query', 'brands'));
     }
+
+    public function filteredProducts(Request $request)
+{
+    $productsQuery = Product::query()->where('status', true);
+
+    // Lấy danh mục theo slug nếu có
+    if ($request->has('category')) {
+        $category = Category::where('slug', $request->category)->firstOrFail();
+        $productsQuery->where('category_id', $category->id);
+    }
+
+    // Lọc theo thương hiệu nếu có
+    if ($request->has('brand')) {
+        $brandIds = (array) $request->brand;
+        $productsQuery->whereIn('brand_id', $brandIds);
+    }
+
+    $products = $productsQuery->paginate(20);
+
+    // Danh mục cấp cha và danh mục con
+    $categories = Category::where('is_active', true)
+        ->whereNull('parent_id')
+        ->with('children')
+        ->get();
+
+    // Lấy danh sách thương hiệu
+    $brands = Brand::where('is_active', 1)->get();
+
+    $template = 'fontend.products.index';
+
+    return view('fontend.layout', compact('template', 'products', 'categories', 'brands'));
+}
+
 }

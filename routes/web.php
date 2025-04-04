@@ -170,6 +170,8 @@ Route::middleware(['web'])->group(function () {
     Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
 
     Route::get('/products/brand/{brandSlug}', [ProductClientController::class, 'showByBrand'])->name('client.products.brand');
+    Route::get('/products/filter', [ProductClientController::class, 'filteredProducts'])->name('client.products.filter');
+
 
 
     Route::get('/products/category/{slug}', [ProductClientController::class, 'categoryProducts'])->name('client.products.category');

@@ -174,15 +174,16 @@
                         <div class="mb-2">
                             <a class="d-inline-flex align-items-center small font-size-15 text-lh-1" href="#">
                                 <div class="text-warning mr-2">
-                                    <small class="fas fa-star"></small>
-                                    <small class="fas fa-star"></small>
-                                    <small class="fas fa-star"></small>
-                                    <small class="fas fa-star"></small>
-                                    <small class="far fa-star text-muted"></small>
+                                    <!-- Hiển thị sao dựa trên đánh giá trung bình -->
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <small
+                                            class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
+                                    @endfor
                                 </div>
-                                <span class="text-secondary font-size-13">(3 customer reviews)</span>
+                                <span class="text-secondary font-size-13">({{ $totalReviews }} customer reviews)</span>
                             </a>
                         </div>
+
 
                         <div class="d-flex align-items-center">
                             <!-- Ảnh thương hiệu với kích thước nhỏ hơn -->

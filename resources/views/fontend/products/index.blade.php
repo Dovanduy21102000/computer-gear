@@ -60,35 +60,43 @@
 
                             <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                 <ul id="sidebarNav1" class="list-unstyled dropdown-list">
-                                    @foreach ($categories as $category)
-                                        <li>
-                                            <a class="dropdown-item"
-                                                href="{{ route('client.products.category', ['slug' => $category->slug]) }}">
-                                                {{ $category->name }}
-                                                <span class="text-gray-25 font-size-12 font-weight-normal">
-                                                    ({{ $category->products()->count() }})
-                                                </span>
-                                            </a>
+                                    <!-- Danh mục -->
+@foreach ($categories as $category)
+<li>
+    @php
+        $query = request()->all();
+        $query['category'] = $category->slug;
+    @endphp
+    <a class="dropdown-item"
+        href="{{ route('client.products.filter', $query) }}">
+        {{ $category->name }}
+        <span class="text-gray-25 font-size-12 font-weight-normal">
+            ({{ $category->products()->count() }})
+        </span>
+    </a>
 
-                                            <!-- Nếu có danh mục con, hiển thị danh mục con -->
-                                            @if ($category->children->count())
-                                                <ul class="list-unstyled dropdown-list">
-                                                    @foreach ($category->children as $child)
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('client.products.category', ['slug' => $child->slug]) }}">
-                                                                {{ $child->name }}
-                                                                <span
-                                                                    class="text-gray-25 font-size-12 font-weight-normal">
-                                                                    ({{ $child->products()->count() }})
-                                                                </span>
-                                                            </a>
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                            @endif
-                                        </li>
-                                    @endforeach
+    @if ($category->children->count())
+        <ul class="list-unstyled dropdown-list">
+            @foreach ($category->children as $child)
+                @php
+                    $query = request()->all();
+                    $query['category'] = $child->slug;
+                @endphp
+                <li>
+                    <a class="dropdown-item"
+                        href="{{ route('client.products.filter', $query) }}">
+                        {{ $child->name }}
+                        <span class="text-gray-25 font-size-12 font-weight-normal">
+                            ({{ $child->products()->count() }})
+                        </span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    @endif
+</li>
+@endforeach
+
                                 </ul>
                             </div>
 
@@ -101,20 +109,20 @@
                     <div class="border-bottom border-color-1 mb-5">
                         <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">Bộ lọc</h3>
                     </div>
-                    <form method="GET" action="{{ route('client.products.index') }}">
-                        <!-- Giữ category_id khi lọc thương hiệu -->
-                        <input type="hidden" name="category_id"
-                            value="{{ request()->has('category_id') ? request('category_id') : '' }}">
-
-
+                    <form id="filterForm" method="GET" action="{{ route('client.products.filter') }}">
+                        @if (request()->has('category'))
+                            <input type="hidden" name="category" value="{{ request('category') }}">
+                        @endif
+                    
                         <div class="border-bottom pb-4 mb-4">
                             <h4 class="font-size-14 mb-3 font-weight-bold">Thương hiệu</h4>
-
+                    
                             @foreach ($brands as $brand)
                                 <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
                                     <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input"
-                                            id="brand{{ $brand->id }}" name="brand[]" value="{{ $brand->id }}"
+                                        <input type="checkbox" class="custom-control-input brand-filter"
+                                            id="brand{{ $brand->id }}" name="brand[]"
+                                            value="{{ $brand->id }}"
                                             {{ in_array($brand->id, (array) request('brand', [])) ? 'checked' : '' }}>
                                         <label class="custom-control-label" for="brand{{ $brand->id }}">
                                             {{ $brand->name }}
@@ -123,12 +131,19 @@
                                 </div>
                             @endforeach
                         </div>
-
-                        <button type="submit" class="btn btn-primary">Lọc</button>
+                    
+                        {{-- Bỏ nút submit --}}
                     </form>
-
-
-
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const brandCheckboxes = document.querySelectorAll('.brand-filter');
+                            brandCheckboxes.forEach(function (checkbox) {
+                                checkbox.addEventListener('change', function () {
+                                    this.closest('form').submit();
+                                });
+                            });
+                        });
+                    </script>
                 </div>
 
 
