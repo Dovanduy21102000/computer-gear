@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Attribute;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Product; // Import model Product
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
@@ -81,13 +82,31 @@ class ProductClientController extends Controller
             ->where('id', '!=', $product->id)
             ->limit(6)
             ->get();
+        $comments = Comment::where('product_id', $product->id)
+            ->where('status', 1)
+            ->latest()
+            ->paginate(5);
 
+        $totalReviews = $comments->count();
+
+        // Tính điểm đánh giá trung bình
+        $averageRating = $totalReviews > 0 ? round($comments->avg('rating'), 1) : 0;
+
+        $comment = $product->comments()->where('user_id', auth()->id())->first();
+        // Lấy số lượng đánh giá theo từng mức sao
+        $ratingsCount = Comment::where('product_id', $product->id)
+            ->where('status', 1)
+            ->selectRaw('rating, COUNT(*) as count')
+            ->groupBy('rating')
+            ->orderBy('rating', 'desc')
+            ->pluck('count', 'rating')
+            ->toArray();
         if ($relatedProducts->isEmpty()) {
             $relatedProducts = collect(); // Trả về danh sách rỗng thay vì null
         }
 
         $template = 'fontend.products.detail';
-        return view('fontend.layout', compact('template', 'product', 'variants', 'relatedProducts', 'images'));
+        return view('fontend.layout', compact('template', 'product', 'variants', 'relatedProducts', 'images', 'comments','totalReviews', 'averageRating', 'ratingsCount','comment'));
     }
 
 

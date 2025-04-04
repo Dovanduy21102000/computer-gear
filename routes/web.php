@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\ResetPasswordController;
+
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Admin\BrandController;
@@ -30,6 +30,9 @@ use App\Http\Controllers\Client\VNPayController;
 use App\Http\Controllers\Admin\CategoryPostController;
 
 use App\Http\Controllers\Admin\ProfileController;
+
+
+use App\Http\Controllers\Admin\CommentController;
 
 use App\Http\Controllers\Admin\SpecificationController;
 
@@ -100,6 +103,7 @@ Route::prefix('admin')->group(function () {
             Route::put('product/{product_id}/bulk-update', [SpecificationController::class, 'bulkUpdate'])
                 ->name('bulkUpdate');
         });
+
         // Route album image
         Route::prefix('album')->name('backend.album.')->group(function () {
             Route::get('product/{product_id}', [AlbumImageController::class, 'index'])->name('index');
@@ -109,6 +113,12 @@ Route::prefix('admin')->group(function () {
             Route::put('update/{id}', [AlbumImageController::class, 'update'])->name('update');
             Route::delete('destroy/{id}', [AlbumImageController::class, 'destroy'])->name('destroy');
         });
+
+        // Đảm bảo rằng route này đã được thêm vào trong routes/web.php
+        Route::put('/comments/{id}/toggle-status', [CommentController::class, 'toggleStatus'])->name('admin.comments.toggleStatus');
+
+        Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
+        Route::get('/comments/{id}/show', [CommentController::class, 'show'])->name('comments.show');
     });
 });
 
@@ -165,12 +175,12 @@ Route::middleware(['web'])->group(function () {
     Route::get('/products/category/{slug}', [ProductClientController::class, 'categoryProducts'])->name('client.products.category');
     Route::get('/get-variant', [ProductClientController::class, 'getVariant'])->name('getVariant');
     Route::get('/search', [ProductClientController::class, 'search'])->name('search');
-
-
+    //
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
 
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
-
     Route::get('/about_us', [HomeController::class, 'about_us'])->name('about_us');
     Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
     Route::get('/track-order', [CheckoutController::class, 'trackOrderView'])->name('order.track');
@@ -205,3 +215,7 @@ Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
 
 
 Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
+
+
+//
+Route::get('/comments/{productId}', [CommentController::class, 'getComments']);
