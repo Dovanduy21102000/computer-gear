@@ -943,6 +943,8 @@
             let selectedAttributes = checkVariants();
             let quantity = parseInt($("#quantityInput").val(), 10) || 1;
 
+            console.log("Selected Attributes:", selectedAttributes); // Debug log
+
             if (!selectedAttributes || parseInt($("#quantityInput").attr("max"), 10) === 0) {
                 Swal.fire({
                     icon: "error",
@@ -953,39 +955,47 @@
                 return;
             }
 
-            // Kiểm tra nếu là "Thêm vào giỏ hàng"
-            if ($(this).is("#addToCartBtn")) {
-                // Hiển thị thông báo thành công và chuyển hướng đến trang giỏ hàng
-                Swal.fire({
-                    icon: "success",
-                    title: "Thành công!",
-                    text: "✅ Sản phẩm đã được thêm vào giỏ hàng!",
-                    confirmButtonText: "OK"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Chuyển hướng đến trang giỏ hàng
-                        window.location.href = "/cart"; // Thay đường dẫn nếu cần
-                    }
-                });
-            }
+            // Prepare the data to send to the cart
+            let formData = {
+                product_id: {{ $product->id }},
+                quantity: quantity,
+                attributes: selectedAttributes
+            };
 
-            // Kiểm tra nếu là "Mua ngay"
-            if ($(this).is("#buyNowBtn")) {
-                // Hiển thị thông báo thành công và thực hiện hành động "Mua ngay"
-                Swal.fire({
-                    icon: "success",
-                    title: "Thành công!",
-                    text: "✅ Bạn đã mua sản phẩm này!",
-                    confirmButtonText: "OK"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Chuyển hướng đến trang thanh toán hoặc trang khác
-                        window.location.href = "/thanh-toan"; // Thay đường dẫn nếu cần
+            console.log("Sending to cart:", formData); // Debug log
+
+            // Send POST request to add to cart
+            $.ajax({
+                url: '{{ route('cart.add') }}',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    console.log("Cart response:", response); // Debug log
+                    Swal.fire({
+                        icon: "success",
+                        title: "Thành công!",
+                        text: "✅ Sản phẩm đã được thêm vào giỏ hàng!",
+                        confirmButtonText: "OK"
+                    });
+                },
+                error: function(xhr) {
+                    console.error("Cart error:", xhr.responseText); // Debug log
+                    let errorMessage = "Có lỗi xảy ra khi thêm vào giỏ hàng.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
                     }
-                });
-            }
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi!",
+                        text: errorMessage,
+                        confirmButtonText: "OK"
+                    });
+                }
+            });
         });
-
 
         disablePurchase(); // Đảm bảo các nút bị vô hiệu hóa khi chưa chọn gì
     });

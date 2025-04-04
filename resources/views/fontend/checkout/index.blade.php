@@ -1,4 +1,25 @@
 <main id="content" role="main" class="checkout-page">
+    <style>
+        .variant-attributes {
+            margin-top: 5px;
+        }
+
+        .variant-attributes small {
+            display: inline-block;
+            background-color: #f8f9fa;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+        .product-quantity {
+            display: block;
+            margin-top: 5px;
+            color: #6c757d;
+        }
+    </style>
     <!-- breadcrumb -->
     <div class="bg-gray-13 bg-md-transparent">
         <div class="container">
@@ -89,13 +110,39 @@
                                                 <td>
                                                     {{ $item->product->name }}
                                                     @if ($item->productVariant)
-                                                        ({{ $item->productVariant->name }})
+                                                        <div class="variant-attributes">
+                                                            @php
+                                                                $groupedAttributes = [];
+                                                                foreach (
+                                                                    $item->productVariant->attributeValues
+                                                                    as $attributeValue
+                                                                ) {
+                                                                    if (isset($attributeValue->attribute)) {
+                                                                        $attrName = $attributeValue->attribute->name;
+                                                                        if (!isset($groupedAttributes[$attrName])) {
+                                                                            $groupedAttributes[$attrName] =
+                                                                                $attributeValue->value;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                $formattedAttributes = [];
+                                                                foreach ($groupedAttributes as $name => $value) {
+                                                                    $formattedAttributes[] = $name . ': ' . $value;
+                                                                }
+                                                            @endphp
+                                                            <small class="text-dark">
+                                                                {{ implode(' | ', $formattedAttributes) }}
+                                                            </small>
+                                                        </div>
                                                     @endif
                                                     <strong class="product-quantity">× {{ $item->quantity }}</strong>
                                                 </td>
                                                 <td>
                                                     @php
-                                                        $price = $item->product->price_sale ?? $item->product->price;
+                                                        $price = $item->productVariant
+                                                            ? $item->productVariant->price_sale ??
+                                                                $item->productVariant->price
+                                                            : $item->product->price_sale ?? $item->product->price;
                                                         $itemTotal = $item->quantity * $price;
                                                     @endphp
                                                     {{ number_format($itemTotal, 0, ',', '.') }}₫
@@ -105,10 +152,12 @@
                                     </tbody>
                                     <tfoot>
                                         @php
-                                            $subtotal = $cartItems->sum(
-                                                fn($item) => $item->quantity *
-                                                    ($item->product->price_sale ?? $item->product->price),
-                                            );
+                                            $subtotal = $cartItems->sum(function ($item) {
+                                                $price = $item->productVariant
+                                                    ? $item->productVariant->price_sale ?? $item->productVariant->price
+                                                    : $item->product->price_sale ?? $item->product->price;
+                                                return $item->quantity * $price;
+                                            });
 
                                             $appliedCoupon = session('coupon') ?? null;
                                             $discount = 0;
@@ -316,7 +365,7 @@
         </form>
 
 
-        {{-- <script>
+        <script>
             document.addEventListener("DOMContentLoaded", function() {
                 let checkoutForm = document.getElementById("checkout-form");
 
@@ -340,7 +389,7 @@
                     checkoutForm.submit();
                 });
             });
-        </script> --}}
+        </script>
 
     </div>
 </main>
