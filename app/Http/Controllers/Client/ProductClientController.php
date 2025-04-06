@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\AlbumImage;
 use App\Models\Attribute;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Product; // Import model Product
+use App\Models\ProductImage;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -74,24 +77,39 @@ class ProductClientController extends Controller
             ->get();
 
         // Lấy danh sách ảnh của sản phẩm
-        $images = $product->images;
+        $images = AlbumImage::where('product_id', $product->id)->get(); // Lấy tất cả ảnh của sản phẩm
 
         // Lấy các sản phẩm liên quan
         $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->limit(6)
             ->get();
+        $comments = Comment::where('product_id', $product->id)
+            ->where('status', 1)
+            ->latest()
+            ->paginate(5);
 
+        $totalReviews = $comments->count();
+
+        // Tính điểm đánh giá trung bình
+        $averageRating = $totalReviews > 0 ? round($comments->avg('rating'), 1) : 0;
+
+        $comment = $product->comments()->where('user_id', auth()->id())->first();
+        // Lấy số lượng đánh giá theo từng mức sao
+        $ratingsCount = Comment::where('product_id', $product->id)
+            ->where('status', 1)
+            ->selectRaw('rating, COUNT(*) as count')
+            ->groupBy('rating')
+            ->orderBy('rating', 'desc')
+            ->pluck('count', 'rating')
+            ->toArray();
         if ($relatedProducts->isEmpty()) {
             $relatedProducts = collect(); // Trả về danh sách rỗng thay vì null
         }
 
         $template = 'fontend.products.detail';
-        return view('fontend.layout', compact('template', 'product', 'variants', 'relatedProducts', 'images'));
+        return view('fontend.layout', compact('template', 'product', 'variants', 'relatedProducts', 'images', 'comments','totalReviews', 'averageRating', 'ratingsCount','comment'));
     }
-
-
-
 
     public function getVariant(Request $request)
     {
@@ -166,10 +184,6 @@ class ProductClientController extends Controller
         return view('fontend.layout', compact('template', 'products', 'categories', 'category', 'brands'));
     }
 
-
-
-
-
     public function showByBrand($brandSlug)
     {
         $brand = Brand::where('slug', $brandSlug)->firstOrFail();
@@ -186,9 +200,6 @@ class ProductClientController extends Controller
 
         return view('fontend.layout', compact('template', 'products', 'categories', 'brand', 'brands'));
     }
-
-
-
 
     public function search(Request $request)
     {
@@ -216,4 +227,36 @@ class ProductClientController extends Controller
 
         return view('fontend.layout', compact('template', 'products', 'categories', 'query', 'brands'));
     }
+
+    public function filteredProducts(Request $request)
+{
+    $productsQuery = Product::query()->where('status', true);
+
+    // Lấy danh mục theo slug nếu có
+    if ($request->has('category')) {
+        $category = Category::where('slug', $request->category)->firstOrFail();
+        $productsQuery->where('category_id', $category->id);
+    }
+
+    // Lọc theo thương hiệu nếu có
+    if ($request->has('brand')) {
+        $brandIds = (array) $request->brand;
+        $productsQuery->whereIn('brand_id', $brandIds);
+    }
+
+    $products = $productsQuery->paginate(20);
+
+   
+    $categories = Category::where('is_active', true)
+        ->whereNull('parent_id')
+        ->with('children')
+        ->get();
+
+    $brands = Brand::where('is_active', 1)->get();
+
+    $template = 'fontend.products.index';
+
+    return view('fontend.layout', compact('template', 'products', 'categories', 'brands'));
+}
+
 }

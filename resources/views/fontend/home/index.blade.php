@@ -194,68 +194,69 @@
                     <aside class="mb-8">
                         <div class="d-flex justify-content-center rounded border mb-4">
                             <div class="px-4 py-6 w-100">
-                                <!-- Feature List -->
+                                <!-- Danh sách tính năng -->
                                 <div class="media px-3 mb-4 pb-4 border-bottom" href="#">
                                     <div class="u-avatar mr-2">
                                         <i class="text-primary ec ec-transport font-size-46"></i>
                                     </div>
                                     <div class="media-body text-center">
-                                        <span class="d-block font-weight-bold text-dark">Free Delivery</span>
-                                        <div class=" text-secondary">from $50</div>
+                                        <span class="d-block font-weight-bold text-dark">Giao hàng miễn phí</span>
+                                        <div class="text-secondary">từ $50</div>
                                     </div>
                                 </div>
-                                <!-- End Feature List -->
-
-                                <!-- Feature List -->
+                                <!-- End Danh sách tính năng -->
+                    
+                                <!-- Danh sách tính năng -->
                                 <div class="media px-3 mb-4 pb-4 border-bottom" href="#">
                                     <div class="u-avatar mr-2">
                                         <i class="text-primary ec ec-customers font-size-56"></i>
                                     </div>
                                     <div class="media-body text-center">
-                                        <span class="d-block font-weight-bold text-dark">99 % Customer</span>
-                                        <div class=" text-secondary">Feedbacks</div>
+                                        <span class="d-block font-weight-bold text-dark">99% Khách hàng</span>
+                                        <div class="text-secondary">Phản hồi</div>
                                     </div>
                                 </div>
-                                <!-- End Feature List -->
-
-                                <!-- Feature List -->
+                                <!-- End Danh sách tính năng -->
+                    
+                                <!-- Danh sách tính năng -->
                                 <div class="media px-3 mb-4 pb-4 border-bottom" href="#">
                                     <div class="u-avatar mr-2">
                                         <i class="text-primary ec ec-returning font-size-46"></i>
                                     </div>
                                     <div class="media-body text-center">
-                                        <span class="d-block font-weight-bold text-dark">365 Days</span>
-                                        <div class=" text-secondary">for free return</div>
+                                        <span class="d-block font-weight-bold text-dark">365 Ngày</span>
+                                        <div class="text-secondary">đổi trả miễn phí</div>
                                     </div>
                                 </div>
-                                <!-- End Feature List -->
-
-                                <!-- Feature List -->
+                                <!-- End Danh sách tính năng -->
+                    
+                                <!-- Danh sách tính năng -->
                                 <div class="media px-3 mb-4 pb-4 border-bottom" href="#">
                                     <div class="u-avatar mr-2">
                                         <i class="text-primary ec ec-payment font-size-46"></i>
                                     </div>
                                     <div class="media-body text-center">
-                                        <span class="d-block font-weight-bold text-dark">Payment</span>
-                                        <div class=" text-secondary">Secure System</div>
+                                        <span class="d-block font-weight-bold text-dark">Thanh toán</span>
+                                        <div class="text-secondary">Hệ thống bảo mật</div>
                                     </div>
                                 </div>
-                                <!-- End Feature List -->
-
-                                <!-- Feature List -->
+                                <!-- End Danh sách tính năng -->
+                    
+                                <!-- Danh sách tính năng -->
                                 <div class="media px-3" href="#">
                                     <div class="u-avatar mr-2">
                                         <i class="text-primary ec ec-tag font-size-46"></i>
                                     </div>
                                     <div class="media-body text-center">
-                                        <span class="d-block font-weight-bold text-dark">Only Best</span>
-                                        <div class=" text-secondary">Brands</div>
+                                        <span class="d-block font-weight-bold text-dark">Chỉ có</span>
+                                        <div class="text-secondary">Các thương hiệu tốt nhất</div>
                                     </div>
                                 </div>
-                                <!-- End Feature List -->
+                                <!-- End Danh sách tính năng -->
                             </div>
                         </div>
                     </aside>
+                    
                     <!-- End Feature List -->
                     <!-- Feature Product -->
                     <aside class="mb-8">
@@ -277,10 +278,11 @@
                                                     class="product-item__inner remove-prodcut-hover px-wd-4 p-2 p-md-3">
                                                     <div class="product-item__body pb-xl-2">
                                                         <div class="mb-2">
-                                                            <a href="{{ route('client.products.detail', $topViewedProduct->slug) }}"
-                                                                class="d-block text-center"><img class="img-fluid"
-                                                                    src="{{ asset('storage/' . $topViewedProduct->thumbnail) }}"
-                                                                    alt="Image Description"></a>
+                                                            <a href="{{ route('client.products.detail', $topViewedProduct->slug) }}" class="d-block text-center">
+                                                                <img class="img-fluid w-100" style="height: 200px; object-fit: cover; border-radius: 8px;" 
+                                                                     src="{{ asset('storage/' . $topViewedProduct->thumbnail) }}" alt="Image Description">
+                                                            </a>
+                                                            
                                                         </div>
                                                         <div class="mb-2"><a
                                                                 href="{{ route('client.products.brand', ['brandSlug' => $topViewedProduct->brand->slug]) }}"
@@ -290,11 +292,11 @@
                                                                 href="{{ route('client.products.detail', $topViewedProduct->slug) }}"
                                                                 class="text-blue font-weight-bold">{{ $topViewedProduct->name }}</a>
                                                         </h5>
-                                                        <div class="mb-1">
+                                                        <div class="mt-2">
                                                             <div class="prodcut-price">
                                                                 {{-- <div class="text-gray-100">$685,00</div> --}}
                                                                 @if ($topViewedProduct->price_sale)
-                                                                    <div class="text-red ">
+                                                                    <div class="text-red">
                                                                         {{ number_format($topViewedProduct->price_sale, 0, ',', '.') }}
                                                                         đ
                                                                     </div>
@@ -384,7 +386,7 @@
                 <!-- Banner -->
                 <div class="row mb-6">
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4">
-                        <a href="/shop" class="d-black text-gray-90">
+                        <a href="{{route('client.products.index')}}" class="d-black text-gray-90">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/190x150/img3.jpg"
@@ -406,7 +408,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4">
-                        <a href="/shop" class="d-black text-gray-90">
+                        <a href="{{route('client.products.index')}}" class="d-black text-gray-90">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/246X176/img2.jpg"
@@ -428,7 +430,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4 d-md-none d-wd-block">
-                        <a href="/shop" class="d-black text-gray-90">
+                        <a href="{{route('client.products.index')}}" class="d-black text-gray-90">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/246X176/img3.jpg" alt="PC Gaming">
@@ -641,7 +643,7 @@
 
                 <!-- Full banner -->
                 <div class="mb-8">
-                    <a href="https://transvelo.github.io/electro-html/2.0/html/shop/shop.html"
+                    <a href="{{route('client.products.index')}}"
                         class="d-block text-gray-90">
                         <div class="bg-img-hero pt-3"
                             style="background-image: url(fontend/assets/img/1400X206/img1.jpg);">
@@ -655,7 +657,7 @@
                                         <div class="bg-primary rounded-lg px-6 py-2">
                                             <em class="font-size-14 font-weight-light">GIÁ CHỈ TỪ</em>
                                             <div class="font-size-30 font-weight-bold text-lh-1">
-                                                <sup class="">$</sup>299<sup class="">99</sup>
+                                                <sup class="">$</sup>299<sup class=""></sup>
                                             </div>
                                         </div>
                                     </div>
@@ -914,7 +916,7 @@
                     </dv>
                     <div class="row">
                         <div class="col-auto">
-                            <a href="https://transvelo.github.io/electro-html/2.0/html/shop/shop.html"
+                            <a href="{{route('client.products.index')}}"
                                 class="d-block">
                                 <img class="img-fluid" src="fontend/assets/img/212X305/img2.jpg"
                                     alt="Image Description">
@@ -1003,13 +1005,13 @@
                 <div class="mb-8">
                     <div class="row">
                         <div class="col-md-6 mb-3 mb-md-0">
-                            <a href="https://transvelo.github.io/electro-html/2.0/html/shop/shop.html">
+                            <a href="{{route('client.products.index')}}">
                                 <img class="img-fluid" src="fontend/assets/img/536X150/img1.jpg"
                                     alt="Image Description">
                             </a>
                         </div>
                         <div class="col-md-6">
-                            <a href="https://transvelo.github.io/electro-html/2.0/html/shop/shop.html">
+                            <a href="{{route('client.products.index')}}">
                                 <img class="img-fluid" src="fontend/assets/img/536X150/img2.jpg"
                                     alt="Image Description">
                             </a>
@@ -1136,12 +1138,15 @@
                     }
                 }]'>
                 @foreach ($brands as $brand)
-                    <div class="js-slide">
-                        <a href="#" class="link-hover__brand">
-                            <img class="img-fluid m-auto max-height-50" src="{{ asset('storage/' . $brand->logo) }}"
-                                alt="Image Description">
-                        </a>
-                    </div>
+                <div class="js-slide d-flex align-items-center">
+                    <a href="#" class="link-hover__brand d-flex align-items-center">
+                        <img class="img-fluid m-auto max-height-50" src="{{ asset('storage/' . $brand->logo) }}" alt="Image Description">
+                        <span class="brand-name ms-3 fs-5 fw-bold">{{ $brand->name }}</span> <!-- Tên thương hiệu -->
+                    </a>
+                </div>
+                
+                
+                
                 @endforeach
             </div>
         </div>

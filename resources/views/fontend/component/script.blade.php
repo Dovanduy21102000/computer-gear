@@ -42,6 +42,11 @@
         <script src="{{ asset('fontend/assets/js/components/hs.go-to.js') }}"></script>
         <script src="{{ asset('fontend/assets/js/components/hs.selectpicker.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+       
+
+        <!-- Thêm thư viện jQuery Bar Rating -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-bar-rating/dist/themes/fontawesome-stars.css">
+        <script src="https://cdn.jsdelivr.net/npm/jquery-bar-rating/dist/jquery.barrating.min.js"></script>
 
         <!-- JS Plugins Init. -->
         <script>
