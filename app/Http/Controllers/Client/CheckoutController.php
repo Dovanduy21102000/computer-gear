@@ -397,4 +397,10 @@ class CheckoutController extends Controller
         $template = 'fontend.checkout.success';
         return view('fontend.layout', compact('template', 'order'));
     }
+
+    public function removeCoupon()
+    {
+        session()->forget('coupon');
+        return back()->with('success', 'Mã khuyến mại đã được xóa!');
+    }
 }

@@ -193,7 +193,13 @@
 
                                         @if ($appliedCoupon)
                                             <tr>
-                                                <th>Mã giảm giá: ({{ $appliedCoupon['code'] }})</th>
+                                                <th>
+                                                    Mã giảm giá: ({{ $appliedCoupon['code'] }})
+                                                    <a href="{{ route('removeCoupon') }}"
+                                                        class="btn btn-sm btn-danger ml-2">
+                                                        <i class="fas fa-times"></i> Xóa
+                                                    </a>
+                                                </th>
                                                 <td class="text-danger">-{{ number_format($discount, 0, ',', '.') }}₫
                                                 </td>
                                             </tr>
@@ -242,7 +248,8 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="cash"
                                                         name="payment_method" value="cash">
-                                                    <label class="custom-control-label form-label" for="cash">Thanh
+                                                    <label class="custom-control-label form-label"
+                                                        for="cash">Thanh
                                                         toán trực tiếp</label>
                                                 </div>
                                             </div>
