@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\Banner; // Import model Banner
 use App\Models\Cart;
 use App\Models\CartItem;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -59,7 +60,7 @@ class HomeController extends Controller
             ->whereHas('brand', function ($query) {
                 $query->where('is_active', 1);
             })
-            ->orderBy('quantity_sold', 'desc')
+            // ->orderBy('quantity_sold', 'desc')
             ->paginate(9);
 
         // Lấy 4 sản phẩm bất kỳ (chỉ lấy khi danh mục và thương hiệu is_active = 1)
@@ -86,6 +87,9 @@ class HomeController extends Controller
             ->get();
 
         $brands = Brand::where('is_active', 1)->get();
+        $total_items = CartItem::whereHas('cart', function ($query) {
+            $query->where('user_id', Auth::id());
+        })->count();
 
         $template = 'fontend.home.index';
         return view('fontend.layout', compact(
@@ -97,7 +101,8 @@ class HomeController extends Controller
             'topSellingProducts',
             'products',
             'keyboardMouseProducts',
-            'brands'
+            'brands',
+            'total_items'
         ));
     }
 
@@ -153,14 +158,15 @@ class HomeController extends Controller
     // }
 
 
-    public function faqs(){
+    public function faqs()
+    {
         $template = 'fontend.home.faqs';
         return view('fontend.layout', compact('template'));
     }
 
-    public function about_us(){
+    public function about_us()
+    {
         $template = 'fontend.home.about_us';
         return view('fontend.layout', compact('template'));
     }
 }
-

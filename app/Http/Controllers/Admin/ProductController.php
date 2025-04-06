@@ -19,11 +19,31 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with(['category', 'brand', 'variants.attributeValues.attribute'])->paginate(10);
+        // Khởi tạo query để lấy sản phẩm
+        $query = Product::with(['category', 'brand', 'variants.attributeValues.attribute']);
+
+        // Lọc theo danh mục
+        if ($request->has('category') && $request->category != '') {
+            $query->where('category_id', $request->category);
+        }
+
+        // Lọc theo thương hiệu
+        if ($request->has('brand') && $request->brand != '') {
+            $query->where('brand_id', $request->brand);
+        }
+
+        // Lấy các danh mục và thương hiệu để truyền vào view
+        $categories = Category::all();
+        $brands = Brand::all();
+
+        // Phân trang kết quả
+        $products = $query->paginate(10);
+
+        // Trả về view với các biến cần thiết
         $template = 'backend.products.index';
-        return view('backend.dashboard.layout', compact('products', 'template'));
+        return view('backend.dashboard.layout', compact('products', 'categories', 'brands', 'template'));
     }
 
     /**

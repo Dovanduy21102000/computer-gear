@@ -21,6 +21,17 @@
                     <div class="card-body">
                         <h5 class="card-title">Danh sách đơn hàng</h5>
                         <!-- Table with stripped rows -->
+                        <div class="col-lg-2">
+                            <label for="orderStatusFilter" class="form-label">Lọc theo trạng thái:</label>
+                            <select id="orderStatusFilter" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option value="pending">Đang chờ xử lý</option>
+                                <option value="processing">Đang xử lý</option>
+                                <option value="delivered">Đang giao hàng</option>
+                                <option value="completed">Hoàn thành</option>
+                                <option value="canceled">Hủy đơn</option>
+                            </select>
+                        </div>
                         <table class="table datatable">
                             <thead>
                                 <tr>
@@ -46,7 +57,7 @@
                                         <td>{{ number_format($order->coupon_discount, 2) }}</td>
                                         <td>{{ number_format($order->final_price, 2) }}</td>
                                         <td>
-                                            <span
+                                            <span data-status="{{ $order->status }}"
                                                 class="badge {{ $order->status === 'pending'
                                                     ? 'bg-warning'
                                                     : ($order->status === 'processing'
@@ -109,4 +120,41 @@
             </div>
         </div>
     </section>
+
 </main><!-- End #main -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let filter = document.getElementById('orderStatusFilter');
+
+        function filterOrders() {
+            let status = filter.value.trim().toLowerCase(); // Lấy giá trị từ dropdown
+            let rows = document.querySelectorAll('.datatable tbody tr');
+
+            rows.forEach(row => {
+                let cell = row.querySelector('td:nth-child(7) span'); // Lấy cột trạng thái
+                if (!cell) return; // Nếu không tìm thấy, bỏ qua
+
+                let cellStatus = cell.dataset.status.trim().toLowerCase(); // Lấy trạng thái thực tế
+
+                // Nếu chọn "Tất cả", hiển thị tất cả đơn hàng
+                if (status === "") {
+                    row.style.display = "";
+                    return;
+                }
+
+                // Nếu trạng thái đơn hàng trùng với giá trị lọc, hiển thị, ngược lại ẩn
+                if (cellStatus === status) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        // Lọc khi trang load
+        filterOrders();
+
+        // Lọc khi thay đổi dropdown
+        filter.addEventListener('change', filterOrders);
+    });
+</script>

@@ -24,6 +24,42 @@
                                     <input class="datatable-input" placeholder="Tìm kiếm theo tên hoặc SKU..."
                                         type="search" name="search" title="Tìm kiếm trong bảng">
                                 </div>
+                                <form method="GET" action="{{ route('products.index') }}" class="mb-1">
+                                    <div class="row">
+                                        <!-- Lọc danh mục -->
+                                        <div class="col-md-4">
+                                            <select name="category" id="category" class="form-control">
+                                                <option value="">-- Danh mục --</option>
+                                                @foreach ($categories as $category)
+                                                    <option value="{{ $category->id }}"
+                                                        {{ request('category') == $category->id ? 'selected' : '' }}>
+                                                        {{ $category->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- Lọc thương hiệu -->
+                                        <div class="col-md-4">
+                                            <select name="brand" id="brand" class="form-control">
+                                                <option value="">-- Thương hiệu --</option>
+                                                @foreach ($brands as $brand)
+                                                    <option value="{{ $brand->id }}"
+                                                        {{ request('brand') == $brand->id ? 'selected' : '' }}>
+                                                        {{ $brand->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- Nút lọc -->
+                                        <div class="col-md-4 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary">Lọc</button>
+                                            <a href="{{ route('products.index') }}"
+                                                class="btn btn-secondary ms-2">Reset</a>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                             <div class="datatable-container">
                                 <table class="table datatable datatable-table table-bordered">
@@ -91,6 +127,10 @@
                                                     <a href="{{ route('products.edit', $product->id) }}"
                                                         class="btn btn-warning btn-sm">
                                                         <i class="fa fa-edit"></i>
+                                                    </a>
+                                                    <a href="{{ route('backend.album.index', ['product_id' => $product->id]) }}"
+                                                        class="btn btn-primary btn-sm">
+                                                        <i class="bi bi-image"></i> 
                                                     </a>
                                                     <!-- Nút xem thông số sản phẩm -->
                                                     <a href="{{ route('admin.specifications.index', ['product_id' => $product->id]) }}"
