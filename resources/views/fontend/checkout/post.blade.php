@@ -11,7 +11,13 @@
     <form id="redirect-form" action="{{ $url }}" method="POST">
         @csrf
         @foreach ($data as $key => $value)
-            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+            @if (is_array($value))
+                @foreach ($value as $item)
+                    <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+                @endforeach
+            @else
+                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+            @endif
         @endforeach
     </form>
     <p>Redirecting...</p>

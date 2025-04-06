@@ -913,11 +913,22 @@
             let selectedAttributes = checkVariants();
             let quantity = parseInt($("#quantityInput").val(), 10) || 0;
             let stockQuantity = parseInt($("#quantityInput").attr("max"), 10);
+            let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
 
-            if (!selectedAttributes || quantity < 1 || stockQuantity === 0) {
-                disablePurchase();
+            if (isVariantProduct) {
+                // For variant products, we need to check if attributes are selected
+                if (!selectedAttributes || quantity < 1 || stockQuantity === 0) {
+                    disablePurchase();
+                } else {
+                    $("#addToCartBtn, #buyNowBtn").prop("disabled", false);
+                }
             } else {
-                $("#addToCartBtn, #buyNowBtn").prop("disabled", false);
+                // For non-variant products, just check if quantity is valid
+                if (quantity < 1 || stockQuantity === 0) {
+                    disablePurchase();
+                } else {
+                    $("#addToCartBtn, #buyNowBtn").prop("disabled", false);
+                }
             }
         }
 
@@ -942,10 +953,14 @@
 
             let selectedAttributes = checkVariants();
             let quantity = parseInt($("#quantityInput").val(), 10) || 1;
+            let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
 
             console.log("Selected Attributes:", selectedAttributes); // Debug log
+            console.log("Is Variant Product:", isVariantProduct); // Debug log
 
-            if (!selectedAttributes || parseInt($("#quantityInput").attr("max"), 10) === 0) {
+            // For variant products, we need to check if attributes are selected
+            if (isVariantProduct && (!selectedAttributes || parseInt($("#quantityInput").attr("max"),
+                    10) === 0)) {
                 Swal.fire({
                     icon: "error",
                     title: "Lỗi!",
@@ -955,12 +970,27 @@
                 return;
             }
 
+            // For non-variant products, just check if quantity is valid
+            if (!isVariantProduct && parseInt($("#quantityInput").attr("max"), 10) === 0) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi!",
+                    text: "⚠️ Sản phẩm đã hết hàng!",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+
             // Prepare the data to send to the cart
             let formData = {
                 product_id: {{ $product->id }},
-                quantity: quantity,
-                attributes: selectedAttributes
+                quantity: quantity
             };
+
+            // Only add attributes if this is a variant product
+            if (isVariantProduct && selectedAttributes) {
+                formData.attributes = selectedAttributes;
+            }
 
             console.log("Sending to cart:", formData); // Debug log
 

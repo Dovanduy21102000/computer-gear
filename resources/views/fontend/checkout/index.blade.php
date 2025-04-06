@@ -86,6 +86,13 @@
         <form action="{{ route('checkout.method') }}" id="checkout-form" method="POST" class="js-validate">
             @csrf
 
+            <!-- Add hidden input for selected items -->
+            @if (request()->has('selected_items'))
+                @foreach (request()->input('selected_items') as $itemId)
+                    <input type="hidden" name="selected_items[]" value="{{ $itemId }}">
+                @endforeach
+            @endif
+
             <div class="row">
                 <!-- Order Summary -->
                 <div class="col-lg-5 order-lg-2 mb-7 mb-lg-0">
