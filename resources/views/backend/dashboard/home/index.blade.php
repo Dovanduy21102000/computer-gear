@@ -1,5 +1,6 @@
 <main id="main" class="main">
     <div class="pagetitle">
+
         <h1>Thống Kê</h1>
         <nav>
             <ol class="breadcrumb">
@@ -25,8 +26,9 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                     <li class="dropdown-header text-start">
-                                        <h6>Filter</h6>
+                                        <h6>Lọc</h6>
                                     </li>
+
                                     <li>
                                         <a class="dropdown-item"
                                             href="{{ route('dashboard.index', ['filter' => 'today']) }}">Hôm nay</a>
@@ -43,7 +45,10 @@
                             </div>
 
                             <div class="card-body">
+
+
                                 <h5 class="card-title">Đơn hàng <span>| {{ ucfirst($filter) }}</span></h5>
+
 
                                 <div class="d-flex align-items-center">
                                     <div
@@ -51,6 +56,7 @@
                                         <i class="bi bi-cart"></i>
                                     </div>
                                     <div class="ps-3">
+
                                         <h6>{{ $orders ?? 0 }}</h6>
                                         <span class="text-success small pt-1 fw-bold">
                                             {{ number_format((float) $growthPercentageOrders) }}%

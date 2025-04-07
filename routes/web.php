@@ -120,20 +120,18 @@ Route::prefix('admin')->group(function () {
         Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
         Route::get('/comments/{id}/show', [CommentController::class, 'show'])->name('comments.show');
     });
+    //Biêns thể
+    Route::prefix('products/{product}/variants')->group(function () {
+        Route::get('/', [ProductVariantController::class, 'index'])->name('variants.index');
+        Route::get('/create', [ProductVariantController::class, 'create'])->name('variants.create');
+        Route::post('/store', [ProductVariantController::class, 'store'])->name('variants.store');
+        Route::get('/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
+        Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
+        Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
+        Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
+    });
 });
 
-
-
-//Biêns thể
-Route::prefix('products/{product}/variants')->group(function () {
-    Route::get('/', [ProductVariantController::class, 'index'])->name('variants.index');
-    Route::get('/create', [ProductVariantController::class, 'create'])->name('variants.create');
-    Route::post('/store', [ProductVariantController::class, 'store'])->name('variants.store');
-    Route::get('/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
-    Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
-    Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
-    Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
-});
 
 
 // Client Routes
@@ -183,6 +181,7 @@ Route::middleware(['web'])->group(function () {
 
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
     Route::get('/about_us', [HomeController::class, 'about_us'])->name('about_us');
     Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
     Route::get('/track-order', [CheckoutController::class, 'trackOrderView'])->name('order.track');

@@ -298,7 +298,7 @@
 
 
                         <div class="mb-2 pb-0dot5" style="margin-top: 10px">
-                            <a href="#" id="addToCartBtn" class="btn btn-block btn-primary-dark" disabled>
+                            <a href="{{route('cart.add')}}" id="addToCartBtn" class="btn btn-block btn-primary-dark" disabled>
                                 <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
                             </a>
                         </div>
