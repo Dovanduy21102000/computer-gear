@@ -56,9 +56,10 @@ class CartController extends Controller
         $userId = Auth::id();
         $product = Product::findOrFail($request->product_id);
 
-        // Ensure the requested quantity does not exceed available stock
-        if ($request->quantity > $product->quantity) {
-            return redirect()->back()->with('error', 'Sản phẩm không còn tồn hàng.');
+        // Check if this is a variant product and no attributes are selected
+        if ($product->is_variant && (!$request->has('attributes') || empty($request->attributes))) {
+            return redirect()->route('client.products.detail', $product->slug)
+                ->with('error', 'Vui lòng chọn các thuộc tính sản phẩm trước khi thêm vào giỏ hàng.');
         }
 
         // Get or create the user's cart
@@ -86,6 +87,11 @@ class CartController extends Controller
                 return redirect()->back()->with('error', 'Biến thể sản phẩm không hợp lệ.');
             }
 
+            // Check if the variant has sufficient stock
+            if ($variant->quantity < $request->quantity) {
+                return redirect()->back()->with('error', 'Biến thể sản phẩm không đủ số lượng trong kho. Số lượng còn lại: ' . $variant->quantity);
+            }
+
             // Check if the selected variant is already in the cart
             $cartItem = CartItem::where('cart_id', $cart->id)
                 ->where('product_id', $product->id)
@@ -97,7 +103,7 @@ class CartController extends Controller
                 $newQuantity = $cartItem->quantity + $request->quantity;
 
                 if ($newQuantity > $variant->quantity) {
-                    return redirect()->back()->with('error', 'Không thể thêm quá số lượng tồn kho cho biến thể này.');
+                    return redirect()->back()->with('error', 'Không thể thêm quá số lượng tồn kho cho biến thể này. Số lượng còn lại: ' . $variant->quantity);
                 }
 
                 $cartItem->quantity = $newQuantity;
@@ -113,6 +119,11 @@ class CartController extends Controller
             }
         } else {
             // Handle non-variant product
+            // Ensure the requested quantity does not exceed available stock
+            if ($request->quantity > $product->quantity) {
+                return redirect()->back()->with('error', 'Sản phẩm không đủ số lượng trong kho. Số lượng còn lại: ' . $product->quantity);
+            }
+
             // Check if the product is already in the cart
             $cartItem = CartItem::where('cart_id', $cart->id)
                 ->where('product_id', $product->id)
@@ -124,7 +135,7 @@ class CartController extends Controller
                 $newQuantity = $cartItem->quantity + $request->quantity;
 
                 if ($newQuantity > $product->quantity) {
-                    return redirect()->back()->with('error', 'Không thể thêm quá số lượng tồn kho.');
+                    return redirect()->back()->with('error', 'Không thể thêm quá số lượng tồn kho. Số lượng còn lại: ' . $product->quantity);
                 }
 
                 $cartItem->quantity = $newQuantity;
@@ -154,12 +165,25 @@ class CartController extends Controller
             $cartItemModel = CartItem::where('id', $cartItem['id'])->first();
 
             if ($cartItemModel) {
-                $product = Product::findOrFail($cartItemModel->product_id);
                 $newQuantity = (int) $cartItem['quantity'];
 
-                // Check stock limit
-                if ($newQuantity > $product->quantity) {
-                    return back()->with('error', 'Số lượng sản phẩm không đủ.');
+                // Check if this is a variant product
+                if ($cartItemModel->product_variant_id) {
+                    $variant = ProductVariant::find($cartItemModel->product_variant_id);
+                    if (!$variant) {
+                        return back()->with('error', 'Biến thể sản phẩm không tồn tại.');
+                    }
+
+                    // Check stock limit for variant
+                    if ($newQuantity > $variant->quantity) {
+                        return back()->with('error', 'Số lượng sản phẩm biến thể không đủ. Số lượng còn lại: ' . $variant->quantity);
+                    }
+                } else {
+                    $product = Product::findOrFail($cartItemModel->product_id);
+                    // Check stock limit for regular product
+                    if ($newQuantity > $product->quantity) {
+                        return back()->with('error', 'Số lượng sản phẩm không đủ. Số lượng còn lại: ' . $product->quantity);
+                    }
                 }
 
                 $cartItemModel->quantity = $newQuantity;

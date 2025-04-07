@@ -88,7 +88,10 @@
 
             <!-- Add hidden input for selected items -->
             @if (request()->has('selected_items'))
-                @foreach (request()->input('selected_items') as $itemId)
+                @php
+                    $selectedItems = explode(',', request()->input('selected_items'));
+                @endphp
+                @foreach ($selectedItems as $itemId)
                     <input type="hidden" name="selected_items[]" value="{{ $itemId }}">
                 @endforeach
             @endif

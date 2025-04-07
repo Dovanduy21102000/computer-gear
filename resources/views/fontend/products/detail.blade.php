@@ -298,7 +298,8 @@
 
 
                         <div class="mb-2 pb-0dot5" style="margin-top: 10px">
-                            <a href="{{route('cart.add')}}" id="addToCartBtn" class="btn btn-block btn-primary-dark" disabled>
+                            <a href="{{ route('cart.add') }}" id="addToCartBtn"
+                                class="btn btn-block btn-primary-dark" disabled>
                                 <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
                             </a>
                         </div>
@@ -900,6 +901,8 @@
             } else {
                 $("#quantityInput").val("").prop("disabled", true);
                 disablePurchase();
+                // Hiển thị thông báo hết hàng
+                $("#quantityError").removeClass("d-none").text("Sản phẩm đã hết hàng!");
             }
         }
 
@@ -940,11 +943,16 @@
             if (max === 0 || value === "") {
                 $(this).val("");
                 disablePurchase();
+                $("#quantityError").removeClass("d-none").text("Sản phẩm đã hết hàng!");
                 return;
             }
 
             value = Math.max(1, Math.min(max, parseInt(value, 10)));
             $(this).val(value);
+
+            // Ẩn thông báo lỗi nếu số lượng hợp lệ
+            $("#quantityError").addClass("d-none");
+
             enablePurchase();
         });
 
@@ -954,13 +962,15 @@
             let selectedAttributes = checkVariants();
             let quantity = parseInt($("#quantityInput").val(), 10) || 1;
             let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
+            let maxQuantity = parseInt($("#quantityInput").attr("max"), 10);
 
             console.log("Selected Attributes:", selectedAttributes); // Debug log
             console.log("Is Variant Product:", isVariantProduct); // Debug log
+            console.log("Quantity:", quantity); // Debug log
+            console.log("Max Quantity:", maxQuantity); // Debug log
 
             // For variant products, we need to check if attributes are selected
-            if (isVariantProduct && (!selectedAttributes || parseInt($("#quantityInput").attr("max"),
-                    10) === 0)) {
+            if (isVariantProduct && (!selectedAttributes || maxQuantity === 0)) {
                 Swal.fire({
                     icon: "error",
                     title: "Lỗi!",
@@ -971,11 +981,22 @@
             }
 
             // For non-variant products, just check if quantity is valid
-            if (!isVariantProduct && parseInt($("#quantityInput").attr("max"), 10) === 0) {
+            if (!isVariantProduct && maxQuantity === 0) {
                 Swal.fire({
                     icon: "error",
                     title: "Lỗi!",
                     text: "⚠️ Sản phẩm đã hết hàng!",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+
+            // Check if quantity exceeds available stock
+            if (quantity > maxQuantity) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi!",
+                    text: "⚠️ Số lượng vượt quá tồn kho! Số lượng còn lại: " + maxQuantity,
                     confirmButtonText: "OK"
                 });
                 return;

@@ -38,7 +38,10 @@ class CheckoutController extends Controller
         }
 
         // Get selected items from the cart
-        $selectedItemIds = $request->input('selected_items', []);
+        $selectedItemIds = $request->input('selected_items', '');
+
+        // Convert comma-separated string to array and filter out empty values
+        $selectedItemIds = array_filter(explode(',', $selectedItemIds));
 
         // If no items are selected, show error
         if (empty($selectedItemIds)) {

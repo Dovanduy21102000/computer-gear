@@ -53,7 +53,7 @@
                     <h1 class="text-center">Giỏ hàng</h1>
                 </div>
                 <div class="mb-10 cart-table">
-                    <form action="" id="cart-form" method="GET">
+                    <form action="{{ route('cart.bulkDelete') }}" id="cart-form" method="POST">
                         @csrf
                         <div class="d-flex justify-content-end mb-4">
                             <button type="submit" id="delete-selected"
@@ -199,61 +199,62 @@
 
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
-                            document.getElementById('select-all').addEventListener('click', function(event) {
-                                document.querySelectorAll('.select-item').forEach(checkbox => {
-                                    checkbox.checked = event.target.checked;
-                                });
-                            });
+                    document.getElementById('select-all').addEventListener('click', function(event) {
+                        document.querySelectorAll('.select-item').forEach(checkbox => {
+                            checkbox.checked = event.target.checked;
+                        });
+                    });
 
-                            document.getElementById('checkout-selected').addEventListener('click', function(event) {
-                                    event.preventDefault();
+                    document.getElementById('checkout-selected').addEventListener('click', function(event) {
+                        event.preventDefault();
 
-                                    let selectedItems = document.querySelectorAll('.select-item:checked');
-                                    if (selectedItems.length === 0) {
-                                        alert('Vui lòng chọn ít nhất một mục để thanh toán ');
-                                            return;
-                                        }
+                        let selectedItems = document.querySelectorAll('.select-item:checked');
+                        if (selectedItems.length === 0) {
+                            alert('Vui lòng chọn ít nhất một mục để thanh toán ');
+                            return;
+                        }
 
-                                        let form = document.getElementById('cart-form');
-                                        if (form) {
-                                            form.action = "{{ route('checkout.index') }}"; // Set action to checkout route
-                                            form.submit();
-                                        } else {
-                                            console.error("Form not found!");
-                                        }
-                                    });
+                        // Get selected item IDs
+                        let selectedIds = Array.from(selectedItems).map(item => item.value);
 
-                                document.getElementById('delete-selected').addEventListener('click', function(event) {
-                                    event.preventDefault(); // Prevent default form submission
-                                    let selectedItems = document.querySelectorAll('.select-item:checked');
-                                    if (selectedItems.length === 0) {
-                                        alert('Vui lòng chọn ít nhất một mục để xóa.');
-                                        return;
-                                    }
-                                    if (confirm('Are you sure you want to delete the selected items?')) {
-                                        let form = document.getElementById('cart-form');
-                                        if (form) {
-                                            form.action = "{{ route('cart.bulkDelete') }}";
-                                            form.submit();
-                                        } else {
-                                            console.error("Form not found!");
-                                        }
+                        // Create URL with selected items
+                        let checkoutUrl = "{{ route('checkout.index') }}?selected_items=" + selectedIds.join(',');
 
-                                    }
-                                });
+                        // Redirect to checkout page with selected items
+                        window.location.href = checkoutUrl;
+                    });
 
-                                document.getElementById('update-cart').addEventListener('click', function(event) {
-                                    event.preventDefault();
-                                    let form = document.getElementById('cart-form');
-                                    if (form) {
-                                        form.method = "POST";
-                                        form.action = "{{ route('cart.update') }}"; // Ensure update action
-                                        form.submit();
-                                    } else {
-                                        console.error("Form not found!");
-                                    }
-                                });
+                    document.getElementById('delete-selected').addEventListener('click', function(event) {
+                        event.preventDefault(); // Prevent default form submission
+                        let selectedItems = document.querySelectorAll('.select-item:checked');
+                        if (selectedItems.length === 0) {
+                            alert('Vui lòng chọn ít nhất một mục để xóa.');
+                            return;
+                        }
+                        if (confirm('Are you sure you want to delete the selected items?')) {
+                            let form = document.getElementById('cart-form');
+                            if (form) {
+                                form.action = "{{ route('cart.bulkDelete') }}";
+                                form.submit();
+                            } else {
+                                console.error("Form not found!");
+                            }
 
-                            });
+                        }
+                    });
+
+                    document.getElementById('update-cart').addEventListener('click', function(event) {
+                        event.preventDefault();
+                        let form = document.getElementById('cart-form');
+                        if (form) {
+                            form.method = "POST";
+                            form.action = "{{ route('cart.update') }}"; // Ensure update action
+                            form.submit();
+                        } else {
+                            console.error("Form not found!");
+                        }
+                    });
+
+                });
             </script>
         </main>
