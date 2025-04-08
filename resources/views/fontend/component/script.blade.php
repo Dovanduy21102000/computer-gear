@@ -4,6 +4,28 @@
             <span class="fas fa-arrow-up u-go-to__inner"></span>
         </a>
         <!-- End Go to Top -->
+        <!-- Nút mở chat -->
+        <div id="chat-toggle"
+            class="fixed bottom-4 right-4 z-50 cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition">
+            Chat với chúng tôi 💬
+        </div>
+
+        <!-- Khung chat nổi -->
+        <div id="chat-box"
+            class="fixed bottom-20 right-4 z-50 w-80 bg-white border border-gray-300 rounded-lg shadow-lg hidden">
+            <div class="flex justify-between items-center bg-blue-600 text-white px-4 py-2 rounded-t-lg">
+                <span>Hỗ trợ khách hàng</span>
+                <button id="close-chat" class="text-white hover:text-red-200">✖</button>
+            </div>
+            <div id="chat-messages" class="h-64 overflow-y-auto p-3 space-y-2 text-sm">
+                <!-- Tin nhắn hiển thị tại đây -->
+            </div>
+            <form id="chat-form" class="p-3 border-t flex gap-2">
+                <input type="text" id="chat-input" class="w-full border rounded px-2 py-1 text-sm"
+                    placeholder="Nhập tin nhắn..." required>
+                <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Gửi</button>
+            </form>
+        </div>
 
         <!-- JS Global Compulsory -->
         <script src="{{ asset('fontend/assets/vendor/jquery/dist/jquery.min.js') }}"></script>
@@ -42,6 +64,11 @@
         <script src="{{ asset('fontend/assets/js/components/hs.go-to.js') }}"></script>
         <script src="{{ asset('fontend/assets/js/components/hs.selectpicker.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+        <!-- Thêm thư viện jQuery Bar Rating -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-bar-rating/dist/themes/fontawesome-stars.css">
+        <script src="https://cdn.jsdelivr.net/npm/jquery-bar-rating/dist/jquery.barrating.min.js"></script>
 
         <!-- JS Plugins Init. -->
         <script>
@@ -157,4 +184,66 @@
                     }
                 });
             });
+            // document.addEventListener('DOMContentLoaded', () => {
+            //     const toggle = document.getElementById('chat-toggle');
+            //     const chatBox = document.getElementById('chat-box');
+            //     const closeBtn = document.getElementById('close-chat');
+            //     const chatMessages = document.getElementById('chat-messages');
+            //     const chatForm = document.getElementById('chat-form');
+            //     const chatInput = document.getElementById('chat-input');
+            //     const receiverId = 1; // Giả sử admin có ID = 1
+            //     const userId = {{ auth()->id() }}; // ID người dùng hiện tại
+
+            //     // Mở / đóng chat
+            //     toggle.onclick = () => chatBox.classList.toggle('hidden');
+            //     closeBtn.onclick = () => chatBox.classList.add('hidden');
+
+            //     // Load tin nhắn cũ
+            //     fetch(`/chat/messages/${receiverId}`)
+            //         .then(res => res.json())
+            //         .then(messages => {
+            //             messages.forEach(m => {
+            //                 appendMessage(m.message, m.sender_id == userId ? 'me' : 'them');
+            //             });
+            //             chatMessages.scrollTop = chatMessages.scrollHeight;
+            //         });
+
+            //     // Gửi tin nhắn
+            //     chatForm.onsubmit = (e) => {
+            //         e.preventDefault();
+            //         const msg = chatInput.value;
+            //         if (!msg.trim()) return;
+
+            //         fetch('/chat/send', {
+            //             method: 'POST',
+            //             headers: {
+            //                 'Content-Type': 'application/json',
+            //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            //             },
+            //             body: JSON.stringify({
+            //                 receiver_id: receiverId,
+            //                 message: msg
+            //             })
+            //         });
+
+            //         appendMessage(msg, 'me');
+            //         chatInput.value = '';
+            //     };
+
+            //     // Nhận tin nhắn realtime
+            //     Echo.private(`chat.${userId}`)
+            //         .listen('MessageSent', (e) => {
+            //             if (e.sender_id == receiverId) {
+            //                 appendMessage(e.message, 'them');
+            //             }
+            //         });
+
+            //     function appendMessage(message, from) {
+            //         const div = document.createElement('div');
+            //         div.classList.add('message', from == 'me' ? 'from-me' : 'from-them');
+            //         div.innerText = message;
+            //         chatMessages.appendChild(div);
+            //         chatMessages.scrollTop = chatMessages.scrollHeight;
+            //     }
+            // });
         </script>

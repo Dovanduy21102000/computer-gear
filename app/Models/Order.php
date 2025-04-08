@@ -18,7 +18,6 @@ class Order extends Model
         'shipping_address',
         'province_id',
         'district_id',
-        'specific_address',
         'coupon_code',
         'coupon_discount',
         'total_price',

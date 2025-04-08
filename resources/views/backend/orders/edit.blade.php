@@ -129,15 +129,6 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label">Địa chỉ cụ thể</label>
-                                <div class="col-sm-10">
-                                    <input type="text" name="specific_address" class="form-control"
-                                        value="{{ old('specific_address', $order->specific_address) }}"
-                                        {{ $isEditable ? '' : 'disabled' }}>
-                                </div>
-                            </div>
-
                             <!-- Mã giảm giá -->
                             <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label">Mã giảm giá</label>
@@ -313,38 +304,6 @@
                 }
             });
         });
-        // $(document).ready(function() {
-        //     // Lắng nghe sự kiện submit của form
-        //     $('form').submit(function(event) {
-        //         var status = $('select[name="status"]').val(); // Lấy trạng thái đơn hàng
-        //         if (status === 'canceled') {
-        //             event.preventDefault(); // Ngừng việc gửi form
-        //             $('#cancelModal').modal('show'); // Hiển thị modal xác nhận hủy
-        //         }
-        //     });
-
-        //     // Xử lý khi bấm "Đồng ý hủy" trong modal
-        //     $('#confirmCancelBtn').click(function() {
-        //         var cancelReason = $('#cancelReason').val(); // Lấy lý do hủy
-
-        //         if (cancelReason) {
-        //             // Gửi dữ liệu lý do hủy vào mục "Ghi chú"
-        //             $('textarea[name="notes"]').val(cancelReason);
-
-        //             // Cập nhật trạng thái đơn hàng thành "Hủy đơn"
-        //             $('select[name="status"]').val('canceled');
-
-        //             // Đóng modal sau khi xử lý
-        //             $('#cancelModal').modal('hide');
-
-        //             // Gửi form lại sau khi cập nhật lý do hủy
-        //             $('form')[0]
-        //         .submit(); // Dùng cách này để gửi form mà không cần người dùng bấm lại nút submit
-        //         } else {
-        //             alert("Vui lòng nhập lý do hủy đơn.");
-        //         }
-        //     });
-        // });
     </script>
 
 </main><!-- End #main -->

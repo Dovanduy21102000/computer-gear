@@ -1,24 +1,23 @@
  <!-- ========== FOOTER ========== -->
  <footer>
-
      <!-- Footer-newsletter -->
      <div class="bg-primary py-3">
          <div class="container">
              <div class="row align-items-center">
-                <div class="col-lg-7 mb-md-3 mb-lg-0">
-                    <div class="row align-items-center">
-                        <div class="col-auto flex-horizontal-center">
-                            <i class="ec ec-newsletter font-size-40"></i>
-                            <h2 class="font-size-20 mb-0 ml-3">Đăng ký nhận bản tin</h2>
-                        </div>
-                        <div class="col my-4 my-md-0">
-                            <h5 class="font-size-15 ml-4 mb-0">
-                                ...và nhận ngay <strong>phiếu giảm giá 20$ cho lần mua đầu tiên.</strong>
-                            </h5>
-                        </div>
-                    </div>
-                </div>
-                
+                 <div class="col-lg-7 mb-md-3 mb-lg-0">
+                     <div class="row align-items-center">
+                         <div class="col-auto flex-horizontal-center">
+                             <i class="ec ec-newsletter font-size-40"></i>
+                             <h2 class="font-size-20 mb-0 ml-3">Đăng ký nhận bản tin</h2>
+                         </div>
+                         <div class="col my-4 my-md-0">
+                             <h5 class="font-size-15 ml-4 mb-0">
+                                 ...và nhận ngay <strong>phiếu giảm giá 20$ cho lần mua đầu tiên.</strong>
+                             </h5>
+                         </div>
+                     </div>
+                 </div>
+
                  <div class="col-lg-5">
                      <!-- Subscribe Form -->
                      <!-- End Subscribe Form -->
@@ -91,12 +90,12 @@
                          </div>
                      </div>
                      <div class="mb-4">
-                        <h6 class="mb-1 font-weight-bold">Thông tin liên hệ</h6>
-                        <address>
-                            123 Đường Cầu Giấy, Quận Cầu Giấy, Hà Nội, Việt Nam
-                        </address>
-                    </div>
-                    
+                         <h6 class="mb-1 font-weight-bold">Thông tin liên hệ</h6>
+                         <address>
+                             123 Đường Cầu Giấy, Quận Cầu Giấy, Hà Nội, Việt Nam
+                         </address>
+                     </div>
+
                      <div class="my-4 my-md-4">
                          <ul class="list-inline mb-0 opacity-7">
                              <li class="list-inline-item mr-0">
@@ -127,45 +126,48 @@
                      </div>
                  </div>
                  <div class="col-lg-7">
-                    <div class="row">
-                        <div class="col-12 col-md mb-4 mb-md-0">
-                            <h6 class="mb-3 font-weight-bold">Tìm kiếm nhanh</h6>
-                            <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent">
-                                <li><a class="list-group-item list-group-item-action">Laptop & Máy tính</a></li>
-                                <li><a class="list-group-item list-group-item-action">Máy ảnh & Nhiếp ảnh</a></li>
-                                <li><a class="list-group-item list-group-item-action">Điện thoại thông minh & Máy tính bảng</a></li>
-                                <li><a class="list-group-item list-group-item-action">Trò chơi điện tử & Máy chơi game</a></li>
-                                <li><a class="list-group-item list-group-item-action">Tivi & Âm thanh</a></li>
-                                <li><a class="list-group-item list-group-item-action">Thiết bị thông minh</a></li>
-                                <li><a class="list-group-item list-group-item-action">Đồ điện tử & GPS ô tô</a></li>
-                            </ul>
-                        </div>
-                
-                        <div class="col-12 col-md mb-4 mb-md-0">
-                            <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent mt-md-6">
-                                <li><a class="list-group-item list-group-item-action">Máy in & Mực in</a></li>
-                                <li><a class="list-group-item list-group-item-action">Phần mềm</a></li>
-                                <li><a class="list-group-item list-group-item-action">Văn phòng phẩm</a></li>
-                                <li><a class="list-group-item list-group-item-action">Linh kiện máy tính</a></li>
-                                <li><a class="list-group-item list-group-item-action">Phụ kiện</a></li>
-                            </ul>
-                        </div>
-                
-                        <div class="col-12 col-md mb-4 mb-md-0">
-                            <h6 class="mb-3 font-weight-bold">Chăm sóc khách hàng</h6>
-                            <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent">
-                                <li><a class="list-group-item list-group-item-action">Tài khoản của tôi</a></li>
-                                <li><a class="list-group-item list-group-item-action">Theo dõi đơn hàng</a></li>
-                                <li><a class="list-group-item list-group-item-action">Danh sách yêu thích</a></li>
-                                <li><a class="list-group-item list-group-item-action">Dịch vụ khách hàng</a></li>
-                                <li><a class="list-group-item list-group-item-action">Trả hàng / Đổi hàng</a></li>
-                                <li><a class="list-group-item list-group-item-action">Câu hỏi thường gặp</a></li>
-                                <li><a class="list-group-item list-group-item-action">Hỗ trợ sản phẩm</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
+                     <div class="row">
+                         <div class="col-12 col-md mb-4 mb-md-0">
+                             <h6 class="mb-3 font-weight-bold">Tìm kiếm nhanh</h6>
+                             <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent">
+                                 <li><a class="list-group-item list-group-item-action">Laptop & Máy tính</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Máy ảnh & Nhiếp ảnh</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Điện thoại thông minh & Máy tính
+                                         bảng</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Trò chơi điện tử & Máy chơi
+                                         game</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Tivi & Âm thanh</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Thiết bị thông minh</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Đồ điện tử & GPS ô tô</a></li>
+                             </ul>
+                         </div>
+
+                         <div class="col-12 col-md mb-4 mb-md-0">
+                             <ul
+                                 class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent mt-md-6">
+                                 <li><a class="list-group-item list-group-item-action">Máy in & Mực in</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Phần mềm</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Văn phòng phẩm</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Linh kiện máy tính</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Phụ kiện</a></li>
+                             </ul>
+                         </div>
+
+                         <div class="col-12 col-md mb-4 mb-md-0">
+                             <h6 class="mb-3 font-weight-bold">Chăm sóc khách hàng</h6>
+                             <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent">
+                                 <li><a class="list-group-item list-group-item-action">Tài khoản của tôi</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Theo dõi đơn hàng</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Danh sách yêu thích</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Dịch vụ khách hàng</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Trả hàng / Đổi hàng</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Câu hỏi thường gặp</a></li>
+                                 <li><a class="list-group-item list-group-item-action">Hỗ trợ sản phẩm</a></li>
+                             </ul>
+                         </div>
+                     </div>
+                 </div>
+
              </div>
          </div>
      </div>
@@ -290,20 +292,6 @@
                                          data-target="#signup" data-link-group="idForm" data-animation-in="slideInUp"
                                          onclick="toggleForm('signup')">Signup</a>
                                  </div>
-
-                                 {{-- <div class="text-center">
-                                    <span class="u-divider u-divider--xs u-divider--text mb-4">OR</span>
-                                </div>
-                
-                                <!-- Login Buttons -->
-                                <div class="d-flex">
-                                    <a class="btn btn-block btn-sm btn-soft-facebook transition-3d-hover mr-1" href="#">
-                                        <span class="fab fa-facebook-square mr-1"></span> Facebook
-                                    </a>
-                                    <a class="btn btn-block btn-sm btn-soft-google transition-3d-hover ml-1 mt-0" href="#">
-                                        <span class="fab fa-google mr-1"></span> Google
-                                    </a>
-                                </div> --}}
                              </div>
                          </form>
                          <!-- Form Đăng Ký -->
@@ -391,67 +379,13 @@
                                      data-target="#login" data-link-group="idForm" data-animation-in="slideInUp"
                                      onclick="toggleForm('login')">Login</a>
                              </div>
-
-                             {{-- <div class="text-center">
-                                <span class="u-divider u-divider--xs u-divider--text mb-4">OR</span>
-                            </div>
-                
-                            <!-- Login Buttons -->
-                            <div class="d-flex">
-                                <a class="btn btn-block btn-sm btn-soft-facebook transition-3d-hover mr-1" href="#">
-                                    <span class="fab fa-facebook-square mr-1"></span> Facebook
-                                </a>
-                                <a class="btn btn-block btn-sm btn-soft-google transition-3d-hover ml-1 mt-0" href="#">
-                                    <span class="fab fa-google mr-1"></span> Google
-                                </a>
-                            </div> --}}
                          </form>
-                         <!-- Form Forgot Password -->
-                         {{-- <div id="forgotPassword" style="display: none; opacity: 0;" data-target-group="idForm">
-                            <!-- Title -->
-                            <header class="text-center mb-7">
-                                <h2 class="h4 mb-0">Recover Password.</h2>
-                                <p>Enter your email address and an email with instructions will be sent to you.</p>
-                            </header>
-                            <!-- End Title -->
-                          
-                            <!-- Form Group -->
-                            <div class="form-group">
-                                <div class="js-form-message js-focus-state">
-                                    <label class="sr-only" for="recoverEmail">Your email</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="recoverEmailLabel">
-                                                <span class="fas fa-user"></span>
-                                            </span>
-                                        </div>
-                                        <input type="email" class="form-control" name="email"
-                                            id="recoverEmail" placeholder="Your email" aria-label="Your email"
-                                            aria-describedby="recoverEmailLabel" required
-                                            data-msg="Please enter a valid email address."
-                                            data-error-class="u-has-error" data-success-class="u-has-success">
-                                    </div>
-                                </div>
-                            </div> --}}
-                         <!-- End Form Group -->
+
                      </div>
                  </div>
-                 <!-- End Content -->
              </div>
          </div>
      </div>
  </aside>
-
- <script>
-     function toggleForm(formType) {
-         if (formType === 'signup') {
-             document.getElementById('loginForm').style.display = 'none'; // Ẩn form đăng nhập
-             document.getElementById('signupForm').style.display = 'block'; // Hiện form đăng ký
-         } else if (formType === 'login') {
-             document.getElementById('signupForm').style.display = 'none'; // Ẩn form đăng ký
-             document.getElementById('loginForm').style.display = 'block'; // Hiện form đăng nhập
-         }
-     }
- </script>
  <!-- End Account Sidebar Navigation  đây là form đăng ký đăng nhập của phần content footer.blade -->
  <!-- ========== END SECONDARY CONTENTS ========== -->

@@ -9,6 +9,7 @@ use App\Models\CartItem;
 use App\Models\Coupon;
 use App\Models\CouponUser;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -40,41 +41,71 @@ class CartController extends Controller
     // Add Product to Cart
     public function add(Request $request)
     {
+        // Validate input
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
+            'attributes' => 'required|array', // Expecting an array of attribute_id => attribute_value_id
         ]);
 
+        // Check if the user is logged in
         if (!Auth::check()) {
             return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để thêm vào giỏ hàng.');
         }
-        $userId = Auth::id();
 
+        $userId = Auth::id();
         $product = Product::findOrFail($request->product_id);
 
         // Ensure the requested quantity does not exceed available stock
         if ($request->quantity > $product->quantity) {
-            return redirect()->back()->with('error', 'Sản phẩm không còn tồn hàng   ');
+            return redirect()->back()->with('error', 'Sản phẩm không còn tồn hàng.');
         }
 
+        // Get the selected attributes from the request
+        $attributes = $request->attributes;  // Example: ['color' => 1, 'size' => 2]
+
+        // Find the product variant by matching selected attributes
+        $variant = ProductVariant::where('product_id', $request->product_id)
+            ->whereHas('attributeValues', function ($query) use ($attributes) {
+                foreach ($attributes as $attributeId => $valueId) {
+                    $query->where('attribute_value_id', $valueId)
+                        ->whereHas('attribute', function ($subQuery) use ($attributeId) {
+                            $subQuery->where('id', $attributeId);
+                        });
+                }
+            })
+            ->first();
+
+        // If no matching variant is found, return an error
+        if (!$variant) {
+            return redirect()->back()->with('error', 'Biến thể sản phẩm không hợp lệ.');
+        }
+
+        // Get or create the user's cart
         $cart = Cart::firstOrCreate(['user_id' => $userId]);
 
+        // Check if the selected variant is already in the cart
         $cartItem = CartItem::where('cart_id', $cart->id)
-            ->where('product_id', $request->product_id)
+            ->where('product_id', $product->id)
+            ->where('product_variant_id', $variant->id) // Ensure we match the correct variant
             ->first();
 
         if ($cartItem) {
+            // Update quantity if the item is already in the cart
             $newQuantity = $cartItem->quantity + $request->quantity;
 
-            if ($newQuantity > $product->quantity) {
-                return redirect()->back()->with('error', 'Không thể thêm quá số lượng tồn kho.');
+            if ($newQuantity > $variant->quantity) {
+                return redirect()->back()->with('error', 'Không thể thêm quá số lượng tồn kho cho biến thể này.');
             }
+
             $cartItem->quantity = $newQuantity;
             $cartItem->save();
         } else {
+            // Add the variant to the cart
             CartItem::create([
                 'cart_id' => $cart->id,
-                'product_id' => $request->product_id,
+                'product_id' => $product->id,
+                'product_variant_id' => $variant->id,  // Store the variant_id in the cart item
                 'quantity' => $request->quantity,
             ]);
         }
@@ -82,11 +113,13 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Thêm vào giỏ hàng thành công');
     }
 
+
+
     // Update Cart Item Quantity
     public function update(Request $request)
     {
         if (!$request->has('cart') || !is_array($request->cart)) {
-            return back()->with('error', 'No cart items to update.');
+            return back()->with('error', 'Không có mục giỏ hàng nào để cập nhật.');
         }
 
         foreach ($request->cart as $cartItem) {
@@ -106,7 +139,7 @@ class CartController extends Controller
             }
         }
 
-        return back()->with('success', 'Cart updated successfully!');
+        return back()->with('success', 'Cập nhật giỏ hàng thành công!');
     }
 
 
@@ -120,20 +153,20 @@ class CartController extends Controller
 
         if ($cartItem) {
             $cartItem->delete();
-            return redirect()->back()->with('success', 'Item removed from cart.');
+            return redirect()->back()->with('success', 'Sản phẩm đã được xóa khỏi giỏ hàng');
         }
 
-        return redirect()->back()->with('error', 'Item not found.');
+        return redirect()->back()->with('error', 'Không tìm thấy mục.');
     }
 
     public function bulkDelete(Request $request)
     {
         if ($request->selected_items) {
             CartItem::whereIn('id', $request->selected_items)->delete();
-            return redirect()->back()->with('success', 'Selected items removed from cart.');
+            return redirect()->back()->with('success', 'Đã xóa các mặt hàng đã chọn khỏi giỏ hàng.');
         }
 
-        return redirect()->back()->with('error', 'No items selected.');
+        return redirect()->back()->with('error', 'Không có mục nào được chọn.');
     }
     // Clear Cart
     public function clear()
@@ -143,7 +176,7 @@ class CartController extends Controller
             $cart->items()->delete();
         }
 
-        return redirect()->back()->with('success', 'Cart cleared!');
+        return redirect()->back()->with('success', 'Đã xóa giỏ hàng!');
     }
 
     public function applyCoupon(Request $request)
@@ -158,7 +191,7 @@ class CartController extends Controller
             ->first();
 
         if (!$coupon) {
-            return back()->with('error', 'Invalid or expired coupon.');
+            return back()->with('error', 'Phiếu giảm giá không hợp lệ hoặc đã hết hạn');
         }
 
         // Ensure user hasn't used the coupon before
@@ -167,7 +200,7 @@ class CartController extends Controller
                 ->where('coupon_id', $coupon->id)
                 ->exists();
             if ($couponUsed) {
-                return back()->with('error', 'You have already used this coupon.');
+                return back()->with('error', 'Bạn đã sử dụng phiếu giảm giá này');
             }
         }
 
@@ -183,6 +216,7 @@ class CartController extends Controller
             ]
         ]);
 
-        return back()->with('success', 'Coupon applied successfully!');
+        return back()->with('success', 'Phiếu giảm giá được áp dụng thành công
+!');
     }
 }

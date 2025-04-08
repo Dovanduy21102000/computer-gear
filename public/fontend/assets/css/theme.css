@@ -37470,7 +37470,24 @@ blockquote:not(.blockquote) p {
 .u-range-slider-indicator .irs-slider {
   top: 0.2rem;
 }
+/* Tin nhắn người gửi và người nhận */
+#chat-messages .message {
+  padding: 5px 10px;
+  border-radius: 10px;
+  max-width: 75%;
+  clear: both;
+  word-wrap: break-word;
+}
 
+.from-me {
+  background-color: #dcf8c6;
+  float: right;
+}
+
+.from-them {
+  background-color: #f1f0f0;
+  float: left;
+}
 /*------------------------------------
   File for your custom SCSS style
 ------------------------------------*/

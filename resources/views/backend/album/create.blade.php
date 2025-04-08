@@ -26,7 +26,7 @@
 
                             <div class="mb-3">
                                 <label for="image" class="form-label">Chọn ảnh</label>
-                                <input type="file" class="form-control" id="image" name="image" required>
+                                <input type="file" class="form-control" id="image" name="images[]" accept="image/*" multiple required>
                             </div>
 
                             <button type="submit" class="btn btn-primary">Lưu</button>

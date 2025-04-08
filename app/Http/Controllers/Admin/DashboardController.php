@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -16,6 +17,8 @@ class DashboardController extends Controller
 
     public function index()
     {
+        $totalUsers = DB::table('users')->count();
+
         $filter = request()->get('filter', 'month');
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
@@ -74,13 +77,13 @@ class DashboardController extends Controller
 
         // Doanh thu tháng này
         $currentMonth = Carbon::now()->startOfMonth();
-        $revenueThisMonth = Order::whereBetween('created_at', [$currentMonth, Carbon::now()])
+        $revenueThisMonth = Order::where('status', 'completed')->whereBetween('created_at', [$currentMonth, Carbon::now()])
             ->sum('total_price');
 
         // Doanh thu tháng trước
         $lastMonth = Carbon::now()->subMonth()->startOfMonth();
         $endLastMonth = Carbon::now()->subMonth()->endOfMonth();
-        $revenueLastMonth = Order::whereBetween('created_at', [$lastMonth, $endLastMonth])
+        $revenueLastMonth = Order::where('status', 'completed')->whereBetween('created_at', [$lastMonth, $endLastMonth])
             ->sum('total_price');
 
         // Tính phần trăm thay đổi
@@ -113,11 +116,29 @@ class DashboardController extends Controller
             ->pluck('total_orders', 'month');
 
         // Lấy doanh thu theo từng tháng
-        $revenueData = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as total_revenue')
-            ->whereYear('created_at', $year)
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('total_revenue', 'month');
+        // $revenueData = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as total_revenue')
+        //     ->where('status', 'completed')
+        //     ->whereYear('created_at', $year)
+        //     ->groupBy('month')
+        //     ->orderBy('month')
+        //     ->pluck('total_revenue', 'month');
+
+        $year = Carbon::now()->year;
+        $revenue = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+            // Xác định tháng và năm
+            $startOfMonth = Carbon::create($year, $i, 1)->startOfMonth();
+            $endOfMonth = Carbon::create($year, $i, 1)->endOfMonth();
+
+            // Tính doanh thu cho tháng này
+            $monthlyRevenue = Order::where('status', 'completed')
+                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->sum('total_price');
+
+            // Chia doanh thu cho 1 triệu và làm tròn đến 2 chữ số, nếu không có đơn hàng thì doanh thu là 0
+            $revenue[] = round($monthlyRevenue / 1_000_000, 2);
+        }
 
         // Lấy số khách hàng mới theo từng tháng
         $customerData = User::selectRaw('MONTH(created_at) as month, COUNT(*) as total_customers')
@@ -126,17 +147,20 @@ class DashboardController extends Controller
             ->orderBy('month')
             ->pluck('total_customers', 'month');
 
-        // Chuẩn hóa dữ liệu cho ApexCharts (12 tháng)
+        // Đảm bảo dữ liệu cho tất cả 12 tháng (bao gồm tháng có số lượng khách hàng bằng 0)
+        $customerData = collect(range(1, 12))->mapWithKeys(function ($month) use ($customerData) {
+            return [$month => $customerData->get($month, 0)];
+        });
+
         $months = range(1, 12);
         $sales = [];
-        $revenue = [];
         $customers = [];
 
         foreach ($months as $month) {
             $sales[] = $salesData[$month] ?? 0;
-            $revenue[] = $revenueData[$month] ?? 0;
             $customers[] = $customerData[$month] ?? 0;
         }
+
         // Lấy danh sách đơn hàng mới
         $ordersLatest = Order::with(['user', 'items.productVariant'])  // Đảm bảo tải các quan hệ với 'user' và 'items.productVariant'
             ->latest()  // Sắp xếp theo created_at giảm dần (mới nhất ở trên cùng)
@@ -189,7 +213,20 @@ class DashboardController extends Controller
 
         $latestPosts = Post::latest()->take(5)->get();
 
+        $usersByRole = DB::table('users')
+            ->select('role', DB::raw('count(*) as count'))
+            ->groupBy('role')
+            ->get();
+
+        $totalOrders = DB::table('orders')->count();
+
+        $totalRevenue = DB::table('orders')->sum('total_price');
+
+        $totalProducts = DB::table('products')->count();
+
+
         $template = 'backend.dashboard.home.index';
+
         return view('backend.dashboard.layout', compact(
             'template',
             'filter',

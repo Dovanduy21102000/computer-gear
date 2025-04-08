@@ -1,5 +1,6 @@
 <main id="main" class="main">
     <div class="pagetitle">
+
         <h1>Thống Kê</h1>
         <nav>
             <ol class="breadcrumb">
@@ -25,8 +26,9 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                     <li class="dropdown-header text-start">
-                                        <h6>Filter</h6>
+                                        <h6>Lọc</h6>
                                     </li>
+
                                     <li>
                                         <a class="dropdown-item"
                                             href="{{ route('dashboard.index', ['filter' => 'today']) }}">Hôm nay</a>
@@ -43,7 +45,10 @@
                             </div>
 
                             <div class="card-body">
+
+
                                 <h5 class="card-title">Đơn hàng <span>| {{ ucfirst($filter) }}</span></h5>
+
 
                                 <div class="d-flex align-items-center">
                                     <div
@@ -51,6 +56,7 @@
                                         <i class="bi bi-cart"></i>
                                     </div>
                                     <div class="ps-3">
+
                                         <h6>{{ $orders ?? 0 }}</h6>
                                         <span class="text-success small pt-1 fw-bold">
                                             {{ number_format((float) $growthPercentageOrders) }}%
@@ -169,10 +175,8 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title">Báo cáo <span>| Năm nay</span></h5>
-
                                     <!-- Line Chart -->
                                     <div id="reportsChart"></div>
-
                                     <script>
                                         document.addEventListener("DOMContentLoaded", () => {
                                             new ApexCharts(document.querySelector("#reportsChart"), {
@@ -181,7 +185,7 @@
                                                     data: {!! json_encode($sales) !!}
                                                 }, {
                                                     name: 'Doanh thu',
-                                                    data: {!! json_encode($revenue) !!}
+                                                    data: {!! json_encode($revenue) !!} // ← dùng đúng biến
                                                 }, {
                                                     name: 'Khách hàng',
                                                     data: {!! json_encode($customers) !!}
@@ -219,9 +223,14 @@
                                                     ]
                                                 },
                                                 tooltip: {
+                                                    y: {
+                                                        formatter: function(val) {
+                                                            return val + " triệu";
+                                                        }
+                                                    },
                                                     x: {
                                                         format: 'MM/yyyy'
-                                                    },
+                                                    }
                                                 }
                                             }).render();
                                         });
@@ -372,8 +381,8 @@
                         <div class="activity">
                             @foreach ($recentActivities as $activity)
                                 <div class="activity-item d-flex">
-                                    <div class="activite-label">
-                                        {{ $activity['created_at']->locale('vi')->diffForHumans() }}</div>
+                                    {{-- <div class="activite-label">
+                                        {{ $activity['created_at']->locale('vi')->diffForHumans() }}</div> --}}
                                     <i
                                         class='bi {{ $activity['type'] === 'order' ? 'bi-cart-fill text-success' : 'bi-person-fill text-primary' }} activity-badge align-self-start'></i>
                                     <div class="activity-content">

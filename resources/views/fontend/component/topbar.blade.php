@@ -45,20 +45,3 @@
         </div>
     </div>
 </div>
-
-<!-- Script -->
-{{-- <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const isLoggedIn = @json(Auth::check()); // Kiểm tra đăng nhập
-        const userName = @json(Auth::user()->name ?? ''); // Lấy tên user nếu có
-        const sidebarNavToggler = document.getElementById('sidebarNavToggler');
-
-        if (sidebarNavToggler) {
-            if (isLoggedIn) {
-                sidebarNavToggler.innerHTML = `<i class="ec ec-user mr-1"></i> Xin chào, ${userName}`;
-            } else {
-                sidebarNavToggler.innerHTML = `<i class="ec ec-user mr-1"></i> <a href="{{ route('login.form') }}">Đăng nhập</a>`;
-            }
-        }
-    });
-</script> --}}
