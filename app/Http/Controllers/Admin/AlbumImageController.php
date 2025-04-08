@@ -13,7 +13,7 @@ class AlbumImageController extends Controller
     public function index($product_id)
     {
         // Lấy thông tin sản phẩm
-        $product = Product::findOrFail($product_id);
+        $product = Product::findOrFail($product_id)->paginate(10);
     
         // Lấy tất cả ảnh từ album của sản phẩm này
         $images = AlbumImage::where('product_id', $product_id)->get();
