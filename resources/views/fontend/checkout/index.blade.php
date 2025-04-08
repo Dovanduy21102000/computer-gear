@@ -1,4 +1,25 @@
 <main id="content" role="main" class="checkout-page">
+    <style>
+        .variant-attributes {
+            margin-top: 5px;
+        }
+
+        .variant-attributes small {
+            display: inline-block;
+            background-color: #f8f9fa;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+        .product-quantity {
+            display: block;
+            margin-top: 5px;
+            color: #6c757d;
+        }
+    </style>
     <!-- breadcrumb -->
     <div class="bg-gray-13 bg-md-transparent">
         <div class="container">
@@ -20,40 +41,57 @@
 
     <div class="container">
         <div class="mb-5">
-            <h1 class="text-center">Checkout</h1>
+            <h1 class="text-center">Thanh toán đơn hàng</h1>
         </div>
 
         <!-- Accordion -->
         <div id="shopCartAccordion1" class="accordion rounded mb-6">
-            <!-- Card -->
             <div class="card border-0">
                 <div id="shopCartHeadingTwo" class="alert alert-primary mb-0" role="alert">
-                    Have a coupon? <a href="#" class="alert-link" data-toggle="collapse"
-                        data-target="#shopCartTwo" aria-expanded="false" aria-controls="shopCartTwo">Click here to enter
-                        your code</a>
+                    Có mã giảm giá? <a href="#" class="alert-link" data-toggle="collapse"
+                        data-target="#shopCartTwo" aria-expanded="false" aria-controls="shopCartTwo">Hãy nhấp vào đây
+                        để
+                        nhập</a>
                 </div>
                 <div id="shopCartTwo" class="collapse border border-top-0" aria-labelledby="shopCartHeadingTwo"
-                    data-parent="#shopCartAccordion1" style="">
-                    <form class="js-validate p-5" novalidate="novalidate">
-                        <p class="w-100 text-gray-90">If you have a coupon code, please apply it below.</p>
+                    data-parent="#shopCartAccordion1">
+                    <form action="{{ route('applyCoupon') }}" method="POST" class="p-5">
+                        @csrf
+                        <p class="w-100 text-gray-90">Nếu bạn có mã giảm giá thì hãy nhập
+                            vào dưới đây</p>
                         <div class="input-group input-group-pill max-width-660-xl">
-                            <input type="text" class="form-control" name="name" placeholder="Coupon code"
-                                aria-label="Promo code">
+                            <input type="text" class="form-control" name="coupon_code" placeholder="Coupon code"
+                                aria-label="Promo code" required>
                             <div class="input-group-append">
                                 <button type="submit" class="btn btn-block btn-dark font-weight-normal btn-pill px-4">
                                     <i class="fas fa-tags d-md-none"></i>
-                                    <span class="d-none d-md-inline">Apply coupon</span>
+                                    <span class="d-none d-md-inline">Áp dụng mã</span>
                                 </button>
                             </div>
                         </div>
+
+                        <!-- Display validation messages -->
+                        @if (session('success'))
+                            <div class="mt-3 text-success">{{ session('success') }}</div>
+                        @endif
+                        @if (session('error'))
+                            <div class="mt-3 text-danger">{{ session('error') }}</div>
+                        @endif
                     </form>
                 </div>
             </div>
-            <!-- End Card -->
         </div>
+        <!-- End Card -->
         <!-- End Accordion -->
-        <form id="checkout-form" method="POST" class="js-validate">
+        <form action="{{ route('checkout.method') }}" id="checkout-form" method="POST" class="js-validate">
             @csrf
+
+            <!-- Add hidden input for selected items -->
+            @if (request()->has('selected_items'))
+                @foreach (request()->input('selected_items') as $itemId)
+                    <input type="hidden" name="selected_items[]" value="{{ $itemId }}">
+                @endforeach
+            @endif
 
             <div class="row">
                 <!-- Order Summary -->
@@ -62,15 +100,15 @@
                         <div class="bg-gray-1 rounded-lg">
                             <div class="p-4 mb-4 checkout-table">
                                 <div class="border-bottom border-color-1 mb-5">
-                                    <h3 class="section-title mb-0 pb-2 font-size-25">Your order</h3>
+                                    <h3 class="section-title mb-0 pb-2 font-size-25">Đơn hàng của bạn</h3>
                                 </div>
 
                                 <!-- Product Content -->
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th class="product-name">Product</th>
-                                            <th class="product-total">Total</th>
+                                            <th class="product-name">Sản phẩm</th>
+                                            <th class="product-total">Tổng</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -79,32 +117,89 @@
                                                 <td>
                                                     {{ $item->product->name }}
                                                     @if ($item->productVariant)
-                                                        ({{ $item->productVariant->name }})
+                                                        <div class="variant-attributes">
+                                                            @php
+                                                                $groupedAttributes = [];
+                                                                foreach (
+                                                                    $item->productVariant->attributeValues
+                                                                    as $attributeValue
+                                                                ) {
+                                                                    if (isset($attributeValue->attribute)) {
+                                                                        $attrName = $attributeValue->attribute->name;
+                                                                        if (!isset($groupedAttributes[$attrName])) {
+                                                                            $groupedAttributes[$attrName] =
+                                                                                $attributeValue->value;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                $formattedAttributes = [];
+                                                                foreach ($groupedAttributes as $name => $value) {
+                                                                    $formattedAttributes[] = $name . ': ' . $value;
+                                                                }
+                                                            @endphp
+                                                            <small class="text-dark">
+                                                                {{ implode(' | ', $formattedAttributes) }}
+                                                            </small>
+                                                        </div>
                                                     @endif
                                                     <strong class="product-quantity">× {{ $item->quantity }}</strong>
                                                 </td>
                                                 <td>
-                                                    {{ number_format($item->quantity * $item->product->price, 0, ',', '.') }}₫
+                                                    @php
+                                                        $price = $item->productVariant
+                                                            ? $item->productVariant->price_sale ??
+                                                                $item->productVariant->price
+                                                            : $item->product->price_sale ?? $item->product->price;
+                                                        $itemTotal = $item->quantity * $price;
+                                                    @endphp
+                                                    {{ number_format($itemTotal, 0, ',', '.') }}₫
                                                 </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
                                     <tfoot>
                                         @php
-                                            $subtotal = $cartItems->sum(
-                                                fn($item) => $item->quantity * $item->product->price,
-                                            );
-                                            $discount = $appliedCoupon['discount'] ?? 0;
+                                            $subtotal = $cartItems->sum(function ($item) {
+                                                $price = $item->productVariant
+                                                    ? $item->productVariant->price_sale ?? $item->productVariant->price
+                                                    : $item->product->price_sale ?? $item->product->price;
+                                                return $item->quantity * $price;
+                                            });
+
+                                            $appliedCoupon = session('coupon') ?? null;
+                                            $discount = 0;
+
+                                            if ($appliedCoupon) {
+                                                if ($appliedCoupon['type'] === 'percentage') {
+                                                    // Giảm giá theo phần trăm, giới hạn theo maximum_amount nếu có
+                                                    $discount = min(
+                                                        $subtotal * ($appliedCoupon['value'] / 100),
+                                                        $appliedCoupon['maximum_amount'] ?? $subtotal,
+                                                    );
+                                                } else {
+                                                    // Giảm giá cố định
+                                                    $discount = min($appliedCoupon['value'], $subtotal);
+                                                }
+                                            }
+
                                             $total = max(0, $subtotal - $discount);
                                         @endphp
+
+
                                         <tr>
-                                            <th>Subtotal</th>
+                                            <th>Tổng cộng</th>
                                             <td>{{ number_format($subtotal, 0, ',', '.') }}₫</td>
                                         </tr>
 
                                         @if ($appliedCoupon)
                                             <tr>
-                                                <th>Coupon ({{ $appliedCoupon['code'] }})</th>
+                                                <th>
+                                                    Mã giảm giá: ({{ $appliedCoupon['code'] }})
+                                                    <a href="{{ route('removeCoupon') }}"
+                                                        class="btn btn-sm btn-danger ml-2">
+                                                        <i class="fas fa-times"></i> Xóa
+                                                    </a>
+                                                </th>
                                                 <td class="text-danger">-{{ number_format($discount, 0, ',', '.') }}₫
                                                 </td>
                                             </tr>
@@ -114,13 +209,15 @@
                                         @endif
 
                                         <tr>
-                                            <th>Total</th>
+                                            <th>Thành tiền</th>
                                             <td><strong>{{ number_format($total, 0, ',', '.') }}₫</strong></td>
                                             <input type="hidden" name="total_price" value="{{ (int) $total }}">
                                         </tr>
                                     </tfoot>
-                                </table>
 
+
+
+                                </table>
                                 <!-- Payment Methods -->
                                 <div class="border-top border-width-3 border-color-1 pt-3 mb-3">
                                     <div id="basicsAccordion1">
@@ -151,7 +248,8 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="cash"
                                                         name="payment_method" value="cash">
-                                                    <label class="custom-control-label form-label" for="cash">Thanh
+                                                    <label class="custom-control-label form-label"
+                                                        for="cash">Thanh
                                                         toán trực tiếp</label>
                                                 </div>
                                             </div>
@@ -160,8 +258,8 @@
                                 </div>
 
                                 <button type="submit"
-                                    class="btn btn-primary-dark-w btn-block btn-pill font-size-20 mb-3 py-3">Place
-                                    order</button>
+                                    class="btn btn-primary-dark-w btn-block btn-pill font-size-20 mb-3 py-3">Đặt
+                                    hàng</button>
                             </div>
                         </div>
                     </div>
@@ -171,7 +269,7 @@
                 <div class="col-lg-7 order-lg-1">
                     <div class="pb-7 mb-7">
                         <div class="border-bottom border-color-1 mb-5">
-                            <h3 class="section-title mb-0 pb-2 font-size-25">Billing details</h3>
+                            <h3 class="section-title mb-0 pb-2 font-size-25">Chi tiết thanh toán</h3>
                         </div>
 
                         <div class="row">
@@ -186,7 +284,8 @@
                             <div class="col-md-12">
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="shipping_address" required>
+                                    <input type="text" class="form-control" name="shipping_address"
+                                        value="{{ old('shipping_address', '') }}" required>
                                 </div>
                             </div>
 
@@ -255,7 +354,7 @@
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Email <span class="text-danger">*</span></label>
                                     <input type="email" class="form-control" name="shipping_email"
-                                        value="{{ old('email', $user->email ?? '') }}" required>
+                                        value="{{ old('shipping_email', $user->email ?? '') }}" required>
                                 </div>
                             </div>
 
@@ -263,14 +362,14 @@
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" name="shipping_phone"
-                                        value="{{ old('phone', $user->phone ?? '') }}" required>
+                                        value="{{ old('shipping_phone', $user->phone ?? '') }}" required>
                                 </div>
                             </div>
 
                             <div class="col-md-12">
                                 <div class="js-form-message mb-6">
-                                    <label class="form-label">Order notes (optional)</label>
-                                    <textarea class="form-control" name="notes" rows="4"></textarea>
+                                    <label class="form-label">Ghi chú đơn hàng (không bắt buộc)</label>
+                                    <textarea class="form-control" name="notes" rows="4" value="{{ old('notes', '') }}"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -278,16 +377,24 @@
                 </div>
             </div>
         </form>
+
+
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 let checkoutForm = document.getElementById("checkout-form");
-                checkoutForm.addEventListener("submit", function(event) {
-                    event.preventDefault();
-                    let paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
 
-                    if (paymentMethod === "momo") {
+                checkoutForm.addEventListener("submit", function(event) {
+                    let paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+
+                    if (!paymentMethod) {
+                        event.preventDefault();
+                        alert("Please select a payment method before proceeding.");
+                        return;
+                    }
+
+                    if (paymentMethod.value === "momo") {
                         checkoutForm.action = "{{ route('momo.create') }}";
-                    } else if (paymentMethod === "vn_pay") {
+                    } else if (paymentMethod.value === "vn_pay") {
                         checkoutForm.action = "{{ route('vnpay.create') }}";
                     } else {
                         checkoutForm.action = "{{ route('checkout.process') }}";
@@ -297,5 +404,6 @@
                 });
             });
         </script>
+
     </div>
 </main>

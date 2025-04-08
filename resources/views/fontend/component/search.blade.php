@@ -45,7 +45,7 @@
                 </form>
 
                 <!-- End Search-Form -->
-                
+
 
             </div>
             <!-- End Search bar -->
@@ -63,8 +63,8 @@
                                 data-toggle="tooltip" data-placement="top" title="Giỏ hàng">
                                 <i class="font-size-22 ec ec-shopping-bag"></i>
                                 <span
-                                    class="width-22 height-22 bg-dark position-absolute flex-content-center text-white rounded-circle left-12 top-8 font-weight-bold font-size-12">2</span>
-                                <span class="font-weight-bold font-size-16 text-gray-90 ml-3">$1785.00</span>
+                                    class="width-22 height-22 bg-dark position-absolute flex-content-center text-white rounded-circle left-12 top-8 font-weight-bold font-size-12">{{ $total_items }}</span>
+                                {{-- <span class="font-weight-bold font-size-16 text-gray-90 ml-3">$1785.00</span> --}}
                             </a>
                         </li>
                     </ul>

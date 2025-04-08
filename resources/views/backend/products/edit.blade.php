@@ -28,9 +28,10 @@
                         <h5 class="card-title">Thông tin sản phẩm</h5>
 
                         <!-- Form Thêm Mới Sản Phẩm -->
-                        <form action="{{ route('products.update', $product->id) }}" method="PUT"
+                        <form action="{{ route('products.update', $product->id) }}" method="POST"
                             enctype="multipart/form-data">
                             @csrf
+                            @method('PUT')
 
                             <!-- Danh mục -->
                             <div class="row mb-3">

@@ -186,6 +186,11 @@ class OrderController extends Controller
             'specific_address.required' => 'Địa chỉ chi tiết không được để trống.',
         ]);
 
+        // // Kiểm tra trạng thái đơn hàng
+        // if ($request->status == 'canceled' && $request->has('notes')) {
+        //     $order->cancel_reason = $request->notes; // Lưu lý do hủy vào trường cancel_reason
+        // }
+
         // Cập nhật thông tin đơn hàng (chỉ khi chưa ở trạng thái "delivered", "completed", "canceled")
         $dataToUpdate = [
             'status' => $newStatus,

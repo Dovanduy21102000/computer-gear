@@ -24,6 +24,7 @@ class ProductVariant extends Model
         return $this->belongsTo(Product::class);
     }
 
+
     // Quan hệ với AttributeValue thông qua bảng trung gian
     public function attributes()
     {

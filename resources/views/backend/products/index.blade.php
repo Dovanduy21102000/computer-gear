@@ -92,7 +92,14 @@
                                                 <td>{{ $product->brand->name ?? 'Không có' }}</td>
                                                 <td class="text-end">{{ number_format($product->price, 0, ',', '.') }}
                                                     VNĐ</td>
-                                                <td class="text-center">{{ $product->quantity }}</td>
+                                                <td class="text-center">
+                                                    @if ($product->is_variant)
+                                                        {{ $product->variants->sum('quantity') }}
+                                                        <!-- Tổng số lượng biến thể -->
+                                                    @else
+                                                        {{ $product->quantity }}
+                                                    @endif
+                                                </td>
                                                 <td class="text-center">
                                                     @if ($product->is_variant)
                                                         <span class="badge bg-info">{{ $product->variants->count() }}
@@ -126,10 +133,10 @@
                                                         <i class="bi bi-image"></i> 
                                                     </a>
                                                     <!-- Nút xem thông số sản phẩm -->
-                                                    <a href="{{ route('admin.specifications.index', ['product_id' => $product->id]) }}" 
+                                                    <a href="{{ route('admin.specifications.index', ['product_id' => $product->id]) }}"
                                                         class="btn btn-info btn-sm">
                                                         <i class="bi bi-cpu"></i>
-                                                     </a>
+                                                    </a>
                                                     <form action="{{ route('products.destroy', $product->id) }}"
                                                         method="POST" class="d-inline mt-1">
                                                         @csrf

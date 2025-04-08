@@ -41,120 +41,123 @@
         </div>
     </section>
 </main>
-
 <style>
     /* Chỉnh sửa chung cho giao diện */
-    .main {
-        margin: 0 auto;
-        padding: 20px;
-        font-family: 'Arial', sans-serif;
-    }
+.main {
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+}
 
-    /* Chỉnh sửa tiêu đề trang */
-    .pagetitle h1 {
-        font-size: 1.75rem;
-        font-weight: 600;
-        color: #333;
-    }
+/* Chỉnh sửa tiêu đề trang */
+.pagetitle h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+}
 
-    /* Breadcrumb */
-    .breadcrumb {
-        background-color: #f8f9fa;
-        padding: 0.75rem;
-        border-radius: 5px;
-    }
+/* Breadcrumb */
+.breadcrumb {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 5px;
+}
 
-    .breadcrumb-item a {
-        color: #007bff;
-        text-decoration: none;
-    }
+.breadcrumb-item a {
+    color: #007bff;
+    text-decoration: none;
+}
 
-    .breadcrumb-item.active {
-        color: #6c757d;
-    }
+.breadcrumb-item.active {
+    color: #6c757d;
+}
 
-    /* Thêm kiểu dáng cho card */
-    .card {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        background-color: #fff;
-    }
+/* Thêm kiểu dáng cho card */
+.card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fff;
+}
 
-    .card-body {
-        padding: 2rem;
-    }
+.card-body {
+    padding: 2rem;
+}
 
-    /* Nút "Thêm ảnh" */
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-        padding: 10px 20px;
-        font-size: 14px;
-        border-radius: 4px;
-        margin-bottom: 15px;
-    }
+/* Nút "Thêm ảnh" */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
 
-    .btn-primary:hover {
-        background-color: #0056b3;
-        border-color: #004085;
-    }
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
 
-    /* Gallery */
-    .image-gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 15px;
-    }
+/* Gallery */
+.image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Tăng kích thước ảnh */
+    gap: 20px;
+    margin-top: 20px;
+}
 
-    .image-item {
-        position: relative;
-        overflow: hidden;
-        border-radius: 8px;
-        background-color: #f8f9fa;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-    }
+/* Mỗi ảnh trong gallery */
+.image-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
 
-    .image-item:hover {
-        transform: scale(1.05);
-    }
+.image-item:hover {
+    transform: scale(1.05);
+}
 
-    .img-thumbnail {
-        width: 100%;
-        height: auto;
-        border-radius: 8px;
-        object-fit: cover;
-    }
+.img-thumbnail {
+    width: 100%;
+    height: 200px; /* Đặt chiều cao cố định cho ảnh */
+    object-fit: cover; /* Giữ tỷ lệ hình ảnh */
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
 
-    /* Nút xóa (btn-danger) */
-    .image-actions {
-        position: absolute;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10;
-    }
+/* Nút xóa (btn-danger) */
+.image-actions {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
 
-    .image-actions .btn {
-        padding: 5px 12px;
-        font-size: 13px;
-        border-radius: 4px;
-        transition: background-color 0.3s ease;
-    }
+.image-actions .btn {
+    padding: 5px 12px;
+    font-size: 13px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
 
-    .image-actions .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-        color: #fff;
-    }
+.image-actions .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
 
-    .image-actions .btn-danger:hover {
-        background-color: #c82333;
-        border-color: #bd2130;
-    }
+.image-actions .btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
 
-    /* Nút Xóa icon */
-    .image-actions .fa-trash {
-        font-size: 14px;
-    }
+/* Nút Xóa icon */
+.image-actions .fa-trash {
+    font-size: 14px;
+}
+
 </style>
