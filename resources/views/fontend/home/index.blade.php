@@ -205,7 +205,7 @@
                                     </div>
                                 </div>
                                 <!-- End Danh sách tính năng -->
-                    
+
                                 <!-- Danh sách tính năng -->
                                 <div class="media px-3 mb-4 pb-4 border-bottom" href="#">
                                     <div class="u-avatar mr-2">
@@ -217,7 +217,7 @@
                                     </div>
                                 </div>
                                 <!-- End Danh sách tính năng -->
-                    
+
                                 <!-- Danh sách tính năng -->
                                 <div class="media px-3 mb-4 pb-4 border-bottom" href="#">
                                     <div class="u-avatar mr-2">
@@ -229,7 +229,7 @@
                                     </div>
                                 </div>
                                 <!-- End Danh sách tính năng -->
-                    
+
                                 <!-- Danh sách tính năng -->
                                 <div class="media px-3 mb-4 pb-4 border-bottom" href="#">
                                     <div class="u-avatar mr-2">
@@ -241,7 +241,7 @@
                                     </div>
                                 </div>
                                 <!-- End Danh sách tính năng -->
-                    
+
                                 <!-- Danh sách tính năng -->
                                 <div class="media px-3" href="#">
                                     <div class="u-avatar mr-2">
@@ -256,7 +256,7 @@
                             </div>
                         </div>
                     </aside>
-                    
+
                     <!-- End Feature List -->
                     <!-- Feature Product -->
                     <aside class="mb-8">
@@ -278,11 +278,14 @@
                                                     class="product-item__inner remove-prodcut-hover px-wd-4 p-2 p-md-3">
                                                     <div class="product-item__body pb-xl-2">
                                                         <div class="mb-2">
-                                                            <a href="{{ route('client.products.detail', $topViewedProduct->slug) }}" class="d-block text-center">
-                                                                <img class="img-fluid w-100" style="height: 200px; object-fit: cover; border-radius: 8px;" 
-                                                                     src="{{ asset('storage/' . $topViewedProduct->thumbnail) }}" alt="Image Description">
+                                                            <a href="{{ route('client.products.detail', $topViewedProduct->slug) }}"
+                                                                class="d-block text-center">
+                                                                <img class="img-fluid w-100"
+                                                                    style="height: 200px; object-fit: cover; border-radius: 8px;"
+                                                                    src="{{ asset('storage/' . $topViewedProduct->thumbnail) }}"
+                                                                    alt="Image Description">
                                                             </a>
-                                                            
+
                                                         </div>
                                                         <div class="mb-2"><a
                                                                 href="{{ route('client.products.brand', ['brandSlug' => $topViewedProduct->brand->slug]) }}"
@@ -386,7 +389,7 @@
                 <!-- Banner -->
                 <div class="row mb-6">
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4">
-                        <a href="{{route('client.products.index')}}" class="d-black text-gray-90">
+                        <a href="{{ route('client.products.index') }}" class="d-black text-gray-90">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/190x150/img3.jpg"
@@ -408,7 +411,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4">
-                        <a href="{{route('client.products.index')}}" class="d-black text-gray-90">
+                        <a href="{{ route('client.products.index') }}" class="d-black text-gray-90">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/246X176/img2.jpg"
@@ -430,7 +433,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4 d-md-none d-wd-block">
-                        <a href="{{route('client.products.index')}}" class="d-black text-gray-90">
+                        <a href="{{ route('client.products.index') }}" class="d-black text-gray-90">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/246X176/img3.jpg" alt="PC Gaming">
@@ -532,17 +535,25 @@
                                                             @endif
                                                         </div>
                                                         <div class="d-none d-xl-block prodcut-add-cart">
-                                                            <form action="{{ route('cart.add') }}" method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="product_id"
-                                                                    value="{{ $topViewedProduct->id }}">
-                                                                <input type="hidden" name="quantity" value="1">
-                                                                <!-- Default to 1 -->
-                                                                <button type="submit"
+                                                            @if ($topViewedProduct->is_variant)
+                                                                <a href="{{ route('client.products.detail', $topViewedProduct->slug) }}"
                                                                     class="btn-add-cart btn-primary transition-3d-hover">
                                                                     <i class="ec ec-add-to-cart"></i>
-                                                                </button>
-                                                            </form>
+                                                                </a>
+                                                            @else
+                                                                <form action="{{ route('cart.add') }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="product_id"
+                                                                        value="{{ $topViewedProduct->id }}">
+                                                                    <input type="hidden" name="quantity"
+                                                                        value="1">
+                                                                    <button type="submit"
+                                                                        class="btn-add-cart btn-primary transition-3d-hover">
+                                                                        <i class="ec ec-add-to-cart"></i>
+                                                                    </button>
+                                                                </form>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 </div>
@@ -643,8 +654,7 @@
 
                 <!-- Full banner -->
                 <div class="mb-8">
-                    <a href="{{route('client.products.index')}}"
-                        class="d-block text-gray-90">
+                    <a href="{{ route('client.products.index') }}" class="d-block text-gray-90">
                         <div class="bg-img-hero pt-3"
                             style="background-image: url(fontend/assets/img/1400X206/img1.jpg);">
                             <div class="space-top-2-md p-4 pt-4 pt-md-5 pt-lg-6 pt-xl-5 pb-lg-4 px-xl-8 px-lg-6">
@@ -724,19 +734,25 @@
                                                                 @endif
                                                             </div>
                                                             <div class="d-none d-xl-block prodcut-add-cart">
-                                                                <form action="{{ route('cart.add') }}"
-                                                                    method="POST">
-                                                                    @csrf
-                                                                    <input type="hidden" name="product_id"
-                                                                        value="{{ $topSellingProduct->id }}">
-                                                                    <input type="hidden" name="quantity"
-                                                                        value="1">
-                                                                    <!-- Default to 1 -->
-                                                                    <button type="submit"
+                                                                @if ($topSellingProduct->is_variant)
+                                                                    <a href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
                                                                         class="btn-add-cart btn-primary transition-3d-hover">
                                                                         <i class="ec ec-add-to-cart"></i>
-                                                                    </button>
-                                                                </form>
+                                                                    </a>
+                                                                @else
+                                                                    <form action="{{ route('cart.add') }}"
+                                                                        method="POST">
+                                                                        @csrf
+                                                                        <input type="hidden" name="product_id"
+                                                                            value="{{ $topSellingProduct->id }}">
+                                                                        <input type="hidden" name="quantity"
+                                                                            value="1">
+                                                                        <button type="submit"
+                                                                            class="btn-add-cart btn-primary transition-3d-hover">
+                                                                            <i class="ec ec-add-to-cart"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                         <div class="product-item__footer">
@@ -807,9 +823,25 @@
                                                                 @endif
                                                             </div>
                                                             <div class="d-none d-xl-block prodcut-add-cart">
-                                                                <a href="https://transvelo.github.io/electro-html/2.0/html/shop/single-product-fullwidth.html"
-                                                                    class="btn-add-cart btn-primary transition-3d-hover"><i
-                                                                        class="ec ec-add-to-cart"></i></a>
+                                                                @if ($topSellingProduct->is_variant)
+                                                                    <a href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
+                                                                        class="btn-add-cart btn-primary transition-3d-hover">
+                                                                        <i class="ec ec-add-to-cart"></i>
+                                                                    </a>
+                                                                @else
+                                                                    <form action="{{ route('cart.add') }}"
+                                                                        method="POST">
+                                                                        @csrf
+                                                                        <input type="hidden" name="product_id"
+                                                                            value="{{ $topSellingProduct->id }}">
+                                                                        <input type="hidden" name="quantity"
+                                                                            value="1">
+                                                                        <button type="submit"
+                                                                            class="btn-add-cart btn-primary transition-3d-hover">
+                                                                            <i class="ec ec-add-to-cart"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                         <div class="product-item__footer">
@@ -880,9 +912,25 @@
                                                                 @endif
                                                             </div>
                                                             <div class="d-none d-xl-block prodcut-add-cart">
-                                                                <a href="https://transvelo.github.io/electro-html/2.0/html/shop/single-product-fullwidth.html"
-                                                                    class="btn-add-cart btn-primary transition-3d-hover"><i
-                                                                        class="ec ec-add-to-cart"></i></a>
+                                                                @if ($topSellingProduct->is_variant)
+                                                                    <a href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
+                                                                        class="btn-add-cart btn-primary transition-3d-hover">
+                                                                        <i class="ec ec-add-to-cart"></i>
+                                                                    </a>
+                                                                @else
+                                                                    <form action="{{ route('cart.add') }}"
+                                                                        method="POST">
+                                                                        @csrf
+                                                                        <input type="hidden" name="product_id"
+                                                                            value="{{ $topSellingProduct->id }}">
+                                                                        <input type="hidden" name="quantity"
+                                                                            value="1">
+                                                                        <button type="submit"
+                                                                            class="btn-add-cart btn-primary transition-3d-hover">
+                                                                            <i class="ec ec-add-to-cart"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                         <div class="product-item__footer">
@@ -916,8 +964,7 @@
                     </dv>
                     <div class="row">
                         <div class="col-auto">
-                            <a href="{{route('client.products.index')}}"
-                                class="d-block">
+                            <a href="{{ route('client.products.index') }}" class="d-block">
                                 <img class="img-fluid" src="fontend/assets/img/212X305/img2.jpg"
                                     alt="Image Description">
                             </a>
@@ -966,17 +1013,25 @@
                                                             @endif
                                                         </div>
                                                         <div class="d-none d-xl-block prodcut-add-cart">
-                                                            <form action="{{ route('cart.add') }}" method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="product_id"
-                                                                    value="{{ $product->id }}">
-                                                                <input type="hidden" name="quantity" value="1">
-                                                                <!-- Default to 1 -->
-                                                                <button type="submit"
+                                                            @if ($product->is_variant)
+                                                                <a href="{{ route('client.products.detail', $product->slug) }}"
                                                                     class="btn-add-cart btn-primary transition-3d-hover">
                                                                     <i class="ec ec-add-to-cart"></i>
-                                                                </button>
-                                                            </form>
+                                                                </a>
+                                                            @else
+                                                                <form action="{{ route('cart.add') }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="product_id"
+                                                                        value="{{ $product->id }}">
+                                                                    <input type="hidden" name="quantity"
+                                                                        value="1">
+                                                                    <button type="submit"
+                                                                        class="btn-add-cart btn-primary transition-3d-hover">
+                                                                        <i class="ec ec-add-to-cart"></i>
+                                                                    </button>
+                                                                </form>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1005,13 +1060,13 @@
                 <div class="mb-8">
                     <div class="row">
                         <div class="col-md-6 mb-3 mb-md-0">
-                            <a href="{{route('client.products.index')}}">
+                            <a href="{{ route('client.products.index') }}">
                                 <img class="img-fluid" src="fontend/assets/img/536X150/img1.jpg"
                                     alt="Image Description">
                             </a>
                         </div>
                         <div class="col-md-6">
-                            <a href="{{route('client.products.index')}}">
+                            <a href="{{ route('client.products.index') }}">
                                 <img class="img-fluid" src="fontend/assets/img/536X150/img2.jpg"
                                     alt="Image Description">
                             </a>
@@ -1079,17 +1134,23 @@
                                                         <div class="text-gray-100">$685,00</div>
                                                     </div>
                                                     <div class="d-none d-xl-block prodcut-add-cart">
-                                                        <form action="{{ route('cart.add') }}" method="POST">
-                                                            @csrf
-                                                            <input type="hidden" name="product_id"
-                                                                value="{{ $product->id }}">
-                                                            <input type="hidden" name="quantity" value="1">
-                                                            <!-- Default to 1 -->
-                                                            <button type="submit"
+                                                        @if ($keyboardMouseProduct->is_variant)
+                                                            <a href="{{ route('client.products.detail', $keyboardMouseProduct->slug) }}"
                                                                 class="btn-add-cart btn-primary transition-3d-hover">
                                                                 <i class="ec ec-add-to-cart"></i>
-                                                            </button>
-                                                        </form>
+                                                            </a>
+                                                        @else
+                                                            <form action="{{ route('cart.add') }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="product_id"
+                                                                    value="{{ $keyboardMouseProduct->id }}">
+                                                                <input type="hidden" name="quantity" value="1">
+                                                                <button type="submit"
+                                                                    class="btn-add-cart btn-primary transition-3d-hover">
+                                                                    <i class="ec ec-add-to-cart"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -1138,15 +1199,14 @@
                     }
                 }]'>
                 @foreach ($brands as $brand)
-                <div class="js-slide d-flex align-items-center">
-                    <a href="#" class="link-hover__brand d-flex align-items-center">
-                        <img class="img-fluid m-auto max-height-50" src="{{ asset('storage/' . $brand->logo) }}" alt="Image Description">
-                        <span class="brand-name ms-3 fs-5 fw-bold">{{ $brand->name }}</span> <!-- Tên thương hiệu -->
-                    </a>
-                </div>
-                
-                
-                
+                    <div class="js-slide d-flex align-items-center">
+                        <a href="#" class="link-hover__brand d-flex align-items-center">
+                            <img class="img-fluid m-auto max-height-50" src="{{ asset('storage/' . $brand->logo) }}"
+                                alt="Image Description">
+                            <span class="brand-name ms-3 fs-5 fw-bold">{{ $brand->name }}</span>
+                            <!-- Tên thương hiệu -->
+                        </a>
+                    </div>
                 @endforeach
             </div>
         </div>

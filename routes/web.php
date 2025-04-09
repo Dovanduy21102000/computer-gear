@@ -204,6 +204,7 @@ Route::post('/checkout/method', [CheckoutController::class, 'checkoutMethod'])->
 Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
 Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('applyCoupon');
+Route::get('/remove-coupon', [CheckoutController::class, 'removeCoupon'])->name('removeCoupon');
 
 
 Route::post('/vnpay/create', [VNPayController::class, 'createPayment'])->name('vnpay.create');

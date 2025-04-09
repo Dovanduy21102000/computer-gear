@@ -86,6 +86,13 @@
         <form action="{{ route('checkout.method') }}" id="checkout-form" method="POST" class="js-validate">
             @csrf
 
+            <!-- Add hidden input for selected items -->
+            @if (request()->has('selected_items'))
+                @foreach (request()->input('selected_items') as $itemId)
+                    <input type="hidden" name="selected_items[]" value="{{ $itemId }}">
+                @endforeach
+            @endif
+
             <div class="row">
                 <!-- Order Summary -->
                 <div class="col-lg-5 order-lg-2 mb-7 mb-lg-0">
@@ -186,7 +193,13 @@
 
                                         @if ($appliedCoupon)
                                             <tr>
-                                                <th>Mã giảm giá: ({{ $appliedCoupon['code'] }})</th>
+                                                <th>
+                                                    Mã giảm giá: ({{ $appliedCoupon['code'] }})
+                                                    <a href="{{ route('removeCoupon') }}"
+                                                        class="btn btn-sm btn-danger ml-2">
+                                                        <i class="fas fa-times"></i> Xóa
+                                                    </a>
+                                                </th>
                                                 <td class="text-danger">-{{ number_format($discount, 0, ',', '.') }}₫
                                                 </td>
                                             </tr>
@@ -235,7 +248,8 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="cash"
                                                         name="payment_method" value="cash">
-                                                    <label class="custom-control-label form-label" for="cash">Thanh
+                                                    <label class="custom-control-label form-label"
+                                                        for="cash">Thanh
                                                         toán trực tiếp</label>
                                                 </div>
                                             </div>
