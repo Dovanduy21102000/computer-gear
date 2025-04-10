@@ -60,7 +60,7 @@ class CartController extends Controller
 
             $cartItems = $validCartItems;
         }
-
+        
         $template = 'fontend.cart.index';
         return view('fontend.layout', compact('template', 'cart', 'cartItems'));
     }
