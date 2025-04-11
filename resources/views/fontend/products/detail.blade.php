@@ -298,7 +298,8 @@
 
 
                         <div class="mb-2 pb-0dot5" style="margin-top: 10px">
-                            <a href="{{route('cart.add')}}" id="addToCartBtn" class="btn btn-block btn-primary-dark" disabled>
+                            <a href="{{ route('cart.add') }}" id="addToCartBtn"
+                                class="btn btn-block btn-primary-dark" disabled>
                                 <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
                             </a>
                         </div>
@@ -697,16 +698,25 @@
                                     <div class="mb-2">
                                         <a href="{{ route('client.products.detail', $related->slug) }}"
                                             class="d-block text-center">
-                                            <img class="img-fluid"
+                                            <img class="img-fluid w-100" style="height: 150px; object-fit: cover;"
                                                 src="{{ asset('storage/' . $related->thumbnail) }}"
                                                 alt="{{ $related->name }}">
                                         </a>
                                     </div>
                                     <div class="flex-center-between mb-1">
                                         <div class="prodcut-price">
-                                            <div class="text-gray-100">
-                                                {{ number_format($related->price, 0, ',', '.') }}đ
-                                            </div>
+                                            @if ($related->price_sale)
+                                                <div class="prodcut-price d-flex align-items-center position-relative">
+                                                    <ins
+                                                        class="font-size-20 text-red text-decoration-none">{{ number_format($related->price_sale) }}đ</ins>
+                                                    <del
+                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($related->price, 0, ',', '.') }}đ</del>
+                                                </div>
+                                            @else
+                                                <div class="text-dark fw-bold fs-5">
+                                                    {{ number_format($related->price, 0, ',', '.') }}đ
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="d-none d-xl-block prodcut-add-cart">
                                             <a href="#" class="btn-add-cart btn-primary transition-3d-hover">
