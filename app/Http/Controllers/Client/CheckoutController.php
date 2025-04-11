@@ -59,9 +59,41 @@ class CheckoutController extends Controller
             ->whereIn('id', $selectedItemIds)
             ->get();
 
+        // Process cart items to handle multiple variants
+        $processedCartItems = collect();
+        foreach ($cartItems as $item) {
+            // If the item has multiple variants (stored as "id1 | id2")
+            if (strpos($item->product_variant_id, '|') !== false) {
+                $variantIds = array_map('trim', explode('|', $item->product_variant_id));
+                foreach ($variantIds as $variantId) {
+                    // Create a new cart item for each variant
+                    $variantItem = clone $item;
+                    $variantItem->product_variant_id = $variantId;
+                    $variantItem->productVariant = ProductVariant::with('attributeValues.attribute')
+                        ->find($variantId);
+                    $processedCartItems->push($variantItem);
+                }
+            } else {
+                $processedCartItems->push($item);
+            }
+        }
+
+        // Log the processed cart items for debugging
+        Log::info('Processed cart items in checkout:', [
+            'selected_ids' => $selectedItemIds,
+            'cart_items' => $processedCartItems->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'variant_id' => $item->product_variant_id,
+                    'quantity' => $item->quantity
+                ];
+            })->toArray()
+        ]);
+
         // Validate products status and availability
         $invalidItems = [];
-        $validCartItems = $cartItems->filter(function ($item) use (&$invalidItems) {
+        $validCartItems = $processedCartItems->filter(function ($item) use (&$invalidItems) {
             // Check if product exists and is active
             if (!$item->product) {
                 $invalidItems[] = 'Sản phẩm không tồn tại';
@@ -167,17 +199,17 @@ class CheckoutController extends Controller
         }
 
         $template = 'fontend.checkout.index';
-        return view('fontend.layout', compact(
-            'template',
-            'provinces',
-            'districtsByProvince',
-            'cartItems',
-            'appliedCoupon',
-            'discount',
-            'user',
-            'totalPrice',
-            'finalPrice'
-        ));
+        return view('fontend.layout', [
+            'template' => $template,
+            'provinces' => $provinces,
+            'districtsByProvince' => $districtsByProvince,
+            'cartItems' => $processedCartItems,
+            'appliedCoupon' => $appliedCoupon,
+            'discount' => $discount,
+            'user' => $user,
+            'totalPrice' => $totalPrice,
+            'finalPrice' => $finalPrice
+        ]);
     }
 
 

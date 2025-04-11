@@ -93,53 +93,50 @@
                                                     alt="{{ $item->product->name }}">
                                             </a>
                                         </td>
-                                        <td data-title="Product">
+                                        <td>
                                             <a href="#" class="text-gray-90">{{ $item->product->name }}</a>
-                                            @if ($item->productVariant)
+                                            @if (isset($item->variants))
                                                 <div class="variant-attributes">
-                                                    @php
-                                                        $groupedAttributes = [];
-                                                        foreach ($item->productVariant->attributeValues as $value) {
-                                                            if (isset($value->attribute)) {
-                                                                $attrName = $value->attribute->name;
-                                                                if (!isset($groupedAttributes[$attrName])) {
-                                                                    $groupedAttributes[$attrName] = $value->value;
+                                                    @foreach ($item->variants as $variant)
+                                                        <div class="variant-group mb-2">
+                                                            @php
+                                                                $groupedAttributes = [];
+                                                                foreach ($variant->attributeValues as $value) {
+                                                                    if (isset($value->attribute)) {
+                                                                        $attrName = $value->attribute->name;
+                                                                        if (!isset($groupedAttributes[$attrName])) {
+                                                                            $groupedAttributes[$attrName] =
+                                                                                $value->value;
+                                                                        }
+                                                                    }
                                                                 }
-                                                            }
-                                                        }
-                                                        $formattedAttributes = [];
-                                                        foreach ($groupedAttributes as $name => $value) {
-                                                            $formattedAttributes[] = $name . ': ' . $value;
-                                                        }
-                                                    @endphp
-                                                    <small class="text-dark">
-                                                        {{ implode(' | ', $formattedAttributes) }}
-                                                    </small>
+                                                                // Sort attributes by name to ensure consistent order
+                                                                ksort($groupedAttributes);
+                                                                $formattedAttributes = [];
+                                                                foreach ($groupedAttributes as $name => $value) {
+                                                                    $formattedAttributes[] = $name . ': ' . $value;
+                                                                }
+                                                            @endphp
+                                                            <small class="text-dark d-block">
+                                                                {{ implode(' | ', $formattedAttributes) }}
+                                                            </small>
+                                                        </div>
+                                                    @endforeach
                                                 </div>
                                             @endif
                                         </td>
                                         <td data-title="Price">
                                             @php
-                                                $price = $item->productVariant
-                                                    ? $item->productVariant->price_sale ?? $item->productVariant->price
-                                                    : $item->product->price_sale ?? $item->product->price;
-
-                                                $originalPrice = $item->productVariant
-                                                    ? $item->productVariant->price
-                                                    : $item->product->price;
-
-                                                $salePrice = $item->productVariant
-                                                    ? $item->productVariant->price_sale
-                                                    : $item->product->price_sale;
+                                                $totalPrice = 0;
+                                                if (isset($item->variants)) {
+                                                    foreach ($item->variants as $variant) {
+                                                        $totalPrice += $variant->price_sale ?? $variant->price;
+                                                    }
+                                                } else {
+                                                    $totalPrice = $item->product->price_sale ?? $item->product->price;
+                                                }
                                             @endphp
-                                            @if ($salePrice)
-                                                <del
-                                                    class="text-muted">{{ number_format($originalPrice, 0, ',', '.') }}₫</del>
-                                                <span
-                                                    class="text-danger">{{ number_format($salePrice, 0, ',', '.') }}₫</span>
-                                            @else
-                                                <span>{{ number_format($price, 0, ',', '.') }}₫</span>
-                                            @endif
+                                            <span>{{ number_format($totalPrice, 0, ',', '.') }}₫</span>
                                         </td>
 
                                         <td data-title="Quantity">
@@ -161,7 +158,7 @@
 
                                         <td data-title="Total">
                                             <span
-                                                class="">{{ number_format($item->quantity * $price, 0, ',', '.') }}₫</span>
+                                                class="">{{ number_format($item->quantity * $totalPrice, 0, ',', '.') }}₫</span>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -216,6 +213,9 @@
 
                         // Get selected item IDs
                         let selectedIds = Array.from(selectedItems).map(item => item.value);
+
+                        // Log selected items for debugging
+                        console.log('Selected items for checkout:', selectedIds);
 
                         // Create URL with selected items
                         let checkoutUrl = "{{ route('checkout.index') }}?selected_items=" + selectedIds.join(',');

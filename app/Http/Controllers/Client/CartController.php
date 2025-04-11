@@ -20,47 +20,142 @@ class CartController extends Controller
     public function index()
     {
         if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để thêm vào giỏ hàng.');
+            return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để xem giỏ hàng.');
         }
+
         $userId = Auth::id();
-        // Get the cart for the user
         $cart = Cart::where('user_id', $userId)->first();
 
-        // If the cart exists, get its items with associated products
-        $cartItems = [];
-        if ($cart) {
-            $cartItems = CartItem::where('cart_id', $cart->id)
-                ->with(['product', 'productVariant'])
-                ->get();
+        if (!$cart) {
+            $cart = Cart::create(['user_id' => $userId]);
+        }
 
-            // Filter out invalid products
-            $validCartItems = $cartItems->filter(function ($item) {
-                // Check if product exists and is active
-                if (!$item->product || !$item->product->status) {
-                    // Remove invalid item from cart
-                    $item->delete();
-                    return false;
+        // Get cart items with their products and variants
+        $cartItems = CartItem::where('cart_id', $cart->id)
+            ->with(['product', 'productVariant'])
+            ->get();
+
+        // Log initial cart items
+        Log::info('Initial cart items', [
+            'items' => $cartItems->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'variant_id' => $item->product_variant_id
+                ];
+            })->toArray()
+        ]);
+
+        // Process each cart item to handle multiple variant IDs
+        $processedItems = collect();
+        $cartItems->each(function ($item) use ($processedItems) {
+            if ($item->product_variant_id) {
+                // Split the variant IDs if they exist
+                $variantIds = explode(' | ', $item->product_variant_id);
+
+                // Log the variant IDs
+                Log::info('Processing cart item', [
+                    'item_id' => $item->id,
+                    'variant_ids' => $variantIds
+                ]);
+
+                // Get all variants with their attribute values
+                $variants = ProductVariant::whereIn('id', $variantIds)
+                    ->with(['attributeValues' => function ($query) {
+                        $query->with('attribute')
+                            ->orderBy('attribute_id'); // Order by attribute_id to ensure consistent order
+                    }])
+                    ->get();
+
+                // Log the variants found
+                Log::info('Variants found', [
+                    'variants' => $variants->map(function ($v) {
+                        return [
+                            'id' => $v->id,
+                            'attributes' => $v->attributeValues->map(function ($av) {
+                                return [
+                                    'name' => $av->attribute->name,
+                                    'value' => $av->value
+                                ];
+                            })->toArray()
+                        ];
+                    })->toArray()
+                ]);
+
+                // Create a new cart item for each variant
+                foreach ($variants as $variant) {
+                    // Create a new cart item instance
+                    $newItem = new CartItem();
+                    $newItem->id = $item->id;
+                    $newItem->cart_id = $item->cart_id;
+                    $newItem->product_id = $item->product_id;
+                    $newItem->product_variant_id = (string)$variant->id;
+                    $newItem->quantity = $item->quantity;
+                    $newItem->product = $item->product;
+
+                    // Create a new variants collection with just this variant
+                    $newItem->variants = collect([$variant]);
+
+                    // Add the variant's attributes to the item, ensuring unique attribute names
+                    $newItem->variant_attributes = $variant->attributeValues->unique('attribute_id')->map(function ($value) {
+                        return [
+                            'name' => $value->attribute->name,
+                            'value' => $value->value
+                        ];
+                    })->toArray();
+
+                    // Log the new item details
+                    Log::info('Created new cart item', [
+                        'original_id' => $item->id,
+                        'variant_id' => $variant->id,
+                        'attributes' => $newItem->variant_attributes
+                    ]);
+
+                    $processedItems->push($newItem);
                 }
+            } else {
+                $processedItems->push($item);
+            }
+        });
 
-                // If product has variant, check variant status
-                if ($item->productVariant) {
-                    if (!$item->productVariant->status) {
-                        $item->delete();
+        // Log the final processed items
+        Log::info('Final processed items', [
+            'items' => $processedItems->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'variant_id' => $item->product_variant_id,
+                    'attributes' => isset($item->variant_attributes) ? $item->variant_attributes : []
+                ];
+            })->toArray()
+        ]);
+
+        // Filter out invalid products
+        $validCartItems = $processedItems->filter(function ($item) {
+            // Check if product exists and is active
+            if (!$item->product || !$item->product->status) {
+                return false;
+            }
+
+            // If product has variants, check variant status
+            if (isset($item->variants)) {
+                foreach ($item->variants as $variant) {
+                    if (!$variant->status) {
                         return false;
                     }
                 }
-
-                return true;
-            });
-
-            // If any items were removed, update the cart
-            if ($validCartItems->count() < $cartItems->count()) {
-                session()->flash('warning', 'Một số sản phẩm không còn khả dụng đã được xóa khỏi giỏ hàng.');
             }
 
-            $cartItems = $validCartItems;
+            return true;
+        });
+
+        // If any items were removed, update the cart
+        if ($validCartItems->count() < $processedItems->count()) {
+            session()->flash('warning', 'Một số sản phẩm không còn khả dụng đã được xóa khỏi giỏ hàng.');
         }
-        
+
+        $cartItems = $validCartItems;
+
         $template = 'fontend.cart.index';
         return view('fontend.layout', compact('template', 'cart', 'cartItems'));
     }
@@ -68,181 +163,210 @@ class CartController extends Controller
     // Add Product to Cart
     public function add(Request $request)
     {
+        // Validate input
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
-            'attributes' => 'nullable',
         ]);
 
-        // Check if product exists and is active
-        $product = Product::find($request->product_id);
-        if (!$product) {
-            return back()->with('error', 'Sản phẩm không tồn tại.');
+        // Check if the user is logged in
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để thêm vào giỏ hàng.');
         }
 
-        if (!$product->status) {
-            return back()->with('error', 'Sản phẩm không khả dụng.');
-        }
+        $userId = Auth::id();
+        $product = Product::findOrFail($request->product_id);
 
-        // Check if product has variants but no attributes were provided
-        if ($product->is_variant && (!$request->has('attributes') || empty($request->input('attributes')))) {
-            return redirect()->route('client.products.detail', $product->slug)
-                ->with('info', 'Vui lòng chọn biến thể sản phẩm.');
-        }
+        // Check if product has variants
+        if ($product->is_variant) {
+            // If product has variants but no attributes selected, redirect to product detail
+            if (!$request->has('attributes') || empty($request->attributes)) {
+                return redirect()->route('client.products.detail', $product->slug)
+                    ->with('error', 'Vui lòng chọn biến thể sản phẩm.');
+            }
 
-        // If product has variants, validate the selected variant
-        $variant = null;
-        if ($request->has('attributes') && !empty($request->input('attributes'))) {
-            // Get the attributes in format {"attribute_name": "attribute_value"}
-            $attributeData = $request->input('attributes');
+            // Find the product variant by matching selected attributes
+            $requestAttributeValues = [];
 
-            // Log received attribute data
-            Log::info('Received attribute data:', ['product_id' => $request->product_id, 'attributes' => $attributeData]);
+            // Log the raw request
+            Log::info('Raw request data', [
+                'all' => $request->all(),
+                'attributes' => $request->input('attributes')
+            ]);
 
-            // Find the variant that matches the selected attributes
-            $productVariants = ProductVariant::where('product_id', $product->id)
-                ->with('attributeValues.attribute')
+            // Handle nested attributes array
+            $attributes = $request->input('attributes', []);
+            if (is_array($attributes)) {
+                foreach ($attributes as $key => $value) {
+                    // Find the attribute value ID for this value
+                    $attributeValue = \App\Models\AttributeValue::where('value', $value)->first();
+                    if ($attributeValue) {
+                        $requestAttributeValues[] = $attributeValue->id;
+                    }
+                }
+            }
+
+            // Log the request attributes
+            Log::info('Request attributes processed', [
+                'product_id' => $request->product_id,
+                'raw_attributes' => $attributes,
+                'attribute_value_ids' => $requestAttributeValues
+            ]);
+
+            // Find all variants for this product
+            $variants = ProductVariant::where('product_id', $request->product_id)
+                ->with('attributeValues')
                 ->get();
 
-            foreach ($productVariants as $productVariant) {
-                $matches = true;
-                $variantAttributeValues = $productVariant->attributeValues;
+            // Log all variants found
+            Log::info('All variants found', [
+                'variants' => $variants->map(function ($v) {
+                    return [
+                        'id' => $v->id,
+                        'price' => $v->price,
+                        'attribute_values' => $v->attributeValues->pluck('id')->toArray()
+                    ];
+                })->toArray()
+            ]);
 
-                // Log the variant being checked
-                Log::info('Checking variant:', [
-                    'variant_id' => $productVariant->id,
-                    'attributes' => $variantAttributeValues->map(function ($value) {
-                        return [
-                            'name' => $value->attribute->name ?? null,
-                            'value' => $value->value
-                        ];
-                    })->toArray()
+            // Find the matching variant by checking attributes
+            $matchingVariant = null;
+            foreach ($variants as $variant) {
+                // Get attribute value IDs for this variant
+                $variantAttributeIds = $variant->attributeValues->pluck('id')->toArray();
+
+                // Log variant check
+                Log::info('Checking variant', [
+                    'variant_id' => $variant->id,
+                    'variant_price' => $variant->price,
+                    'variant_attributes' => $variantAttributeIds,
+                    'request_attributes' => $requestAttributeValues
                 ]);
 
-                // Check if each selected attribute matches this variant
-                foreach ($attributeData as $attributeName => $attributeValue) {
-                    // Convert attribute name to match database format (e.g., "mau_sac" to "màu sắc")
-                    $formattedAttributeName = str_replace('_', ' ', $attributeName);
-
-                    // Find the matching attribute value for this variant
-                    $matchingValue = $variantAttributeValues->first(function ($value) use ($formattedAttributeName, $attributeValue) {
-                        return isset($value->attribute) &&
-                            strtolower($value->attribute->name) === strtolower($formattedAttributeName) &&
-                            strtolower($value->value) === strtolower($attributeValue);
-                    });
-
-                    if (!$matchingValue) {
-                        $matches = false;
+                // Check if this variant matches all the requested attributes
+                $isMatch = true;
+                foreach ($requestAttributeValues as $requestAttributeId) {
+                    if (!in_array($requestAttributeId, $variantAttributeIds)) {
+                        $isMatch = false;
                         break;
                     }
                 }
 
-                // Also check if all variant attributes are matched
-                if ($matches) {
-                    $allAttributesMatched = true;
-                    foreach ($variantAttributeValues as $variantValue) {
-                        $attributeName = strtolower($variantValue->attribute->name ?? '');
-                        $attributeValue = strtolower($variantValue->value);
-
-                        $hasMatch = false;
-                        foreach ($attributeData as $selectedName => $selectedValue) {
-                            $formattedSelectedName = str_replace('_', ' ', $selectedName);
-                            if (
-                                strtolower($formattedSelectedName) === $attributeName &&
-                                strtolower($selectedValue) === $attributeValue
-                            ) {
-                                $hasMatch = true;
-                                break;
-                            }
-                        }
-
-                        if (!$hasMatch) {
-                            $allAttributesMatched = false;
-                            break;
-                        }
-                    }
-
-                    if ($allAttributesMatched) {
-                        $variant = $productVariant;
-                        Log::info('Found matching variant:', [
-                            'variant_id' => $variant->id,
-                            'attributes' => $variantAttributeValues->map(function ($value) {
-                                return [
-                                    'name' => $value->attribute->name ?? null,
-                                    'value' => $value->value
-                                ];
-                            })->toArray()
-                        ]);
-                        break;
-                    }
+                if ($isMatch) {
+                    $matchingVariant = $variant;
+                    Log::info('Found matching variant', [
+                        'variant_id' => $variant->id,
+                        'price' => $variant->price
+                    ]);
+                    break;
                 }
             }
+
+            $variant = $matchingVariant;
 
             if (!$variant) {
-                return back()->with('error', 'Không tìm thấy biến thể sản phẩm với các thuộc tính đã chọn.');
+                return redirect()->back()->with('error', 'Biến thể sản phẩm không tồn tại.');
             }
 
-            if (!$variant->status) {
-                return back()->with('error', 'Biến thể sản phẩm không khả dụng.');
-            }
+            // Log the final selected variant
+            Log::info('Selected variant', [
+                'variant_id' => $variant->id,
+                'price' => $variant->price,
+                'request_attributes' => $requestAttributeValues
+            ]);
 
-            // Check variant quantity
-            if ($variant->quantity < $request->quantity) {
-                return back()->with('error', 'Số lượng sản phẩm trong kho không đủ.');
+            // Store the actual variant ID as a string
+            $variantId = (string)$variant->id;
+
+            // Get or create user's cart
+            $cart = Cart::firstOrCreate(['user_id' => $userId]);
+
+            // Check if the item already exists in the cart
+            $existingItem = CartItem::where('cart_id', $cart->id)
+                ->where('product_id', $request->product_id)
+                ->first();
+
+            if ($existingItem) {
+                // Check if the variant ID already exists in the string
+                $existingVariantIds = $existingItem->product_variant_id ? explode(' | ', $existingItem->product_variant_id) : [];
+
+                if (!in_array($variantId, $existingVariantIds)) {
+                    // Append the new variant ID
+                    $newVariantIds = $existingItem->product_variant_id ?
+                        $existingItem->product_variant_id . ' | ' . $variantId :
+                        $variantId;
+
+                    // Update quantity if item exists
+                    $newQuantity = $existingItem->quantity + $request->quantity;
+                    if ($newQuantity > $variant->quantity) {
+                        return redirect()->back()->with('error', 'Số lượng sản phẩm vượt quá tồn kho.');
+                    }
+
+                    // Log the update
+                    Log::info('Updating cart item with new variant', [
+                        'cart_item_id' => $existingItem->id,
+                        'current_variant_ids' => $existingItem->product_variant_id,
+                        'new_variant_id' => $variantId,
+                        'new_variant_ids' => $newVariantIds,
+                        'new_quantity' => $newQuantity,
+                        'variant_price' => $variant->price
+                    ]);
+
+                    $existingItem->update([
+                        'product_variant_id' => $newVariantIds,
+                        'quantity' => $newQuantity
+                    ]);
+                } else {
+                    // Update quantity if variant already exists
+                    $newQuantity = $existingItem->quantity + $request->quantity;
+                    if ($newQuantity > $variant->quantity) {
+                        return redirect()->back()->with('error', 'Số lượng sản phẩm vượt quá tồn kho.');
+                    }
+                    $existingItem->update(['quantity' => $newQuantity]);
+                }
+            } else {
+                // Create new cart item
+                CartItem::create([
+                    'cart_id' => $cart->id,
+                    'product_id' => $request->product_id,
+                    'product_variant_id' => $variantId,
+                    'quantity' => $request->quantity,
+                ]);
             }
         } else {
-            // Check product quantity
-            if ($product->quantity < $request->quantity) {
-                return back()->with('error', 'Số lượng sản phẩm trong kho không đủ.');
+            // For non-variant products, check product stock directly
+            if ($request->quantity > $product->quantity) {
+                return redirect()->back()->with('error', 'Sản phẩm không còn tồn hàng.');
+            }
+
+            // Get or create user's cart
+            $cart = Cart::firstOrCreate(['user_id' => $userId]);
+
+            // Check if the item already exists in the cart
+            $existingItem = CartItem::where('cart_id', $cart->id)
+                ->where('product_id', $request->product_id)
+                ->whereNull('product_variant_id')
+                ->first();
+
+            if ($existingItem) {
+                // Update quantity if item exists
+                $newQuantity = $existingItem->quantity + $request->quantity;
+                if ($newQuantity > $product->quantity) {
+                    return redirect()->back()->with('error', 'Số lượng sản phẩm vượt quá tồn kho.');
+                }
+                $existingItem->update(['quantity' => $newQuantity]);
+            } else {
+                // Create new cart item
+                CartItem::create([
+                    'cart_id' => $cart->id,
+                    'product_id' => $request->product_id,
+                    'product_variant_id' => null,
+                    'quantity' => $request->quantity,
+                ]);
             }
         }
 
-        // Get or create cart
-        $cart = Cart::firstOrCreate(
-            ['user_id' => Auth::id()],
-            ['user_id' => Auth::id()]
-        );
-
-        // Check if product already exists in cart with the same variant
-        $existingItem = CartItem::where('cart_id', $cart->id)
-            ->where('product_id', $request->product_id)
-            ->where('product_variant_id', $variant ? $variant->id : null)
-            ->first();
-
-        if ($existingItem) {
-            // Update quantity if product exists
-            $newQuantity = $existingItem->quantity + $request->quantity;
-
-            // Check if new quantity exceeds available stock
-            $maxQuantity = $variant ? $variant->quantity : $product->quantity;
-            if ($newQuantity > $maxQuantity) {
-                return back()->with('error', 'Số lượng sản phẩm trong kho không đủ.');
-            }
-
-            $existingItem->update(['quantity' => $newQuantity]);
-            Log::info('Updated existing cart item', [
-                'item_id' => $existingItem->id,
-                'product_id' => $existingItem->product_id,
-                'variant_id' => $existingItem->product_variant_id,
-                'new_quantity' => $newQuantity
-            ]);
-        } else {
-            // Create new cart item
-            $cartItem = CartItem::create([
-                'cart_id' => $cart->id,
-                'product_id' => $request->product_id,
-                'product_variant_id' => $variant ? $variant->id : null,
-                'quantity' => $request->quantity,
-            ]);
-            Log::info('Created new cart item', [
-                'item_id' => $cartItem->id,
-                'product_id' => $cartItem->product_id,
-                'variant_id' => $cartItem->product_variant_id,
-                'quantity' => $cartItem->quantity
-            ]);
-        }
-
-        return back()->with('success', 'Sản phẩm đã được thêm vào giỏ hàng.');
+        return redirect()->back()->with('success', 'Sản phẩm đã được thêm vào giỏ hàng.');
     }
 
     // Update Cart Item Quantity
