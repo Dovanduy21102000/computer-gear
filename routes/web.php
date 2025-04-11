@@ -33,7 +33,7 @@ use App\Http\Controllers\Admin\ProfileController;
 
 
 use App\Http\Controllers\Admin\CommentController;
-
+use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SpecificationController;
 
 use App\Http\Controllers\OrderItemController;
@@ -104,15 +104,24 @@ Route::prefix('admin')->group(function () {
                 ->name('bulkUpdate');
         });
 
-        // Route album image
-        Route::prefix('album')->name('backend.album.')->group(function () {
-            Route::get('product/{product_id}', [AlbumImageController::class, 'index'])->name('index');
-            Route::get('product/{product_id}/create', [AlbumImageController::class, 'create'])->name('create');
-            Route::post('product/{product_id}', [AlbumImageController::class, 'store'])->name('store');
-            Route::get('edit/{id}', [AlbumImageController::class, 'edit'])->name('edit');
-            Route::put('update/{id}', [AlbumImageController::class, 'update'])->name('update');
-            Route::delete('destroy/{id}', [AlbumImageController::class, 'destroy'])->name('destroy');
+        
+        Route::prefix('products/{product_id}/images')->name('backend.product_images.')->group(function () {
+            // Trang danh sách ảnh
+            Route::get('/', [ProductImageController::class, 'index'])->name('index');
+        
+            // Thêm ảnh mới
+            Route::get('/create', [ProductImageController::class, 'create'])->name('create');
+            Route::post('/', [ProductImageController::class, 'store'])->name('store');
+        
+            // Sửa toàn bộ album ảnh
+            Route::get('/edit', [ProductImageController::class, 'edit'])->name('edit');  // ✅ không có {key}
+            Route::put('/', [ProductImageController::class, 'update'])->name('update');  // ✅ không có {key}
+        
+            // Xoá ảnh cụ thể theo index trong mảng
+            Route::delete('/{key}', [ProductImageController::class, 'destroy'])->name('destroy');
         });
+        
+
 
         // Đảm bảo rằng route này đã được thêm vào trong routes/web.php
         Route::put('/comments/{id}/toggle-status', [CommentController::class, 'toggleStatus'])->name('admin.comments.toggleStatus');
