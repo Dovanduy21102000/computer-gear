@@ -22,48 +22,69 @@ class ProductClientController extends Controller
     {
         $query = Product::where('status', true);
         $category = null;
-
-        // Lọc theo danh mục nếu có category_id
-        if ($request->filled('category_id')) {
-            $category = Category::where('is_active', 1)->find($request->category_id);
+    
+        // Nếu có truyền category dạng slug (?category=printer)
+        if ($request->filled('category')) {
+            $category = Category::where('slug', $request->category)
+                ->where('is_active', 1)
+                ->first();
+    
             if ($category) {
                 $query->where('category_id', $category->id);
+            } else {
+                // Không tìm thấy category theo slug → trả về danh sách rỗng
+                $query->whereRaw('0 = 1');
             }
         }
-
+    
+        // Nếu truyền dạng category_id (?category_id=5)
+        elseif ($request->filled('category_id')) {
+            $category = Category::where('is_active', 1)->find($request->category_id);
+    
+            if ($category) {
+                $query->where('category_id', $category->id);
+            } else {
+                // Không tìm thấy category theo ID → trả về danh sách rỗng
+                $query->whereRaw('0 = 1');
+            }
+        }
+    
         // Lọc theo thương hiệu nếu có brand[]
         if ($request->filled('brand')) {
-            $brandsFilter = is_array($request->brand) ? $request->brand : explode(',', $request->brand);
-            $brandsFilter = array_filter(array_map('intval', $brandsFilter)); // Chỉ lấy số hợp lệ
-
+            $brandsFilter = is_array($request->brand)
+                ? $request->brand
+                : explode(',', $request->brand);
+    
+            $brandsFilter = array_filter(array_map('intval', $brandsFilter));
+    
             if (!empty($brandsFilter)) {
                 $query->whereIn('brand_id', $brandsFilter);
             }
         }
-
-
-        // Áp dụng bộ lọc vào danh sách sản phẩm
+    
         $products = $query->paginate(20);
-
-
-
-        // Lấy danh sách danh mục cha (chỉ danh mục đang hoạt động)
-        $categories = Category::where('is_active', true)->whereNull('parent_id')->with('children')->get();
-
+    
+        // Danh mục cấp cha
+        $categories = Category::where('is_active', true)
+            ->whereNull('parent_id')
+            ->with('children')
+            ->get();
+    
+        // Lọc danh sách brand có sản phẩm trong category (nếu có)
         $brandsQuery = Brand::where('is_active', 1);
-
         if ($category) {
             $brandsQuery->whereHas('products', function ($query) use ($category) {
                 $query->where('category_id', $category->id);
             });
         }
-
         $brands = $brandsQuery->get();
-
+    
         $template = 'fontend.products.index';
-
+    
         return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category'));
     }
+    
+    
 
 
     public function show($slug)

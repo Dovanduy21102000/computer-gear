@@ -247,17 +247,12 @@
                                                 <div class="flex-center-between mb-1">
                                                     <div class="prodcut-price">
                                                         @if ($product->price_sale)
-                                                            <div class="text-danger fw-bold fs-5">
-                                                                {{ number_format($product->price_sale, 0, ',', '.') }}đ
-                                                            </div>
-                                                            <div>
-                                                                <del class="text-muted fw-semibold fs-6 me-2">
-                                                                    {{ number_format($product->price, 0, ',', '.') }}đ
-                                                                </del>
-                                                                <span class="badge bg-danger text-white fs-6 fw-bold">
-                                                                    -{{ round((1 - $product->price_sale / $product->price) * 100) }}%
-                                                                </span>
-                                                            </div>
+                                                         
+                                                                <div class="prodcut-price d-flex align-items-center position-relative">
+                                                                    <ins class="font-size-20 text-red text-decoration-none">{{ number_format($product->price_sale)  }}đ</ins>
+                                                                    <del class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                                                </div> 
+
                                                         @else
                                                             <div class="text-dark fw-bold fs-5">
                                                                 {{ number_format($product->price, 0, ',', '.') }}đ
