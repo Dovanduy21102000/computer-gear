@@ -18,7 +18,8 @@
                         <a href="{{ route('backend.product_images.edit', ['product_id' => $product->id]) }}" class="btn btn-warning mb-3">
                             <i class="bi bi-pencil-square"></i> Chỉnh sửa Album
                         </a>
-
+                        
+                        
                         <div class="image-gallery">
                             @forelse ($images as $index => $image)
                                 <div class="image-item">

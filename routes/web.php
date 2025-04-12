@@ -127,6 +127,8 @@ Route::prefix('admin')->group(function () {
             Route::delete('/{key}', [ProductImageController::class, 'destroy'])->name('destroy');
         });
         
+        
+        
 
 
         // Đảm bảo rằng route này đã được thêm vào trong routes/web.php
