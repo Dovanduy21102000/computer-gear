@@ -46,36 +46,43 @@
                     <form action="{{ route('client.contacts.store') }}" method="POST">
                         @csrf
                         <div class="row">
+                            {{-- Họ và tên --}}
                             <div class="col-md-6">
                                 <div class="mb-4">
                                     <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="name" value="{{ old('name') }}" required>
+                                    <input type="text" class="form-control" name="name"
+                                        value="{{ old('name', Auth::check() ? Auth::user()->name : '') }}" required>
                                     @error('name')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                             </div>
-
+                    
+                            {{-- Email --}}
                             <div class="col-md-6">
                                 <div class="mb-4">
                                     <label class="form-label">Email <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" name="email" value="{{ old('email') }}" required>
+                                    <input type="email" class="form-control" name="email"
+                                        value="{{ old('email', Auth::check() ? Auth::user()->email : '') }}" required>
                                     @error('email')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                             </div>
-
+                    
+                            {{-- Số điện thoại --}}
                             <div class="col-md-6">
                                 <div class="mb-4">
                                     <label class="form-label">Số điện thoại</label>
-                                    <input type="text" class="form-control" name="phone" value="{{ old('phone') }}">
+                                    <input type="text" class="form-control" name="phone"
+                                        value="{{ old('phone', Auth::check() ? Auth::user()->phone ?? '' : '') }}">
                                     @error('phone')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                             </div>
-
+                    
+                            {{-- Chủ đề --}}
                             <div class="col-md-6">
                                 <div class="mb-4">
                                     <label class="form-label">Chủ đề</label>
@@ -85,7 +92,8 @@
                                     @enderror
                                 </div>
                             </div>
-
+                    
+                            {{-- Nội dung tin nhắn --}}
                             <div class="col-md-12">
                                 <div class="mb-4">
                                     <label class="form-label">Nội dung tin nhắn <span class="text-danger">*</span></label>
@@ -96,10 +104,13 @@
                                 </div>
                             </div>
                         </div>
+                    
+                        {{-- Nút gửi --}}
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary-dark-w px-5">Gửi tin nhắn</button>
                         </div>
                     </form>
+                    
                 </div>
             </div>
         </div>

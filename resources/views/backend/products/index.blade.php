@@ -128,7 +128,7 @@
                                                         class="btn btn-warning btn-sm">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
-                                                    <a href="{{ route('backend.album.index', ['product_id' => $product->id]) }}"
+                                                    <a href="{{ route('backend.product_images.index', ['product_id' => $product->id]) }}"
                                                         class="btn btn-primary btn-sm">
                                                         <i class="bi bi-image"></i> 
                                                     </a>

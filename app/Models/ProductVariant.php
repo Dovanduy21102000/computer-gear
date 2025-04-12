@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 class ProductVariant extends Model
 {
     use HasFactory;
@@ -16,6 +17,10 @@ class ProductVariant extends Model
         'quantity',
         'image',
         'status',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     // Quan hệ với model Product
@@ -37,4 +42,3 @@ class ProductVariant extends Model
         return $this->belongsToMany(AttributeValue::class, 'product_variant_attribute_values', 'product_variant_id', 'attribute_value_id');
     }
 }
-

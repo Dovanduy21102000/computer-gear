@@ -88,7 +88,10 @@
 
             <!-- Add hidden input for selected items -->
             @if (request()->has('selected_items'))
-                @foreach (request()->input('selected_items') as $itemId)
+                @php
+                    $selectedItems = explode(',', request()->input('selected_items'));
+                @endphp
+                @foreach ($selectedItems as $itemId)
                     <input type="hidden" name="selected_items[]" value="{{ $itemId }}">
                 @endforeach
             @endif
@@ -121,7 +124,9 @@
                                                             @php
                                                                 $groupedAttributes = [];
                                                                 foreach (
-                                                                    $item->productVariant->attributeValues
+                                                                    $item->productVariant->attributeValues->sortBy(
+                                                                        'attribute_id',
+                                                                    )
                                                                     as $attributeValue
                                                                 ) {
                                                                     if (isset($attributeValue->attribute)) {
@@ -132,6 +137,7 @@
                                                                         }
                                                                     }
                                                                 }
+                                                                ksort($groupedAttributes); // Sort attributes by name
                                                                 $formattedAttributes = [];
                                                                 foreach ($groupedAttributes as $name => $value) {
                                                                     $formattedAttributes[] = $name . ': ' . $value;
@@ -171,13 +177,11 @@
 
                                             if ($appliedCoupon) {
                                                 if ($appliedCoupon['type'] === 'percentage') {
-                                                    // Giảm giá theo phần trăm, giới hạn theo maximum_amount nếu có
                                                     $discount = min(
                                                         $subtotal * ($appliedCoupon['value'] / 100),
                                                         $appliedCoupon['maximum_amount'] ?? $subtotal,
                                                     );
                                                 } else {
-                                                    // Giảm giá cố định
                                                     $discount = min($appliedCoupon['value'], $subtotal);
                                                 }
                                             }

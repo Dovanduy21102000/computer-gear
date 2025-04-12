@@ -40,6 +40,14 @@ class CheckoutController extends Controller
         // Get selected items from the cart
         $selectedItemIds = $request->input('selected_items', []);
 
+        // Convert string to array if it's a comma-separated string
+        if (is_string($selectedItemIds)) {
+            $selectedItemIds = explode(',', $selectedItemIds);
+        }
+
+        // Ensure selectedItemIds is an array
+        $selectedItemIds = is_array($selectedItemIds) ? $selectedItemIds : [];
+
         // If no items are selected, show error
         if (empty($selectedItemIds)) {
             return redirect()->route('cart.index')->with('error', 'Vui lòng chọn sản phẩm để thanh toán');
@@ -51,13 +59,101 @@ class CheckoutController extends Controller
             ->whereIn('id', $selectedItemIds)
             ->get();
 
-        if ($cartItems->isEmpty()) {
+        // Process cart items to handle multiple variants
+        $processedCartItems = collect();
+        foreach ($cartItems as $item) {
+            // If the item has multiple variants (stored as "id1 | id2")
+            if (strpos($item->product_variant_id, '|') !== false) {
+                $variantIds = array_map('trim', explode('|', $item->product_variant_id));
+                foreach ($variantIds as $variantId) {
+                    // Create a new cart item for each variant
+                    $variantItem = clone $item;
+                    $variantItem->product_variant_id = $variantId;
+                    $variantItem->productVariant = ProductVariant::with('attributeValues.attribute')
+                        ->find($variantId);
+                    $processedCartItems->push($variantItem);
+                }
+            } else {
+                $processedCartItems->push($item);
+            }
+        }
+
+        // Log the processed cart items for debugging
+        Log::info('Processed cart items in checkout:', [
+            'selected_ids' => $selectedItemIds,
+            'cart_items' => $processedCartItems->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'variant_id' => $item->product_variant_id,
+                    'quantity' => $item->quantity
+                ];
+            })->toArray()
+        ]);
+
+        // Validate products status and availability
+        $invalidItems = [];
+        $validCartItems = $processedCartItems->filter(function ($item) use (&$invalidItems) {
+            // Check if product exists and is active
+            if (!$item->product) {
+                $invalidItems[] = 'Sản phẩm không tồn tại';
+                $item->delete();
+                return false;
+            }
+
+            // Log product status for debugging
+            Log::info('Product status check:', [
+                'product_id' => $item->product->id,
+                'product_name' => $item->product->name,
+                'status' => $item->product->status,
+                'variant_id' => $item->productVariant ? $item->productVariant->id : null,
+                'variant_status' => $item->productVariant ? $item->productVariant->status : null
+            ]);
+
+            if (!$item->product->status) {
+                $invalidItems[] = $item->product->name . ' (Sản phẩm không khả dụng)';
+                $item->delete();
+                return false;
+            }
+
+            // Check product quantity
+            $availableQuantity = $item->productVariant
+                ? $item->productVariant->quantity
+                : $item->product->quantity;
+
+            if ($availableQuantity < $item->quantity) {
+                $invalidItems[] = $item->product->name .
+                    ($item->productVariant ? ' - ' . $item->productVariant->name : '') .
+                    ' (Chỉ còn ' . $availableQuantity . ' sản phẩm)';
+                $item->delete();
+                return false;
+            }
+
+            // If product has variant, check variant status
+            if ($item->productVariant) {
+                if (!$item->productVariant->status) {
+                    $invalidItems[] = $item->product->name . ' - ' . $item->productVariant->name . ' (Biến thể không khả dụng)';
+                    $item->delete();
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        // If there are invalid items, redirect back to cart with error message
+        if (!empty($invalidItems)) {
+            $errorMessage = 'Các sản phẩm sau không khả dụng hoặc không đủ số lượng: ' . implode(', ', $invalidItems);
+            return redirect()->route('cart.index')->with('error', $errorMessage);
+        }
+
+        if ($validCartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Không có sản phẩm hợp lệ.');
         }
 
         // Calculate the total price of selected items
         $totalPrice = 0;
-        foreach ($cartItems as $item) {
+        foreach ($validCartItems as $item) {
             $price = $item->productVariant ?
                 ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
             $totalPrice += $price * $item->quantity;
@@ -103,17 +199,17 @@ class CheckoutController extends Controller
         }
 
         $template = 'fontend.checkout.index';
-        return view('fontend.layout', compact(
-            'template',
-            'provinces',
-            'districtsByProvince',
-            'cartItems',
-            'appliedCoupon',
-            'discount',
-            'user',
-            'totalPrice',
-            'finalPrice'
-        ));
+        return view('fontend.layout', [
+            'template' => $template,
+            'provinces' => $provinces,
+            'districtsByProvince' => $districtsByProvince,
+            'cartItems' => $processedCartItems,
+            'appliedCoupon' => $appliedCoupon,
+            'discount' => $discount,
+            'user' => $user,
+            'totalPrice' => $totalPrice,
+            'finalPrice' => $finalPrice
+        ]);
     }
 
 
@@ -171,6 +267,10 @@ class CheckoutController extends Controller
         if (isset($data['selected_items']) && is_array($data['selected_items'])) {
             $selectedItems = $data['selected_items'];
         }
+        // If selected_items is a string (comma-separated), convert to array
+        else if (isset($data['selected_items']) && is_string($data['selected_items'])) {
+            $selectedItems = explode(',', $data['selected_items']);
+        }
         // Otherwise, extract from cart data
         else if (isset($data['cart']) && is_array($data['cart'])) {
             foreach ($data['cart'] as $itemId => $itemData) {
@@ -188,8 +288,8 @@ class CheckoutController extends Controller
             }
         }
 
-        // Add selected_items to the data
-        $data['selected_items'] = $selectedItems;
+        // Ensure selected_items is always an array
+        $data['selected_items'] = is_array($selectedItems) ? $selectedItems : [];
 
         return view('fontend.checkout.post', ['url' => $url, 'data' => $data]);
     }

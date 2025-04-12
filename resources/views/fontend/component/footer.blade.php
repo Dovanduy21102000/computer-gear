@@ -1,6 +1,10 @@
  <!-- ========== FOOTER ========== -->
  <footer>
-
+<style>
+    .row {
+    align-items: stretch;
+}
+</style>
      <!-- Footer-newsletter -->
      <div class="bg-primary py-3">
          <div class="container">
@@ -127,44 +131,47 @@
                      </div>
                  </div>
                  <div class="col-lg-7">
-                    <div class="row">
-                        <div class="col-12 col-md mb-4 mb-md-0">
+                    <div class="row align-items-stretch">
+                        <!-- Tìm kiếm nhanh -->
+                        <div class="col-12 col-md mb-4 mb-md-0 d-flex flex-column h-100">
                             <h6 class="mb-3 font-weight-bold">Tìm kiếm nhanh</h6>
                             <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent">
-                                <li><a class="list-group-item list-group-item-action">Laptop & Máy tính</a></li>
-                                <li><a class="list-group-item list-group-item-action">Máy ảnh & Nhiếp ảnh</a></li>
-                                <li><a class="list-group-item list-group-item-action">Điện thoại thông minh & Máy tính bảng</a></li>
-                                <li><a class="list-group-item list-group-item-action">Trò chơi điện tử & Máy chơi game</a></li>
-                                <li><a class="list-group-item list-group-item-action">Tivi & Âm thanh</a></li>
-                                <li><a class="list-group-item list-group-item-action">Thiết bị thông minh</a></li>
-                                <li><a class="list-group-item list-group-item-action">Đồ điện tử & GPS ô tô</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'laptop']) }}">Laptop & Máy tính</a></li>
+                                {{-- <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'camera']) }}">Máy ảnh & Nhiếp ảnh</a></li> --}}
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'smartphone']) }}">Máy tính bảng</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'gaming']) }}">Game & Máy chơi game</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'tv-audio']) }}">TV & Âm thanh</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'smart-devices']) }}">Thiết bị thông minh</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'car-electronics']) }}">Thiết bị xe hơi & GPS</a></li>
                             </ul>
                         </div>
                 
-                        <div class="col-12 col-md mb-4 mb-md-0">
-                            <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent mt-md-6">
-                                <li><a class="list-group-item list-group-item-action">Máy in & Mực in</a></li>
-                                <li><a class="list-group-item list-group-item-action">Phần mềm</a></li>
-                                <li><a class="list-group-item list-group-item-action">Văn phòng phẩm</a></li>
-                                <li><a class="list-group-item list-group-item-action">Linh kiện máy tính</a></li>
-                                <li><a class="list-group-item list-group-item-action">Phụ kiện</a></li>
+                        <!-- Danh mục thiết bị - phụ kiện -->
+                        <div class="col-12 col-md mb-4 mb-md-0 d-flex flex-column h-100">
+                            <h6 class="mb-3 font-weight-bold">Danh mục thiết bị - phụ kiện</h6>
+                            <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent">
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'printer']) }}">Máy in & Mực in</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'software']) }}">Phần mềm</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'stationery']) }}">Văn phòng phẩm</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'components']) }}">Linh kiện máy tính</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'accessories']) }}">Phụ kiện</a></li>
                             </ul>
                         </div>
                 
-                        <div class="col-12 col-md mb-4 mb-md-0">
+                        <!-- Chăm sóc khách hàng -->
+                        <div class="col-12 col-md mb-4 mb-md-0 d-flex flex-column h-100">
                             <h6 class="mb-3 font-weight-bold">Chăm sóc khách hàng</h6>
                             <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent">
-                                <li><a class="list-group-item list-group-item-action">Tài khoản của tôi</a></li>
-                                <li><a class="list-group-item list-group-item-action">Theo dõi đơn hàng</a></li>
-                                <li><a class="list-group-item list-group-item-action">Danh sách yêu thích</a></li>
-                                <li><a class="list-group-item list-group-item-action">Dịch vụ khách hàng</a></li>
-                                <li><a class="list-group-item list-group-item-action">Trả hàng / Đổi hàng</a></li>
-                                <li><a class="list-group-item list-group-item-action">Câu hỏi thường gặp</a></li>
-                                <li><a class="list-group-item list-group-item-action">Hỗ trợ sản phẩm</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('user.show') }}">Tài khoản của tôi</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('order.track') }}">Theo dõi đơn hàng</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('client.contacts.index') }}">Liên hệ & Hỗ trợ</a></li>
+                                <li><a class="list-group-item list-group-item-action" href="{{ route('faqs') }}">Câu hỏi thường gặp</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
+                
+                
                 
              </div>
          </div>
