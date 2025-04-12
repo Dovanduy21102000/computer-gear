@@ -144,11 +144,10 @@
 
                         @foreach ($images as $image)
                             <div class="js-slide">
-                                <!-- Main product image -->
-                                <img class="img-fluid" src="{{ asset('storage/' . $image->image) }}"
-                                    alt="Product Image">
+                                <img class="img-fluid" src="{{ asset('storage/' . $image) }}" alt="Product Image">
                             </div>
                         @endforeach
+
                     </div>
 
                     <!-- Thumbnail slider for syncing -->
@@ -159,11 +158,11 @@
 
                         @foreach ($images as $image)
                             <div class="js-slide">
-                                <!-- Thumbnails for product images -->
-                                <img class="img-fluid" src="{{ asset('storage/' . $image->image) }}"
+                                <img class="img-fluid" src="{{ asset('storage/' . $image) }}"
                                     alt="Product Image Thumbnail">
                             </div>
                         @endforeach
+
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 col-xl-4 mb-md-6 mb-lg-0">
