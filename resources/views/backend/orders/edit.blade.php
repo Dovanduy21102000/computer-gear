@@ -183,12 +183,10 @@
                                         @elseif($order->status == 'processing')
                                             <option value="processing" selected>Đang xử lý</option>
                                             <option value="delivered">Đang giao hàng</option>
-                                            <option value="completed">Hoàn thành</option>
                                             <option value="canceled">Hủy đơn</option>
                                             <!-- Trạng thái "delivered" không thể quay lại trạng thái "processing", chỉ có thể chuyển sang "completed","delivered" hoặc "canceled" -->
                                         @elseif($order->status == 'delivered')
                                             <option value="delivered" selected>Đang giao hàng</option>
-                                            <option value="completed">Hoàn thành</option>
                                             <option value="canceled">Hủy đơn</option>
                                             <!-- Trạng thái "completed" không thể thay đổi, chỉ có thể giữ nguyên -->
                                         @elseif($order->status == 'completed')

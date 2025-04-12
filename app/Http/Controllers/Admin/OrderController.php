@@ -133,7 +133,9 @@ class OrderController extends Controller
     {
         // Lấy trạng thái mới từ request hoặc giữ nguyên trạng thái cũ
         $newStatus = $request->input('status', $order->status);
-
+        if ($newStatus === 'completed') {
+            return redirect()->back()->with('error', 'Không được cập nhật trạng thái hoàn thành bằng tay.');
+        }
         // Định nghĩa các trạng thái hợp lệ khi chuyển đổi
         $validTransitions = [
             'pending' => ['pending', 'processing', 'canceled'],
@@ -153,7 +155,15 @@ class OrderController extends Controller
             if ($newStatus === $order->status) {
                 return redirect()->back()->with('error', 'Bạn không thể chỉnh sửa đơn hàng đã hoàn thành hoặc bị hủy.');
             }
-
+            // Nếu chuyển sang trạng thái "canceled", hoàn lại số lượng sản phẩm
+            if ($newStatus === 'canceled') {
+                foreach ($order->orderItems as $item) {
+                    $product = $item->product;
+                    if ($product) {
+                        $product->increment('quantity', $item->quantity);
+                    }
+                }
+            }
             // Chỉ cho phép cập nhật trạng thái nếu hợp lệ
             try {
                 $order->update(['status' => $newStatus]);

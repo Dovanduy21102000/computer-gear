@@ -27,6 +27,9 @@ class CheckoutController extends Controller
             return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
         }
 
+        // Clear any existing coupon from session when entering checkout page
+        session()->forget('coupon');
+
         $user = User::find($userId);
         $cart = Cart::where('user_id', $userId)->first();
 
@@ -161,6 +164,33 @@ class CheckoutController extends Controller
 
     private function redirectToPost($url, $data)
     {
+        // Extract selected items from the cart data
+        $selectedItems = [];
+
+        // Check if selected_items is already in the data
+        if (isset($data['selected_items']) && is_array($data['selected_items'])) {
+            $selectedItems = $data['selected_items'];
+        }
+        // Otherwise, extract from cart data
+        else if (isset($data['cart']) && is_array($data['cart'])) {
+            foreach ($data['cart'] as $itemId => $itemData) {
+                if (isset($itemData['id'])) {
+                    $selectedItems[] = $itemData['id'];
+                }
+            }
+        }
+        // Check for cart[item_id][id] format
+        else {
+            foreach ($data as $key => $value) {
+                if (strpos($key, 'cart[') === 0 && strpos($key, '][id]') !== false) {
+                    $selectedItems[] = $value;
+                }
+            }
+        }
+
+        // Add selected_items to the data
+        $data['selected_items'] = $selectedItems;
+
         return view('fontend.checkout.post', ['url' => $url, 'data' => $data]);
     }
 
@@ -289,9 +319,6 @@ class CheckoutController extends Controller
                 } else {
                     $item->product->decrement('quantity', $item->quantity);
                 }
-
-                // Update sales count
-                $item->product->increment('quantity_sold', $item->quantity);
             }
 
             // Clear cart
@@ -346,7 +373,7 @@ class CheckoutController extends Controller
             }
         }
 
-        // Store coupon details in session
+        // Store coupon details in session with a timestamp to track when it was applied
         session([
             'coupon' => [
                 'id' => $coupon->id,
@@ -354,7 +381,8 @@ class CheckoutController extends Controller
                 'type' => $coupon->type, // 'fixed' or 'percentage'
                 'value' => $coupon->price, // Discount value (amount or percentage)
                 'maximum_amount' => $coupon->maximum_amount, // Limit discount for percentage type
-                'min_order_total' => $coupon->min_order_total // Minimum order value required
+                'min_order_total' => $coupon->min_order_total, // Minimum order value required
+                'applied_at' => now()->timestamp // Add timestamp to track when coupon was applied
             ]
         ]);
 
@@ -368,5 +396,11 @@ class CheckoutController extends Controller
 
         $template = 'fontend.checkout.success';
         return view('fontend.layout', compact('template', 'order'));
+    }
+
+    public function removeCoupon()
+    {
+        session()->forget('coupon');
+        return back()->with('success', 'Mã khuyến mại đã được xóa!');
     }
 }
