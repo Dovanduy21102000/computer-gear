@@ -281,56 +281,26 @@ class CartController extends Controller
             // Get or create user's cart
             $cart = Cart::firstOrCreate(['user_id' => $userId]);
 
-            // Check if the item already exists in the cart
+            // Check if the item with this exact variant already exists in the cart
             $existingItem = CartItem::where('cart_id', $cart->id)
                 ->where('product_id', $request->product_id)
+                ->where('product_variant_id', $variantId)
                 ->first();
 
             if ($existingItem) {
-                // Check if the variant ID already exists in the string
-                $existingVariantIds = $existingItem->product_variant_id ? explode(' | ', $existingItem->product_variant_id) : [];
-
-                if (!in_array($variantId, $existingVariantIds)) {
-                    // Append the new variant ID
-                    $newVariantIds = $existingItem->product_variant_id ?
-                        $existingItem->product_variant_id . ' | ' . $variantId :
-                        $variantId;
-
-                    // Update quantity if item exists
-                    $newQuantity = $existingItem->quantity + $request->quantity;
-                    if ($newQuantity > $variant->quantity) {
-                        return redirect()->back()->with('error', 'Số lượng sản phẩm vượt quá tồn kho.');
-                    }
-
-                    // Log the update
-                    Log::info('Updating cart item with new variant', [
-                        'cart_item_id' => $existingItem->id,
-                        'current_variant_ids' => $existingItem->product_variant_id,
-                        'new_variant_id' => $variantId,
-                        'new_variant_ids' => $newVariantIds,
-                        'new_quantity' => $newQuantity,
-                        'variant_price' => $variant->price
-                    ]);
-
-                    $existingItem->update([
-                        'product_variant_id' => $newVariantIds,
-                        'quantity' => $newQuantity
-                    ]);
-                } else {
-                    // Update quantity if variant already exists
-                    $newQuantity = $existingItem->quantity + $request->quantity;
-                    if ($newQuantity > $variant->quantity) {
-                        return redirect()->back()->with('error', 'Số lượng sản phẩm vượt quá tồn kho.');
-                    }
-                    $existingItem->update(['quantity' => $newQuantity]);
+                // Update quantity if variant exists
+                $newQuantity = $existingItem->quantity + $request->quantity;
+                if ($newQuantity > $variant->quantity) {
+                    return redirect()->back()->with('error', 'Số lượng sản phẩm vượt quá tồn kho.');
                 }
+                $existingItem->update(['quantity' => $newQuantity]);
             } else {
-                // Create new cart item
+                // Create new cart item if it doesn't exist
                 CartItem::create([
                     'cart_id' => $cart->id,
                     'product_id' => $request->product_id,
                     'product_variant_id' => $variantId,
-                    'quantity' => $request->quantity,
+                    'quantity' => $request->quantity
                 ]);
             }
         } else {
