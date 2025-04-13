@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CancelRequestStatusMail;
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -155,15 +158,7 @@ class OrderController extends Controller
             if ($newStatus === $order->status) {
                 return redirect()->back()->with('error', 'Bạn không thể chỉnh sửa đơn hàng đã hoàn thành hoặc bị hủy.');
             }
-            // Nếu chuyển sang trạng thái "canceled", hoàn lại số lượng sản phẩm
-            if ($newStatus === 'canceled') {
-                foreach ($order->orderItems as $item) {
-                    $product = $item->product;
-                    if ($product) {
-                        $product->increment('quantity', $item->quantity);
-                    }
-                }
-            }
+
             // Chỉ cho phép cập nhật trạng thái nếu hợp lệ
             try {
                 $order->update(['status' => $newStatus]);
@@ -214,18 +209,79 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Order $oder)
+    public function cancelTabs()
     {
-        //
+        $canceledOrders = Order::where('status', 'canceled')
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10);
+
+        $pendingCancelOrders = Order::where('cancel_requested', true)
+            ->where('status', 'processing')
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10);
+        $template = 'backend.orders.canceled';
+        return view('backend.dashboard.layout', compact('canceledOrders', 'pendingCancelOrders', 'template'));
     }
-    /**
-     * Force Remove the specified resource from storage.
-     */
-    public function forceDestroy(Order $oder)
+
+
+    public function approveCancel($id)
     {
-        //
+        $order = Order::findOrFail($id);
+
+        if ($order->status === 'processing' && $order->cancel_requested) {
+            // Cộng lại số lượng sản phẩm
+            foreach ($order->orderItems as $item) {
+                if ($item->product_variant_id) {
+                    // Sản phẩm biến thể
+                    $variant = ProductVariant::find($item->product_variant_id);
+                    if ($variant) {
+                        $variant->quantity += $item->quantity;
+                        $variant->save();
+                    }
+
+                    // Cộng lại cho sản phẩm cha
+                    $product = Product::find($item->product_id);
+                    if ($product) {
+                        $product->quantity += $item->quantity;
+                        $product->save();
+                    }
+                } else {
+                    // Sản phẩm thường
+                    $product = Product::find($item->product_id);
+                    if ($product) {
+                        $product->quantity += $item->quantity;
+                        $product->save();
+                    }
+                }
+            }
+
+            // Cập nhật trạng thái đơn
+            $order->status = 'canceled';
+            $order->cancel_requested = false;
+            $order->save();
+
+            // Gửi email thông báo đã duyệt huỷ
+            Mail::to($order->shipping_email)->send(new CancelRequestStatusMail($order, true));
+
+            return back()->with('success', 'Đã duyệt yêu cầu huỷ đơn hàng.');
+        }
+
+        return back()->with('error', 'Không thể duyệt yêu cầu.');
+    }
+
+    public function rejectCancel($id)
+    {
+        $order = Order::findOrFail($id);
+        if ($order->status === 'processing' && $order->cancel_requested) {
+            $order->cancel_requested = false;
+            $order->cancel_reason = null;
+            $order->save();
+
+            // Gửi email thông báo đã từ chối huỷ
+            Mail::to($order->shipping_email)->send(new CancelRequestStatusMail($order, false));
+
+            return back()->with('success', 'Đã từ chối yêu cầu huỷ đơn hàng.');
+        }
+        return back()->with('error', 'Không thể từ chối yêu cầu.');
     }
 }

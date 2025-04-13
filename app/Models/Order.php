@@ -37,7 +37,6 @@ class Order extends Model
 
     ];
 
-    // Liên kết với bảng users (Người dùng)
     public function user()
     {
         return $this->belongsTo(User::class);

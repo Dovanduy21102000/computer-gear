@@ -1,5 +1,6 @@
 <main id="content" role="main">
     <!-- Slider Section -->
+     
     <div class="mb-4">
         <div class="container overflow-hidden">
             <div class="js-slick-carousel u-slick" data-autoplay="true" data-speed="3000"
@@ -326,62 +327,48 @@
                     <aside class="mb-8">
                         <div class="position-relative">
                             <div class="border-bottom border-color-1 mb-4">
-                                <h3 class="section-title mb-0 pb-3 font-size-18">Bài viết</h3>
+                                <h3 class="section-title mb-0 pb-3 font-size-18">Bài viết mới</h3>
                             </div>
                             <div class="js-slick-carousel u-slick position-static overflow-hidden u-slick-overflow-visble"
                                 data-slides-show="1" data-slides-scroll="1"
                                 data-arrows-classes="position-absolute top-0 font-size-17 u-slick__arrow-normal top-10"
                                 data-arrow-left-classes="fa fa-angle-left right-1"
                                 data-arrow-right-classes="fa fa-angle-right right-0">
-                                <div class="js-slide post-group">
-                                    <div class="post-item">
-                                        <div class="product-item__body pb-xl-2">
-                                            <div class="mb-3">
-                                                <a href="https://transvelo.github.io/electro-html/2.0/html/blog/single-blog-post.html"
-                                                    class="d-block text-center"><img class="img-fluid"
-                                                        src="fontend/assets/img/270X180/img1.jpg"
-                                                        alt="Image Description"></a>
-                                            </div>
-                                            <div class="mb-1"><a
-                                                    href="https://transvelo.github.io/electro-html/2.0/html/shop/product-categories-7-column-full-width.html"
-                                                    class="font-size-12 text-gray-5">Speakers</a></div>
-                                            <h6 class="mb-2 post-item__title font-size-14"><a
-                                                    href="https://transvelo.github.io/electro-html/2.0/html/blog/single-blog-post.html"
-                                                    class="font-weight-bold text-dark">Robot Wars – Post with
-                                                    Gallery</a></h6>
-                                            <div class="mb-1">
-                                                <a href="https://transvelo.github.io/electro-html/2.0/html/blog/single-blog-post.html"
-                                                    class="d-block text-gray-5"><i class="ec ec-comment"></i> 3</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="js-slide post-group">
-                                    <div class="post-item">
-                                        <div class="product-item__body pb-xl-2">
-                                            <div class="mb-3">
-                                                <a href="https://transvelo.github.io/electro-html/2.0/html/blog/single-blog-post.html"
-                                                    class="d-block text-center"><img class="img-fluid"
-                                                        src="fontend/assets/img/270X180/img1.jpg"
-                                                        alt="Image Description"></a>
-                                            </div>
-                                            <div class="mb-1"><a
-                                                    href="https://transvelo.github.io/electro-html/2.0/html/shop/product-categories-7-column-full-width.html"
-                                                    class="font-size-12 text-gray-5">Speakers</a></div>
-                                            <h6 class="mb-2 post-item__title font-size-14"><a
-                                                    href="https://transvelo.github.io/electro-html/2.0/html/blog/single-blog-post.html"
-                                                    class="font-weight-bold text-dark">Robot Wars – Post with
-                                                    Gallery</a></h6>
-                                            <div class="mb-1">
-                                                <a href="https://transvelo.github.io/electro-html/2.0/html/blog/single-blog-post.html"
-                                                    class="d-block text-gray-5"><i class="ec ec-comment"></i> 3</a>
+                    
+                                @foreach($recentPosts as $post)
+                                    <div class="js-slide post-group">
+                                        <div class="post-item">
+                                            <div class="product-item__body pb-xl-2">
+                                                <div class="mb-3">
+                                                    <a href="{{ route('blog.show', $post->slug) }}" class="d-block text-center">
+                                                        <img class="img-fluid"
+                                                             src="{{ asset('storage/' . $post->image) }}"
+                                                             alt="{{ $post->title }}">
+                                                    </a>
+                                                </div>
+                                                <div class="mb-1">
+                                                    <a href="#" class="font-size-12 text-gray-5">
+                                                        {{ $post->category_post->name ?? 'Không có danh mục' }}
+                                                    </a>
+                                                </div>
+                                                <h6 class="mb-2 post-item__title font-size-14">
+                                                    <a href="{{ route('blog.show', $post->slug) }}"
+                                                       class="font-weight-bold text-dark">{{ $post->title }}</a>
+                                                </h6>
+                                                <div class="mb-1">
+                                                    <a href="{{ route('blog.show', $post->slug) }}" class="d-block text-gray-5">
+                                                        <i class="ec ec-comment"></i> {{ $post->comments_count ?? 0 }}
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endforeach
+                    
                             </div>
                         </div>
                     </aside>
+                    
                     <!-- End From the Blog -->
                 </div>
             </div>

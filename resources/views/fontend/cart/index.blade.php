@@ -53,7 +53,7 @@
                     <h1 class="text-center">Giỏ hàng</h1>
                 </div>
                 <div class="mb-10 cart-table">
-                    <form action="" id="cart-form" method="GET">
+                    <form action="{{ route('cart.bulkDelete') }}" id="cart-form" method="POST">
                         @csrf
                         <div class="d-flex justify-content-end mb-4">
                             <button type="submit" id="delete-selected"
@@ -93,53 +93,50 @@
                                                     alt="{{ $item->product->name }}">
                                             </a>
                                         </td>
-                                        <td data-title="Product">
+                                        <td>
                                             <a href="#" class="text-gray-90">{{ $item->product->name }}</a>
-                                            @if ($item->productVariant)
+                                            @if (isset($item->variants))
                                                 <div class="variant-attributes">
-                                                    @php
-                                                        $groupedAttributes = [];
-                                                        foreach ($item->productVariant->attributeValues as $value) {
-                                                            if (isset($value->attribute)) {
-                                                                $attrName = $value->attribute->name;
-                                                                if (!isset($groupedAttributes[$attrName])) {
-                                                                    $groupedAttributes[$attrName] = $value->value;
+                                                    @foreach ($item->variants as $variant)
+                                                        <div class="variant-group mb-2">
+                                                            @php
+                                                                $groupedAttributes = [];
+                                                                foreach ($variant->attributeValues as $value) {
+                                                                    if (isset($value->attribute)) {
+                                                                        $attrName = $value->attribute->name;
+                                                                        if (!isset($groupedAttributes[$attrName])) {
+                                                                            $groupedAttributes[$attrName] =
+                                                                                $value->value;
+                                                                        }
+                                                                    }
                                                                 }
-                                                            }
-                                                        }
-                                                        $formattedAttributes = [];
-                                                        foreach ($groupedAttributes as $name => $value) {
-                                                            $formattedAttributes[] = $name . ': ' . $value;
-                                                        }
-                                                    @endphp
-                                                    <small class="text-dark">
-                                                        {{ implode(' | ', $formattedAttributes) }}
-                                                    </small>
+                                                                // Sort attributes by name to ensure consistent order
+                                                                ksort($groupedAttributes);
+                                                                $formattedAttributes = [];
+                                                                foreach ($groupedAttributes as $name => $value) {
+                                                                    $formattedAttributes[] = $name . ': ' . $value;
+                                                                }
+                                                            @endphp
+                                                            <small class="text-dark d-block">
+                                                                {{ implode(' | ', $formattedAttributes) }}
+                                                            </small>
+                                                        </div>
+                                                    @endforeach
                                                 </div>
                                             @endif
                                         </td>
                                         <td data-title="Price">
                                             @php
-                                                $price = $item->productVariant
-                                                    ? $item->productVariant->price_sale ?? $item->productVariant->price
-                                                    : $item->product->price_sale ?? $item->product->price;
-
-                                                $originalPrice = $item->productVariant
-                                                    ? $item->productVariant->price
-                                                    : $item->product->price;
-
-                                                $salePrice = $item->productVariant
-                                                    ? $item->productVariant->price_sale
-                                                    : $item->product->price_sale;
+                                                $totalPrice = 0;
+                                                if (isset($item->variants)) {
+                                                    foreach ($item->variants as $variant) {
+                                                        $totalPrice += $variant->price_sale ?? $variant->price;
+                                                    }
+                                                } else {
+                                                    $totalPrice = $item->product->price_sale ?? $item->product->price;
+                                                }
                                             @endphp
-                                            @if ($salePrice)
-                                                <del
-                                                    class="text-muted">{{ number_format($originalPrice, 0, ',', '.') }}₫</del>
-                                                <span
-                                                    class="text-danger">{{ number_format($salePrice, 0, ',', '.') }}₫</span>
-                                            @else
-                                                <span>{{ number_format($price, 0, ',', '.') }}₫</span>
-                                            @endif
+                                            <span>{{ number_format($totalPrice, 0, ',', '.') }}₫</span>
                                         </td>
 
                                         <td data-title="Quantity">
@@ -161,7 +158,7 @@
 
                                         <td data-title="Total">
                                             <span
-                                                class="">{{ number_format($item->quantity * $price, 0, ',', '.') }}₫</span>
+                                                class="">{{ number_format($item->quantity * $totalPrice, 0, ',', '.') }}₫</span>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -199,61 +196,65 @@
 
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
-                            document.getElementById('select-all').addEventListener('click', function(event) {
-                                document.querySelectorAll('.select-item').forEach(checkbox => {
-                                    checkbox.checked = event.target.checked;
-                                });
-                            });
+                    document.getElementById('select-all').addEventListener('click', function(event) {
+                        document.querySelectorAll('.select-item').forEach(checkbox => {
+                            checkbox.checked = event.target.checked;
+                        });
+                    });
 
-                            document.getElementById('checkout-selected').addEventListener('click', function(event) {
-                                    event.preventDefault();
+                    document.getElementById('checkout-selected').addEventListener('click', function(event) {
+                        event.preventDefault();
 
-                                    let selectedItems = document.querySelectorAll('.select-item:checked');
-                                    if (selectedItems.length === 0) {
-                                        alert('Vui lòng chọn ít nhất một mục để thanh toán ');
-                                            return;
-                                        }
+                        let selectedItems = document.querySelectorAll('.select-item:checked');
+                        if (selectedItems.length === 0) {
+                            alert('Vui lòng chọn ít nhất một mục để thanh toán ');
+                            return;
+                        }
 
-                                        let form = document.getElementById('cart-form');
-                                        if (form) {
-                                            form.action = "{{ route('checkout.index') }}"; // Set action to checkout route
-                                            form.submit();
-                                        } else {
-                                            console.error("Form not found!");
-                                        }
-                                    });
+                        // Get selected item IDs
+                        let selectedIds = Array.from(selectedItems).map(item => item.value);
 
-                                document.getElementById('delete-selected').addEventListener('click', function(event) {
-                                    event.preventDefault(); // Prevent default form submission
-                                    let selectedItems = document.querySelectorAll('.select-item:checked');
-                                    if (selectedItems.length === 0) {
-                                        alert('Vui lòng chọn ít nhất một mục để xóa.');
-                                        return;
-                                    }
-                                    if (confirm('Are you sure you want to delete the selected items?')) {
-                                        let form = document.getElementById('cart-form');
-                                        if (form) {
-                                            form.action = "{{ route('cart.bulkDelete') }}";
-                                            form.submit();
-                                        } else {
-                                            console.error("Form not found!");
-                                        }
+                        // Log selected items for debugging
+                        console.log('Selected items for checkout:', selectedIds);
 
-                                    }
-                                });
+                        // Create URL with selected items
+                        let checkoutUrl = "{{ route('checkout.index') }}?selected_items=" + selectedIds.join(',');
 
-                                document.getElementById('update-cart').addEventListener('click', function(event) {
-                                    event.preventDefault();
-                                    let form = document.getElementById('cart-form');
-                                    if (form) {
-                                        form.method = "POST";
-                                        form.action = "{{ route('cart.update') }}"; // Ensure update action
-                                        form.submit();
-                                    } else {
-                                        console.error("Form not found!");
-                                    }
-                                });
+                        // Redirect to checkout page with selected items
+                        window.location.href = checkoutUrl;
+                    });
 
-                            });
+                    document.getElementById('delete-selected').addEventListener('click', function(event) {
+                        event.preventDefault(); // Prevent default form submission
+                        let selectedItems = document.querySelectorAll('.select-item:checked');
+                        if (selectedItems.length === 0) {
+                            alert('Vui lòng chọn ít nhất một mục để xóa.');
+                            return;
+                        }
+                        if (confirm('Are you sure you want to delete the selected items?')) {
+                            let form = document.getElementById('cart-form');
+                            if (form) {
+                                form.action = "{{ route('cart.bulkDelete') }}";
+                                form.submit();
+                            } else {
+                                console.error("Form not found!");
+                            }
+
+                        }
+                    });
+
+                    document.getElementById('update-cart').addEventListener('click', function(event) {
+                        event.preventDefault();
+                        let form = document.getElementById('cart-form');
+                        if (form) {
+                            form.method = "POST";
+                            form.action = "{{ route('cart.update') }}"; // Ensure update action
+                            form.submit();
+                        } else {
+                            console.error("Form not found!");
+                        }
+                    });
+
+                });
             </script>
         </main>

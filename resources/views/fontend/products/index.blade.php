@@ -61,41 +61,42 @@
                             <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                 <ul id="sidebarNav1" class="list-unstyled dropdown-list">
                                     <!-- Danh mục -->
-@foreach ($categories as $category)
-<li>
-    @php
-        $query = request()->all();
-        $query['category'] = $category->slug;
-    @endphp
-    <a class="dropdown-item"
-        href="{{ route('client.products.filter', $query) }}">
-        {{ $category->name }}
-        <span class="text-gray-25 font-size-12 font-weight-normal">
-            ({{ $category->products()->count() }})
-        </span>
-    </a>
+                                    @foreach ($categories as $category)
+                                        <li>
+                                            @php
+                                                $query = request()->all();
+                                                $query['category'] = $category->slug;
+                                            @endphp
+                                            <a class="dropdown-item"
+                                                href="{{ route('client.products.filter', $query) }}">
+                                                {{ $category->name }}
+                                                <span class="text-gray-25 font-size-12 font-weight-normal">
+                                                    ({{ $category->products()->count() }})
+                                                </span>
+                                            </a>
 
-    @if ($category->children->count())
-        <ul class="list-unstyled dropdown-list">
-            @foreach ($category->children as $child)
-                @php
-                    $query = request()->all();
-                    $query['category'] = $child->slug;
-                @endphp
-                <li>
-                    <a class="dropdown-item"
-                        href="{{ route('client.products.filter', $query) }}">
-                        {{ $child->name }}
-                        <span class="text-gray-25 font-size-12 font-weight-normal">
-                            ({{ $child->products()->count() }})
-                        </span>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
-    @endif
-</li>
-@endforeach
+                                            @if ($category->children->count())
+                                                <ul class="list-unstyled dropdown-list">
+                                                    @foreach ($category->children as $child)
+                                                        @php
+                                                            $query = request()->all();
+                                                            $query['category'] = $child->slug;
+                                                        @endphp
+                                                        <li>
+                                                            <a class="dropdown-item"
+                                                                href="{{ route('client.products.filter', $query) }}">
+                                                                {{ $child->name }}
+                                                                <span
+                                                                    class="text-gray-25 font-size-12 font-weight-normal">
+                                                                    ({{ $child->products()->count() }})
+                                                                </span>
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </li>
+                                    @endforeach
 
                                 </ul>
                             </div>
@@ -113,16 +114,15 @@
                         @if (request()->has('category'))
                             <input type="hidden" name="category" value="{{ request('category') }}">
                         @endif
-                    
+
                         <div class="border-bottom pb-4 mb-4">
                             <h4 class="font-size-14 mb-3 font-weight-bold">Thương hiệu</h4>
-                    
+
                             @foreach ($brands as $brand)
                                 <div class="form-group d-flex align-items-center justify-content-between mb-2 pb-1">
                                     <div class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input brand-filter"
-                                            id="brand{{ $brand->id }}" name="brand[]"
-                                            value="{{ $brand->id }}"
+                                            id="brand{{ $brand->id }}" name="brand[]" value="{{ $brand->id }}"
                                             {{ in_array($brand->id, (array) request('brand', [])) ? 'checked' : '' }}>
                                         <label class="custom-control-label" for="brand{{ $brand->id }}">
                                             {{ $brand->name }}
@@ -131,14 +131,14 @@
                                 </div>
                             @endforeach
                         </div>
-                    
+
                         {{-- Bỏ nút submit --}}
                     </form>
                     <script>
-                        document.addEventListener('DOMContentLoaded', function () {
+                        document.addEventListener('DOMContentLoaded', function() {
                             const brandCheckboxes = document.querySelectorAll('.brand-filter');
-                            brandCheckboxes.forEach(function (checkbox) {
-                                checkbox.addEventListener('change', function () {
+                            brandCheckboxes.forEach(function(checkbox) {
+                                checkbox.addEventListener('change', function() {
                                     this.closest('form').submit();
                                 });
                             });
@@ -247,17 +247,12 @@
                                                 <div class="flex-center-between mb-1">
                                                     <div class="prodcut-price">
                                                         @if ($product->price_sale)
-                                                            <div class="text-danger fw-bold fs-5">
-                                                                {{ number_format($product->price_sale, 0, ',', '.') }}đ
-                                                            </div>
-                                                            <div>
-                                                                <del class="text-muted fw-semibold fs-6 me-2">
-                                                                    {{ number_format($product->price, 0, ',', '.') }}đ
-                                                                </del>
-                                                                <span class="badge bg-danger text-white fs-6 fw-bold">
-                                                                    -{{ round((1 - $product->price_sale / $product->price) * 100) }}%
-                                                                </span>
-                                                            </div>
+                                                         
+                                                                <div class="prodcut-price d-flex align-items-center position-relative">
+                                                                    <ins class="font-size-20 text-red text-decoration-none">{{ number_format($product->price_sale)  }}đ</ins>
+                                                                    <del class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                                                </div> 
+
                                                         @else
                                                             <div class="text-dark fw-bold fs-5">
                                                                 {{ number_format($product->price, 0, ',', '.') }}đ
@@ -267,17 +262,24 @@
 
 
                                                     <div class="d-none d-xl-block prodcut-add-cart">
-                                                        <form action="{{ route('cart.add') }}" method="POST">
-                                                            @csrf
-                                                            <input type="hidden" name="product_id"
-                                                                value="{{ $product->id }}">
-                                                            <input type="hidden" name="quantity" value="1">
-                                                            <!-- Default to 1 -->
-                                                            <button type="submit"
+                                                        @if ($product->is_variant)
+                                                            <a href="{{ route('client.products.detail', $product->slug) }}"
                                                                 class="btn-add-cart btn-primary transition-3d-hover">
                                                                 <i class="ec ec-add-to-cart"></i>
-                                                            </button>
-                                                        </form>
+                                                            </a>
+                                                        @else
+                                                            <form action="{{ route('cart.add') }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="product_id"
+                                                                    value="{{ $product->id }}">
+                                                                <input type="hidden" name="quantity" value="1">
+                                                                <!-- Default to 1 -->
+                                                                <button type="submit"
+                                                                    class="btn-add-cart btn-primary transition-3d-hover">
+                                                                    <i class="ec ec-add-to-cart"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -389,20 +391,27 @@
 
                                                     <!-- Nút thêm vào giỏ hàng -->
                                                     <div class="d-none d-xl-block prodcut-add-cart w-100">
-                                                        <form action="{{ route('cart.add') }}" method="POST">
-                                                            @csrf
-                                                            <input type="hidden" name="product_id"
-                                                                value="{{ $product->id }}">
-                                                            <input type="hidden" name="quantity" value="1">
-                                                            <button
-                                                                class="btn btn-warning w-100 py-2 rounded-pill shadow-sm transition-3d-hover"
-                                                                type="submit"
-                                                                style="font-size: 1rem; font-weight: 600; background: #ffc107; border: none;">
-                                                                <i class="ec ec-add-to-cart mr-2"></i> Thêm vào giỏ
-                                                                hàng
-                                                            </button>
+                                                        @if ($product->is_variant)
+                                                            <a href="{{ route('client.products.detail', $product->slug) }}"
+                                                                class="btn-add-cart btn-primary transition-3d-hover">
+                                                                <i class="ec ec-add-to-cart"></i>
+                                                            </a>
+                                                        @else
+                                                            <form action="{{ route('cart.add') }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="product_id"
+                                                                    value="{{ $product->id }}">
+                                                                <input type="hidden" name="quantity" value="1">
+                                                                <button
+                                                                    class="btn btn-warning w-100 py-2 rounded-pill shadow-sm transition-3d-hover"
+                                                                    type="submit"
+                                                                    style="font-size: 1rem; font-weight: 600; background: #ffc107; border: none;">
+                                                                    <i class="ec ec-add-to-cart mr-2"></i> Thêm vào giỏ
+                                                                    hàng
+                                                                </button>
 
-                                                        </form>
+                                                            </form>
+                                                        @endif
                                                     </div>
                                                 </div>
 
@@ -426,7 +435,7 @@
                     </div>
                 </div>
 
-               
+
 
             </div>
         </div>
@@ -438,10 +447,10 @@
     document.addEventListener("DOMContentLoaded", function() {
         const sortSelect = document.getElementById("sortSelect");
         const productList = document.querySelector(".products-group");
-        const originalProducts = Array.from(productList.children); 
+        const originalProducts = Array.from(productList.children);
 
         sortSelect.addEventListener("change", function() {
-            let products = [...originalProducts]; 
+            let products = [...originalProducts];
             let sortBy = sortSelect.value;
 
             if (sortBy !== "default") {

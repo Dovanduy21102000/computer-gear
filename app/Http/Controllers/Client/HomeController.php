@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use App\Models\Banner; // Import model Banner
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\CategoryPost;
+use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
@@ -18,80 +20,79 @@ class HomeController extends Controller
 
     public function index()
     {
+        // Hiển thị banner đang hoạt động
         $banners = Banner::where('status', 1)->get();
-
-        // Lấy sản phẩm mới nhất, chỉ hiển thị nếu danh mục và thương hiệu có is_active = 1
-        $newProducts = Product::whereHas('category', function ($query) {
+    
+        // Điều kiện chung: category và brand đều active
+        $activeCategoryBrand = function ($query) {
             $query->where('is_active', 1);
-        })->whereHas('brand', function ($query) {
-            $query->where('is_active', 1);
-        })->orderBy('created_at', 'desc')->take(24)->get();
-
-        // Lấy sản phẩm top lượt xem
+        };
+    
+        // Sản phẩm mới nhất
+        $newProducts = Product::whereHas('category', $activeCategoryBrand)
+            ->whereHas('brand', $activeCategoryBrand)
+            ->latest()
+            ->take(24)
+            ->get();
+    
+        // Sản phẩm được xem nhiều
         $topViewedProducts = Product::with('brand')
-            ->whereHas('category', function ($query) {
-                $query->where('is_active', 1);
-            })
-            ->whereHas('brand', function ($query) {
-                $query->where('is_active', 1);
-            })
-            ->orderBy('views', 'desc')
+            ->whereHas('category', $activeCategoryBrand)
+            ->whereHas('brand', $activeCategoryBrand)
+            ->orderByDesc('views')
             ->take(5)
             ->get();
-
-        // Sản phẩm giảm giá
+    
+        // Sản phẩm có giảm giá
         $discountedProducts = Product::whereNotNull('price_sale')
             ->where('price_sale', '>', 0)
-            ->whereHas('category', function ($query) {
-                $query->where('is_active', 1);
-            })
-            ->whereHas('brand', function ($query) {
-                $query->where('is_active', 1);
-            })
-            ->orderBy('created_at', 'desc')
+            ->whereHas('category', $activeCategoryBrand)
+            ->whereHas('brand', $activeCategoryBrand)
+            ->latest()
             ->take(5)
             ->get();
-
-        // Sản phẩm bán chạy
+    
+        // Sản phẩm bán chạy (ở đây chưa có tiêu chí cụ thể, lấy dạng paginate để show nhiều)
         $topSellingProducts = Product::with('brand')
-            ->whereHas('category', function ($query) {
-                $query->where('is_active', 1);
-            })
-            ->whereHas('brand', function ($query) {
-                $query->where('is_active', 1);
-            })
-            // ->orderBy('quantity_sold', 'desc')
+            ->whereHas('category', $activeCategoryBrand)
+            ->whereHas('brand', $activeCategoryBrand)
             ->paginate(9);
-
-        // Lấy 4 sản phẩm bất kỳ (chỉ lấy khi danh mục và thương hiệu is_active = 1)
+    
+        // Một số sản phẩm nổi bật
         $products = Product::with('category')
-            ->whereHas('category', function ($query) {
-                $query->where('is_active', 1);
-            })
-            ->whereHas('brand', function ($query) {
-                $query->where('is_active', 1);
-            })
+            ->whereHas('category', $activeCategoryBrand)
+            ->whereHas('brand', $activeCategoryBrand)
             ->take(4)
             ->get();
-
-        // Lọc sản phẩm theo danh mục Chuột, Bàn phím, Bộ bàn phím và Chuột
+    
+        // Sản phẩm thuộc một số danh mục nổi bật
         $topCategories = ['Chuột', 'Bàn phím', 'Bộ bàn phím và Chuột'];
         $keyboardMouseProducts = Product::whereHas('category', function ($query) use ($topCategories) {
-            $query->whereIn('name', $topCategories)->where('is_active', 1);
-        })
-            ->whereHas('brand', function ($query) {
-                $query->where('is_active', 1);
+                $query->whereIn('name', $topCategories)->where('is_active', 1);
             })
-            ->orderBy('created_at', 'desc')
+            ->whereHas('brand', $activeCategoryBrand)
+            ->latest()
             ->take(10)
             ->get();
-
+    
+        // Danh sách thương hiệu đang hoạt động
         $brands = Brand::where('is_active', 1)->get();
         $total_items = CartItem::whereHas('cart', function ($query) {
             $query->where('user_id', Auth::id());
-        })->count();
+        })->get()->sum(function ($item) {
+            // If product_variant_id contains multiple variants (e.g. "4 | 5")
+            if (strpos($item->product_variant_id, '|') !== false) {
+                return count(explode('|', $item->product_variant_id));
+            }
+            return 1;
+        });
+
+        $recentPosts = Post::where('status', 1)->latest()->take(5)->get();
+
+        $category_post = CategoryPost::all();
 
         $template = 'fontend.home.index';
+    
         return view('fontend.layout', compact(
             'template',
             'banners',
@@ -102,11 +103,12 @@ class HomeController extends Controller
             'products',
             'keyboardMouseProducts',
             'brands',
-            'total_items'
+            'total_items',
+            'recentPosts',
+            'category_post'
         ));
     }
-
-
+    
 
     public function add(Request $request)
     {

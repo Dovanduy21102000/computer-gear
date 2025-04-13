@@ -28,7 +28,13 @@ class AppServiceProvider extends ServiceProvider
             if (Auth::check()) {
                 $total_items = CartItem::whereHas('cart', function ($query) {
                     $query->where('user_id', Auth::id());
-                })->count();
+                })->get()->sum(function ($item) {
+                    // If product_variant_id contains multiple variants (e.g. "4 | 5")
+                    if (strpos($item->product_variant_id, '|') !== false) {
+                        return count(explode('|', $item->product_variant_id));
+                    }
+                    return 1;
+                });
             }
 
             $view->with('total_items', $total_items);
