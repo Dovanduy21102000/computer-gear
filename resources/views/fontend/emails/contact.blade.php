@@ -10,13 +10,13 @@
     <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
         <h2 style="color: #333; text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px;">Thông tin liên hệ mới</h2>
 
-        <p><strong>Họ tên:</strong> {{ $contactData['name'] }}</p>
-        <p><strong>Email:</strong> <a href="mailto:{{ $contactData['email'] }}" style="color: #007bff;">{{ $contactData['email'] }}</a></p>
-        <p><strong>Số điện thoại:</strong> {{ $contactData['phone'] ?? 'Không có' }}</p>
-        <p><strong>Chủ đề:</strong> {{ $contactData['subject'] ?? 'Không có' }}</p>
+        <p><strong>Họ tên:</strong> {{ $contact->name }}</p>
+        <p><strong>Email:</strong> <a href="mailto:{{ $contact->email }}" style="color: #007bff;">{{ $contact->email }}</a></p>
+        <p><strong>Số điện thoại:</strong> {{ $contact->phone ?? 'Không có' }}</p>
+        <p><strong>Chủ đề:</strong> {{ $contact->subject ?? 'Không có' }}</p>
         <p><strong>Nội dung:</strong></p>
         <div style="background: #f9f9f9; padding: 10px; border-left: 4px solid #007bff; border-radius: 5px;">
-            <p>{{ $contactData['message'] }}</p>
+            <p>{{ $contact->message }}</p>
         </div>
 
         <div style="text-align: center; margin-top: 20px;">
@@ -26,4 +26,3 @@
 
 </body>
 </html>
-

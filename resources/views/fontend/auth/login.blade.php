@@ -1,3 +1,9 @@
+@if(session('login_error'))
+    <div class="alert alert-danger">
+        {{ session('login_error') }}
+    </div>
+@endif
+
 <div class="container d-flex justify-content-center mt-5 min-vh-100">
     <div class="col-md-5">
         <!-- Title -->

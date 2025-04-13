@@ -9,11 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->integer('quantity_sold')->default(0)->after('quantity'); // Thêm cột sau 'quantity'
-        });
+        // Kiểm tra xem cột đã tồn tại chưa
+        if (!Schema::hasColumn('products', 'quantity_sold')) {
+            Schema::table('products', function (Blueprint $table) {
+                $table->integer('quantity_sold')->default(0);
+            });
+        }
     }
 
     /**

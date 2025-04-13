@@ -1,3 +1,107 @@
+<style>
+    /* Định dạng mặc định của các ô */
+    .attribute-option {
+        display: inline-block;
+        margin-right: 10px;
+        padding: 8px 15px;
+        border: 2px solid #ddd;
+        /* Viền mặc định */
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: normal;
+        /* Giữ font chữ không in đậm mặc định */
+    }
+
+    /* Thay đổi viền khi ô được chọn, không thay đổi nội dung */
+    .attribute-option input[type="radio"]:checked+.attribute-box {
+        background-color: white;
+        /* Giữ nền trắng */
+        color: black;
+        /* Giữ màu chữ không thay đổi */
+        border-color: #ffda08;
+        /* Màu viền khi chọn */
+        font-weight: normal;
+        /* Đảm bảo chữ không bị in đậm */
+    }
+
+    /* Thêm hiệu ứng hover */
+    .attribute-option:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* Thay đổi viền khi được chọn */
+    .attribute-option.selected {
+        border-color: yellow;
+        /* Viền màu khi được chọn */
+    }
+
+    /* Định dạng khi di chuột qua ô */
+    .attribute-option:hover {
+        border-color: #ebf306;
+        /* Viền đổi màu khi hover */
+    }
+
+    /* Chỉnh sửa kích thước ảnh chính trong slider */
+    #sliderSyncingNav .js-slide img {
+        width: 100%;
+        height: 400px;
+        /* Hoặc chiều cao phù hợp */
+        object-fit: cover;
+        /* Giúp ảnh đầy khung mà không bị méo */
+        border-radius: 8px;
+    }
+
+    /* Thumbnails */
+    #sliderSyncingThumb .js-slide img {
+        width: 100%;
+        height: 80px;
+        /* Giữ chiều cao cố định cho thumbnail */
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    /* Khi nhấn vào ảnh, giữ kích thước đồng nhất */
+    #sliderSyncingNav .slick-current img {
+        object-fit: contain;
+        /* Giữ cho ảnh phóng to không bị méo */
+        max-height: 100%;
+        /* Đảm bảo ảnh không bị kéo dài quá mức */
+    }
+</style>
+
+<!-- CSS CMT -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<style>
+    .rating input {
+        display: none;
+    }
+
+    .rating label {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+    }
+
+    .rating input:checked~label {
+        color: #ffbb33;
+        /* Yellow color for selected stars */
+    }
+
+    .rating label:hover,
+    .rating label:hover~label {
+        color: #ffbb33;
+        /* Highlight on hover */
+    }
+
+    /* Ensure stars are in left-to-right order */
+    .rating {
+        display: flex;
+        direction: ltr;
+        /* Set left-to-right direction */
+    }
+</style>
+
 <!-- ========== MAIN CONTENT ========== -->
 <main id="content" role="main">
     <!-- breadcrumb -->
@@ -28,37 +132,36 @@
 
     <div class="container">
         <!-- Single Product Body -->
-        <div class="mb-14">
+        <div class="mb-7">
             <div class="row">
                 <div class="col-md-6 col-lg-4 col-xl-5 mb-4 mb-md-0">
+                    <!-- Slider for main product image -->
                     <div id="sliderSyncingNav" class="js-slick-carousel u-slick mb-2" data-infinite="true"
                         data-arrows-classes="d-none d-lg-inline-block u-slick__arrow-classic u-slick__arrow-centered--y rounded-circle"
                         data-arrow-left-classes="fas fa-arrow-left u-slick__arrow-classic-inner u-slick__arrow-classic-inner--left ml-lg-2 ml-xl-4"
                         data-arrow-right-classes="fas fa-arrow-right u-slick__arrow-classic-inner u-slick__arrow-classic-inner--right mr-lg-2 mr-xl-4"
                         data-nav-for="#sliderSyncingThumb">
-                        <div class="js-slide">
-                            <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
-                                alt="{{ $product->name }}">
-                        </div>
-                        <div class="js-slide">
-                            <img class="img-fluid" src="../../assets/img/720X660/img2.jpg" alt="Image Description">
-                        </div>
+
+                        @foreach ($images as $image)
+                            <div class="js-slide">
+                                <img class="img-fluid" src="{{ asset('storage/' . $image) }}" alt="Product Image">
+                            </div>
+                        @endforeach
 
                     </div>
 
+                    <!-- Thumbnail slider for syncing -->
                     <div id="sliderSyncingThumb"
                         class="js-slick-carousel u-slick u-slick--slider-syncing u-slick--slider-syncing-size u-slick--gutters-1 u-slick--transform-off"
                         data-infinite="true" data-slides-show="5" data-is-thumbs="true"
                         data-nav-for="#sliderSyncingNav">
+
                         @foreach ($images as $image)
-                            @foreach ($image->images as $img)
-                                <div class="js-slide">
-                                    <img class="img-fluid" src="{{ asset('storage/' . $img) }}" alt="Product Image">
-                                </div>
-                            @endforeach
+                            <div class="js-slide">
+                                <img class="img-fluid" src="{{ asset('storage/' . $image) }}"
+                                    alt="Product Image Thumbnail">
+                            </div>
                         @endforeach
-
-
 
                     </div>
                 </div>
@@ -70,15 +173,17 @@
                         <div class="mb-2">
                             <a class="d-inline-flex align-items-center small font-size-15 text-lh-1" href="#">
                                 <div class="text-warning mr-2">
-                                    <small class="fas fa-star"></small>
-                                    <small class="fas fa-star"></small>
-                                    <small class="fas fa-star"></small>
-                                    <small class="fas fa-star"></small>
-                                    <small class="far fa-star text-muted"></small>
+                                    <!-- Hiển thị sao dựa trên đánh giá trung bình -->
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <small
+                                            class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
+                                    @endfor
                                 </div>
-                                <span class="text-secondary font-size-13">(3 customer reviews)</span>
+                                <span class="text-secondary font-size-13">({{ $totalReviews }} customer reviews)</span>
                             </a>
                         </div>
+
+
                         <div class="d-flex align-items-center">
                             <!-- Ảnh thương hiệu với kích thước nhỏ hơn -->
 
@@ -90,12 +195,23 @@
                                 </p>
                             @endif
                         </div>
+                        <div class="product-main-image mb-3">
+                            <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
+                                alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
+                        </div>
+
+                        <!-- Thêm thông tin bảo hành và hỗ trợ -->
+                        <div class="mb-2">
+                            <p class="mb-1 fw-bold">✔ Bảo hành chính hãng 12 tháng.</p>
+                            <p class="mb-1 fw-bold">✔ Hỗ trợ đổi mới trong 7 ngày.</p>
+                            <p class="mb-1 fw-bold">✔ Windows bản quyền tích hợp.</p>
+                        </div>
 
                         <div class="mb-2">
                             <p>{!! $product->short_description !!}</p>
                         </div>
 
-                        <p><strong>SKU</strong>{{ $product->sku }}</p>
+                        <p><strong>SKU: </strong>{{ $product->sku }}</p>
                     </div>
                 </div>
                 <div class="mx-md-auto mx-lg-0 col-md-6 col-lg-4 col-xl-3">
@@ -143,8 +259,7 @@
                             <!-- End Quantity -->
                         </div>
                         @php
-                            $colors = [];
-                            $rams = [];
+                            $attributes = [];
 
                             foreach ($variants as $variant) {
                                 foreach ($variant->attributeValues as $attributeValue) {
@@ -152,59 +267,48 @@
                                         $attributeName = trim($attributeValue->attribute->name);
                                         $attributeValueText = trim($attributeValue->value);
 
-                                        if ($attributeName === 'màu sắc') {
-                                            $colors[$attributeValueText] = $attributeValueText;
-                                        }
-                                        if ($attributeName === 'RAM') {
-                                            $rams[$attributeValueText] = $attributeValueText;
-                                        }
+                                        // Lưu các giá trị vào nhóm thuộc tính
+                                        $attributes[$attributeName][$attributeValueText] = $attributeValueText;
                                     }
                                 }
                             }
                         @endphp
 
-                        @if (!empty($colors) || !empty($rams))
+                        @foreach ($attributes as $attributeName => $values)
                             <div class="mb-3">
-                                <h6 class="font-size-14">Chọn màu</h6>
-                                <select id="colorSelect"
-                                    class="js-select selectpicker dropdown-select btn-block col-12 px-0"
-                                    data-style="btn-sm bg-white font-weight-normal py-2 border">
-                                    <option value="" selected disabled>Vui lòng chọn màu</option>
-                                    <!-- Đổi nội dung -->
-                                    @foreach ($colors as $color)
-                                        <option value="{{ $color }}">{{ $color }}</option>
+                                <h6 class="font-size-14">Chọn {{ ucfirst($attributeName) }}</h6>
+                                <div class="attribute-options">
+                                    @foreach ($values as $value)
+                                        <label class="attribute-option">
+                                            <input type="radio"
+                                                name="{{ strtolower(string: str_replace(' ', '_', $attributeName)) }}"
+                                                value="{{ $value }}" class="d-none">
+                                            <span class="attribute-box">{{ $value }}</span>
+                                        </label>
                                     @endforeach
-                                </select>
+                                </div>
                             </div>
-
-                            <div class="mb-3">
-                                <h6 class="font-size-14">Chọn RAM</h6>
-                                <select id="ramSelect"
-                                    class="js-select selectpicker dropdown-select btn-block col-12 px-0"
-                                    data-style="btn-sm bg-white font-weight-normal py-2 border">
-                                    <option value="" selected disabled>Vui lòng chọn RAM</option>
-                                    <!-- Đổi nội dung -->
-                                    @foreach ($rams as $ram)
-                                        <option value="{{ $ram }}">{{ $ram }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        @endforeach
 
 
-                        @endif
+
+
+
+
 
                         <div class="mb-2 pb-0dot5" style="margin-top: 10px">
-                            <a href="#" id="addToCartBtn" class="btn btn-block btn-primary-dark">
+                            <a href="{{ route('cart.add') }}" id="addToCartBtn"
+                                class="btn btn-block btn-primary-dark" disabled>
                                 <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
                             </a>
                         </div>
                         <div class="mb-3">
-                            <a href="#" id="buyNowBtn" class="btn btn-block btn-dark">Mua ngay</a>
+                            <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
                         </div>
                         <div class="flex-content-center flex-wrap">
-                            <a href="#" class="text-gray-6 font-size-13 mr-2"><i
-                                    class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích</a>
-
+                            <a href="#" class="text-gray-6 font-size-13 mr-2">
+                                <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -219,35 +323,36 @@
 
                 <div class="bg-white pt-4 pb-6 px-xl-11 px-md-5 px-4  overflow-hidden">
                     {{-- <div id="Description" class="mx-md-2"> --}}
-                        <div class="position-relative mb-1">
+                    <div class="position-relative mb-1">
 
 
-                            <!-- Tabs -->
-                            <ul class="nav nav-classic nav-tab nav-tab-lg justify-content-xl-center mb-6 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble border-lg-down-bottom-0 pb-1 pb-xl-0 mb-n1 mb-xl-0" role="tablist">
-                                <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                    <a class="nav-link active" data-bs-toggle="tab" href="#Description" role="tab">
-                                        <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                            Mô Tả 
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                    <a class="nav-link" data-bs-toggle="tab" href="#Specification" role="tab">
-                                        <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                            Thông Số 
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                    <a class="nav-link" data-bs-toggle="tab" href="#Reviews" role="tab">
-                                        <div class="d-md-flex justify-content-md-center align-items-md-center">
-                                            Đánh Giá
-                                        </div>
-                                    </a>
-                                </li>
-                            </ul>
+                        <!-- Tabs -->
+                        <ul class="nav nav-classic nav-tab nav-tab-lg justify-content-xl-center mb-6 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble border-lg-down-bottom-0 pb-1 pb-xl-0 mb-n1 mb-xl-0"
+                            role="tablist">
+                            <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#Description" role="tab">
+                                    <div class="d-md-flex justify-content-md-center align-items-md-center">
+                                        Mô Tả
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
+                                <a class="nav-link" data-bs-toggle="tab" href="#Specification" role="tab">
+                                    <div class="d-md-flex justify-content-md-center align-items-md-center">
+                                        Thông Số
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
+                                <a class="nav-link" data-bs-toggle="tab" href="#Reviews" role="tab">
+                                    <div class="d-md-flex justify-content-md-center align-items-md-center">
+                                        Đánh Giá
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
 
-                        </div>
+                    </div>
 
                     {{-- </div> --}}
                 </div>
@@ -257,11 +362,13 @@
                         <div class="mx-md-4 pt-1">
 
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10 text-center">
 
                                     <p>{!! $product->description !!}</p>
 
                                 </div>
+                                <div class="col-md-1"></div>
 
 
                             </div>
@@ -286,178 +393,273 @@
                     <div class="tab-pane fade" id="Specification" role="tabpanel">
                         <div class="mx-md-5 pt-1">
                             <div class="table-responsive mb-4">
-                                <table class="table table-hover">
+                                <table class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="font-weight-bold px-4 px-xl-5">Thông số</th>
+                                            <th class="font-weight-bold">Chi tiết</th>
+                                        </tr>
+                                    </thead>
                                     <tbody>
-                                        <tr>
-                                            <th class="px-4 px-xl-5 border-top-0">Weight</th>
-                                            <td class="border-top-0">7.25kg</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="px-4 px-xl-5">Dimensions</th>
-                                            <td>90 x 60 x 90 cm</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="px-4 px-xl-5">Size</th>
-                                            <td>One Size Fits all</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="px-4 px-xl-5">color</th>
-                                            <td>Black with Red, White with Gold</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="px-4 px-xl-5">Guarantee</th>
-                                            <td>5 years</td>
-                                        </tr>
+                                        @foreach ($product->specifications as $specification)
+                                            <tr>
+                                                <td class="px-4 px-xl-5 {{ $loop->first ? 'border-top-0' : '' }}">
+                                                    <strong>{{ $specification->key }}</strong>
+                                                </td>
+                                                <td class="{{ $loop->last ? 'border-top-0' : '' }}">
+                                                    {{ $specification->value }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
-
                         </div>
                     </div>
+
+
                     <div class="tab-pane fade" id="Reviews" role="tabpanel">
                         <div class="mb-4 px-lg-4">
                             <div class="row mb-8">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <h3 class="font-size-18 mb-6">Based on 3 reviews</h3>
-                                        <h2 class="font-size-30 font-weight-bold text-lh-1 mb-0">4.3
+                                        <h3 class="font-size-18 mb-6">Dựa trên {{ $totalReviews }} đánh giá</h3>
+                                        <h2 class="font-size-30 font-weight-bold text-lh-1 mb-0">{{ $averageRating }}
                                         </h2>
-                                        <div class="text-lh-1">overall</div>
+                                        <div class="text-lh-1">Tổng thể</div>
                                     </div>
 
                                     <!-- Ratings -->
                                     <ul class="list-unstyled">
-                                        <li class="py-1">
-                                            <a class="row align-items-center mx-gutters-2 font-size-1"
-                                                href="javascript:;">
-                                                <div class="col-auto mb-2 mb-md-0">
-                                                    <div class="text-warning text-ls-n2 font-size-16"
-                                                        style="width: 80px;">
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="fas fa-star"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                    </div>
-                                                </div>
-                                                <div class="col-auto mb-2 mb-md-0">
-                                                    <div class="progress ml-xl-5" style="height: 10px; width: 200px;">
-                                                        <div class="progress-bar" role="progressbar"
-                                                            style="width: 100%;" aria-valuenow="100"
-                                                            aria-valuemin="0" aria-valuemax="100">
+                                        @for ($i = 5; $i >= 1; $i--)
+                                            @php
+                                                $ratingCount = $ratingsCount[$i] ?? 0;
+                                                $percentage =
+                                                    $totalReviews > 0 ? ($ratingCount / $totalReviews) * 100 : 0;
+                                            @endphp
+                                            <li class="py-1">
+                                                <a class="row align-items-center mx-gutters-2 font-size-1"
+                                                    href="javascript:;">
+                                                    <div class="col-auto mb-2 mb-md-0">
+                                                        <div class="text-warning text-ls-n2 font-size-16"
+                                                            style="width: 80px;">
+                                                            @for ($j = 1; $j <= 5; $j++)
+                                                                @if ($j <= $i)
+                                                                    <small class="fas fa-star"></small>
+                                                                @else
+                                                                    <small class="far fa-star text-muted"></small>
+                                                                @endif
+                                                            @endfor
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-auto text-right">
-                                                    <span class="text-gray-90">205</span>
-                                                </div>
-                                            </a>
-                                        </li>
-
+                                                    <div class="col-auto mb-2 mb-md-0">
+                                                        <div class="progress ml-xl-5"
+                                                            style="height: 10px; width: 200px;">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: {{ $percentage }}%;"
+                                                                aria-valuenow="{{ $percentage }}" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-auto text-right">
+                                                        <span class="text-gray-90">{{ $ratingCount }}</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        @endfor
                                     </ul>
                                     <!-- End Ratings -->
                                 </div>
+
+
                                 <div class="col-md-6">
-                                    <h3 class="font-size-18 mb-5">Add a review</h3>
-                                    <!-- Form -->
-                                    <form class="js-validate">
-                                        <div class="row align-items-center mb-4">
-                                            <div class="col-md-4 col-lg-3">
-                                                <label for="rating" class="form-label mb-0">Your
-                                                    Review</label>
-                                            </div>
-                                            <div class="col-md-8 col-lg-9">
-                                                <a href="#" class="d-block">
-                                                    <div class="text-warning text-ls-n2 font-size-16">
-                                                        <small class="far fa-star text-muted"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                        <small class="far fa-star text-muted"></small>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="js-form-message form-group mb-3 row">
-                                            <div class="col-md-4 col-lg-3">
-                                                <label for="descriptionTextarea" class="form-label">Your
-                                                    Review</label>
-                                            </div>
-                                            <div class="col-md-8 col-lg-9">
-                                                <textarea class="form-control" rows="3" id="descriptionTextarea" data-msg="Please enter your message."
-                                                    data-error-class="u-has-error" data-success-class="u-has-success"></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="js-form-message form-group mb-3 row">
-                                            <div class="col-md-4 col-lg-3">
-                                                <label for="inputName" class="form-label">Name <span
-                                                        class="text-danger">*</span></label>
-                                            </div>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input type="text" class="form-control" name="name"
-                                                    id="inputName" aria-label="Alex Hecker" required
-                                                    data-msg="Please enter your name." data-error-class="u-has-error"
-                                                    data-success-class="u-has-success">
-                                            </div>
-                                        </div>
-                                        <div class="js-form-message form-group mb-3 row">
-                                            <div class="col-md-4 col-lg-3">
-                                                <label for="emailAddress" class="form-label">Email
-                                                    <span class="text-danger">*</span></label>
-                                            </div>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input type="email" class="form-control" name="emailAddress"
-                                                    id="emailAddress" aria-label="alexhecker@pixeel.com" required
-                                                    data-msg="Please enter a valid email address."
-                                                    data-error-class="u-has-error" data-success-class="u-has-success">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="offset-md-4 offset-lg-3 col-auto">
-                                                <button type="submit"
-                                                    class="btn btn-primary-dark btn-wide transition-3d-hover">Add
-                                                    Review</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <!-- End Form -->
-                                </div>
-                            </div>
-                            <!-- Review -->
-                            <div class="border-bottom border-color-1 pb-4 mb-4">
-                                <!-- Review Rating -->
-                                <div
-                                    class="d-flex justify-content-between align-items-center text-secondary font-size-1 mb-2">
-                                    <div class="text-warning text-ls-n2 font-size-16" style="width: 80px;">
-                                        <small class="fas fa-star"></small>
-                                        <small class="fas fa-star"></small>
-                                        <small class="fas fa-star"></small>
-                                        <small class="far fa-star text-muted"></small>
-                                        <small class="far fa-star text-muted"></small>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h3 class="font-size-18 mb-0">
+                                            @if ($comment)
+                                                <span class="text">Cập nhật đánh giá của bạn</span> <small
+                                                    class="text-muted">(Chỉ có thể cập nhật 1 lần)</small>
+                                            @else
+                                                <span class="text-success">Thêm một đánh giá</span>
+                                            @endif
+                                        </h3>
                                     </div>
-                                </div>
-                                <!-- End Review Rating -->
 
-                                <p class="text-gray-90">Fusce vitae nibh mi. Integer posuere, libero et
-                                    ullamcorper
-                                    facilisis, enim eros tincidunt orci, eget vestibulum sapien nisi ut
-                                    leo.
-                                    Cras
-                                    finibus vel est ut mollis. Donec luctus condimentum ante et euismod.
-                                </p>
 
-                                <!-- Reviewer -->
-                                <div class="mb-2">
-                                    <strong>John Doe</strong>
-                                    <span class="font-size-13 text-gray-23">- April 3, 2019</span>
+                                    <!-- Form -->
+                                    @if ($comment)
+                                        <!-- Form chỉnh sửa bình luận -->
+                                        <form class="js-validate"
+                                            action="{{ route('comments.update', $comment->id) }}" method="POST"
+                                            enctype="multipart/form-data">
+                                            @csrf
+                                            @method('PUT') <!-- Đặt phương thức PUT cho chỉnh sửa -->
+                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+
+                                            <div class="row align-items-center mb-4">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="rating" class="form-label mb-0">Đánh giá của
+                                                        bạn</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <div class="rating">
+                                                        @for ($i = 5; $i >= 1; $i--)
+                                                            <input type="radio" id="star{{ $i }}"
+                                                                name="rating" value="{{ $i }}"
+                                                                {{ $comment->rating == $i ? 'checked' : '' }}>
+                                                            <label for="star{{ $i }}"
+                                                                class="fa fa-star"></label>
+                                                        @endfor
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="js-form-message form-group mb-3 row">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="descriptionTextarea" class="form-label">Bình
+                                                        luận</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <textarea class="form-control" rows="3" id="descriptionTextarea" name="content" required>{{ $comment->content }}</textarea>
+                                                </div>
+                                            </div>
+
+                                            <!-- Thêm trường hình ảnh -->
+                                            <div class="js-form-message form-group mb-3 row">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="image" class="form-label">Hình ảnh</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <input type="file" class="form-control" id="image"
+                                                        name="image">
+                                                    @if ($comment->image)
+                                                        <img src="{{ asset('storage/' . $comment->image) }}"
+                                                            alt="Image" width="100">
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="offset-md-4 offset-lg-3 col-auto">
+                                                    <button type="submit" class="btn btn-primary-dark btn-wide">Cập
+                                                        nhật bình luận</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @else
+                                        <!-- Form tạo mới bình luận -->
+                                        <form class="js-validate" action="{{ route('comments.store') }}"
+                                            method="POST" enctype="multipart/form-data">
+                                            @csrf
+                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+
+                                            <div class="row align-items-center mb-4">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="rating" class="form-label mb-0">Đánh giá của
+                                                        bạn</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <div class="rating">
+                                                        @for ($i = 5; $i >= 1; $i--)
+                                                            <input type="radio" id="star{{ $i }}"
+                                                                name="rating" value="{{ $i }}">
+                                                            <label for="star{{ $i }}"
+                                                                class="fa fa-star"></label>
+                                                        @endfor
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="js-form-message form-group mb-3 row">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="descriptionTextarea" class="form-label">Bình
+                                                        luận</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <textarea class="form-control" rows="3" id="descriptionTextarea" name="content" required></textarea>
+                                                </div>
+                                            </div>
+
+                                            <!-- Thêm trường hình ảnh -->
+                                            <div class="js-form-message form-group mb-3 row">
+                                                <div class="col-md-4 col-lg-3">
+                                                    <label for="image" class="form-label">Hình ảnh</label>
+                                                </div>
+                                                <div class="col-md-8 col-lg-9">
+                                                    <input type="file" class="form-control" id="image"
+                                                        name="image">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="offset-md-4 offset-lg-3 col-auto">
+                                                    <button type="submit" class="btn btn-primary-dark btn-wide">Thêm
+                                                        bình luận</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @endif
                                 </div>
-                                <!-- End Reviewer -->
+
+
                             </div>
-                            <!-- End Review -->
+
+                            @foreach ($comments as $comment)
+                                <!-- Review -->
+                                <div class="row justify-content-center">
+                                    <div class="col-12 col-md-8">
+                                        <!-- Giới hạn chiều rộng ở 7 phần trên 12 của grid -->
+                                        <div class="border-bottom border-color-1 pb-4 mb-4">
+                                            <!-- Review Rating -->
+                                            <div
+                                                class="d-flex justify-content-between align-items-center text-secondary font-size-1 mb-2">
+                                                <div class="text-warning text-ls-n2 font-size-16"
+                                                    style="width: 80px;">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        @if ($i <= $comment->rating)
+                                                            <small class="fas fa-star"></small>
+                                                        @else
+                                                            <small class="far fa-star text-muted"></small>
+                                                        @endif
+                                                    @endfor
+                                                </div>
+                                            </div>
+                                            <!-- End Review Rating -->
+
+                                            <p class="text-gray-90">{{ $comment->content }}</p>
+
+                                            <!-- Display image if exists -->
+                                            @if ($comment->image)
+                                                <div class="comment-image">
+                                                    <img src="{{ Storage::url($comment->image) }}"
+                                                        alt="Comment Image" class="img-fluid" />
+                                                </div>
+                                            @endif
+
+                                            <!-- Reviewer -->
+                                            <div class="mb-2">
+                                                <strong>{{ $comment->user->name ?? 'Ẩn danh' }}</strong>
+                                                <span class="font-size-13 text-gray-23">
+                                                    -
+                                                    {{ \Carbon\Carbon::parse($comment->created_at)->locale('vi')->isoFormat('D MMMM YYYY') }}
+                                                </span>
+                                            </div>
+                                            <!-- End Reviewer -->
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4"></div>
+                                </div>
+                                <!-- End Review -->
+                            @endforeach
+                            <div class="pagination">
+                                {{ $comments->links() }}
+                            </div>
+
 
 
                         </div>
                     </div>
+
+
                 </div>
             </div>
 
@@ -470,7 +672,7 @@
         <div class="mb-6">
             <div
                 class="d-flex justify-content-between align-items-center border-bottom border-color-1 flex-lg-nowrap flex-wrap mb-4">
-                <h3 class="section-title mb-0 pb-2 font-size-22">Related Products</h3>
+                <h3 class="section-title mb-0 pb-2 font-size-22">Sản phẩm liên quan</h3>
             </div>
 
             <ul class="row list-unstyled products-group no-gutters">
@@ -495,16 +697,25 @@
                                     <div class="mb-2">
                                         <a href="{{ route('client.products.detail', $related->slug) }}"
                                             class="d-block text-center">
-                                            <img class="img-fluid"
+                                            <img class="img-fluid w-100" style="height: 150px; object-fit: cover;"
                                                 src="{{ asset('storage/' . $related->thumbnail) }}"
                                                 alt="{{ $related->name }}">
                                         </a>
                                     </div>
                                     <div class="flex-center-between mb-1">
                                         <div class="prodcut-price">
-                                            <div class="text-gray-100">
-                                                {{ number_format($related->price, 0, ',', '.') }}đ
-                                            </div>
+                                            @if ($related->price_sale)
+                                                <div class="prodcut-price d-flex align-items-center position-relative">
+                                                    <ins
+                                                        class="font-size-20 text-red text-decoration-none">{{ number_format($related->price_sale) }}đ</ins>
+                                                    <del
+                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($related->price, 0, ',', '.') }}đ</del>
+                                                </div>
+                                            @else
+                                                <div class="text-dark fw-bold fs-5">
+                                                    {{ number_format($related->price, 0, ',', '.') }}đ
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="d-none d-xl-block prodcut-add-cart">
                                             <a href="#" class="btn-add-cart btn-primary transition-3d-hover">
@@ -553,173 +764,278 @@
 
     });
     //Tab 
-    
 </script>
+
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        let variantCache = {}; // Bộ nhớ đệm để lưu trữ kết quả biến thể
-
-        $('#colorSelect, #ramSelect').change(function() {
-            let color = $('#colorSelect').val();
-            let ram = $('#ramSelect').val();
-
-            console.log("🎨 Chọn màu:", color, "💾 Chọn RAM:", ram);
-
-            if (color && ram) {
-                let cacheKey = color + "_" + ram;
-
-                if (variantCache[cacheKey]) {
-                    console.log("⚡ Dữ liệu lấy từ cache:", variantCache[cacheKey]);
-                    updateUI(variantCache[cacheKey]); // Cập nhật giao diện ngay
-                    return;
+        // Lắng nghe sự kiện thay đổi trên các ô radio
+        $(".attribute-option input[type='radio']").change(function() {
+            // Lưu trữ tất cả các ô đã chọn
+            $(".attribute-option").each(function() {
+                // Kiểm tra nếu ô radio được chọn
+                if ($(this).find('input[type="radio"]').is(":checked")) {
+                    $(this).addClass("selected"); // Thêm lớp selected để thay đổi viền
+                } else {
+                    $(this).removeClass("selected"); // Bỏ lớp selected nếu không chọn
                 }
+            });
+        });
+    });
+    $(document).ready(function() {
+        let variantCache = {}; // Bộ nhớ đệm biến thể
 
-                $.ajax({
-                    url: '{{ route('getVariant') }}',
-                    type: 'GET',
-                    data: {
-                        product_id: {{ $product->id }},
-                        color: color,
-                        ram: ram
-                    },
-                    beforeSend: function() {
-                        console.log("⏳ Gửi request đến server...");
-                        $('#productPrice').html(
-                            '<span class="text-muted">Đang tải...</span>');
-                    },
-                    success: function(response) {
-                        console.log("✅ Phản hồi từ server:", response);
+        // Kiểm tra các thuộc tính đã chọn
+        function checkVariants() {
+            let selectedAttributes = {}; // Lưu biến thể đã chọn
 
-                        if (!response || Object.keys(response).length === 0) {
-                            console.warn("⚠️ Không có dữ liệu biến thể!");
-                            return;
-                        }
+            $(".attribute-option input[type='radio']:checked").each(function() {
+                let attributeName = $(this).attr("name");
+                let attributeValue = $(this).val();
+                selectedAttributes[attributeName] = attributeValue;
+            });
 
-                        variantCache[cacheKey] = response; // Lưu vào cache
-                        updateUI(response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("❌ Lỗi AJAX:", error);
-                        console.error("📌 Chi tiết lỗi:", xhr.responseText);
-                    }
-                });
+            // Kiểm tra nếu chưa chọn đủ thuộc tính
+            if (Object.keys(selectedAttributes).length < $(".attribute-options").length) {
+                $("#variantAlert").show();
+                disablePurchase();
+                return false;
+            }
+
+            $("#variantAlert").hide();
+            return selectedAttributes;
+        }
+
+        // Xử lý khi thay đổi thuộc tính (Màu sắc, RAM, v.v.)
+        $(".attribute-option input[type='radio']").change(function() {
+            let selectedAttributes = checkVariants();
+            if (!selectedAttributes) return;
+
+            let cacheKey = JSON.stringify(selectedAttributes);
+            let productId = {{ $product->id }}; // ID sản phẩm
+
+            console.log("Selected Attributes:",
+                selectedAttributes); // Log để kiểm tra giá trị thuộc tính
+
+            // Kiểm tra bộ nhớ đệm
+            if (variantCache[cacheKey]) {
+                updateUI(variantCache[cacheKey]);
+            } else {
+                fetchVariantData(productId, selectedAttributes, cacheKey);
             }
         });
 
+        // Hàm gửi request và cập nhật UI
+        function fetchVariantData(productId, selectedAttributes, cacheKey) {
+            // Khởi tạo queryParams với product_id
+            let queryParams = `product_id=${encodeURIComponent(productId)}`;
+
+            // Duyệt qua các thuộc tính đã chọn và tạo query string
+            for (let [key, value] of Object.entries(selectedAttributes)) {
+                queryParams += `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+            }
+
+            let url = '{{ route('getVariant') }}' + '?' + queryParams;
+            console.log("Request URL:", url); // In URL ra console để kiểm tra
+
+            $.ajax({
+                url: url, // Sử dụng URL đã mã hóa
+                type: 'GET',
+                beforeSend: function() {
+                    // Bạn có thể cập nhật giá trị giao diện ngay tại đây để không bị hiển thị "Đang tải..."
+                    // Ví dụ: Đổi màu viền, hoặc thay đổi nút "Thêm vào giỏ" ngay lập tức.
+                    // Cập nhật giao diện ngay lập tức
+                    $(".attribute-option").each(function() {
+                        $(this).addClass("loading");
+                    });
+                },
+                success: function(response) {
+                    console.log("Response from API:", response);
+                    if (!response || Object.keys(response).length === 0) {
+                        disablePurchase();
+                        return;
+                    }
+                    variantCache[cacheKey] = response;
+                    updateUI(response);
+                    // Loại bỏ trạng thái loading khi hoàn tất
+                    $(".attribute-option").each(function() {
+                        $(this).removeClass("loading");
+                    });
+                },
+                error: function(xhr) {
+                    console.error("❌ Lỗi AJAX:", xhr.responseText);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi!",
+                        text: "Có lỗi xảy ra khi tải thông tin biến thể.",
+                        confirmButtonText: "OK"
+                    });
+                    disablePurchase();
+                    // Loại bỏ trạng thái loading khi có lỗi
+                    $(".attribute-option").each(function() {
+                        $(this).removeClass("loading");
+                    });
+                }
+            });
+        }
+
+        // Cập nhật giao diện UI
         function updateUI(response) {
-            $('#productPrice').html(
-                response.price_sale ?
-                `<del class="text-muted">${response.price}</del> 
-     <span class="text-danger">${response.price_sale}</span>` :
-                `${response.price}`
-            );
+            console.log("🏆 UI đang cập nhật...", response); // Debug log
 
             let quantity = response.quantity ?? 0;
-            let quantityInput = $('#quantityInput');
 
-            // Cập nhật giá trị `max`
-            quantityInput.attr('max', quantity);
+            // Kiểm tra giá
+            let price = response.price_sale ?
+                `<del class="text-muted">${response.price}</del> 
+                <span class="text-danger">${response.price_sale}</span>` :
+                `${response.price}`;
 
-            // Nếu số lượng đang nhập lớn hơn max mới, đặt lại bằng max
-            if (parseInt(quantityInput.val()) > quantity) {
-                quantityInput.val(quantity);
-            }
-
-            $('#productStock').html(quantity > 0 ?
-                `<span class="text-green font-weight-bold">${quantity}</span> sản phẩm` :
-                `<span class="text-danger font-weight-bold">Hết hàng</span>`
+            // Cập nhật giá và số lượng
+            $("#productPrice").html(price);
+            $("#productStock").html(
+                `<span class="font-weight-bold ${quantity > 0 ? 'text-green' : 'text-danger'}">${quantity}</span>`
             );
 
-            // Nếu hết hàng, disable nút mua hàng
-            $('#addToCartBtn, #buyNowBtn').prop('disabled', quantity <= 0);
-            $('#quantityError').addClass('d-none'); // Ẩn lỗi nếu có
+            // Cập nhật số lượng tối đa có thể chọn
+            $("#quantityInput").attr("max", quantity);
+
+            // Kiểm tra nếu có hàng, kích hoạt mua
+            if (quantity > 0) {
+                $("#quantityInput").prop("disabled", false).val(1);
+                enablePurchase();
+            } else {
+                $("#quantityInput").val("").prop("disabled", true);
+                disablePurchase();
+            }
         }
 
-        // Kiểm tra số lượng nhập tay
-        $('#quantityInput').on('input', function() {
-            let max = parseInt($(this).attr('max'), 10);
-            let min = parseInt($(this).attr('min'), 10);
-            let value = $(this).val();
+        // Vô hiệu hóa các nút "Thêm vào giỏ" và "Mua ngay"
+        function disablePurchase() {
+            $("#addToCartBtn, #buyNowBtn").prop("disabled", true);
+        }
 
-            if (value === "") return; // Cho phép xóa tạm thời
+        // Kích hoạt các nút nếu đủ điều kiện
+        function enablePurchase() {
+            let selectedAttributes = checkVariants();
+            let quantity = parseInt($("#quantityInput").val(), 10) || 0;
+            let stockQuantity = parseInt($("#quantityInput").attr("max"), 10);
+            let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
 
-            value = parseInt(value, 10);
-
-            if (isNaN(value) || value < min) {
-                $(this).val(min);
-                $('#quantityError').addClass('d-none');
-            } else if (value > max) {
-                $(this).val(max);
-                $('#quantityError').removeClass('d-none');
-            } else {
-                $('#quantityError').addClass('d-none');
-            }
-        });
-
-        // Khi mất focus, nếu rỗng thì đặt về min
-        $('#quantityInput').on('blur', function() {
-            if ($(this).val() === "") {
-                $(this).val($(this).attr('min'));
-            }
-        });
-
-
-        function validateSelection(showAlert = false) {
-            let colorSelect = $('#colorSelect');
-            let ramSelect = $('#ramSelect');
-            let color = colorSelect.val();
-            let ram = ramSelect.val();
-            let quantity = parseInt($('#quantityInput').attr('max')) || 0;
-
-            let hasVariants = (colorSelect.length > 0 && colorSelect.find('option').length > 1) ||
-                (ramSelect.length > 0 && ramSelect.find('option').length > 1);
-
-            // Nếu sản phẩm không có biến thể, chỉ kiểm tra tồn kho
-            if (!hasVariants) {
-                if (quantity <= 0) {
-                    if (showAlert) alert("⚠️ Sản phẩm đã hết hàng! Không thể mua.");
-                    return false;
+            if (isVariantProduct) {
+                // For variant products, we need to check if attributes are selected
+                if (!selectedAttributes || quantity < 1 || stockQuantity === 0) {
+                    disablePurchase();
+                } else {
+                    $("#addToCartBtn, #buyNowBtn").prop("disabled", false);
                 }
-                return true;
-            }
-
-            // Kiểm tra nếu sản phẩm có biến thể nhưng chưa chọn đủ
-            if (colorSelect.length > 0 && !color) {
-                if (showAlert) alert("⚠️ Vui lòng chọn màu sắc trước khi tiếp tục!");
-                return false;
-            }
-            if (ramSelect.length > 0 && !ram) {
-                if (showAlert) alert("⚠️ Vui lòng chọn bộ nhớ RAM trước khi tiếp tục!");
-                return false;
-            }
-            if (quantity <= 0) {
-                if (showAlert) alert("⚠️ Sản phẩm đã hết hàng! Không thể mua.");
-                return false;
-            }
-
-            return true;
-        }
-
-        function updateButtonState() {
-            if (validateSelection(false)) {
-                $('#addToCartBtn, #buyNowBtn').prop('disabled', false);
             } else {
-                $('#addToCartBtn, #buyNowBtn').prop('disabled', true);
+                // For non-variant products, just check if quantity is valid
+                if (quantity < 1 || stockQuantity === 0) {
+                    disablePurchase();
+                } else {
+                    $("#addToCartBtn, #buyNowBtn").prop("disabled", false);
+                }
             }
         }
 
-        $('#addToCartBtn, #buyNowBtn').click(function(event) {
-            if (!validateSelection(true)) {
-                event.preventDefault();
-            } else {
-                console.log("✅ Điều kiện hợp lệ, tiếp tục...");
+        // Xử lý thay đổi số lượng
+        $("#quantityInput").on("input", function() {
+            let max = parseInt($(this).attr("max"), 10);
+            let value = $(this).val().replace(/\D/g, "");
+
+            if (max === 0 || value === "") {
+                $(this).val("");
+                disablePurchase();
+                return;
             }
+
+            value = Math.max(1, Math.min(max, parseInt(value, 10)));
+            $(this).val(value);
+            enablePurchase();
         });
 
-        // Kiểm tra trạng thái ngay từ đầu
-        updateButtonState();
+        $("#addToCartBtn, #buyNowBtn").click(function(event) {
+            event.preventDefault();
+
+            let selectedAttributes = checkVariants();
+            let quantity = parseInt($("#quantityInput").val(), 10) || 1;
+            let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
+
+            console.log("Selected Attributes:", selectedAttributes); // Debug log
+            console.log("Is Variant Product:", isVariantProduct); // Debug log
+
+            // For variant products, we need to check if attributes are selected
+            if (isVariantProduct && (!selectedAttributes || parseInt($("#quantityInput").attr("max"),
+                    10) === 0)) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi!",
+                    text: "⚠️ Vui lòng chọn đầy đủ biến thể hoặc sản phẩm đã hết hàng!",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+
+            // For non-variant products, just check if quantity is valid
+            if (!isVariantProduct && parseInt($("#quantityInput").attr("max"), 10) === 0) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi!",
+                    text: "⚠️ Sản phẩm đã hết hàng!",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+
+            // Prepare the data to send to the cart
+            let formData = {
+                product_id: {{ $product->id }},
+                quantity: quantity
+            };
+
+            // Only add attributes if this is a variant product
+            if (isVariantProduct && selectedAttributes) {
+                formData.attributes = selectedAttributes;
+            }
+
+            console.log("Sending to cart:", formData); // Debug log
+
+            // Send POST request to add to cart
+            $.ajax({
+                url: '{{ route('cart.add') }}',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    console.log("Cart response:", response); // Debug log
+                    Swal.fire({
+                        icon: "success",
+                        title: "Thành công!",
+                        text: "✅ Sản phẩm đã được thêm vào giỏ hàng!",
+                        confirmButtonText: "OK"
+                    });
+                },
+                error: function(xhr) {
+                    console.error("Cart error:", xhr.responseText); // Debug log
+                    let errorMessage = "Có lỗi xảy ra khi thêm vào giỏ hàng.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi!",
+                        text: errorMessage,
+                        confirmButtonText: "OK"
+                    });
+                }
+            });
+        });
+
+        disablePurchase(); // Đảm bảo các nút bị vô hiệu hóa khi chưa chọn gì
     });
 </script>

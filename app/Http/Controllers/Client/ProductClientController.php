@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\AlbumImage;
+use App\Models\Attribute;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Product; // Import model Product
+use App\Models\ProductImage;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ProductClientController extends Controller
 {
@@ -18,47 +23,68 @@ class ProductClientController extends Controller
         $query = Product::where('status', true);
         $category = null;
 
-        // Lọc theo danh mục nếu có category_id
-        if ($request->filled('category_id')) {
-            $category = Category::where('is_active', 1)->find($request->category_id);
+        // Nếu có truyền category dạng slug (?category=printer)
+        if ($request->filled('category')) {
+            $category = Category::where('slug', $request->category)
+                ->where('is_active', 1)
+                ->first();
+
             if ($category) {
                 $query->where('category_id', $category->id);
+            } else {
+                // Không tìm thấy category theo slug → trả về danh sách rỗng
+                $query->whereRaw('0 = 1');
+            }
+        }
+
+        // Nếu truyền dạng category_id (?category_id=5)
+        elseif ($request->filled('category_id')) {
+            $category = Category::where('is_active', 1)->find($request->category_id);
+
+            if ($category) {
+                $query->where('category_id', $category->id);
+            } else {
+                // Không tìm thấy category theo ID → trả về danh sách rỗng
+                $query->whereRaw('0 = 1');
             }
         }
 
         // Lọc theo thương hiệu nếu có brand[]
         if ($request->filled('brand')) {
-            $brandsFilter = is_array($request->brand) ? $request->brand : explode(',', $request->brand);
-            $brandsFilter = array_filter(array_map('intval', $brandsFilter)); // Chỉ lấy số hợp lệ
+            $brandsFilter = is_array($request->brand)
+                ? $request->brand
+                : explode(',', $request->brand);
+
+            $brandsFilter = array_filter(array_map('intval', $brandsFilter));
 
             if (!empty($brandsFilter)) {
                 $query->whereIn('brand_id', $brandsFilter);
             }
         }
 
-
-        // Áp dụng bộ lọc vào danh sách sản phẩm
         $products = $query->paginate(20);
 
+        // Danh mục cấp cha
+        $categories = Category::where('is_active', true)
+            ->whereNull('parent_id')
+            ->with('children')
+            ->get();
 
-
-        // Lấy danh sách danh mục cha (chỉ danh mục đang hoạt động)
-        $categories = Category::where('is_active', true)->whereNull('parent_id')->with('children')->get();
-
+        // Lọc danh sách brand có sản phẩm trong category (nếu có)
         $brandsQuery = Brand::where('is_active', 1);
-
         if ($category) {
             $brandsQuery->whereHas('products', function ($query) use ($category) {
                 $query->where('category_id', $category->id);
             });
         }
-
         $brands = $brandsQuery->get();
 
         $template = 'fontend.products.index';
 
         return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category'));
     }
+
+
 
 
     public function show($slug)
@@ -71,51 +97,81 @@ class ProductClientController extends Controller
             ->with(['attributeValues.attribute'])
             ->get();
 
-        // Lấy danh sách ảnh của sản phẩm
-        $images = $product->images;
+            $productImage = ProductImage::where('product_id', $product->id)->first();
+            $images = $productImage ? $productImage->images : [];
+            
 
         // Lấy các sản phẩm liên quan
         $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->limit(6)
             ->get();
+        $comments = Comment::where('product_id', $product->id)
+            ->where('status', 1)
+            ->latest()
+            ->paginate(5);
 
+        $totalReviews = $comments->count();
+
+        // Tính điểm đánh giá trung bình
+        $averageRating = $totalReviews > 0 ? round($comments->avg('rating'), 1) : 0;
+
+        $comment = $product->comments()->where('user_id', auth()->id())->first();
+        // Lấy số lượng đánh giá theo từng mức sao
+        $ratingsCount = Comment::where('product_id', $product->id)
+            ->where('status', 1)
+            ->selectRaw('rating, COUNT(*) as count')
+            ->groupBy('rating')
+            ->orderBy('rating', 'desc')
+            ->pluck('count', 'rating')
+            ->toArray();
         if ($relatedProducts->isEmpty()) {
             $relatedProducts = collect(); // Trả về danh sách rỗng thay vì null
         }
 
         $template = 'fontend.products.detail';
-        return view('fontend.layout', compact('template', 'product', 'variants', 'relatedProducts', 'images'));
+        return view('fontend.layout', compact('template', 'product', 'variants', 'relatedProducts', 'images', 'comments', 'totalReviews', 'averageRating', 'ratingsCount', 'comment'));
     }
-
-
-
 
     public function getVariant(Request $request)
     {
-        $variant = ProductVariant::where('product_id', $request->product_id)
-            ->whereHas('attributeValues', function ($query) use ($request) {
-                $query->whereHas('attribute', function ($subQuery) {
-                    $subQuery->where('name', 'RAM');
-                })->where('value', $request->ram);
-            })
-            ->whereHas('attributeValues', function ($query) use ($request) {
-                $query->whereHas('attribute', function ($subQuery) {
-                    $subQuery->where('name', 'Màu sắc');
-                })->where('value', $request->color);
-            })
-            ->first();
+        // Log để kiểm tra request
+        Log::info('Received request:', $request->all());
 
-        if (!$variant) {
-            return response()->json(['error' => '❌ Không tìm thấy biến thể'], 404);
+        // Truy vấn biến thể sản phẩm dựa trên product_id
+        $query = ProductVariant::where('product_id', $request->product_id);
+
+        // Duyệt qua tất cả các tham số của request (trừ product_id) và thêm điều kiện vào truy vấn
+        foreach ($request->except('product_id') as $key => $value) {
+            if (!empty($value)) {
+                Log::info('Áp dụng điều kiện: ' . $key . ' = ' . $value);  // Log điều kiện tìm kiếm
+                $query->whereHas('attributeValues', function ($query) use ($key, $value) {
+                    $query->where('value', $value)
+                        ->whereHas('attribute', function ($subQuery) use ($key) {
+                            // Điều kiện tìm kiếm linh hoạt cho tên thuộc tính
+                            $subQuery->where('name', 'like', '%' . $key . '%');
+                        });
+                });
+            }
         }
 
+        // Trả về biến thể đầu tiên thỏa mãn điều kiện
+        $variant = $query->first();
+
+        // Log kết quả
+        Log::info('Kết quả truy vấn biến thể:', ['variant' => $variant]);
+
+        // Nếu không tìm thấy biến thể
+        if (!$variant) {
+            Log::error('Không tìm thấy biến thể cho sản phẩm:', ['request' => $request->all()]);
+            return response()->json(['error' => 'Không tìm thấy biến thể'], 404);
+        }
+
+        // Trả về thông tin biến thể
         return response()->json([
             'price' => number_format($variant->price, 0, ',', '.') . '₫',
-            'price_sale' => $variant->price_sale
-                ? number_format($variant->price_sale, 0, ',', '.') . '₫'
-                : null,
-            'quantity' => $variant->quantity ?? 0 // Lấy giá trị từ quantity thay vì stock
+            'price_sale' => $variant->price_sale ? number_format($variant->price_sale, 0, ',', '.') . '₫' : null,
+            'quantity' => $variant->quantity ?? 0,
         ]);
     }
 
@@ -150,10 +206,6 @@ class ProductClientController extends Controller
         return view('fontend.layout', compact('template', 'products', 'categories', 'category', 'brands'));
     }
 
-
-
-
-   
     public function showByBrand($brandSlug)
     {
         $brand = Brand::where('slug', $brandSlug)->firstOrFail();
@@ -170,9 +222,6 @@ class ProductClientController extends Controller
 
         return view('fontend.layout', compact('template', 'products', 'categories', 'brand', 'brands'));
     }
-
-
-
 
     public function search(Request $request)
     {
@@ -199,5 +248,36 @@ class ProductClientController extends Controller
         $template = 'fontend.products.search-results';
 
         return view('fontend.layout', compact('template', 'products', 'categories', 'query', 'brands'));
+    }
+
+    public function filteredProducts(Request $request)
+    {
+        $productsQuery = Product::query()->where('status', true);
+
+        // Lấy danh mục theo slug nếu có
+        if ($request->has('category')) {
+            $category = Category::where('slug', $request->category)->firstOrFail();
+            $productsQuery->where('category_id', $category->id);
+        }
+
+        // Lọc theo thương hiệu nếu có
+        if ($request->has('brand')) {
+            $brandIds = (array) $request->brand;
+            $productsQuery->whereIn('brand_id', $brandIds);
+        }
+
+        $products = $productsQuery->paginate(20);
+
+
+        $categories = Category::where('is_active', true)
+            ->whereNull('parent_id')
+            ->with('children')
+            ->get();
+
+        $brands = Brand::where('is_active', 1)->get();
+
+        $template = 'fontend.products.index';
+
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brands'));
     }
 }
