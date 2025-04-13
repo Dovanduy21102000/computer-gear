@@ -77,13 +77,13 @@ class DashboardController extends Controller
 
         // Doanh thu tháng này
         $currentMonth = Carbon::now()->startOfMonth();
-        $revenueThisMonth = Order::whereBetween('created_at', [$currentMonth, Carbon::now()])
+        $revenueThisMonth = Order::where('status', 'completed')->whereBetween('created_at', [$currentMonth, Carbon::now()])
             ->sum('total_price');
 
         // Doanh thu tháng trước
         $lastMonth = Carbon::now()->subMonth()->startOfMonth();
         $endLastMonth = Carbon::now()->subMonth()->endOfMonth();
-        $revenueLastMonth = Order::whereBetween('created_at', [$lastMonth, $endLastMonth])
+        $revenueLastMonth = Order::where('status', 'completed')->whereBetween('created_at', [$lastMonth, $endLastMonth])
             ->sum('total_price');
 
         // Tính phần trăm thay đổi
@@ -110,6 +110,7 @@ class DashboardController extends Controller
 
         // Lấy dữ liệu số đơn hàng theo từng tháng
         $salesData = Order::selectRaw('MONTH(created_at) as month, COUNT(*) as total_orders')
+            ->where('status', 'completed')
             ->whereYear('created_at', $year)
             ->groupBy('month')
             ->orderBy('month')
@@ -117,6 +118,7 @@ class DashboardController extends Controller
 
         // Lấy doanh thu theo từng tháng
         $revenueData = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as total_revenue')
+            ->where('status', 'completed')
             ->whereYear('created_at', $year)
             ->groupBy('month')
             ->orderBy('month')
@@ -202,8 +204,8 @@ class DashboardController extends Controller
         $totalRevenue = DB::table('orders')->sum('total_price');
 
         $totalProducts = DB::table('products')->count();
-        
-      
+
+
         $template = 'backend.dashboard.home.index';
 
         return view('backend.dashboard.layout', compact(
