@@ -117,7 +117,7 @@
                                             <td><a href="{{ route('orders.show', $order->id) }}">#{{ $order->code }}</a></td>
                                             <td>{{ $order->shipping_user_name }}</td>
                                             <td>{{ $order->shipping_phone }}</td>
-                                            <td class="text-warning">
+                                            <td class="text">
                                                 {{ number_format($order->final_price, 0, ',', '.') }}₫</td>
                                             <td>{{ $order->cancel_reason ?? 'Không có' }}</td>
                                             <td>{{ $order->updated_at->format('d/m/Y H:i') }}</td>

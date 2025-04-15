@@ -20,9 +20,10 @@
                         <a id="sidebarNavToggler" href="javascript:;" class="u-header-topbar__nav-link">
                             @auth
                             <div class="dropdown">
-                                <a id="userDropdown" href="javascript:;" class="dropdown-toggle d-flex align-items-center" role="button" data-toggle="dropdown">
+                                <a id="userDropdown" href="javascript:;" class="dropdown-toggle d-flex align-items-center text-dark" role="button" data-toggle="dropdown">
                                     <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
                                 </a>
+                                
                                 <div class="dropdown-menu dropdown-menu-right">
                                     <a class="dropdown-item" href="{{ route('user.show') }}">Quản lý tài khoản</a>
                                     <a class="dropdown-item" href="{{ route('client.orders.index') }}">Quản lý đơn hàng</a>

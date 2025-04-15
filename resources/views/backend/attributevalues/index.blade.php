@@ -42,7 +42,7 @@
                                 <table class="table datatable datatable-table">
                                     <thead>
                                         <tr>
-                                            <th class="text-center">ID</th>
+                                            
                                             <th class="text-center">Tên giá trị</th>
                                             <th class="text-center">Loại thuộc tính</th>
                                             <th class="text-center">Hành động</th>
@@ -51,10 +51,7 @@
                                     <tbody>
                                         @foreach ($data as $item)
                                             <tr>
-                                                <td>
-                                                    <div class="value text-center"><span class="value">{{ $item->id }}</span>
-                                                    </div>
-                                                </td>
+                                                
                                                 <td>
                                                     <div class="value text-center"><span class="value">{{ $item->value }}</span>
                                                     </div>
