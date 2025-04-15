@@ -201,9 +201,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/track-order', [CheckoutController::class, 'trackOrderView'])->name('order.track');
     Route::match(['get', 'post'], '/track-order/check', [CheckoutController::class, 'trackOrder'])->name('order.trackOrder');
     //thay doi ne
-    
-    Route::get('/orders/{status?}', [UserOrderController::class, 'index'])->name('client.orders.index');
-
+    Route::get('/orders', [UserOrderController::class, 'index'])->name('client.orders.index');
     Route::get('/orders/{code}', [UserOrderController::class, 'show'])->name('client.orders.show');
     Route::put('/orders/{code}/cancel', [UserOrderController::class, 'cancel'])->name('client.orders.cancel');
     Route::put('/orders/{code}/confirm-received', [UserOrderController::class, 'confirmReceived'])->name('client.orders.confirmReceived');
