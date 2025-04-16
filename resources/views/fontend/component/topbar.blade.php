@@ -20,7 +20,6 @@
                         <a id="sidebarNavToggler" href="javascript:;" class="u-header-topbar__nav-link">
                             @auth
                             <div class="dropdown">
-                                <a id="userDropdown" href="javascript:;" class="dropdown-toggle d-flex align-items-center text-black" role="button" data-toggle="dropdown">
                                 <a id="userDropdown" href="javascript:;" class="dropdown-toggle d-flex align-items-center text-dark" role="button" data-toggle="dropdown">
                                     <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
                                 </a>
