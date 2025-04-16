@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use Illuminate\Support\Facades\RateLimiter;
 
 class UserOrderController extends Controller
 {
@@ -26,72 +27,48 @@ class UserOrderController extends Controller
     public function show($code)
     {
         $order = Order::with(['items.product', 'items.productVariant.attributeValues.attribute'])
-    ->where('code', $code)
-    ->where('user_id', Auth::id())
-    ->firstOrFail();
+            ->where('code', $code)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
-    
+
         $template = 'fontend.oders.show';
         return view('fontend.layout', compact('order', 'template'));
     }
 
     public function cancel(Request $request, $code)
-{
-    $order = Order::where('code', $code)
-        ->where('user_id', auth()->id()) // đảm bảo chỉ huỷ đơn của mình
-        ->firstOrFail();
+    {
+        $user = auth()->user();
 
-    if (!in_array($order->status, ['pending', 'processing'])) {
-        return back()->with('error', 'Không thể huỷ đơn hàng này.');
-    }
-
-    $request->validate([
-        'cancel_reason' => 'required|string|max:255',
-    ]);
-
-    if ($order->status === 'pending') {
-        // Nếu đang chờ xác nhận → huỷ ngay
-        $order->status = 'canceled';
-        $order->cancel_reason = $request->cancel_reason;
-        $order->save();
-    
-        // Trả lại số lượng sản phẩm
-        foreach ($order->orderItems as $item) {
-            if ($item->product_variant_id) {
-                // Sản phẩm biến thể
-                $variant = ProductVariant::find($item->product_variant_id);
-                if ($variant) {
-                    $variant->quantity += $item->quantity;
-                    $variant->save();
-                }
-    
-                // Đồng thời cộng lại số lượng sản phẩm cha
-                $product = Product::find($item->product_id);
-                if ($product) {
-                    $product->quantity += $item->quantity;
-                    $product->save();
-                }
-            } else {
-                // Sản phẩm thường
-                $product = Product::find($item->product_id);
-                if ($product) {
-                    $product->quantity += $item->quantity;
-                    $product->save();
-                }
-            }
+        // Kiểm tra số lần huỷ đơn của người dùng trong 1 giờ
+        $key = 'cancel-attempts:' . $user->id;
+        if (RateLimiter::tooManyAttempts($key, 3)) {
+            return back()->with('error', 'Bạn đã huỷ đơn quá nhiều lần. Vui lòng thử lại sau 1 giờ.');
         }
-    
-        return back()->with('success', 'Đơn hàng đã được huỷ.');
-    } elseif ($order->status === 'processing') {
-        // Nếu đang xử lý → yêu cầu huỷ
-        $order->cancel_requested = true;
+        RateLimiter::hit($key, 3600);
+
+
+        $order = Order::where('code', $code)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        // Kiểm tra trạng thái đơn hàng có cho phép huỷ không
+        if (!in_array($order->status, ['pending', 'processing'])) {
+            return back()->with('error', 'Không thể huỷ đơn hàng này.');
+        }
+
+        
+        $request->validate([
+            'cancel_reason' => 'required|string|max:255',
+        ]);
+
+       
+        $order->cancel_requested = true;  // Đánh dấu yêu cầu huỷ
         $order->cancel_reason = $request->cancel_reason;
+        $order->status = 'pending_cancel';
         $order->save();
-    
         return back()->with('info', 'Đã gửi yêu cầu huỷ. Người bán sẽ xem xét phê duyệt.');
     }
-    
-}
 
 
 

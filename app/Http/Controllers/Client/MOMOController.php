@@ -146,12 +146,37 @@ class MOMOController extends Controller
 
             $jsonResult = $response->json();
 
+            // Log the full response for debugging
+            Log::info('MOMO Payment Response:', [
+                'status' => $response->status(),
+                'response' => $jsonResult,
+                'request_data' => [
+                    'partnerCode' => $partnerCode,
+                    'amount' => $amount,
+                    'orderId' => $orderId,
+                    'orderInfo' => $orderInfo,
+                    'redirectUrl' => $redirectUrl,
+                    'ipnUrl' => $ipnUrl,
+                    'extraData' => $extraData,
+                    'signature' => $signature
+                ]
+            ]);
+
             if (isset($jsonResult['payUrl'])) {
                 return redirect($jsonResult['payUrl']);
             } else {
-                return back()->with('error', 'Không thể tạo thanh toán. Vui lòng thử lại.');
+                $errorMessage = $jsonResult['message'] ?? 'Không thể tạo thanh toán. Vui lòng thử lại.';
+                Log::error('MOMO Payment Error:', [
+                    'error' => $errorMessage,
+                    'response' => $jsonResult
+                ]);
+                return back()->with('error', $errorMessage);
             }
         } catch (\Exception $e) {
+            Log::error('MOMO Payment Exception:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
