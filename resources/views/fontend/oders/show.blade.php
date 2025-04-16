@@ -20,6 +20,7 @@
                             'delivered' => 'primary',
                             'completed' => 'success',
                             'cancelled' => 'danger',
+                            'pending_cancel' => 'warning',
                         ];
                         $paymentText = match ($order->payment_method) {
                             'cash' => 'Thanh toán khi nhận hàng',
@@ -43,6 +44,10 @@
 
                             @case('completed')
                                 Đã giao
+                            @break
+
+                            @case('pending_cancel')
+                                Chờ duyệt hủy
                             @break
 
                             @case('canceled')

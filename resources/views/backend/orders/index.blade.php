@@ -29,7 +29,7 @@
                                 <option value="processing">Đang xử lý</option>
                                 <option value="delivered">Đang giao hàng</option>
                                 <option value="completed">Hoàn thành</option>
-                                <option value="canceled">Hủy đơn</option>
+                                {{-- <option value="canceled">Hủy đơn</option> --}}
                             </select>
                         </div>
                         <table class="table datatable">
