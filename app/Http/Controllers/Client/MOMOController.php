@@ -45,13 +45,28 @@ class MOMOController extends Controller
                 return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống');
             }
 
+            // Get selected items from the request
+            $selectedItemIds = $request->input('selected_items', []);
+            if (is_string($selectedItemIds)) {
+                $selectedItemIds = explode(',', $selectedItemIds);
+            }
+            $selectedItemIds = is_array($selectedItemIds) ? $selectedItemIds : [];
+
+            if (empty($selectedItemIds)) {
+                return redirect()->route('cart.index')->with('error', 'Vui lòng chọn sản phẩm để thanh toán.');
+            }
+
             $cartItems = CartItem::with(['product', 'productVariant'])
                 ->where('cart_id', $cart->id)
+                ->whereIn('id', $selectedItemIds)
                 ->get();
 
             if ($cartItems->isEmpty()) {
                 return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống');
             }
+
+            // Store selected items in session for later use
+            session(['momo_selected_items' => $selectedItemIds]);
 
             // Validate stock availability
             foreach ($cartItems as $item) {
@@ -105,7 +120,7 @@ class MOMOController extends Controller
             $orderId = $orderCode;
             $redirectUrl = route('momo.return');
             $ipnUrl = route('momo.ipn');
-            $extraData = "";
+            $extraData = json_encode(['selected_items' => $selectedItemIds]); // Store selected items in extraData
 
             $requestId = time() . "";
             $requestType = "payWithCC";
@@ -131,12 +146,37 @@ class MOMOController extends Controller
 
             $jsonResult = $response->json();
 
+            // Log the full response for debugging
+            Log::info('MOMO Payment Response:', [
+                'status' => $response->status(),
+                'response' => $jsonResult,
+                'request_data' => [
+                    'partnerCode' => $partnerCode,
+                    'amount' => $amount,
+                    'orderId' => $orderId,
+                    'orderInfo' => $orderInfo,
+                    'redirectUrl' => $redirectUrl,
+                    'ipnUrl' => $ipnUrl,
+                    'extraData' => $extraData,
+                    'signature' => $signature
+                ]
+            ]);
+
             if (isset($jsonResult['payUrl'])) {
                 return redirect($jsonResult['payUrl']);
             } else {
-                return back()->with('error', 'Không thể tạo thanh toán. Vui lòng thử lại.');
+                $errorMessage = $jsonResult['message'] ?? 'Không thể tạo thanh toán. Vui lòng thử lại.';
+                Log::error('MOMO Payment Error:', [
+                    'error' => $errorMessage,
+                    'response' => $jsonResult
+                ]);
+                return back()->with('error', $errorMessage);
             }
         } catch (\Exception $e) {
+            Log::error('MOMO Payment Exception:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
@@ -156,8 +196,24 @@ class MOMOController extends Controller
                 return redirect()->route('cart.index')->with('error', 'Giỏ hàng không tồn tại.');
             }
 
+            // Get selected items from extraData or session
+            $selectedItemIds = [];
+            if ($request->extraData) {
+                $extraData = json_decode($request->extraData, true);
+                $selectedItemIds = $extraData['selected_items'] ?? [];
+            }
+
+            if (empty($selectedItemIds)) {
+                $selectedItemIds = session('momo_selected_items', []);
+            }
+
+            if (empty($selectedItemIds)) {
+                return redirect()->route('cart.index')->with('error', 'Vui lòng chọn sản phẩm để thanh toán.');
+            }
+
             $cartItems = CartItem::with(['product', 'productVariant'])
                 ->where('cart_id', $cart->id)
+                ->whereIn('id', $selectedItemIds)
                 ->get();
 
             if ($cartItems->isEmpty()) {
@@ -254,11 +310,10 @@ class MOMOController extends Controller
                 } else {
                     $item->product->decrement('quantity', $item->quantity);
                 }
-            }
 
-            // Clear cart
-            $cart->cartItems()->delete();
-            $cart->delete();
+                // Delete only this specific cart item
+                $item->delete();
+            }
 
             // Clear coupon session
             session()->forget('coupon');

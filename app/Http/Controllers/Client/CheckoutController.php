@@ -65,12 +65,13 @@ class CheckoutController extends Controller
             // If the item has multiple variants (stored as "id1 | id2")
             if (strpos($item->product_variant_id, '|') !== false) {
                 $variantIds = array_map('trim', explode('|', $item->product_variant_id));
-                foreach ($variantIds as $variantId) {
-                    // Create a new cart item for each variant
+                // Only process the first variant if it's a selected item
+                if (in_array($item->id, $selectedItemIds)) {
+                    $variantId = $variantIds[0]; // Only take the first variant
                     $variantItem = clone $item;
-                    $variantItem->product_variant_id = $variantId;
-                    $variantItem->productVariant = ProductVariant::with('attributeValues.attribute')
-                        ->find($variantId);
+                    $variantItem->setAttribute('product_variant_id', $variantId);
+                    $variantItem->setRelation('productVariant', ProductVariant::with('attributeValues.attribute')
+                        ->find($variantId));
                     $processedCartItems->push($variantItem);
                 }
             } else {
@@ -321,16 +322,48 @@ class CheckoutController extends Controller
                 throw new \Exception('Giỏ hàng không tồn tại.');
             }
 
+            // Get selected items from the request
+            $selectedItemIds = $request->input('selected_items', []);
+            if (is_string($selectedItemIds)) {
+                $selectedItemIds = explode(',', $selectedItemIds);
+            }
+            $selectedItemIds = is_array($selectedItemIds) ? $selectedItemIds : [];
+
+            if (empty($selectedItemIds)) {
+                throw new \Exception('Vui lòng chọn sản phẩm để thanh toán.');
+            }
+
             $cartItems = CartItem::with(['product', 'productVariant'])
                 ->where('cart_id', $cart->id)
+                ->whereIn('id', $selectedItemIds)
                 ->get();
 
             if ($cartItems->isEmpty()) {
                 throw new \Exception('Giỏ hàng của bạn đang trống.');
             }
 
-            // Validate stock availability
+            // Process cart items to handle multiple variants
+            $processedCartItems = collect();
             foreach ($cartItems as $item) {
+                // If the item has multiple variants (stored as "id1 | id2")
+                if (strpos($item->product_variant_id, '|') !== false) {
+                    $variantIds = array_map('trim', explode('|', $item->product_variant_id));
+                    // Only process variants that are in the selected items
+                    foreach ($variantIds as $variantId) {
+                        // Create a new cart item for each variant
+                        $variantItem = clone $item;
+                        $variantItem->setAttribute('product_variant_id', $variantId);
+                        $variantItem->setRelation('productVariant', ProductVariant::with('attributeValues.attribute')
+                            ->find($variantId));
+                        $processedCartItems->push($variantItem);
+                    }
+                } else {
+                    $processedCartItems->push($item);
+                }
+            }
+
+            // Validate stock availability for processed items
+            foreach ($processedCartItems as $item) {
                 if ($item->productVariant) {
                     if ($item->productVariant->quantity < $item->quantity) {
                         throw new \Exception("Sản phẩm {$item->product->name} - {$item->productVariant->name} không đủ số lượng trong kho.");
@@ -344,7 +377,7 @@ class CheckoutController extends Controller
 
             // Calculate Total Price
             $totalPrice = 0;
-            foreach ($cartItems as $item) {
+            foreach ($processedCartItems as $item) {
                 $price = $item->productVariant ?
                     ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
                 $totalPrice += $price * $item->quantity;
@@ -419,11 +452,10 @@ class CheckoutController extends Controller
                 } else {
                     $item->product->decrement('quantity', $item->quantity);
                 }
-            }
 
-            // Clear cart
-            $cart->cartItems()->delete();
-            $cart->delete();
+                // Delete only this specific cart item
+                $item->delete();
+            }
 
             // Clear coupon session
             session()->forget('coupon');

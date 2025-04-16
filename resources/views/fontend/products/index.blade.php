@@ -226,8 +226,10 @@
                                         <div class="product-item__inner px-xl-4 p-3">
                                             <div class="product-item__body pb-xl-2">
                                                 <div class="mb-2">
-                                                    <a href="{{ route('client.products.category', ['slug' => $product->category->slug]) }}"
-                                                        class="font-size-12 text-gray-5">{{ $product->category->name ?? 'Danh mục' }}</a>
+                                                    <a href="{{ $product->category?->slug ? route('client.products.category', ['slug' => $product->category->slug]) : '#' }}"
+                                                        class="font-size-12 text-gray-5">
+                                                        {{ $product->category->name ?? 'Danh mục' }}
+                                                    </a>
                                                 </div>
                                                 <h5 class="mb-1 product-item__title">
                                                     <a href="{{ route('client.products.detail', $product->slug) }}"
@@ -247,12 +249,13 @@
                                                 <div class="flex-center-between mb-1">
                                                     <div class="prodcut-price">
                                                         @if ($product->price_sale)
-                                                         
-                                                                <div class="prodcut-price d-flex align-items-center position-relative">
-                                                                    <ins class="font-size-20 text-red text-decoration-none">{{ number_format($product->price_sale)  }}đ</ins>
-                                                                    <del class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($product->price, 0, ',', '.') }}đ</del>
-                                                                </div> 
-
+                                                            <div
+                                                                class="prodcut-price d-flex align-items-center position-relative">
+                                                                <ins
+                                                                    class="font-size-20 text-red text-decoration-none">{{ number_format($product->price_sale) }}đ</ins>
+                                                                <del
+                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                                            </div>
                                                         @else
                                                             <div class="text-dark fw-bold fs-5">
                                                                 {{ number_format($product->price, 0, ',', '.') }}đ

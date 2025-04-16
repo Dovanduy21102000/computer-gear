@@ -107,58 +107,37 @@ class DashboardController extends Controller
 
 
         $year = Carbon::now()->year; // Lấy năm hiện tại
+        $months = range(1, 12);
 
-        // Lấy dữ liệu số đơn hàng theo từng tháng
-        $salesData = Order::selectRaw('MONTH(created_at) as month, COUNT(*) as total_orders')
+        // Số đơn hàng theo tháng
+        $salesRaw = Order::selectRaw('MONTH(created_at) as month, COUNT(*) as total_orders')
+            ->where('status', 'completed')
             ->whereYear('created_at', $year)
             ->groupBy('month')
-            ->orderBy('month')
             ->pluck('total_orders', 'month');
 
-        // Lấy doanh thu theo từng tháng
-        // $revenueData = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as total_revenue')
-        //     ->where('status', 'completed')
-        //     ->whereYear('created_at', $year)
-        //     ->groupBy('month')
-        //     ->orderBy('month')
-        //     ->pluck('total_revenue', 'month');
-
-        $year = Carbon::now()->year;
-        $revenue = [];
-
-        for ($i = 1; $i <= 12; $i++) {
-            // Xác định tháng và năm
-            $startOfMonth = Carbon::create($year, $i, 1)->startOfMonth();
-            $endOfMonth = Carbon::create($year, $i, 1)->endOfMonth();
-
-            // Tính doanh thu cho tháng này
-            $monthlyRevenue = Order::where('status', 'completed')
-                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-                ->sum('total_price');
-
-            // Chia doanh thu cho 1 triệu và làm tròn đến 2 chữ số, nếu không có đơn hàng thì doanh thu là 0
-            $revenue[] = round($monthlyRevenue / 1_000_000, 2);
-        }
-
-        // Lấy số khách hàng mới theo từng tháng
-        $customerData = User::selectRaw('MONTH(created_at) as month, COUNT(*) as total_customers')
+        // Doanh thu theo tháng (chia đơn vị triệu)
+        $revenueRaw = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as total_revenue')
+            ->where('status', 'completed')
             ->whereYear('created_at', $year)
             ->groupBy('month')
-            ->orderBy('month')
+            ->pluck('total_revenue', 'month');
+
+        // Số khách hàng mới theo tháng
+        $customersRaw = User::selectRaw('MONTH(created_at) as month, COUNT(*) as total_customers')
+            ->whereYear('created_at', $year)
+            ->groupBy('month')
             ->pluck('total_customers', 'month');
 
-        // Đảm bảo dữ liệu cho tất cả 12 tháng (bao gồm tháng có số lượng khách hàng bằng 0)
-        $customerData = collect(range(1, 12))->mapWithKeys(function ($month) use ($customerData) {
-            return [$month => $customerData->get($month, 0)];
-        });
-
-        $months = range(1, 12);
+        // Chuẩn hóa dữ liệu thành mảng 12 phần tử cho biểu đồ
         $sales = [];
+        $revenue = [];
         $customers = [];
 
         foreach ($months as $month) {
-            $sales[] = $salesData[$month] ?? 0;
-            $customers[] = $customerData[$month] ?? 0;
+            $sales[] = $salesRaw[$month] ?? 0;
+            $revenue[] = round(($revenueRaw[$month] ?? 0) / 1_000_000, 2); // Tính theo triệu
+            $customers[] = $customersRaw[$month] ?? 0;
         }
 
         // Lấy danh sách đơn hàng mới
