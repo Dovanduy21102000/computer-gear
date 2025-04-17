@@ -5,30 +5,48 @@ namespace App\Http\Controllers;
 use App\Events\MessageSent;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
-    public function sendMessage(Request $request)
+    // Gửi tin nhắn
+    public function send(Request $request)
     {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $request->validate([
+            'receiver_id' => 'required|integer',
+            'message' => 'required|string|max:2000',
+        ]);
+
         $message = Message::create([
-            'sender_id' => auth()->id(),
+            'sender_id' => Auth::id(),
             'receiver_id' => $request->receiver_id,
-            'message' => $request->message
+            'message' => $request->message,
         ]);
 
         broadcast(new MessageSent($message))->toOthers();
 
-        return response()->json(['status' => 'sent']);
+        return response()->json(['success' => true]);
     }
 
-    public function getMessages($userId)
+    // Lấy danh sách tin nhắn giữa 2 người dùng
+    public function messages($receiverId)
     {
-        $messages = Message::where(function ($q) use ($userId) {
-            $q->where('sender_id', auth()->id())
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $userId = Auth::id();
+
+        $messages = Message::where(function ($query) use ($userId, $receiverId) {
+            $query->where('sender_id', $userId)
+                ->where('receiver_id', $receiverId);
+        })->orWhere(function ($query) use ($userId, $receiverId) {
+            $query->where('sender_id', $receiverId)
                 ->where('receiver_id', $userId);
-        })->orWhere(function ($q) use ($userId) {
-            $q->where('sender_id', $userId)
-                ->where('receiver_id', auth()->id());
         })->orderBy('created_at')->get();
 
         return response()->json($messages);

@@ -4,27 +4,29 @@
             <span class="fas fa-arrow-up u-go-to__inner"></span>
         </a>
         <!-- End Go to Top -->
-        <!-- Nút mở chat -->
-        <div id="chat-toggle"
-            class="fixed bottom-4 right-4 z-50 cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition">
-            Chat với chúng tôi 💬
-        </div>
 
-        <!-- Khung chat nổi -->
-        <div id="chat-box"
-            class="fixed bottom-20 right-4 z-50 w-80 bg-white border border-gray-300 rounded-lg shadow-lg hidden">
-            <div class="flex justify-between items-center bg-blue-600 text-white px-4 py-2 rounded-t-lg">
+        <!-- Nút mở chat -->
+        <button id="chat-toggle" class="btn btn-primary rounded-circle position-fixed"
+            style="bottom: 20px; right: 20px; z-index: 1050;">
+            💬
+        </button>
+
+        <!-- Hộp chat -->
+        <div id="chat-box" class="card shadow position-fixed"
+            style="width: 300px; bottom: 80px; right: 20px; display: none; z-index: 1050;">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <span>Hỗ trợ khách hàng</span>
-                <button id="close-chat" class="text-white hover:text-red-200">✖</button>
+                <button id="close-chat" class="btn-close btn-close-white btn-sm"></button>
             </div>
-            <div id="chat-messages" class="h-64 overflow-y-auto p-3 space-y-2 text-sm">
-                <!-- Tin nhắn hiển thị tại đây -->
+            <div class="card-body p-2 overflow-auto" style="height: 300px;" id="chat-messages">
+                <!-- Tin nhắn sẽ được hiển thị ở đây -->
             </div>
-            <form id="chat-form" class="p-3 border-t flex gap-2">
-                <input type="text" id="chat-input" class="w-full border rounded px-2 py-1 text-sm"
-                    placeholder="Nhập tin nhắn..." required>
-                <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Gửi</button>
-            </form>
+            <div class="card-footer p-2">
+                <form id="chat-form" class="d-flex gap-2">
+                    <input type="text" id="chat-input" class="form-control" placeholder="Nhập tin nhắn..." required>
+                    <button class="btn btn-primary">Gửi</button>
+                </form>
+            </div>
         </div>
 
         <!-- JS Global Compulsory -->
@@ -70,7 +72,17 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-bar-rating/dist/themes/fontawesome-stars.css">
         <script src="https://cdn.jsdelivr.net/npm/jquery-bar-rating/dist/jquery.barrating.min.js"></script>
 
+        <!-- Pusher -->
+        <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+
+        <!-- Laravel Echo -->
+        <script src="https://cdn.jsdelivr.net/npm/laravel-echo/dist/echo.iife.js"></script>
+
         <!-- JS Plugins Init. -->
+        @php
+            use App\Models\User;
+            $admin = User::where('role', 'admin')->first();
+        @endphp
         <script>
             $(window).on('load', function() {
                 // initialization of HSMegaMenu component
@@ -184,4 +196,118 @@
                     }
                 });
             });
+
+            //Chat real time
+            document.addEventListener('DOMContentLoaded', () => {
+                const toggle = document.getElementById('chat-toggle');
+                const chatBox = document.getElementById('chat-box');
+                const closeBtn = document.getElementById('close-chat');
+                const chatMessages = document.getElementById('chat-messages');
+                const chatForm = document.getElementById('chat-form');
+                const chatInput = document.getElementById('chat-input');
+
+                const receiverId = {{ $admin?->id ?? 'null' }};
+                const userId = {{ auth()->id() ?? 'null' }};
+                let echoInstance = null;
+                let loadedChat = false;
+
+                function appendMessage(message, who = 'me') {
+                    const div = document.createElement('div');
+                    div.className = who === 'me' ? 'text-end mb-2' : 'text-start mb-2';
+                    div.innerHTML =
+                        `<span class="badge bg-${who === 'me' ? 'primary' : 'secondary'}">${message}</span>`;
+                    chatMessages.appendChild(div);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+
+                toggle.onclick = async () => {
+                    @if (!auth()->check())
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Bạn chưa đăng nhập',
+                            text: 'Vui lòng đăng nhập để sử dụng chức năng chat!',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    @endif
+
+                    chatBox.style.display = chatBox.style.display === 'none' ? 'block' : 'none';
+
+                    if (!loadedChat) {
+                        try {
+                            const res = await fetch(`/chat/messages/${receiverId}`);
+                            const messages = await res.json();
+                            messages.forEach(m => {
+                                appendMessage(m.message, m.sender_id == userId ? 'me' : 'them');
+                            });
+                            loadedChat = true;
+                        } catch (error) {
+                            console.error('Lỗi tải tin nhắn:', error);
+                        }
+                    }
+
+                    if (!echoInstance && userId) {
+                        try {
+                            // Import Echo và Pusher từ CDN
+                            const {
+                                default: Echo
+                            } = await import(
+                                'https://cdn.jsdelivr.net/npm/laravel-echo@1.11.3/dist/echo.iife.js');
+                            const Pusher = await import('https://js.pusher.com/7.2/pusher.min.js');
+
+                            window.Pusher = Pusher;
+                            echoInstance = new Echo({
+                                broadcaster: 'pusher',
+                                key: '{{ env('PUSHER_APP_KEY') }}',
+                                cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
+                                forceTLS: true
+                            });
+
+                            echoInstance.private(`chat.${userId}`)
+                                .listen('MessageSent', (e) => {
+                                    appendMessage(e.message, 'them');
+                                });
+
+                        } catch (err) {
+                            console.error('Lỗi khi khởi tạo Echo:', err);
+                        }
+                    }
+                };
+
+                closeBtn.onclick = () => chatBox.style.display = 'none';
+
+                chatForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const msg = chatInput.value;
+                    if (!msg.trim()) return;
+
+                    appendMessage(msg, 'me');
+
+                    try {
+                        await fetch('/chat/send', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                receiver_id: receiverId,
+                                message: msg
+                            })
+                        });
+                        chatInput.value = '';
+                    } catch (error) {
+                        console.error('Lỗi khi gửi tin nhắn:', error);
+                    }
+                };
+            });
+
+            function appendMessage(message, who = 'me') {
+                const chatMessages = document.getElementById('chat-messages');
+                const div = document.createElement('div');
+                div.className = who === 'me' ? 'text-end mb-2' : 'text-start mb-2';
+                div.innerHTML = `<span class="badge bg-${who === 'me' ? 'primary' : 'secondary'}">${message}</span>`;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
         </script>
