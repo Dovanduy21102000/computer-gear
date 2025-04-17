@@ -75,3 +75,69 @@
     </div>
 </div>
 <!-- End Vertical-and-secondary-menu -->
+
+
+<script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                    document.getElementById('select-all').addEventListener('click', function(event) {
+                        document.querySelectorAll('.select-item').forEach(checkbox => {
+                            checkbox.checked = event.target.checked;
+                        });
+                    });
+
+                    document.getElementById('checkout-selected').addEventListener('click', function(event) {
+                        event.preventDefault();
+
+                        let selectedItems = document.querySelectorAll('.select-item:checked');
+                        if (selectedItems.length === 0) {
+                            alert('Vui lòng chọn ít nhất một mục để thanh toán ');
+                            return;
+                        }
+
+                        // Get selected item IDs
+                        let selectedIds = Array.from(selectedItems).map(item => item.value);
+
+                        // Log selected items for debugging
+                        console.log('Selected items for checkout:', selectedIds);
+
+                        // Create URL with selected items
+                        let checkoutUrl = "{{ route('checkout.index') }}?selected_items=" + selectedIds.join(',');
+
+                        // Redirect to checkout page with selected items
+                        window.location.href = checkoutUrl;
+                    });
+
+                    document.getElementById('delete-selected').addEventListener('click', function(event) {
+                        event.preventDefault(); // Prevent default form submission
+                        let selectedItems = document.querySelectorAll('.select-item:checked');
+                        if (selectedItems.length === 0) {
+                            alert('Vui lòng chọn ít nhất một mục để xóa.');
+                            return;
+                        }
+                        if (confirm('Are you sure you want to delete the selected items?')) {
+                            let form = document.getElementById('cart-form');
+                            if (form) {
+                                form.action = "{{ route('cart.bulkDelete') }}";
+                                form.submit();
+                            } else {
+                                console.error("Form not found!");
+                            }
+
+                        }
+                    });
+
+                    document.getElementById('update-cart').addEventListener('click', function(event) {
+                        event.preventDefault();
+                        let form = document.getElementById('cart-form');
+                        if (form) {
+                            form.method = "POST";
+                            form.action = "{{ route('cart.update') }}"; // Ensure update action
+                            form.submit();
+                        } else {
+                            console.error("Form not found!");
+                        }
+                    });
+
+                });
+
+</script>
