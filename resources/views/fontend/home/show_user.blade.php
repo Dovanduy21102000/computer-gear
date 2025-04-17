@@ -129,7 +129,7 @@
     document.getElementById('editInfoTab').addEventListener('click', () => {
         document.getElementById('editInfoForm').style.display = 'block';
         document.getElementById('changePasswordForm').style.display = 'none';
-        document.getElementById('editInfoTab').classList.add('active');
+        document.getElementById('editInfoTab').classList.add('active');                                                                                                                      /
         document.getElementById('changePasswordTab').classList.remove('active');
     });
 
