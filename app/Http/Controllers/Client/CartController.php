@@ -335,13 +335,8 @@ class CartController extends Controller
                 ]);
             }
         }
-        // Sau khi thêm sản phẩm vào giỏ hàng, cập nhật giỏ hàng
-        $cart = Cart::where('user_id', Auth::id())->first();
-        $totalItems = CartItem::where('cart_id', $cart->id)->count();
 
-        // Trả về số lượng sản phẩm giỏ hàng qua AJAX
-        return response()->json(['totalItems' => $totalItems]);
-
+        return redirect()->back()->with('success', 'Sản phẩm đã được thêm vào giỏ hàng.');
     }
 
     // Update Cart Item Quantity
@@ -379,11 +374,6 @@ class CartController extends Controller
                 $cartItemModel->quantity = $newQuantity;
                 $cartItemModel->save();
             }
-            $cart = Cart::where('user_id', Auth::id())->first();
-            $totalItems = CartItem::where('cart_id', $cart->id)->count();
-        
-            // Trả về số lượng sản phẩm giỏ hàng qua AJAX
-            return response()->json(['totalItems' => $totalItems]);
         }
 
         return back()->with('success', 'Cập nhật giỏ hàng thành công!');
