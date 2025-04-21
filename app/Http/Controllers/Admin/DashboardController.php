@@ -172,20 +172,20 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Lấy danh sách người mua mới nhất
+        $latestBuyers = Order::with('user')
+            ->latest()
+            ->take(5)
+            ->get(); // Kết quả là một Collection
+
         // Lấy danh sách người dùng đăng ký mới nhất
         $latestUsers = User::latest()
             ->take(5)
-            ->get()
-            ->map(function ($user) {
-                return [
-                    'type' => 'user',
-                    'name' => $user->name,
-                    'created_at' => $user->created_at,
-                ];
-            });
+            ->get(); // Kết quả là một Collection
 
         // Gộp hai danh sách lại
-        $recentActivities = $latestBuyers->merge($latestUsers);
+        $recentActivities = $latestBuyers->merge($latestUsers); // Đảm bảo merge giữa 2 Collection
+
 
         // Sắp xếp theo thời gian mới nhất
         $recentActivities = $recentActivities->sortByDesc('created_at');
