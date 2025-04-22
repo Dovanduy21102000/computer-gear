@@ -3,12 +3,13 @@
 use App\Http\Controllers\Admin\AlbumImageController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\AttributeValueController;
+use App\Http\Controllers\Admin\AdminChatController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 
 use App\Http\Controllers\Admin\AuthController;
-use App\Http\Controllers\ChatController;
+use App\Http\Controllers\Client\ChatController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -37,8 +38,6 @@ use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SpecificationController;
 use App\Http\Controllers\Client\UserOrderController;
-use App\Http\Controllers\OrderItemController;
-use App\Http\Controllers\Client\ReturnRequestController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -78,7 +77,6 @@ Route::prefix('admin')->group(function () {
             'posts'             => PostController::class,
             'users'             => UserController::class,
             'orders'            => OrderController::class,
-            'orderitems'        => OrderItemController::class,
             'contacts'          => ContactController::class,
             'productvariants'   => ProductVariantController::class,
             'category_post'     => CategoryPostController::class,
@@ -124,16 +122,17 @@ Route::prefix('admin')->group(function () {
             // Xoá ảnh cụ thể theo index trong mảng
             Route::delete('/{key}', [ProductImageController::class, 'destroy'])->name('destroy');
         });
-
-
         // Đảm bảo rằng route này đã được thêm vào trong routes/web.php
         Route::put('/comments/{id}/toggle-status', [CommentController::class, 'toggleStatus'])->name('admin.comments.toggleStatus');
 
         Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
         Route::get('/comments/{id}/show', [CommentController::class, 'show'])->name('comments.show');
 
-        Route::post('/chat/send', [ChatController::class, 'sendMessage']);
-        Route::get('/chat/messages/{user_id}', [ChatController::class, 'getMessages']);
+        //Chat realtime
+        Route::get('/chats', [AdminChatController::class, 'index'])->name('chats.index');
+        Route::get('/chat/users', [AdminChatController::class, 'getUsers']);
+        Route::get('/chat/messages/{userId}', [AdminChatController::class, 'getMessages']);
+        Route::post('/chat/send', [AdminChatController::class, 'sendMessage']);
     });
     //Biêns thể
     Route::prefix('products/{product}/variants')->group(function () {
