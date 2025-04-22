@@ -37,6 +37,7 @@ use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SpecificationController;
 use App\Http\Controllers\Client\UserOrderController;
 use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\Client\ReturnRequestController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -63,7 +64,6 @@ Route::prefix('admin')->group(function () {
         Route::get('orders/cancel-tabs', [OrderController::class, 'cancelTabs'])->name('orders.cancelTabs');
         Route::put('orders/{id}/approve-cancel', [OrderController::class, 'approveCancel'])->name('orders.cancel-approve');
         Route::put('orders/{id}/reject-cancel', [OrderController::class, 'rejectCancel'])->name('orders.cancel-reject');
-        //
 
         // Các route resource dành cho admin
         $objects = [
@@ -110,25 +110,18 @@ Route::prefix('admin')->group(function () {
                 ->name('bulkUpdate');
         });
 
-        
         Route::prefix('products/{product_id}/images')->name('backend.product_images.')->group(function () {
             // Trang danh sách ảnh
             Route::get('/', [ProductImageController::class, 'index'])->name('index');
-        
             // Thêm ảnh mới
             Route::get('/create', [ProductImageController::class, 'create'])->name('create');
             Route::post('/', [ProductImageController::class, 'store'])->name('store');
-        
             // Sửa toàn bộ album ảnh
             Route::get('/edit', [ProductImageController::class, 'edit'])->name('edit');  // ✅ không có {key}
             Route::put('/', [ProductImageController::class, 'update'])->name('update');  // ✅ không có {key}
-        
             // Xoá ảnh cụ thể theo index trong mảng
             Route::delete('/{key}', [ProductImageController::class, 'destroy'])->name('destroy');
         });
-        
-        
-        
 
 
         // Đảm bảo rằng route này đã được thêm vào trong routes/web.php
@@ -189,7 +182,6 @@ Route::middleware(['web'])->group(function () {
     Route::get('/products/category/{slug}', [ProductClientController::class, 'categoryProducts'])->name('client.products.category');
     Route::get('/get-variant', [ProductClientController::class, 'getVariant'])->name('getVariant');
     Route::get('/search', [ProductClientController::class, 'search'])->name('search');
-   
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
 
@@ -204,8 +196,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/orders', [UserOrderController::class, 'index'])->name('client.orders.index');
     Route::get('/orders/{code}', [UserOrderController::class, 'show'])->name('client.orders.show');
     Route::put('/orders/{code}/cancel', [UserOrderController::class, 'cancel'])->name('client.orders.cancel');
-    Route::put('/orders/{code}/confirm-received', [UserOrderController::class, 'confirmReceived'])->name('client.orders.confirmReceived');
-    //
+    Route::put('/orders/{code}/confirm-received', [UserOrderController::class, 'confirmReceived'])->name('client.orders.confirmReceived');   
 });
 
 Route::get('/api/districts/{province_id}', function ($province_id) {

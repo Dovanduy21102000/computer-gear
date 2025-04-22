@@ -53,7 +53,7 @@ class UserOrderController extends Controller
             ->firstOrFail();
 
         // Kiểm tra trạng thái đơn hàng có cho phép huỷ không
-        if (!in_array($order->status, ['pending', 'processing'])) {
+        if (!in_array($order->status, ['pending', 'processing','delivered'])) {
             return back()->with('error', 'Không thể huỷ đơn hàng này.');
         }
 

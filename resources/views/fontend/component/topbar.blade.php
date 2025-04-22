@@ -38,7 +38,7 @@
                             @else
                                 <div>
                                     <i class="ec ec-user mr-1"></i>
-                                    <a href="{{ route('login.form') }}">Đăng nhập</a>
+                                    <a class="text-dark" href="{{ route('login.form') }}">Đăng nhập</a>
                                 </div>
                             @endauth
                         </a>

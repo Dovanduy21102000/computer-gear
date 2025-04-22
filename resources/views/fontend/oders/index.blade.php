@@ -10,7 +10,8 @@
                 'delivered' => 'Đang giao',
                 'completed' => 'Đã giao',
                 'canceled' => 'Đã huỷ',
-                'pending_cancel' => 'Chờ duyệt hủy',
+                'pending_cancel' => 'Chờ duyệt',
+                
             ];
         @endphp
 
