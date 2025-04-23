@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Admin\BrandController;
@@ -157,12 +158,16 @@ Route::prefix('admin')->group(function () {
 
 // Client Routes
 Route::middleware(['web'])->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login.form'); // Form đăng nhập client
-    Route::post('login', [LoginController::class, 'login'])->name('login'); // Xử lý đăng nhập client
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout'); // Xử lý đăng xuất client
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login.form'); 
+    Route::post('login', [LoginController::class, 'login'])->name('login'); 
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout'); 
 
-    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register.form'); // Form đăng ký
-    Route::post('register', [RegisterController::class, 'register'])->name('register'); // Xử lý đăng ký
+    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register.form'); 
+    Route::post('register', [RegisterController::class, 'register'])->name('register'); 
+
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request'); 
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');

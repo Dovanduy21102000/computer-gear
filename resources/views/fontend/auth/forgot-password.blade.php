@@ -24,7 +24,7 @@
             </div>
 
             <div class="text-center mt-3">
-                <button type="submit" class="btn btn-primary w-100">Gửi link reset mật khẩu</button>
+                <button type="submit" class="btn btn-primary w-100">Gửi mail</button>
             </div>
         </form>
 
