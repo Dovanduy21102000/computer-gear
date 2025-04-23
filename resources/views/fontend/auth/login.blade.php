@@ -30,7 +30,12 @@
                 <label for="password">Mật khẩu <span class="text-danger">*</span></label>
                 <input type="password" class="form-control" name="password" id="password" placeholder="Nhập mật khẩu" required>
             </div>
-            <a href="{{route('register.form')}}">Bạn chưa có tài khoản?</a>
+
+            <div class="d-flex justify-content-between">
+                <a class="text-black" href="{{ route('register.form') }}">Bạn chưa có tài khoản?</a>
+                <a class="text-black" href="{{ route('password.request') }}">Quên mật khẩu?</a>
+            </div>
+            
             <div class="text-center mt-3">
                 <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
             </div>
