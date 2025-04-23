@@ -167,7 +167,8 @@ Route::middleware(['web'])->group(function () {
 
     Route::get('forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request'); 
     Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-
+    Route::get('reset_password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('reset_password', [ResetPasswordController::class, 'reset'])->name('password.update'); 
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
