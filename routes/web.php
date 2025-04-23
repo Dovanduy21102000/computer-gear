@@ -38,7 +38,7 @@ use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SpecificationController;
 use App\Http\Controllers\Client\UserOrderController;
-use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\Client\WishlistController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
