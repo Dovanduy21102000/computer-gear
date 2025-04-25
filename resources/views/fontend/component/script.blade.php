@@ -310,4 +310,29 @@ function appendMessage(message, who = 'me') {
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+ $(document).ready(function () {
+        $('.wishlist-toggle').click(function (e) {
+            e.preventDefault();
+
+            const button = $(this);
+            const productId = button.data('product-id');
+
+            $.ajax({
+                url: '{{ route("wishlist.store") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    product_id: productId
+                },
+                success: function (res) {
+                    if (res.success) {
+                        button.removeClass('text-gray-6').addClass('text-danger');
+                    }
+                },
+                error: function () {
+                    alert('Vui lòng đăng nhập để sử dụng chức năng yêu thích!');
+                }
+            });
+        });
+    });
 </script>

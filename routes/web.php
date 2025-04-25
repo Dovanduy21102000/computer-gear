@@ -249,6 +249,6 @@ Route::get('/comments/{productId}', [CommentController::class, 'getComments']);
 // sản phẩm yêu thích
 Route::middleware(['auth'])->group(function(){
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
-    Route::post('/wishlist/add/{product}', [WishlistController::class, 'store'])->name('wishlist.store');
+    Route::post('wishlist/add', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('/wishlist/remove/{wishlist}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
 });
