@@ -55,7 +55,7 @@
                 </div>
                 <div id="shopCartTwo" class="collapse border border-top-0" aria-labelledby="shopCartHeadingTwo"
                     data-parent="#shopCartAccordion1">
-                    <form action="{{ route('applyCoupon') }}" method="POST" class="p-5">
+                    <form action="{{ route('coupon.apply') }}" method="POST" class="p-5">
                         @csrf
                         <p class="w-100 text-gray-90">Nếu bạn có mã giảm giá thì hãy nhập
                             vào dưới đây</p>
@@ -165,12 +165,13 @@
                                     </tbody>
                                     <tfoot>
                                         @php
-                                            $subtotal = $cartItems->sum(function ($item) {
+                                            $subtotal = 0;
+                                            foreach ($cartItems as $item) {
                                                 $price = $item->productVariant
                                                     ? $item->productVariant->price_sale ?? $item->productVariant->price
                                                     : $item->product->price_sale ?? $item->product->price;
-                                                return $item->quantity * $price;
-                                            });
+                                                $subtotal += $item->quantity * $price;
+                                            }
 
                                             $appliedCoupon = session('coupon') ?? null;
                                             $discount = 0;
@@ -199,7 +200,7 @@
                                             <tr>
                                                 <th>
                                                     Mã giảm giá: ({{ $appliedCoupon['code'] }})
-                                                    <a href="{{ route('removeCoupon') }}"
+                                                    <a href="{{ route('remove-coupon') }}"
                                                         class="btn btn-sm btn-danger ml-2">
                                                         <i class="fas fa-times"></i> Xóa
                                                     </a>

@@ -964,9 +964,6 @@
             let quantity = parseInt($("#quantityInput").val(), 10) || 1;
             let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
 
-            console.log("Selected Attributes:", selectedAttributes); // Debug log
-            console.log("Is Variant Product:", isVariantProduct); // Debug log
-
             // For variant products, we need to check if attributes are selected
             if (isVariantProduct && (!selectedAttributes || parseInt($("#quantityInput").attr("max"),
                     10) === 0)) {
@@ -990,7 +987,7 @@
                 return;
             }
 
-            // Prepare the data to send to the cart
+            // Prepare the data to send
             let formData = {
                 product_id: {{ $product->id }},
                 quantity: quantity
@@ -1001,35 +998,38 @@
                 formData.attributes = selectedAttributes;
             }
 
-            console.log("Sending to cart:", formData); // Debug log
+            // Determine if this is a buy now or add to cart action
+            let isBuyNow = $(this).attr('id') === 'buyNowBtn';
+            let url = isBuyNow ? "{{ route('checkout.buy-now') }}" : "{{ route('cart.add') }}";
 
-            // Send POST request to add to cart
+            // Send POST request
             $.ajax({
-                url: '{{ route('cart.add') }}',
+                url: url,
                 type: 'POST',
                 data: formData,
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
-                    console.log("Cart response:", response); // Debug log
-                    Swal.fire({
-                        icon: "success",
-                        title: "Thành công!",
-                        text: "✅ Sản phẩm đã được thêm vào giỏ hàng!",
-                        confirmButtonText: "OK"
-                    });
+                    if (isBuyNow) {
+                        // Redirect to checkout page for buy now
+                        window.location.href = "{{ route('checkout.index') }}";
+                    } else {
+                        // Show success message for add to cart
+                        Swal.fire({
+                            icon: "success",
+                            title: "Thành công!",
+                            text: "Sản phẩm đã được thêm vào giỏ hàng",
+                            confirmButtonText: "OK"
+                        });
+                    }
                 },
                 error: function(xhr) {
-                    console.error("Cart error:", xhr.responseText); // Debug log
-                    let errorMessage = "Có lỗi xảy ra khi thêm vào giỏ hàng.";
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    }
                     Swal.fire({
                         icon: "error",
                         title: "Lỗi!",
-                        text: errorMessage,
+                        text: xhr.responseJSON?.message ||
+                            "Có lỗi xảy ra, vui lòng thử lại",
                         confirmButtonText: "OK"
                     });
                 }

@@ -42,7 +42,7 @@
         <script src="{{ asset('fontend/assets/js/components/hs.go-to.js') }}"></script>
         <script src="{{ asset('fontend/assets/js/components/hs.selectpicker.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-       
+
 
         <!-- Thêm thư viện jQuery Bar Rating -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-bar-rating/dist/themes/fontawesome-stars.css">
@@ -148,6 +148,13 @@
             });
 
             $(document).ready(function() {
+                // Add global AJAX setup for CSRF token
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
                 $(document).on('click', '.js-plus', function() {
                     let $input = $(this).closest('.js-quantity').find('.js-result');
                     let value = parseInt($input.val(), 10) || 0;
