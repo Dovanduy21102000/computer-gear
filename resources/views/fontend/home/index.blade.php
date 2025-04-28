@@ -681,89 +681,90 @@
                         <div class="js-slide">
                             <ul class="row list-unstyled products-group no-gutters mb-0 overflow-visible">
                                 @foreach ($topSellingProducts as $key => $topSellingProduct)
-                                    @if ($key < 3)
-                                        <li
-                                            class="col-md-4 product-item product-item__card pb-2 mb-2 pb-md-0 mb-md-0 border-bottom border-md-bottom-0">
-                                            <div class="product-item__outer h-100">
-                                                <div class="product-item__inner p-md-3 row no-gutters">
-                                                    <div
-                                                        class="col col-lg-auto col-xl-5 col-wd-auto product-media-left">
-                                                        <a href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
-                                                            class="max-width-150 d-block"><img class="img-fluid"
-                                                                src="{{ asset('storage/' . $topSellingProduct->thumbnail) }}"
-                                                                alt="Image Description"></a>
-                                                    </div>
-                                                    <div
-                                                        class="col col-xl-7 col-wd product-item__body pl-2 pl-lg-3 pl-xl-0 pl-wd-3 mr-wd-1">
-                                                        <div class="mb-4 mb-xl-2 mb-wd-4">
-                                                            <div class="mb-2"><a
-                                                                    href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
-                                                                    class="font-size-12 text-gray-5">{{ $topSellingProduct->brand ? $topSellingProduct->brand->name : 'Không có thương hiệu' }}</a>
-                                                            </div>
-                                                            <h5 class="product-item__title"><a
-                                                                    href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
-                                                                    class="text-blue font-weight-bold">{{ $topSellingProduct->name }}</a>
-                                                            </h5>
-                                                        </div>
-                                                        <div class="flex-center-between mb-3">
-                                                            <div class="prodcut-price">
-                                                                @if ($topSellingProduct->price_sale)
-                                                                    <div
-                                                                        class="text-gray-100 font-size-15 font-weight-bold">
-                                                                        {{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}
-                                                                        đ
-                                                                    </div>
-                                                                    <div class="text-muted font-size-12">
-                                                                        <del>{{ number_format($topSellingProduct->price, 0, ',', '.') }}
-                                                                            đ</del>
-                                                                    </div>
-                                                                @else
-                                                                    <div
-                                                                        class="text-gray-100 font-size-15 font-weight-bold">
-                                                                        {{ number_format($topSellingProduct->price, 0, ',', '.') }}
-                                                                        đ
-                                                                    </div>
+                                                                @if ($key < 3)
+                                                                                                    <li
+                                                                                                        class="col-md-4 product-item product-item__card pb-2 mb-2 pb-md-0 mb-md-0 border-bottom border-md-bottom-0">
+                                                                                                        <div class="product-item__outer h-100">
+                                                                                                            <div class="product-item__inner p-md-3 row no-gutters">
+                                                                                                                <div
+                                                                                                                    class="col col-lg-auto col-xl-5 col-wd-auto product-media-left">
+                                                                                                                    <a href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
+                                                                                                                        class="max-width-150 d-block"><img class="img-fluid"
+                                                                                                                            src="{{ asset('storage/' . $topSellingProduct->thumbnail) }}"
+                                                                                                                            alt="Image Description"></a>
+                                                                                                                </div>
+                                                                                                                <div
+                                                                                                                    class="col col-xl-7 col-wd product-item__body pl-2 pl-lg-3 pl-xl-0 pl-wd-3 mr-wd-1">
+                                                                                                                    <div class="mb-4 mb-xl-2 mb-wd-4">
+                                                                                                                        <div class="mb-2"><a
+                                                                                                                                href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
+                                                                                                                                class="font-size-12 text-gray-5">{{ $topSellingProduct->brand ? $topSellingProduct->brand->name : 'Không có thương hiệu' }}</a>
+                                                                                                                        </div>
+                                                                                                                        <h5 class="product-item__title"><a
+                                                                                                                                href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
+                                                                                                                                class="text-blue font-weight-bold">{{ $topSellingProduct->name }}</a>
+                                                                                                                        </h5>
+                                                                                                                    </div>
+                                                                                                                    <div class="flex-center-between mb-3">
+                                                                                                                        <div class="prodcut-price">
+                                                                                                                            @if ($topSellingProduct->price_sale)
+                                                                                                                                <div
+                                                                                                                                    class="text-gray-100 font-size-15 font-weight-bold">
+                                                                                                                                    {{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}
+                                                                                                                                    đ
+                                                                                                                                </div>
+                                                                                                                                <div class="text-muted font-size-12">
+                                                                                                                                    <del>{{ number_format($topSellingProduct->price, 0, ',', '.') }}
+                                                                                                                                        đ</del>
+                                                                                                                                </div>
+                                                                                                                            @else
+                                                                                                                                <div
+                                                                                                                                    class="text-gray-100 font-size-15 font-weight-bold">
+                                                                                                                                    {{ number_format($topSellingProduct->price, 0, ',', '.') }}
+                                                                                                                                    đ
+                                                                                                                                </div>
+                                                                                                                            @endif
+                                                                                                                        </div>
+                                                                                                                        <div class="d-none d-xl-block prodcut-add-cart">
+                                                                                                                            @if ($topSellingProduct->is_variant)
+                                                                                                                                <a href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
+                                                                                                                                    class="btn-add-cart btn-primary transition-3d-hover">
+                                                                                                                                    <i class="ec ec-add-to-cart"></i>
+                                                                                                                                </a>
+                                                                                                                            @else
+                                                                                                                                <form action="{{ route('cart.add') }}"
+                                                                                                                                    method="POST">
+                                                                                                                                    @csrf
+                                                                                                                                    <input type="hidden" name="product_id"
+                                                                                                                                        value="{{ $topSellingProduct->id }}">
+                                                                                                                                    <input type="hidden" name="quantity"
+                                                                                                                                        value="1">
+                                                                                                                                    <button type="submit"
+                                                                                                                                        class="btn-add-cart btn-primary transition-3d-hover">
+                                                                                                                                        <i class="ec ec-add-to-cart"></i>
+                                                                                                                                    </button>
+                                                                                                                                </form>
+                                                                                                                            @endif
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                    <div class="product-item__footer">
+                                                                                                                       
+                                                                                                                        <div class="border-top pt-2 flex-center-between flex-wrap">
+                                                                                                                            <a href="https://transvelo.github.io/electro-html/2.0/html/shop/compare.html"
+                                                                                                                                class="text-gray-6 font-size-13"><i
+                                                                                                                                    class="ec ec-compare mr-1 font-size-15"></i>
+                                                                                                                                Compare</a>
+                                                                                                                            <a href="https://transvelo.github.io/electro-html/2.0/html/shop/wishlist.html"
+                                                                                                                                class="text-gray-6 font-size-13"><i
+                                                                                                                                    class="ec ec-favorites mr-1 font-size-15"></i>
+                                                                                                                                Wishlist</a>
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </li>
                                                                 @endif
-                                                            </div>
-                                                            <div class="d-none d-xl-block prodcut-add-cart">
-                                                                @if ($topSellingProduct->is_variant)
-                                                                    <a href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
-                                                                        class="btn-add-cart btn-primary transition-3d-hover">
-                                                                        <i class="ec ec-add-to-cart"></i>
-                                                                    </a>
-                                                                @else
-                                                                    <form action="{{ route('cart.add') }}"
-                                                                        method="POST">
-                                                                        @csrf
-                                                                        <input type="hidden" name="product_id"
-                                                                            value="{{ $topSellingProduct->id }}">
-                                                                        <input type="hidden" name="quantity"
-                                                                            value="1">
-                                                                        <button type="submit"
-                                                                            class="btn-add-cart btn-primary transition-3d-hover">
-                                                                            <i class="ec ec-add-to-cart"></i>
-                                                                        </button>
-                                                                    </form>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                        <div class="product-item__footer">
-                                                            <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                                <a href="https://transvelo.github.io/electro-html/2.0/html/shop/compare.html"
-                                                                    class="text-gray-6 font-size-13"><i
-                                                                        class="ec ec-compare mr-1 font-size-15"></i>
-                                                                    Compare</a>
-                                                                <a href="https://transvelo.github.io/electro-html/2.0/html/shop/wishlist.html"
-                                                                    class="text-gray-6 font-size-13"><i
-                                                                        class="ec ec-favorites mr-1 font-size-15"></i>
-                                                                    Wishlist</a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    @endif
                                 @endforeach
                             </ul>
                         </div>

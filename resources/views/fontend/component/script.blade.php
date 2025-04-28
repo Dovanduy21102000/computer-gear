@@ -311,28 +311,39 @@ function appendMessage(message, who = 'me') {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
  $(document).ready(function () {
-        $('.wishlist-toggle').click(function (e) {
+        $(document).on('click', '.wishlist-button', function (e) {
             e.preventDefault();
-
-            const button = $(this);
-            const productId = button.data('product-id');
+            var button = $(this);
+            var productId = button.data('product-id');
 
             $.ajax({
-                url: '{{ route("wishlist.store") }}',
-                method: 'POST',
+                url: "{{ route('wishlist.store') }}",
+                method: "POST",
                 data: {
-                    _token: '{{ csrf_token() }}',
-                    product_id: productId
+                    product_id: productId,
+                    _token: "{{ csrf_token() }}"
                 },
-                success: function (res) {
-                    if (res.success) {
-                        button.removeClass('text-gray-6').addClass('text-danger');
+                success: function (response) {
+                    if (response.success) {
+                        // Toggle icon style
+                        button.toggleClass('active');
+                        var icon = button.find('i');
+                        if (button.hasClass('active')) {
+                            icon.removeClass('far').addClass('fas').css('color', 'red');
+                        } else {
+                            icon.removeClass('fas').addClass('far').css('color', '#333');
+                        }
+                        toastr.success(response.message);
+                    } else {
+                        toastr.error('Có lỗi xảy ra.');
                     }
                 },
                 error: function () {
-                    alert('Vui lòng đăng nhập để sử dụng chức năng yêu thích!');
+                    toastr.error('Bạn cần đăng nhập để thêm vào yêu thích.');
                 }
             });
         });
     });
+
+
 </script>

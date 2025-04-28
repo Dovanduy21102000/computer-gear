@@ -64,8 +64,8 @@
                                     @foreach ($categories as $category)
                                         <li>
                                             @php
-                                                $query = request()->all();
-                                                $query['category'] = $category->slug;
+    $query = request()->all();
+    $query['category'] = $category->slug;
                                             @endphp
                                             <a class="dropdown-item"
                                                 href="{{ route('client.products.filter', $query) }}">
@@ -79,8 +79,8 @@
                                                 <ul class="list-unstyled dropdown-list">
                                                     @foreach ($category->children as $child)
                                                         @php
-                                                            $query = request()->all();
-                                                            $query['category'] = $child->slug;
+            $query = request()->all();
+            $query['category'] = $child->slug;
                                                         @endphp
                                                         <li>
                                                             <a class="dropdown-item"
@@ -288,6 +288,7 @@
                                             </div>
                                             <div class="product-item__footer">
                                                 <div class="border-top pt-2 flex-center-between flex-wrap">
+                                                    @include('fontend.component.wishlist-button', ['product' => $product])
                                                     <a href="#" class="text-gray-6 font-size-13"><i
                                                             class="ec ec-favorites mr-1 font-size-15"></i> Yêu
                                                         thích</a>

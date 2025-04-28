@@ -259,19 +259,19 @@
                             <!-- End Quantity -->
                         </div>
                         @php
-                            $attributes = [];
+$attributes = [];
 
-                            foreach ($variants as $variant) {
-                                foreach ($variant->attributeValues as $attributeValue) {
-                                    if (isset($attributeValue->attribute)) {
-                                        $attributeName = trim($attributeValue->attribute->name);
-                                        $attributeValueText = trim($attributeValue->value);
+foreach ($variants as $variant) {
+    foreach ($variant->attributeValues as $attributeValue) {
+        if (isset($attributeValue->attribute)) {
+            $attributeName = trim($attributeValue->attribute->name);
+            $attributeValueText = trim($attributeValue->value);
 
-                                        // Lưu các giá trị vào nhóm thuộc tính
-                                        $attributes[$attributeName][$attributeValueText] = $attributeValueText;
-                                    }
-                                }
-                            }
+            // Lưu các giá trị vào nhóm thuộc tính
+            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
+        }
+    }
+}
                         @endphp
 
                         @foreach ($attributes as $attributeName => $values)
@@ -306,9 +306,14 @@
                             <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
                         </div>
                         <div class="flex-content-center flex-wrap">
-                            <a href="#" class="text-gray-6 font-size-13 mr-2">
+                            @include('fontend.component.wishlist-button', [
+                                'productId' => $product->id,
+                                'isActive' => false
+                            ]) 
+                             <span class="ml-2 text-gray-6 font-size-13">Yêu thích</span>
+                            {{-- <a class="text-gray-6 font-size-13 mr-2">
                                 <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                 </div>
@@ -433,9 +438,9 @@
                                     <ul class="list-unstyled">
                                         @for ($i = 5; $i >= 1; $i--)
                                             @php
-                                                $ratingCount = $ratingsCount[$i] ?? 0;
-                                                $percentage =
-                                                    $totalReviews > 0 ? ($ratingCount / $totalReviews) * 100 : 0;
+    $ratingCount = $ratingsCount[$i] ?? 0;
+    $percentage =
+        $totalReviews > 0 ? ($ratingCount / $totalReviews) * 100 : 0;
                                             @endphp
                                             <li class="py-1">
                                                 <a class="row align-items-center mx-gutters-2 font-size-1"
@@ -677,63 +682,67 @@
 
             <ul class="row list-unstyled products-group no-gutters">
                 @foreach ($relatedProducts as $related)
-                    <li class="col-6 col-md-3 col-xl-2gdot4-only col-wd-2 product-item">
-                        <div class="product-item__outer h-100">
-                            <div class="product-item__inner px-xl-4 p-3">
-                                <div class="product-item__body pb-xl-2">
-                                    <div class="mb-2">
-                                        <a href="{{ route('client.products.category', ['slug' => $related->category->slug]) }}"
-                                            class="font-size-12 text-gray-5">
-                                            {{ $related->category->name }}
-                                        </a>
+                                                    <li class="col-6 col-md-3 col-xl-2gdot4-only col-wd-2 product-item">
+                                                        <div class="product-item__outer h-100">
+                                                            <div class="product-item__inner px-xl-4 p-3">
+                                                                <div class="product-item__body pb-xl-2">
+                                                                    <div class="mb-2">
+                                                                        <a href="{{ route('client.products.category', ['slug' => $related->category->slug]) }}"
+                                                                            class="font-size-12 text-gray-5">
+                                                                            {{ $related->category->name }}
+                                                                        </a>
 
-                                    </div>
-                                    <h5 class="mb-1 product-item__title">
-                                        <a href="{{ route('client.products.detail', $related->slug) }}"
-                                            class="text-blue font-weight-bold">
-                                            {{ $related->name }}
-                                        </a>
-                                    </h5>
-                                    <div class="mb-2">
-                                        <a href="{{ route('client.products.detail', $related->slug) }}"
-                                            class="d-block text-center">
-                                            <img class="img-fluid w-100" style="height: 150px; object-fit: cover;"
-                                                src="{{ asset('storage/' . $related->thumbnail) }}"
-                                                alt="{{ $related->name }}">
-                                        </a>
-                                    </div>
-                                    <div class="flex-center-between mb-1">
-                                        <div class="prodcut-price">
-                                            @if ($related->price_sale)
-                                                <div class="prodcut-price d-flex align-items-center position-relative">
-                                                    <ins
-                                                        class="font-size-20 text-red text-decoration-none">{{ number_format($related->price_sale) }}đ</ins>
-                                                    <del
-                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($related->price, 0, ',', '.') }}đ</del>
-                                                </div>
-                                            @else
-                                                <div class="text-dark fw-bold fs-5">
-                                                    {{ number_format($related->price, 0, ',', '.') }}đ
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <div class="d-none d-xl-block prodcut-add-cart">
-                                            <a href="#" class="btn-add-cart btn-primary transition-3d-hover">
-                                                <i class="ec ec-add-to-cart"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="product-item__footer">
-                                    <div class="border-top pt-2 flex-center-between flex-wrap">
-                                        <a href="#" class="text-gray-6 font-size-13">
-                                            <i class="ec ec-favorites mr-1 font-size-15"></i> Wishlist
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
+                                                                    </div>
+                                                                    <h5 class="mb-1 product-item__title">
+                                                                        <a href="{{ route('client.products.detail', $related->slug) }}"
+                                                                            class="text-blue font-weight-bold">
+                                                                            {{ $related->name }}
+                                                                        </a>
+                                                                    </h5>
+                                                                    <div class="mb-2">
+                                                                        <a href="{{ route('client.products.detail', $related->slug) }}"
+                                                                            class="d-block text-center">
+                                                                            <img class="img-fluid w-100" style="height: 150px; object-fit: cover;"
+                                                                                src="{{ asset('storage/' . $related->thumbnail) }}"
+                                                                                alt="{{ $related->name }}">
+                                                                        </a>
+                                                                    </div>
+                                                                    <div class="flex-center-between mb-1">
+                                                                        <div class="prodcut-price">
+                                                                            @if ($related->price_sale)
+                                                                                <div class="prodcut-price d-flex align-items-center position-relative">
+                                                                                    <ins
+                                                                                        class="font-size-20 text-red text-decoration-none">{{ number_format($related->price_sale) }}đ</ins>
+                                                                                    <del
+                                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($related->price, 0, ',', '.') }}đ</del>
+                                                                                </div>
+                                                                            @else
+                                                                                <div class="text-dark fw-bold fs-5">
+                                                                                    {{ number_format($related->price, 0, ',', '.') }}đ
+                                                                                </div>
+                                                                            @endif
+                                                                        </div>
+                                                                        <div class="d-none d-xl-block prodcut-add-cart">
+                                                                            <a href="#" class="btn-add-cart btn-primary transition-3d-hover">
+                                                                                <i class="ec ec-add-to-cart"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="product-item__footer">
+                                                                    <div class="border-top pt-2 flex-center-between flex-wrap">
+                                                                        @include('fontend.component.wishlist-button', [
+        'productId' => $product->id,
+        'isActive' => false
+    ])
+                                                                        <button class="text-gray-6 font-size-13">
+                                                                            <i class="ec ec-favorites mr-1 font-size-15"></i> Wishlist
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
                 @endforeach
             </ul>
         </div>
