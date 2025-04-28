@@ -316,6 +316,9 @@ function appendMessage(message, who = 'me') {
             var button = $(this);
             var productId = button.data('product-id');
 
+            // Vô hiệu hóa nút trong khi xử lý
+            button.prop('disabled', true);
+
             $.ajax({
                 url: "{{ route('wishlist.store') }}",
                 method: "POST",
@@ -340,10 +343,15 @@ function appendMessage(message, who = 'me') {
                 },
                 error: function () {
                     toastr.error('Bạn cần đăng nhập để thêm vào yêu thích.');
+                },
+                complete: function () {
+                    // Kích hoạt lại nút sau khi xử lý xong
+                    button.prop('disabled', false);
                 }
             });
         });
     });
+
 
 
 </script>

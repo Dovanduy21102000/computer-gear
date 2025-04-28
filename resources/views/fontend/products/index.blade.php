@@ -423,7 +423,7 @@
                                                                     <div class="d-flex justify-content-center align-items-center gap-1">
                                                                         @include('fontend.component.wishlist-button', [
                                                                             'productId' => $product->id,
-                                                                            'isActive' => in_array($product->id, $wishlistProductIds)
+                                                                            'isActive' => false
                                                                         ]) 
                                                                         <span class=" text-gray-6 font-size-13">Yêu thích</span>
                                                                     </div>

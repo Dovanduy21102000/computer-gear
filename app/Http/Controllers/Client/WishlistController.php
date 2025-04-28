@@ -15,7 +15,7 @@ class WishlistController extends Controller
         $wishlists = Wishlist::with('product')->where('user_id', Auth::id())->get();
         $wishlistProductIds = $wishlists->pluck('product.id');
         $template = 'fontend.wishlist.index';
-        return view('fontend.layout', compact('template', 'wishlists', 'wishlistProductIds'));
+        return view('fontend.layout', compact('template', 'wishlistProductIds'));
     }
 
     public function store(Request $request)
