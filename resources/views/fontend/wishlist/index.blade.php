@@ -30,9 +30,14 @@
                             <tr>
                                 <!-- Remove (X) -->
                                 <td class="align-middle">
-                                    <a href="{{ route('wishlist.remove', $item->id) }}" class="text-danger fs-4" title="Remove">
-                                        &times;
-                                    </a>
+                                    <form action="{{ route('wishlist.remove', $item->id) }}" method="POST"
+                                        style="display: inline-block;"
+                                        onsubmit="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            style="background: none; border: none; color: red; font-size: 24px; cursor: pointer;">×</button>
+                                    </form>
                                 </td>
 
                                 <!-- Product image + name -->
@@ -69,5 +74,13 @@
                 Bạn chưa thêm sản phẩm nào vào danh sách yêu thích.
             </div>
         @endif
+
+        <!-- Hiển thị các product_id sau bảng -->
+        <h3 class="mt-5">Danh sách ID sản phẩm yêu thích:</h3>
+        <ul>
+            @foreach ($wishlistProductIds as $productId)
+                <li>{{ $productId }}</li> <!-- Hiển thị mỗi product_id -->
+            @endforeach
+        </ul>
     </div>
 </main>
