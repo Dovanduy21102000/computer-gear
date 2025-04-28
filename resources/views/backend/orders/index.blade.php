@@ -29,7 +29,7 @@
                                 <option value="processing">Đang xử lý</option>
                                 <option value="delivered">Đang giao hàng</option>
                                 <option value="completed">Hoàn thành</option>
-                                {{-- <option value="canceled">Hủy đơn</option> --}}
+                                <option value="canceled">Hủy đơn</option>
                             </select>
                         </div>
                         <table class="table datatable">
@@ -125,14 +125,16 @@
         let filter = document.getElementById('orderStatusFilter');
 
         function filterOrders() {
-            let status = filter.value.trim().toLowerCase(); // Lấy giá trị từ dropdown
+            let status = filter.value?.trim().toLowerCase() ||
+                ""; // Lấy giá trị từ dropdown, nếu undefined thì gán ""
             let rows = document.querySelectorAll('.datatable tbody tr');
 
             rows.forEach(row => {
-                let cell = row.querySelector('td:nth-child(7) span'); // Lấy cột trạng thái
+                let cell = row.querySelector('td:nth-child(6) span'); // Lấy cột trạng thái
                 if (!cell) return; // Nếu không tìm thấy, bỏ qua
 
-                let cellStatus = cell.dataset.status.trim().toLowerCase(); // Lấy trạng thái thực tế
+                let cellStatus = cell.dataset.status?.trim().toLowerCase() ||
+                    ""; // Lấy trạng thái thực tế, nếu undefined thì gán ""
 
                 // Nếu chọn "Tất cả", hiển thị tất cả đơn hàng
                 if (status === "") {
