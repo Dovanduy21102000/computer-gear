@@ -310,14 +310,11 @@ function appendMessage(message, who = 'me') {
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
- $(document).ready(function () {
+    $(document).ready(function () {
         $(document).on('click', '.wishlist-button', function (e) {
             e.preventDefault();
             var button = $(this);
             var productId = button.data('product-id');
-
-            // Vô hiệu hóa nút trong khi xử lý
-            button.prop('disabled', true);
 
             $.ajax({
                 url: "{{ route('wishlist.store') }}",
@@ -328,7 +325,6 @@ function appendMessage(message, who = 'me') {
                 },
                 success: function (response) {
                     if (response.success) {
-                        // Toggle icon style
                         button.toggleClass('active');
                         var icon = button.find('i');
                         if (button.hasClass('active')) {
@@ -343,14 +339,11 @@ function appendMessage(message, who = 'me') {
                 },
                 error: function () {
                     toastr.error('Bạn cần đăng nhập để thêm vào yêu thích.');
-                },
-                complete: function () {
-                    // Kích hoạt lại nút sau khi xử lý xong
-                    button.prop('disabled', false);
                 }
             });
         });
     });
+
 
 
 

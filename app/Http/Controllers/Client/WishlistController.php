@@ -22,7 +22,7 @@ class WishlistController extends Controller
                                       ->toArray();
             }
         $template = 'fontend.wishlist.index';
-        return view('fontend.layout', compact('template', 'wishlistProductIds', 'wishlists', 'products'));
+        return view('fontend.layout', compact('template', 'wishlistProductIds', 'products','wishlists'));
     }
 
     public function store(Request $request)

@@ -310,7 +310,7 @@ foreach ($variants as $variant) {
                                 'productId' => $product->id,
                                 'isActive' => false
                             ]) 
-                             <span class="ml-2 text-gray-6 font-size-13">Yêu thích</span>
+                             {{-- <span class="ml-2 text-gray-6 font-size-13">Yêu thích</span> --}}
                             {{-- <a class="text-gray-6 font-size-13 mr-2">
                                 <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
                             </a> --}}
