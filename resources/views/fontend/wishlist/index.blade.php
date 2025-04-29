@@ -75,12 +75,5 @@
             </div>
         @endif
 
-        <!-- Hiển thị các product_id sau bảng -->
-        <h3 class="mt-5">Danh sách ID sản phẩm yêu thích:</h3>
-        <ul>
-            @foreach ($wishlistProductIds as $productId)
-                <li>{{ $productId }}</li> <!-- Hiển thị mỗi product_id -->
-            @endforeach
-        </ul>
     </div>
 </main>

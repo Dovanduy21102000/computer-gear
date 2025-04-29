@@ -421,10 +421,21 @@
                                                                     </div>
 
                                                                     <div class="d-flex justify-content-center align-items-center gap-1">
-                                                                        @include('fontend.component.wishlist-button', [
+                                                                        {{-- @include('fontend.component.wishlist-button', [
                                                                             'productId' => $product->id,
                                                                             'isActive' => false
-                                                                        ]) 
+                                                                        ])  --}}
+                                                                        @foreach ($products as $product)
+                                                                        @php
+                                                                            $isActive = in_array($product->id, $wishlistProductIds ?? []);
+                                                                        @endphp
+
+                                                                        <button class="wishlist-button {{ $isActive ? 'active' : '' }}" data-product-id="{{ $product->id }}"
+                                                                            style="background: none; border: none; cursor: pointer;">
+                                                                            <i class="fa{{ $isActive ? 's' : 'r' }} fa-heart"
+                                                                            style="color: {{ $isActive ? 'red' : '#333' }}; font-size: 20px;"></i>
+                                                                        </button>
+                                                                        @endforeach
                                                                         <span class=" text-gray-6 font-size-13">Yêu thích</span>
                                                                     </div>
 
