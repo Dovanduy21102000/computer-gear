@@ -52,8 +52,8 @@
                                                     @endif
                                                 </td>
                                                 <td>{{ $variant->name }}</td>
-                                                <td>{{ $variant->category->name ?? 'Không có' }}</td>
-                                                <td>{{ $variant->brand->name ?? 'Không có' }}</td>
+                                                <td>{{ $variant->product->category->name ?? 'Không có' }}</td>
+                                                <td>{{ $variant->product->brand->name ?? 'Không có' }}</td>                                                
                                                 <td class="text-end">{{ number_format($variant->price, 0, ',', '.') }}
                                                     VNĐ</td>
                                                 <td class="text-center">{{ $variant->quantity }}</td>
