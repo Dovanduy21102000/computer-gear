@@ -30,29 +30,29 @@ class WishlistController extends Controller
 }
 
     public function store(Request $request)
-    {
-        $productId = $request->input('product_id');
+{
+    $productId = $request->input('product_id');
+    $userId = Auth::id();
 
-        // Kiểm tra nếu sản phẩm đã tồn tại trong wishlist
-        $exists = Wishlist::where('user_id', Auth::id())
+    // Kiểm tra nếu sản phẩm chưa có trong wishlist, thêm vào
+    $exists = Wishlist::where('user_id', $userId)
+        ->where('product_id', $productId)
+        ->exists();
+
+    if (!$exists) {
+        Wishlist::create([
+            'user_id' => $userId,
+            'product_id' => $productId,
+        ]);
+        return response()->json(['message' => 'Đã thêm vào yêu thích']);
+    } else {
+        // Nếu sản phẩm đã có trong wishlist, xóa đi
+        Wishlist::where('user_id', $userId)
             ->where('product_id', $productId)
-            ->exists();
-
-        if (!$exists) {
-            // Nếu chưa có, thêm sản phẩm vào wishlist
-            Wishlist::create([
-                'user_id' => Auth::id(),
-                'product_id' => $productId,
-            ]);
-            return response()->json(['success' => true, 'message' => 'Đã thêm vào yêu thích']);
-        } else {
-            // Nếu đã có, xóa sản phẩm khỏi wishlist
-            Wishlist::where('user_id', Auth::id())
-                ->where('product_id', $productId)
-                ->delete();
-            return response()->json(['success' => true, 'message' => 'Đã bỏ yêu thích']);
-        }
+            ->delete();
+        return response()->json(['message' => 'Đã xóa khỏi yêu thích']);
     }
+}
 
     public function destroy($id)
     {
