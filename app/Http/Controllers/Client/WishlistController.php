@@ -11,23 +11,23 @@ use Illuminate\Support\Facades\Auth;
 class WishlistController extends Controller
 {
     public function index()
-    {
-        // Lấy danh sách sản phẩm trong wishlist của người dùng
-        $wishlists = Wishlist::with('product')->where('user_id', Auth::id())->get();
-        $products = Product::all();
+{
+    // Lấy danh sách sản phẩm trong wishlist của người dùng
+    $wishlists = Wishlist::with('product')->where('user_id', Auth::id())->get();
+    $products = Product::all();
 
-        // Lấy các ID sản phẩm yêu thích của người dùng
-        $wishlistProductIds = [];
-        if (Auth::check()) {
-            $wishlistProductIds = Wishlist::where('user_id', Auth::id())
-                                          ->pluck('product_id')
-                                          ->toArray();
-        }
-
-        // Hiển thị template wishlist
-        $template = 'fontend.wishlist.index';
-        return view('fontend.layout', compact('template', 'wishlistProductIds', 'products','wishlists'));
+    // Lấy các ID sản phẩm yêu thích của người dùng
+    $wishlistProductIds = [];
+    if (Auth::check()) {
+        $wishlistProductIds = Wishlist::where('user_id', Auth::id())
+                                      ->pluck('product_id')
+                                      ->toArray();
     }
+
+    // Hiển thị template wishlist
+    $template = 'fontend.wishlist.index';
+    return view('fontend.layout', compact('template', 'wishlistProductIds', 'products','wishlists'));
+}
 
     public function store(Request $request)
     {
