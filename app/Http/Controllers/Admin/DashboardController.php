@@ -77,13 +77,13 @@ class DashboardController extends Controller
 
         // Doanh thu tháng này
         $currentMonth = Carbon::now()->startOfMonth();
-        $revenueThisMonth = Order::whereBetween('created_at', [$currentMonth, Carbon::now()])
+        $revenueThisMonth = Order::where('status', 'completed')->whereBetween('created_at', [$currentMonth, Carbon::now()])
             ->sum('total_price');
 
         // Doanh thu tháng trước
         $lastMonth = Carbon::now()->subMonth()->startOfMonth();
         $endLastMonth = Carbon::now()->subMonth()->endOfMonth();
-        $revenueLastMonth = Order::whereBetween('created_at', [$lastMonth, $endLastMonth])
+        $revenueLastMonth = Order::where('status', 'completed')->whereBetween('created_at', [$lastMonth, $endLastMonth])
             ->sum('total_price');
 
         // Tính phần trăm thay đổi
@@ -107,39 +107,39 @@ class DashboardController extends Controller
 
 
         $year = Carbon::now()->year; // Lấy năm hiện tại
+        $months = range(1, 12);
 
-        // Lấy dữ liệu số đơn hàng theo từng tháng
-        $salesData = Order::selectRaw('MONTH(created_at) as month, COUNT(*) as total_orders')
+        // Số đơn hàng theo tháng
+        $salesRaw = Order::selectRaw('MONTH(created_at) as month, COUNT(*) as total_orders')
+            ->where('status', 'completed')
             ->whereYear('created_at', $year)
             ->groupBy('month')
-            ->orderBy('month')
             ->pluck('total_orders', 'month');
 
-        // Lấy doanh thu theo từng tháng
-        $revenueData = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as total_revenue')
+        // Doanh thu theo tháng (chia đơn vị triệu)
+        $revenueRaw = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as total_revenue')
+            ->where('status', 'completed')
             ->whereYear('created_at', $year)
             ->groupBy('month')
-            ->orderBy('month')
             ->pluck('total_revenue', 'month');
 
-        // Lấy số khách hàng mới theo từng tháng
-        $customerData = User::selectRaw('MONTH(created_at) as month, COUNT(*) as total_customers')
+        // Số khách hàng mới theo tháng
+        $customersRaw = User::selectRaw('MONTH(created_at) as month, COUNT(*) as total_customers')
             ->whereYear('created_at', $year)
             ->groupBy('month')
-            ->orderBy('month')
             ->pluck('total_customers', 'month');
 
-        // Chuẩn hóa dữ liệu cho ApexCharts (12 tháng)
-        $months = range(1, 12);
+        // Chuẩn hóa dữ liệu thành mảng 12 phần tử cho biểu đồ
         $sales = [];
         $revenue = [];
         $customers = [];
 
         foreach ($months as $month) {
-            $sales[] = $salesData[$month] ?? 0;
-            $revenue[] = $revenueData[$month] ?? 0;
-            $customers[] = $customerData[$month] ?? 0;
+            $sales[] = $salesRaw[$month] ?? 0;
+            $revenue[] = round(($revenueRaw[$month] ?? 0) / 1_000_000, 2); // Tính theo triệu
+            $customers[] = $customersRaw[$month] ?? 0;
         }
+
         // Lấy danh sách đơn hàng mới
         $ordersLatest = Order::with(['user', 'items.productVariant'])  // Đảm bảo tải các quan hệ với 'user' và 'items.productVariant'
             ->latest()  // Sắp xếp theo created_at giảm dần (mới nhất ở trên cùng)
@@ -202,8 +202,8 @@ class DashboardController extends Controller
         $totalRevenue = DB::table('orders')->sum('total_price');
 
         $totalProducts = DB::table('products')->count();
-        
-      
+
+
         $template = 'backend.dashboard.home.index';
 
         return view('backend.dashboard.layout', compact(

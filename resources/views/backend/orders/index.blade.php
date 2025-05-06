@@ -29,7 +29,7 @@
                                 <option value="processing">Đang xử lý</option>
                                 <option value="delivered">Đang giao hàng</option>
                                 <option value="completed">Hoàn thành</option>
-                                <option value="canceled">Hủy đơn</option>
+                                {{-- <option value="canceled">Hủy đơn</option> --}}
                             </select>
                         </div>
                         <table class="table datatable">
@@ -37,10 +37,9 @@
                                 <tr>
                                     <th>Mã đơn hàng</th>
                                     <th>Tên người nhận</th>
-                                    <th>Địa chỉ giao hàng</th>
                                     <th>Tổng giá trị</th>
                                     <th>Giảm giá</th>
-                                    <th>Giá trị cuối cùng</th>
+                                    <th>Tổng tiền thanh toán</th>
                                     <th>Trạng thái</th>
                                     <th>PTTT</th>
                                     <th>Ngày tạo</th>
@@ -52,10 +51,9 @@
                                     <tr>
                                         <td>{{ $order->code }}</td>
                                         <td>{{ $order->shipping_user_name }}</td>
-                                        <td>{{ $order->shipping_address }}</td>
                                         <td>{{ $order->total_price }}</td>
-                                        <td>{{ number_format($order->coupon_discount, 2) }}</td>
-                                        <td>{{ number_format($order->final_price, 2) }}</td>
+                                        <td>{{ number_format($order->coupon_discount) }}</td>
+                                        <td>{{ number_format($order->final_price) }}</td>
                                         <td>
                                             <span data-status="{{ $order->status }}"
                                                 class="badge {{ $order->status === 'pending'

@@ -17,11 +17,16 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::orderBy('created_at', 'desc')->get();
+        // Lọc các đơn hàng không có trạng thái 'canceled' và 'pending_cancel'
+        $orders = Order::whereNotIn('status', ['canceled', 'pending_cancel'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         $template = 'backend.orders.index';
-        // dd($orders);
+
         return view('backend.dashboard.layout', compact('orders', 'template'));
     }
+
 
     /**
      * Display the specified resource.
@@ -136,7 +141,9 @@ class OrderController extends Controller
     {
         // Lấy trạng thái mới từ request hoặc giữ nguyên trạng thái cũ
         $newStatus = $request->input('status', $order->status);
-
+        if ($newStatus === 'completed') {
+            return redirect()->back()->with('error', 'Không được cập nhật trạng thái hoàn thành bằng tay.');
+        }
         // Định nghĩa các trạng thái hợp lệ khi chuyển đổi
         $validTransitions = [
             'pending' => ['pending', 'processing', 'canceled'],
@@ -175,7 +182,6 @@ class OrderController extends Controller
             'shipping_email' => $requiresValidation ? 'required|email|max:255' : 'nullable|email|max:255',
             'shipping_phone' => $requiresValidation ? 'required|string|max:20' : 'nullable|string|max:20',
             'shipping_address' => $requiresValidation ? 'required|string|max:255' : 'nullable|string|max:255',
-            'specific_address' => $requiresValidation ? 'required|string|max:255' : 'nullable|string|max:255',
             'status' => 'nullable|string|in:pending,processing,delivered,completed,canceled',
             'payment_method' => 'nullable|string|in:cash,vn_pay,momo',
             'payment_status' => 'nullable|in:0,1',
@@ -186,13 +192,7 @@ class OrderController extends Controller
             'shipping_email.email' => 'Email người nhận không hợp lệ.',
             'shipping_phone.required' => 'Số điện thoại không được để trống.',
             'shipping_address.required' => 'Địa chỉ giao hàng không được để trống.',
-            'specific_address.required' => 'Địa chỉ chi tiết không được để trống.',
         ]);
-
-        // // Kiểm tra trạng thái đơn hàng
-        // if ($request->status == 'canceled' && $request->has('notes')) {
-        //     $order->cancel_reason = $request->notes; // Lưu lý do hủy vào trường cancel_reason
-        // }
 
         // Cập nhật thông tin đơn hàng (chỉ khi chưa ở trạng thái "delivered", "completed", "canceled")
         $dataToUpdate = [
@@ -201,7 +201,6 @@ class OrderController extends Controller
             'shipping_email' => $request->input('shipping_email', $order->shipping_email),
             'shipping_phone' => $request->input('shipping_phone', $order->shipping_phone),
             'shipping_address' => $request->input('shipping_address', $order->shipping_address),
-            'specific_address' => $request->input('specific_address', $order->specific_address),
             'province_id' => $request->input('province_id', $order->province_id),
             'district_id' => $request->input('district_id', $order->district_id),
             'notes' => $request->input('notes', $order->notes),
@@ -217,12 +216,12 @@ class OrderController extends Controller
 
     public function cancelTabs()
     {
+        // Lấy các đơn hàng đã huỷ với trạng thái 'canceled'
         $canceledOrders = Order::where('status', 'canceled')
             ->orderBy('updated_at', 'desc')
-            ->paginate(10);
-
-        $pendingCancelOrders = Order::where('cancel_requested', true)
-            ->where('status', 'processing')
+            ->paginate(10);  // Phân trang với 10 đơn mỗi trang
+        $pendingCancelOrders = Order::where('cancel_requested', true)  // Yêu cầu huỷ
+            ->where('status', 'pending_cancel')
             ->orderBy('updated_at', 'desc')
             ->paginate(10);
         $template = 'backend.orders.canceled';
@@ -230,62 +229,59 @@ class OrderController extends Controller
     }
 
 
+
     public function approveCancel($id)
     {
         $order = Order::findOrFail($id);
 
-        if ($order->status === 'processing' && $order->cancel_requested) {
-            // Cộng lại số lượng sản phẩm
-            foreach ($order->orderItems as $item) {
-                if ($item->product_variant_id) {
-                    // Sản phẩm biến thể
-                    $variant = ProductVariant::find($item->product_variant_id);
-                    if ($variant) {
-                        $variant->quantity += $item->quantity;
-                        $variant->save();
-                    }
-
-                    // Cộng lại cho sản phẩm cha
-                    $product = Product::find($item->product_id);
-                    if ($product) {
-                        $product->quantity += $item->quantity;
-                        $product->save();
-                    }
-                } else {
-                    // Sản phẩm thường
-                    $product = Product::find($item->product_id);
-                    if ($product) {
-                        $product->quantity += $item->quantity;
-                        $product->save();
-                    }
-                }
-            }
-
-            // Cập nhật trạng thái đơn
-            $order->status = 'canceled';
-            $order->cancel_requested = false;
-            $order->save();
-
-            // Gửi email thông báo đã duyệt huỷ
-            Mail::to($order->shipping_email)->send(new CancelRequestStatusMail($order, true));
-
-            return back()->with('success', 'Đã duyệt yêu cầu huỷ đơn hàng.');
+        // Kiểm tra trạng thái đơn hàng
+        if ($order->status !== 'pending_cancel') {
+            return back()->with('error', 'Đơn hàng không thể huỷ vì không phải trạng thái đang xử lý.');
         }
 
-        return back()->with('error', 'Không thể duyệt yêu cầu.');
+        // Kiểm tra yêu cầu huỷ
+        if (!$order->cancel_requested) {
+            return back()->with('error', 'Đơn hàng này không có yêu cầu huỷ.');
+        }
+
+        // Cộng lại số lượng sản phẩm vào kho
+        foreach ($order->orderItems as $item) {
+            if ($item->product_variant_id) {
+                $variant = ProductVariant::find($item->product_variant_id);
+                if ($variant) {
+                    $variant->quantity += $item->quantity;
+                    $variant->save();
+                }
+            } else {
+                $product = Product::find($item->product_id);
+                if ($product) {
+                    $product->quantity += $item->quantity;
+                    $product->save();
+                }
+            }
+        }
+        // Cập nhật trạng thái đơn hàng
+        $order->status = 'canceled';
+        $order->cancel_requested = false;
+        $order->save();
+
+        // Gửi email thông báo
+        try {
+            Mail::to($order->shipping_email)->send(new CancelRequestStatusMail($order, true));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Không thể gửi email thông báo. Lỗi: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Đã duyệt yêu cầu huỷ đơn hàng.');
     }
-
-
 
     public function rejectCancel($id)
     {
         $order = Order::findOrFail($id);
-        if ($order->status === 'processing' && $order->cancel_requested) {
+        if ($order->status === 'pending_cancel' && $order->cancel_requested) {
             $order->cancel_requested = false;
             $order->cancel_reason = null;
             $order->save();
-
-            // Gửi email thông báo đã từ chối huỷ
             Mail::to($order->shipping_email)->send(new CancelRequestStatusMail($order, false));
 
             return back()->with('success', 'Đã từ chối yêu cầu huỷ đơn hàng.');

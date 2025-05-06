@@ -175,36 +175,47 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title">Báo cáo <span>| Năm nay</span></h5>
-
-                                    <!-- Line Chart -->
                                     <div id="reportsChart"></div>
 
                                     <script>
                                         document.addEventListener("DOMContentLoaded", () => {
-                                            new ApexCharts(document.querySelector("#reportsChart"), {
-                                                series: [{
-                                                    name: 'Bán hàng',
-                                                    data: {!! json_encode($sales) !!}
-                                                }, {
-                                                    name: 'Doanh thu',
-                                                    data: {!! json_encode($revenue) !!}
-                                                }, {
-                                                    name: 'Khách hàng',
-                                                    data: {!! json_encode($customers) !!}
-                                                }],
+                                            const chart = new ApexCharts(document.querySelector("#reportsChart"), {
                                                 chart: {
-                                                    height: 350,
                                                     type: 'area',
+                                                    height: 350,
                                                     toolbar: {
                                                         show: false
+                                                    }
+                                                },
+                                                series: [{
+                                                        name: 'Bán hàng',
+                                                        data: {!! json_encode($sales) !!}
                                                     },
+                                                    {
+                                                        name: 'Doanh thu (triệu)',
+                                                        data: {!! json_encode($revenue) !!}
+                                                    },
+                                                    {
+                                                        name: 'Khách hàng',
+                                                        data: {!! json_encode($customers) !!}
+                                                    }
+                                                ],
+                                                xaxis: {
+                                                    categories: [
+                                                        "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+                                                        "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+                                                    ]
+                                                },
+                                                colors: ['#4154f1', '#2eca6a', '#ff771d'],
+                                                stroke: {
+                                                    curve: 'smooth',
+                                                    width: 2
                                                 },
                                                 markers: {
                                                     size: 4
                                                 },
-                                                colors: ['#4154f1', '#2eca6a', '#ff771d'],
                                                 fill: {
-                                                    type: "gradient",
+                                                    type: 'gradient',
                                                     gradient: {
                                                         shadeIntensity: 1,
                                                         opacityFrom: 0.3,
@@ -215,25 +226,22 @@
                                                 dataLabels: {
                                                     enabled: false
                                                 },
-                                                stroke: {
-                                                    curve: 'smooth',
-                                                    width: 2
-                                                },
-                                                xaxis: {
-                                                    categories: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
-                                                        "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
-                                                    ]
-                                                },
                                                 tooltip: {
-                                                    x: {
-                                                        format: 'MM/yyyy'
-                                                    },
+                                                    y: {
+                                                        formatter: function(val, opts) {
+                                                            // Hiển thị đơn vị "triệu" nếu là dòng doanh thu
+                                                            const seriesName = opts.w.globals.seriesNames[opts.seriesIndex];
+                                                            return seriesName.includes("Doanh thu") ? val + " triệu" : val;
+                                                        }
+                                                    }
                                                 }
-                                            }).render();
+                                            });
+
+                                            chart.render();
                                         });
                                     </script>
-                                    <!-- End Line Chart -->
                                 </div>
+
                             </div>
 
                         </div>

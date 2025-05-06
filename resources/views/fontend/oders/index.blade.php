@@ -10,6 +10,8 @@
                 'delivered' => 'Đang giao',
                 'completed' => 'Đã giao',
                 'canceled' => 'Đã huỷ',
+                'pending_cancel' => 'Chờ duyệt',
+                
             ];
         @endphp
 
@@ -53,9 +55,13 @@
                                         <td>{{ $order->created_at->format('d/m/Y') }}</td>
                                         <td class="text-danger">{{ number_format($order->final_price, 0, ',', '.') }}₫</td>
                                         <td>
-                                            <a href="{{ route('client.orders.show', $order->code) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                            <a href="{{ route('client.orders.show', $order->code) }}" 
+                                                class="btn btn-sm rounded-pill px-4 text-white"
+                                                style="background-color: #5d6d7e;">
                                                 Xem chi tiết
-                                            </a>
+                                             </a>
+                                             
+                                            
                                         </td>
                                     </tr>
                                 @endforeach

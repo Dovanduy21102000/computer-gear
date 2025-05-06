@@ -18,7 +18,6 @@ class Order extends Model
         'shipping_address',
         'province_id',
         'district_id',
-        'specific_address',
         'coupon_code',
         'coupon_discount',
         'total_price',
@@ -38,18 +37,13 @@ class Order extends Model
 
     ];
 
-    // Liên kết với bảng users (Người dùng)
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    public function orderItems()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
     public function items()
     {
-        return $this->hasMany(OrderItem::class, 'order_id');
+        return $this->hasMany(OrderItem::class);
     }
     public $timestamps = true;
 }

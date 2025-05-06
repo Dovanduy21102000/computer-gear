@@ -69,10 +69,15 @@
                         <i class="bi bi-circle"></i><span>Đơn hàng bị huỷ</span>
                     </a>
                 </li>
-                
+
             </ul>
         </li><!-- End Components Nav -->
-
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ route('chats.index') }}">
+                <i class="bi bi-chat-left-text"></i>
+                <span>Chat</span>
+            </a>
+        </li>
         <li class="nav-item">
             <a class="nav-link collapsed" href="{{ route('users.index') }}">
                 <i class="bi bi-person"></i>
@@ -105,7 +110,7 @@
                 <span>Quản lý bình luận</span>
             </a>
         </li>
-        
+
 
         <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#attributes-nav" data-bs-toggle="collapse" href="#"

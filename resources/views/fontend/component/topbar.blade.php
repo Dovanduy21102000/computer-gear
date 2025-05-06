@@ -20,9 +20,10 @@
                         <a id="sidebarNavToggler" href="javascript:;" class="u-header-topbar__nav-link">
                             @auth
                             <div class="dropdown">
-                                <a id="userDropdown" href="javascript:;" class="dropdown-toggle d-flex align-items-center" role="button" data-toggle="dropdown">
+                                <a id="userDropdown" href="javascript:;" class="dropdown-toggle d-flex align-items-center text-dark" role="button" data-toggle="dropdown">
                                     <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
                                 </a>
+                                
                                 <div class="dropdown-menu dropdown-menu-right">
                                     <a class="dropdown-item" href="{{ route('user.show') }}">Quản lý tài khoản</a>
                                     <a class="dropdown-item" href="{{ route('client.orders.index') }}">Quản lý đơn hàng</a>
@@ -35,10 +36,12 @@
                                 @csrf
                             </form>
                             @else
+
                                 <div>
                                     <i class="ec ec-user mr-1"></i>
-                                    <a href="{{ route('login.form') }}">Đăng nhập</a>
+                                    <a class="text-dark" href="{{ route('login.form') }}">Đăng nhập</a>
                                 </div>
+
                             @endauth
                         </a>
                     </li>
@@ -47,20 +50,3 @@
         </div>
     </div>
 </div>
-
-<!-- Script -->
-{{-- <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const isLoggedIn = @json(Auth::check()); // Kiểm tra đăng nhập
-        const userName = @json(Auth::user()->name ?? ''); // Lấy tên user nếu có
-        const sidebarNavToggler = document.getElementById('sidebarNavToggler');
-
-        if (sidebarNavToggler) {
-            if (isLoggedIn) {
-                sidebarNavToggler.innerHTML = `<i class="ec ec-user mr-1"></i> Xin chào, ${userName}`;
-            } else {
-                sidebarNavToggler.innerHTML = `<i class="ec ec-user mr-1"></i> <a href="{{ route('login.form') }}">Đăng nhập</a>`;
-            }
-        }
-    });
-</script> --}}

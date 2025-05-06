@@ -125,7 +125,6 @@
 </main>
 <br>
 <script>
-    // JavaScript để chuyển đổi tab
     document.getElementById('editInfoTab').addEventListener('click', () => {
         document.getElementById('editInfoForm').style.display = 'block';
         document.getElementById('changePasswordForm').style.display = 'none';
