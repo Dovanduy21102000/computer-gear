@@ -111,22 +111,25 @@ Route::prefix('admin')->group(function () {
         });
 
 
+
         Route::prefix('products/{product_id}/images')->name('backend.product_images.')->group(function () {
             // Trang danh sách ảnh
             Route::get('/', [ProductImageController::class, 'index'])->name('index');
+
             // Thêm ảnh mới
             Route::get('/create', [ProductImageController::class, 'create'])->name('create');
             Route::post('/', [ProductImageController::class, 'store'])->name('store');
-        
+
             // Sửa toàn bộ album ảnh
             Route::get('/edit', [ProductImageController::class, 'edit'])->name('edit');  // ✅ không có {key}
             Route::put('/', [ProductImageController::class, 'update'])->name('update');  // ✅ không có {key}
+
             // Xoá ảnh cụ thể theo index trong mảng
             Route::delete('/{key}', [ProductImageController::class, 'destroy'])->name('destroy');
         });
-        
-        
-        
+
+
+
 
 
         // Đảm bảo rằng route này đã được thêm vào trong routes/web.php
