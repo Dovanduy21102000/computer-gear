@@ -492,11 +492,11 @@ class CheckoutController extends Controller
                     }
 
                     // Log the request attributes
-                    Log::info('Request attributes processed', [
-                        'product_id' => $request->product_id,
-                        'raw_attributes' => $selectedAttributes,
-                        'attribute_value_ids' => $requestAttributeValues
-                    ]);
+                    // Log::info('Request attributes processed', [
+                    //     'product_id' => $request->product_id,
+                    //     'raw_attributes' => $selectedAttributes,
+                    //     'attribute_value_ids' => $requestAttributeValues
+                    // ]);
 
                     // Find all variants for this product
                     $variants = ProductVariant::where('product_id', $request->product_id)
@@ -504,15 +504,15 @@ class CheckoutController extends Controller
                         ->get();
 
                     // Log all variants found
-                    Log::info('All variants found', [
-                        'variants' => $variants->map(function ($v) {
-                            return [
-                                'id' => $v->id,
-                                'price' => $v->price,
-                                'attribute_values' => $v->attributeValues->pluck('id')->toArray()
-                            ];
-                        })->toArray()
-                    ]);
+                    // Log::info('All variants found', [
+                    //     'variants' => $variants->map(function ($v) {
+                    //         return [
+                    //             'id' => $v->id,
+                    //             'price' => $v->price,
+                    //             'attribute_values' => $v->attributeValues->pluck('id')->toArray()
+                    //         ];
+                    //     })->toArray()
+                    // ]);
 
                     // Find the matching variant by checking attributes
                     $matchingVariant = null;
@@ -521,12 +521,12 @@ class CheckoutController extends Controller
                         $variantAttributeIds = $variant->attributeValues->pluck('id')->toArray();
 
                         // Log variant check
-                        Log::info('Checking variant', [
-                            'variant_id' => $variant->id,
-                            'variant_price' => $variant->price,
-                            'variant_attributes' => $variantAttributeIds,
-                            'request_attributes' => $requestAttributeValues
-                        ]);
+                        // Log::info('Checking variant', [
+                        //     'variant_id' => $variant->id,
+                        //     'variant_price' => $variant->price,
+                        //     'variant_attributes' => $variantAttributeIds,
+                        //     'request_attributes' => $requestAttributeValues
+                        // ]);
 
                         // Check if this variant matches all the requested attributes
                         $isMatch = true;
@@ -549,19 +549,19 @@ class CheckoutController extends Controller
 
                     $variant = $matchingVariant;
 
-                    if (!$variant) {
-                        Log::error('No matching variant found for attributes:', [
-                            'selected_attributes' => $selectedAttributes,
-                            'product_id' => $product->id
-                        ]);
-                        throw new \Exception('Không tìm thấy biến thể phù hợp.');
-                    }
+                    // if (!$variant) {
+                    //     Log::error('No matching variant found for attributes:', [
+                    //         'selected_attributes' => $selectedAttributes,
+                    //         'product_id' => $product->id
+                    //     ]);
+                    //     throw new \Exception('Không tìm thấy biến thể phù hợp.');
+                    // }
 
-                    Log::info('Selected variant', [
-                        'variant_id' => $variant->id,
-                        'price' => $variant->price,
-                        'request_attributes' => $requestAttributeValues
-                    ]);
+                    // Log::info('Selected variant', [
+                    //     'variant_id' => $variant->id,
+                    //     'price' => $variant->price,
+                    //     'request_attributes' => $requestAttributeValues
+                    // ]);
                 }
 
                 // Check variant availability
