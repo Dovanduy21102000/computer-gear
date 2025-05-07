@@ -39,7 +39,8 @@ class ProductController extends Controller
         $brands = Brand::all();
 
         // Phân trang kết quả
-        $products = $query->paginate(10);
+        $products = $query->latest()->paginate(10);
+
 
         // Trả về view với các biến cần thiết
         $template = 'backend.products.index';
@@ -63,82 +64,81 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    
-    $request->validate([
-        'category_id' => 'required|exists:categories,id',
-        'brand_id' => 'required|exists:brands,id',
-        'sku' => 'required|string|max:255|unique:products',
-        'name' => 'required|string|max:255',
-        'slug' => 'nullable|string|max:255|unique:products',
-        'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'short_description' => 'nullable|string',
-        'description' => 'nullable|string',
-        'price' => 'required|numeric',
-        'price_sale' => 'nullable|numeric',
-        'quantity' => $request->is_variant ? 'nullable|integer' : 'required|integer',
-        'status' => 'boolean',
-        'is_variant' => 'boolean',
-        'variants' => $request->is_variant ? 'required|array' : 'nullable|array',
-        'variants.*.sku' => $request->is_variant ? 'required|string|max:255' : 'nullable|string|max:255',
-        'variants.*.price' => $request->is_variant ? 'required|numeric' : 'nullable|numeric',
-        'variants.*.quantity' => $request->is_variant ? 'required|integer' : 'nullable|integer',
-        // 'variants.*.attributes' => $request->is_variant ? 'required|array' : 'nullable|array',
-        // 'variants.*.attributes.*' => 'exists:attribute_values,id',
-    ]);
+    {
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'brand_id' => 'required|exists:brands,id',
+            'sku' => 'required|string|max:255|unique:products',
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:products',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'short_description' => 'nullable|string',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'price_sale' => 'nullable|numeric',
+            'quantity' => $request->is_variant ? 'nullable|integer' : 'required|integer',
+            'status' => 'boolean',
+            'is_variant' => 'boolean',
+            'variants' => $request->is_variant ? 'required|array' : 'nullable|array',
+            'variants.*.sku' => $request->is_variant ? 'required|string|max:255' : 'nullable|string|max:255',
+            'variants.*.price' => $request->is_variant ? 'required|numeric' : 'nullable|numeric',
+            'variants.*.quantity' => $request->is_variant ? 'required|integer' : 'nullable|integer',
+        ]);
 
-
-    if (!$request->slug) {
-        $request->merge(['slug' => Str::slug($request->name)]);
-    }
-
-    $thumbnailPath = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('products', 'public') : null;
-
-    // Tính tổng số lượng biến thể nếu có biến thể
-    $totalQuantity = 0;
-    if ($request->is_variant && $request->variants) {
-        foreach ($request->variants as $variantData) {
-            $totalQuantity += $variantData['quantity'];
+        if (!$request->slug) {
+            $request->merge(['slug' => Str::slug($request->name)]);
         }
-    }
 
-    $product = Product::create([
-        'category_id' => $request->category_id,
-        'brand_id' => $request->brand_id,
-        'sku' => $request->sku,
-        'name' => $request->name,
-        'slug' => $request->slug,
-        'thumbnail' => $thumbnailPath,
-        'short_description' => $request->short_description,
-        'description' => $request->description,
-        'price' => $request->price,
-        'price_sale' => $request->price_sale ?? null,
-        'quantity' => $request->is_variant ? $totalQuantity : $request->quantity,
-        'status' => $request->status,
-        'is_variant' => $request->is_variant,
-        'views' => 0
-    ]);
+        $thumbnailPath = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('products', 'public') : null;
 
-    if ($request->is_variant && $request->variants) {
-        foreach ($request->variants as $variantData) {
-            $variant = ProductVariant::create([
-                'product_id' => $product->id,
-                'sku' => $variantData['sku'],
-                'price' => $variantData['price'],
-                'quantity' => $variantData['quantity'],
-            ]);
-
-            foreach ($variantData['attributes'] as $attributeValueId) {
-                ProductVariantAttributeValue::create([
-                    'product_variant_id' => $variant->id,
-                    'attribute_value_id' => $attributeValueId,
-                ]);
+        // Tính tổng số lượng biến thể nếu có biến thể
+        $totalQuantity = 0;
+        if ($request->is_variant && $request->variants) {
+            foreach ($request->variants as $variantData) {
+                $totalQuantity += $variantData['quantity'];
             }
         }
+
+        $product = Product::create([
+            'category_id' => $request->category_id,
+            'brand_id' => $request->brand_id,
+            'sku' => $request->sku,
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'thumbnail' => $thumbnailPath,
+            'short_description' => $request->short_description,
+            'description' => $request->description,
+            'price' => $request->price,
+            'price_sale' => $request->price_sale ?? null,
+            'quantity' => $request->is_variant ? $totalQuantity : $request->quantity,
+            'status' => $request->status,
+            'is_variant' => $request->is_variant,
+            'views' => 0
+        ]);
+
+        if ($request->is_variant && $request->variants) {
+            foreach ($request->variants as $variantData) {
+                $variant = ProductVariant::create([
+                    'product_id' => $product->id,
+                    'sku' => $variantData['sku'],
+                    'price' => $variantData['price'],
+                    'quantity' => $variantData['quantity'],
+                ]);
+
+                if (isset($variantData['attributes']) && is_array($variantData['attributes'])) {
+                    foreach ($variantData['attributes'] as $attributeValueId) {
+                        ProductVariantAttributeValue::create([
+                            'product_variant_id' => $variant->id,
+                            'attribute_value_id' => $attributeValueId,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return redirect()->route('products.index')->with('success', 'Sản phẩm đã được thêm thành công.');
     }
 
-    return redirect()->route('products.index')->with('success', 'Sản phẩm đã được thêm thành công.');
-}
     /**
      * Display the specified resource.
      */
@@ -187,8 +187,6 @@ class ProductController extends Controller
             'variants.*.sku' => $request->is_variant ? 'required|string|max:255' : 'nullable|string|max:255',
             'variants.*.price' => $request->is_variant ? 'required|numeric' : 'nullable|numeric',
             'variants.*.quantity' => $request->is_variant ? 'required|integer' : 'nullable|integer',
-            
-            
         ]);
 
         if ($request->hasFile('thumbnail')) {
@@ -225,11 +223,13 @@ class ProductController extends Controller
                     'quantity' => $variantData['quantity'],
                 ]);
 
-                foreach ($variantData['attributes'] as $attributeValueId) {
-                    ProductVariantAttributeValue::create([
-                        'product_variant_id' => $variant->id,
-                        'attribute_value_id' => $attributeValueId,
-                    ]);
+                if (isset($variantData['attributes']) && is_array($variantData['attributes'])) {
+                    foreach ($variantData['attributes'] as $attributeValueId) {
+                        ProductVariantAttributeValue::create([
+                            'product_variant_id' => $variant->id,
+                            'attribute_value_id' => $attributeValueId,
+                        ]);
+                    }
                 }
             }
         }

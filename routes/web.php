@@ -111,18 +111,27 @@ Route::prefix('admin')->group(function () {
         });
 
 
+
         Route::prefix('products/{product_id}/images')->name('backend.product_images.')->group(function () {
             // Trang danh sách ảnh
             Route::get('/', [ProductImageController::class, 'index'])->name('index');
+
             // Thêm ảnh mới
             Route::get('/create', [ProductImageController::class, 'create'])->name('create');
             Route::post('/', [ProductImageController::class, 'store'])->name('store');
+
             // Sửa toàn bộ album ảnh
             Route::get('/edit', [ProductImageController::class, 'edit'])->name('edit');  // ✅ không có {key}
             Route::put('/', [ProductImageController::class, 'update'])->name('update');  // ✅ không có {key}
+
             // Xoá ảnh cụ thể theo index trong mảng
             Route::delete('/{key}', [ProductImageController::class, 'destroy'])->name('destroy');
         });
+
+
+
+
+
         // Đảm bảo rằng route này đã được thêm vào trong routes/web.php
         Route::put('/comments/{id}/toggle-status', [CommentController::class, 'toggleStatus'])->name('admin.comments.toggleStatus');
 
@@ -230,8 +239,7 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout/method', [CheckoutController::class, 'checkoutMethod'])->name('checkout.method');
 Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
 Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
-Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('applyCoupon');
-Route::get('/remove-coupon', [CheckoutController::class, 'removeCoupon'])->name('removeCoupon');
+Route::post('/checkout/buy-now', [CheckoutController::class, 'buyNow'])->name('checkout.buy-now');
 
 
 Route::post('/vnpay/create', [VNPayController::class, 'createPayment'])->name('vnpay.create');
@@ -249,3 +257,7 @@ Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('c
 
 //
 Route::get('/comments/{productId}', [CommentController::class, 'getComments']);
+
+// Coupon routes
+Route::post('/apply-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'applyCoupon'])->name('coupon.apply');
+Route::post('/remove-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'removeCoupon'])->name('coupon.remove');
