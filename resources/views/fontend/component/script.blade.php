@@ -83,7 +83,7 @@ style="width: 300px; bottom: 80px; right: 20px; display: none; z-index: 1050;">
 use App\Models\User;
 $admin = User::where('role', 'admin')->first();
 @endphp
-<script>
+<sc>
 $(window).on('load', function() {
     // initialization of HSMegaMenu component
     $('.js-mega-menu').HSMegaMenu({
@@ -342,9 +342,7 @@ function appendMessage(message, who = 'me') {
                 }
             });
         });
+
     });
-
-
-
-
+    
 </script>

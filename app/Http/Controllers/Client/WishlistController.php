@@ -60,25 +60,25 @@ class WishlistController extends Controller
         Wishlist::where('user_id', Auth::id())->where('id', $id)->delete();
         return redirect()->back()->with('success', 'Đã xoá khỏi danh sách yêu thích');
     }
-    public function toggle(Request $request)
-{
-    $userId = Auth::id();
-    $productId = $request->input('product_id');
+//     public function toggle(Request $request)
+// {
+//     $userId = Auth::id();
+//     $productId = $request->input('product_id');
 
-    $wishlist = Wishlist::where('user_id', $userId)
-        ->where('product_id', $productId)
-        ->first();
+//     $wishlist = Wishlist::where('user_id', $userId)
+//         ->where('product_id', $productId)
+//         ->first();
 
-    if ($wishlist) {
-        $wishlist->delete();
-        return response()->json(['message' => 'Đã xóa khỏi yêu thích']);
-    } else {
-        Wishlist::create([
-            'user_id' => $userId,
-            'product_id' => $productId,
-        ]);
-        return response()->json(['message' => 'Đã thêm vào yêu thích']);
-    }
-}
+//     if ($wishlist) {
+//         $wishlist->delete();
+//         return response()->json(['message' => 'Đã xóa khỏi yêu thích']);
+//     } else {
+//         Wishlist::create([
+//             'user_id' => $userId,
+//             'product_id' => $productId,
+//         ]);
+//         return response()->json(['message' => 'Đã thêm vào yêu thích']);
+//     }
+// }
 
 }
