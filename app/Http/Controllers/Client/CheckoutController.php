@@ -44,19 +44,37 @@ class CheckoutController extends Controller
             if ($buyNowItem) {
                 $cartItems[] = $buyNowItem;
             } else {
-                // Get cart items from session
-                $cart = session('cart', []);
-                foreach ($cart as $item) {
-                    $product = Product::find($item['product_id']);
-                    if ($product) {
-                        $cartItem = new \stdClass();
-                        $cartItem->product = $product;
-                        $cartItem->productVariant = isset($item['variant_id']) ?
-                            ProductVariant::with(['attributeValues.attribute'])->find($item['variant_id']) : null;
-                        $cartItem->quantity = $item['quantity'];
-                        $cartItem->price = $item['price'];
-                        $cartItems[] = $cartItem;
+                // Get selected items from URL parameters
+                $selectedItems = [];
+                if ($request->has('selected_items')) {
+                    $selectedItems = explode(',', $request->input('selected_items'));
+                }
+
+                Log::info('Selected items from URL:', ['selected_items' => $selectedItems]);
+
+                if (!empty($selectedItems)) {
+                    // Get cart items from database for selected items
+                    $cart = Cart::where('user_id', Auth::id())->first();
+                    if ($cart) {
+                        $cartItems = CartItem::with(['product', 'productVariant'])
+                            ->where('cart_id', $cart->id)
+                            ->whereIn('id', $selectedItems)
+                            ->get()
+                            ->map(function ($item) {
+                                $cartItem = new \stdClass();
+                                $cartItem->product = $item->product;
+                                $cartItem->productVariant = $item->productVariant;
+                                $cartItem->quantity = $item->quantity;
+                                $cartItem->price = $item->productVariant ?
+                                    ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
+                                return $cartItem;
+                            })
+                            ->toArray();
                     }
+
+                    Log::info('Cart items from database for selected items:', [
+                        'items' => $cartItems
+                    ]);
                 }
             }
 
@@ -211,6 +229,10 @@ class CheckoutController extends Controller
             }
             $selectedItemIds = is_array($selectedItemIds) ? $selectedItemIds : [];
 
+            Log::info('Selected items for checkout:', [
+                'selected_items' => $selectedItemIds
+            ]);
+
             if (empty($selectedItemIds)) {
                 throw new \Exception('Vui lòng chọn sản phẩm để thanh toán.');
             }
@@ -220,6 +242,17 @@ class CheckoutController extends Controller
                 ->whereIn('id', $selectedItemIds)
                 ->get();
 
+            Log::info('Cart items found:', [
+                'items' => $cartItems->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'product_id' => $item->product_id,
+                        'variant_id' => $item->product_variant_id,
+                        'quantity' => $item->quantity
+                    ];
+                })->toArray()
+            ]);
+
             if ($cartItems->isEmpty()) {
                 throw new \Exception('Giỏ hàng của bạn đang trống.');
             }
@@ -228,7 +261,7 @@ class CheckoutController extends Controller
             $processedCartItems = collect();
             foreach ($cartItems as $item) {
                 // If the item has multiple variants (stored as "id1 | id2")
-                if (strpos($item->product_variant_id, '|') !== false) {
+                if ($item->product_variant_id && strpos($item->product_variant_id, '|') !== false) {
                     $variantIds = array_map('trim', explode('|', $item->product_variant_id));
                     // Only process variants that are in the selected items
                     foreach ($variantIds as $variantId) {
@@ -240,9 +273,21 @@ class CheckoutController extends Controller
                         $processedCartItems->push($variantItem);
                     }
                 } else {
+                    // For non-variant items or single variant items, just add them as is
                     $processedCartItems->push($item);
                 }
             }
+
+            Log::info('Processed cart items:', [
+                'items' => $processedCartItems->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'product_id' => $item->product_id,
+                        'variant_id' => $item->product_variant_id,
+                        'quantity' => $item->quantity
+                    ];
+                })->toArray()
+            ]);
 
             // Validate stock availability for processed items
             foreach ($processedCartItems as $item) {
