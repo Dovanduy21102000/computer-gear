@@ -179,7 +179,8 @@
                                             class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
                                     @endfor
                                 </div>
-                                <span class="text-secondary font-size-13">({{ $totalReviews }} customer reviews)</span>
+                                <span class="text-secondary font-size-13">({{ $totalReviews }} đánh giá từ khách
+                                    hàng)</span>
                             </a>
                         </div>
 
@@ -215,29 +216,31 @@
                     </div>
                 </div>
                 <div class="mx-md-auto mx-lg-0 col-md-6 col-lg-4 col-xl-3">
-                    <div class="mb-2">
+                    <div class="mb-1">
                         <div class="card p-5 border-width-2 border-color-1 borders-radius-17">
-                            <div class="text-gray-9 font-size-14 pb-2 border-color-1 border-bottom mb-3">Kho :
+                            <div class="text-gray-9 font-size-14 pb-2 border-color-1 border-bottom mb-2">Kho :
                                 <span id="productStock"
                                     class="{{ $product->quantity > 0 ? 'text-green' : 'text-danger' }} font-weight-bold">
-                                    {{ $product->quantity }}
+                                    {{ $product->quantity }} sản phẩm
                                 </span>
                             </div>
 
-                            <div class="mb-3">
+                            <div class="mb-1">
                                 <div class="font-size-24" id="productPrice">
                                     @if ($product->price_sale)
                                         <del
                                             class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
-                                        <span
-                                            class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                        <div class="mt-1">
+                                            <span
+                                                class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                        </div>
                                     @else
                                         {{ number_format($product->price, 0, ',', '.') }}₫
                                     @endif
                                 </div>
                             </div>
 
-                            <div class="mb-3">
+                            <div class="mb-1">
                                 <h6 class="font-size-14">Số lượng</h6>
                                 <!-- Quantity -->
                                 <div class="border rounded-pill py-1 w-md-60 height-35 px-3 border-color-1">
@@ -257,59 +260,61 @@
                             </div>
 
                             <!-- End Quantity -->
-                        </div>
-                        @php
-                            $attributes = [];
+                            @php
+                                $attributes = [];
 
-                            foreach ($variants as $variant) {
-                                foreach ($variant->attributeValues as $attributeValue) {
-                                    if (isset($attributeValue->attribute)) {
-                                        $attributeName = trim($attributeValue->attribute->name);
-                                        $attributeValueText = trim($attributeValue->value);
+                                foreach ($variants as $variant) {
+                                    foreach ($variant->attributeValues as $attributeValue) {
+                                        if (isset($attributeValue->attribute)) {
+                                            $attributeName = trim($attributeValue->attribute->name);
+                                            $attributeValueText = trim($attributeValue->value);
 
-                                        // Lưu các giá trị vào nhóm thuộc tính
-                                        $attributes[$attributeName][$attributeValueText] = $attributeValueText;
+                                            // Lưu các giá trị vào nhóm thuộc tính
+                                            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
+                                        }
                                     }
                                 }
-                            }
-                        @endphp
+                            @endphp
 
-                        @foreach ($attributes as $attributeName => $values)
-                            <div class="mb-3">
-                                <h6 class="font-size-14">Chọn {{ ucfirst($attributeName) }}</h6>
-                                <div class="attribute-options">
-                                    @foreach ($values as $value)
-                                        <label class="attribute-option">
-                                            <input type="radio"
-                                                name="{{ strtolower(string: str_replace(' ', '_', $attributeName)) }}"
-                                                value="{{ $value }}" class="d-none">
-                                            <span class="attribute-box">{{ $value }}</span>
-                                        </label>
-                                    @endforeach
+                            @foreach ($attributes as $attributeName => $values)
+                                <div class="mb-1">
+                                    <h6 class="font-size-14">Chọn {{ ucfirst($attributeName) }}</h6>
+                                    <div class="attribute-options">
+                                        @foreach ($values as $value)
+                                            <label class="attribute-option">
+                                                <input type="radio"
+                                                    name="{{ strtolower(string: str_replace(' ', '_', $attributeName)) }}"
+                                                    value="{{ $value }}" class="d-none">
+                                                <span class="attribute-box">{{ $value }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
                                 </div>
+                            @endforeach
+
+
+
+
+
+
+
+                            <div class="mb-1 pb-0dot5" style="margin-top: 10px">
+                                <a href="{{ route('cart.add') }}" id="addToCartBtn"
+                                    class="btn btn-block btn-primary-dark" disabled>
+                                    <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
+
+                                </a>
                             </div>
-                        @endforeach
-
-
-
-
-
-
-
-                        <div class="mb-2 pb-0dot5" style="margin-top: 10px">
-                            <a href="{{ route('cart.add') }}" id="addToCartBtn"
-                                class="btn btn-block btn-primary-dark" disabled>
-                                <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
-                            </a>
+                            <div class="mb-2">
+                                <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
+                            </div>
+                            <div class="flex-content-center flex-wrap">
+                                <a href="#" class="text-gray-6 font-size-13 mr-2">
+                                    <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
+                                </a>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
-                        </div>
-                        <div class="flex-content-center flex-wrap">
-                            <a href="#" class="text-gray-6 font-size-13 mr-2">
-                                <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
-                            </a>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -330,14 +335,15 @@
                         <ul class="nav nav-classic nav-tab nav-tab-lg justify-content-xl-center mb-6 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble border-lg-down-bottom-0 pb-1 pb-xl-0 mb-n1 mb-xl-0"
                             role="tablist">
                             <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                <a class="nav-link active" data-bs-toggle="tab" href="#Description" role="tab">
+                                <a class="nav-link" data-bs-toggle="tab" href="#Description" role="tab">
                                     <div class="d-md-flex justify-content-md-center align-items-md-center">
                                         Mô Tả
                                     </div>
                                 </a>
                             </li>
                             <li class="nav-item flex-shrink-0 flex-xl-shrink-1 z-index-2">
-                                <a class="nav-link" data-bs-toggle="tab" href="#Specification" role="tab">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#Specification"
+                                    role="tab">
                                     <div class="d-md-flex justify-content-md-center align-items-md-center">
                                         Thông Số
                                     </div>
@@ -358,7 +364,7 @@
                 </div>
 
                 <div class="tab-content">
-                    <div class="tab-pane fade show active" id="Description" role="tabpanel">
+                    <div class="tab-pane fade " id="Description" role="tabpanel">
                         <div class="mx-md-4 pt-1">
 
                             <div class="row">
@@ -390,7 +396,7 @@
                         </ul>
                     </div>
 
-                    <div class="tab-pane fade" id="Specification" role="tabpanel">
+                    <div class="tab-pane fade show active" id="Specification" role="tabpanel">
                         <div class="mx-md-5 pt-1">
                             <div class="table-responsive mb-4">
                                 <table class="table table-striped table-bordered">
@@ -1015,13 +1021,33 @@
                         // Redirect to checkout page for buy now
                         window.location.href = "{{ route('checkout.index') }}";
                     } else {
-                        // Show success message for add to cart
-                        Swal.fire({
-                            icon: "success",
-                            title: "Thành công!",
-                            text: "Sản phẩm đã được thêm vào giỏ hàng",
-                            confirmButtonText: "OK"
-                        });
+                        console.log("Cart response:", response);
+
+                        // Kiểm tra nếu có lỗi từ server (ví dụ: vượt quá tồn kho)
+                        if (response.error) {
+                            // Nếu có lỗi, hiển thị thông báo lỗi
+                            Swal.fire({
+                                icon: "error",
+                                title: "Lỗi!",
+                                text: response.message ||
+                                    "Có lỗi xảy ra khi cập nhật giỏ hàng.",
+                                confirmButtonText: "OK"
+                            });
+                        } else {
+                            // Nếu không có lỗi, hiển thị thông báo thành công và cập nhật giỏ hàng
+                            if (response.cartCount !== undefined) {
+                                $("#cart-badge-count").text(response
+                                    .cartCount); // Cập nhật số lượng giỏ hàng
+                            }
+
+                            Swal.fire({
+                                icon: "success",
+                                title: "Thành công!",
+                                text: response.message ||
+                                    "Sản phẩm đã được thêm vào giỏ hàng!",
+                                confirmButtonText: "OK"
+                            });
+                        }
                     }
                 },
                 error: function(xhr) {
@@ -1039,3 +1065,11 @@
         disablePurchase(); // Đảm bảo các nút bị vô hiệu hóa khi chưa chọn gì
     });
 </script>
+@auth
+    <script>
+        Echo.private('cart.{{ auth()->id() }}')
+            .listen('CartUpdated', (e) => {
+                document.getElementById("cartCount").innerText = e.cartCount;
+            });
+    </script>
+@endauth

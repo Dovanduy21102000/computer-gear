@@ -38,6 +38,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SpecificationController;
+use App\Http\Controllers\Client\ChatController as ClientChatController;
 use App\Http\Controllers\Client\UserOrderController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -218,8 +219,8 @@ Route::middleware(['web'])->group(function () {
     Route::put('/orders/{code}/cancel', [UserOrderController::class, 'cancel'])->name('client.orders.cancel');
 
     Route::put('/orders/{code}/confirm-received', [UserOrderController::class, 'confirmReceived'])->name('client.orders.confirmReceived');
-    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
-    Route::get('/chat/messages/{receiverId}', [ChatController::class, 'messages'])->name('chat.messages');
+    Route::post('/chat/send', [ClientChatController::class, 'send'])->name('chat.send');
+    Route::get('/chat/messages/{receiverId}', [ClientChatController::class, 'messages'])->name('chat.messages');
     //
 
 });

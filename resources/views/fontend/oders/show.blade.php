@@ -182,7 +182,7 @@
                                         <strong>
                                             <a href="{{ route('client.products.detail', $item->product->slug) }}"
                                                 class="text-dark">
-                                                {{ $item->product->name }}a
+                                                {{ $item->product->name }}
                                             </a>
                                         </strong>
                                     </div>
