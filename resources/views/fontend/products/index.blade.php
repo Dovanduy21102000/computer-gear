@@ -396,8 +396,11 @@
                                                     <div class="d-none d-xl-block prodcut-add-cart w-100">
                                                         @if ($product->is_variant)
                                                             <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                                class="btn-add-cart btn-primary transition-3d-hover">
-                                                                <i class="ec ec-add-to-cart"></i>
+                                                                class="btn btn-warning w-100 py-2 rounded-pill shadow-sm transition-3d-hover"
+                                                                type="submit"
+                                                                style="font-size: 1rem; font-weight: 600; background: #ffc107; border: none;">
+                                                                <i class="ec ec-add-to-cart mr-2"></i> Thêm vào giỏ
+                                                                hàng
                                                             </a>
                                                         @else
                                                             <form action="{{ route('cart.add') }}" method="POST">
