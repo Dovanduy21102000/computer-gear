@@ -450,7 +450,7 @@ class CheckoutController extends Controller
 
     public function success(Request $request)
     {
-        $order = Order::with(['orderItems.product', 'orderItems.productVariant'])
+        $order = Order::with(['items.product', 'items.productVariant'])
             ->findOrFail($request->order_id);
 
         $template = 'fontend.checkout.success';

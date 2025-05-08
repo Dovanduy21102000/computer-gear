@@ -63,7 +63,7 @@
                         <div class="order-items mb-4">
                             <h3 class="h5 mb-3 border-bottom pb-2">Sản phẩm đã đặt</h3>
 
-                            @foreach ($order->orderItems as $item)
+                            @foreach ($order->items as $item)
                                 <div class="row mb-3 align-items-center">
                                     <div class="col-sm-8">
                                         <h4 class="h6 mb-0">{{ $item->product->name }}</h4>
