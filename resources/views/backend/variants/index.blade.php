@@ -30,7 +30,6 @@
                                 <thead class="thead-light">
                                     <tr>
                                         <th class="text-center">Ảnh đại diện của biến thể</th>
-                                        <th class="text-center">Tên sản phẩm</th>
                                         <th class="text-center">Danh mục</th>
                                         <th class="text-center">Thương hiệu</th>
                                         <th class="text-center">Giá</th>
@@ -51,7 +50,6 @@
                                                     <span>Không có ảnh</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $variant->product->name ?? 'Không có' }}</td>
                                             <td>{{ $variant->product->category->name ?? 'Không có' }}</td>
                                             <td>{{ $variant->product->brand->name ?? 'Không có' }}</td>
                                             <td class="text-end">{{ number_format($variant->price, 0, ',', '.') }} VNĐ</td>
