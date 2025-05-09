@@ -279,19 +279,19 @@ foreach ($variants as $variant) {
                         @endphp
 
                             @php
-                                $attributes = [];
+$attributes = [];
 
-                                foreach ($variants as $variant) {
-                                    foreach ($variant->attributeValues as $attributeValue) {
-                                        if (isset($attributeValue->attribute)) {
-                                            $attributeName = trim($attributeValue->attribute->name);
-                                            $attributeValueText = trim($attributeValue->value);
+foreach ($variants as $variant) {
+    foreach ($variant->attributeValues as $attributeValue) {
+        if (isset($attributeValue->attribute)) {
+            $attributeName = trim($attributeValue->attribute->name);
+            $attributeValueText = trim($attributeValue->value);
 
-                                            // Lưu các giá trị vào nhóm thuộc tính
-                                            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
-                                        }
-                                    }
-                                }
+            // Lưu các giá trị vào nhóm thuộc tính
+            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
+        }
+    }
+}
                             @endphp
 
 
@@ -328,35 +328,10 @@ foreach ($variants as $variant) {
                                 <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
                             </div>
                             <div class="flex-content-center flex-wrap">
-                                <a href="#" class="text-gray-6 font-size-13 mr-2">
-                                    <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
-                                </a>
+                                <div class="border-top pt-2 flex-center-between flex-wrap">
+                                    @include('fontend.component.wishlist-button', ['product' => $product])
+                                </div>
                             </div>
-
-                        @endforeach
-
-
-
-
-
-
-
-                        <div class="mb-2 pb-0dot5" style="margin-top: 10px">
-                            <a href="{{ route('cart.add') }}" id="addToCartBtn"
-                                class="btn btn-block btn-primary-dark" disabled>
-                                <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
-                            </a>
-                        </div>
-                        <div class="mb-3">
-                            <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
-                        </div>
-                        <div class="flex-content-center flex-wrap">
-                            <div class="border-top pt-2 flex-center-between flex-wrap">
-                                @include('fontend.component.wishlist-button', ['product' => $product])
-                            </div>
-
-                        </div>
-
                     </div>
                 </div>
             </div>
