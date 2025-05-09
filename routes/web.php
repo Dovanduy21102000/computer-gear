@@ -38,6 +38,7 @@ use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SpecificationController;
 use App\Http\Controllers\Client\UserOrderController;
+use App\Http\Controllers\Client\WishlistController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -243,3 +244,11 @@ Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('c
 
 //
 Route::get('/comments/{productId}', [CommentController::class, 'getComments']);
+
+// sản phẩm yêu thích
+Route::middleware('auth')->group(function () {
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/{productId}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+
+});

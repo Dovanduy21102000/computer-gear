@@ -26,4 +26,8 @@
     <link rel="stylesheet" href="{{ asset('fontend/assets/vendor/slick-carousel/slick/slick.css') }}">
     <link rel="stylesheet" href="{{ asset('fontend/assets/vendor/bootstrap-select/dist/css/bootstrap-select.min.css') }}">
     <link rel="stylesheet" href="{{ asset('fontend/assets/css/theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('fontend/assets/css/wishlist.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ asset('fontend/assets/js/wishlist.js') }}" defer></script>
 </head>
