@@ -36,7 +36,7 @@
                                             onsubmit="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit"
+                                            <button type="submit" 
                                                 style="background: none; border: none; color: red; font-size: 24px; cursor: pointer;">×</button>
                                         </form>
                                     </td>
