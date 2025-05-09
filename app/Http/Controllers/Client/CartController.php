@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Events\CartUpdated;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Cart;
@@ -291,7 +292,15 @@ class CartController extends Controller
                 // Update quantity if variant exists
                 $newQuantity = $existingItem->quantity + $request->quantity;
                 if ($newQuantity > $variant->quantity) {
-                    return redirect()->back()->with('error', 'Số lượng sản phẩm vượt quá tồn kho.');
+
+                    $payload = [
+                        'error' => true,
+                        'message' => 'Số lượng sản phẩm vượt quá tồn kho.',
+                    ];
+                    if ($request->ajax()) {
+                        return response()->json($payload, 200);
+                    }
+                    return redirect()->back()->with('error', $payload['message']);
                 }
                 $existingItem->update(['quantity' => $newQuantity]);
             } else {
@@ -322,7 +331,14 @@ class CartController extends Controller
                 // Update quantity if item exists
                 $newQuantity = $existingItem->quantity + $request->quantity;
                 if ($newQuantity > $product->quantity) {
-                    return redirect()->back()->with('error', 'Số lượng sản phẩm vượt quá tồn kho.');
+                    $payload = [
+                        'error' => true,
+                        'message' => 'Số lượng sản phẩm vượt quá tồn kho.',
+                    ];
+                    if ($request->ajax()) {
+                        return response()->json($payload, 200);
+                    }
+                    return redirect()->back()->with('error', $payload['message']);
                 }
                 $existingItem->update(['quantity' => $newQuantity]);
             } else {
@@ -335,8 +351,24 @@ class CartController extends Controller
                 ]);
             }
         }
+        event(new CartUpdated($userId, $cart->items()->count()));
+        $payload = [
+            'success'   => true,
+            'message'   => 'Sản phẩm đã được thêm vào giỏ hàng.',
+            'cartCount' => $cart->items()->count() // Số lượng giỏ hàng mới
+        ];
 
-        return redirect()->back()->with('success', 'Sản phẩm đã được thêm vào giỏ hàng.');
+        if ($request->ajax()) {
+            return response()->json($payload, 200);
+        }
+
+        return redirect()->back()->with('success', $payload['message']);
+
+        //     return response()->json([
+        //     'success' => true,
+        //     'message' => 'Sản phẩm đã được thêm vào giỏ hàng.',
+        //     'cartCount' => $cart->items()->count() // Số lượng giỏ hàng mới
+        // ]);
     }
 
     // Update Cart Item Quantity
