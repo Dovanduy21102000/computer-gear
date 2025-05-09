@@ -48,7 +48,7 @@ class ProductVariantController extends Controller
             'attributes' => 'required|array',
         ]);
 
-        $thumbnailPath = $request->hasFile('thumbnail')
+        $thumbnailPath = $request->hasFile('image')
             ? $request->file('thumbnail')->store('variants', 'public')
             : null;
 
