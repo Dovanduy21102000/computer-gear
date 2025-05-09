@@ -14,7 +14,7 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title text-secondary">Quản lý sản phẩm biến thể</h5>
+                        <h5 class="card-title text-dark">Quản lý sản phẩm biến thể của {{ $product->name }}</h5>
                         
                         <!-- Thanh công cụ -->
                         <div class="d-flex justify-content-between mb-3">
@@ -29,7 +29,7 @@
                             <table class="table table-bordered table-hover">
                                 <thead class="thead-light">
                                     <tr>
-                                        <th class="text-center">Ảnh đại diện</th>
+                                        <th class="text-center">Ảnh đại diện của biến thể</th>
                                         <th class="text-center">Tên sản phẩm</th>
                                         <th class="text-center">Danh mục</th>
                                         <th class="text-center">Thương hiệu</th>
@@ -43,8 +43,8 @@
                                     @foreach ($variants as $variant)
                                         <tr>
                                             <td class="text-center">
-                                                @if ($variant->product->thumbnail)
-                                                    <img src="{{ Storage::url($variant->product->thumbnail) }}" 
+                                                @if ($variant->image)
+                                                    <img src="{{ Storage::url($variant->image) }}" 
                                                          width="50" height="50" style="border-radius: 5px;" 
                                                          alt="Ảnh sản phẩm">
                                                 @else
