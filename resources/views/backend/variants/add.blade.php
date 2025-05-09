@@ -264,11 +264,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <?php $price = 0; ?>
-                      <?php $profit = 0; ?>
-                      @foreach($data['order_details'] as $key => $order_detail)
-                        <?php $price = $price + $order_detail->price * $order_detail->quantity; ?>
-                        <?php $profit = $profit + $order_detail->quantity * ($order_detail->price - $order_detail->product_detail->import_price); ?>
+
                         <tr>
                           <td style="text-align: center; vertical-align: middle;">{{ $key + 1 }}</td>
                           <td style="vertical-align: middle;">{{ '#'.$order_detail->product_detail->product->sku_code }}</td>
