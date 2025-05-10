@@ -141,7 +141,7 @@ class OrderController extends Controller
     {
         // Lấy trạng thái mới từ request hoặc giữ nguyên trạng thái cũ
         $newStatus = $request->input('status', $order->status);
-        if ($newStatus === 'completed') {
+        if ($newStatus === 'success') {
             return redirect()->back()->with('error', 'Không được cập nhật trạng thái hoàn thành bằng tay.');
         }
         // Định nghĩa các trạng thái hợp lệ khi chuyển đổi
@@ -149,7 +149,8 @@ class OrderController extends Controller
             'pending' => ['pending', 'processing', 'canceled'],
             'processing' => ['processing', 'delivered', 'canceled'],
             'delivered' => ['delivered', 'completed', 'canceled'],
-            'completed' => [],
+            'completed' => ['completed','success'],
+            'success'=> [],
             'canceled' => ['pending', 'processing', 'delivered']
         ];
 
