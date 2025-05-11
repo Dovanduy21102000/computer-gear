@@ -130,27 +130,36 @@ class CartController extends Controller
             })->toArray()
         ]);
 
-        // Filter out invalid products
-        $validCartItems = $processedItems->filter(function ($item) {
+        // Filter out invalid products and collect IDs of invalid items
+        $invalidItemIds = collect();
+        $validCartItems = $processedItems->filter(function ($item) use ($invalidItemIds) {
+            $isValid = true;
+
             // Check if product exists and is active
             if (!$item->product || !$item->product->status) {
-                return false;
+                $isValid = false;
             }
 
             // If product has variants, check variant status
-            if (isset($item->variants)) {
+            if ($isValid && isset($item->variants)) {
                 foreach ($item->variants as $variant) {
                     if (!$variant->status) {
-                        return false;
+                        $isValid = false;
+                        break;
                     }
                 }
             }
 
-            return true;
+            if (!$isValid) {
+                $invalidItemIds->push($item->id);
+            }
+
+            return $isValid;
         });
 
-        // If any items were removed, update the cart
-        if ($validCartItems->count() < $processedItems->count()) {
+        // If any items were invalid, delete them from the database
+        if ($invalidItemIds->isNotEmpty()) {
+            CartItem::whereIn('id', $invalidItemIds)->delete();
             session()->flash('warning', 'Một số sản phẩm không còn khả dụng đã được xóa khỏi giỏ hàng.');
         }
 

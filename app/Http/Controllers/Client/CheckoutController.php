@@ -330,7 +330,7 @@ class CheckoutController extends Controller
 
             // Create Order
             $order = Order::create([
-                'code' => 'ORD' . time() . rand(1000, 9999),
+                'code' => date('YmdHis') . rand(100, 999),
                 'user_id' => $userId,
                 'shipping_user_name' => $request->shipping_user_name,
                 'shipping_email' => $request->shipping_email,
