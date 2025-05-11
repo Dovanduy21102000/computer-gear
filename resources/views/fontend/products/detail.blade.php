@@ -260,21 +260,40 @@
                             </div>
 
                             <!-- End Quantity -->
+
+                        </div>
+                        @php
+$attributes = [];
+
+foreach ($variants as $variant) {
+    foreach ($variant->attributeValues as $attributeValue) {
+        if (isset($attributeValue->attribute)) {
+            $attributeName = trim($attributeValue->attribute->name);
+            $attributeValueText = trim($attributeValue->value);
+
+            // Lưu các giá trị vào nhóm thuộc tính
+            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
+        }
+    }
+}
+                        @endphp
+
                             @php
-                                $attributes = [];
+$attributes = [];
 
-                                foreach ($variants as $variant) {
-                                    foreach ($variant->attributeValues as $attributeValue) {
-                                        if (isset($attributeValue->attribute)) {
-                                            $attributeName = trim($attributeValue->attribute->name);
-                                            $attributeValueText = trim($attributeValue->value);
+foreach ($variants as $variant) {
+    foreach ($variant->attributeValues as $attributeValue) {
+        if (isset($attributeValue->attribute)) {
+            $attributeName = trim($attributeValue->attribute->name);
+            $attributeValueText = trim($attributeValue->value);
 
-                                            // Lưu các giá trị vào nhóm thuộc tính
-                                            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
-                                        }
-                                    }
-                                }
+            // Lưu các giá trị vào nhóm thuộc tính
+            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
+        }
+    }
+}
                             @endphp
+
 
                             @foreach ($attributes as $attributeName => $values)
                                 <div class="mb-1">
@@ -309,12 +328,10 @@
                                 <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
                             </div>
                             <div class="flex-content-center flex-wrap">
-                                <a href="#" class="text-gray-6 font-size-13 mr-2">
-                                    <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
-                                </a>
+                                <div class="border-top pt-2 flex-center-between flex-wrap">
+                                    @include('fontend.component.wishlist-button', ['product' => $product])
+                                </div>
                             </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -439,9 +456,9 @@
                                     <ul class="list-unstyled">
                                         @for ($i = 5; $i >= 1; $i--)
                                             @php
-                                                $ratingCount = $ratingsCount[$i] ?? 0;
-                                                $percentage =
-                                                    $totalReviews > 0 ? ($ratingCount / $totalReviews) * 100 : 0;
+    $ratingCount = $ratingsCount[$i] ?? 0;
+    $percentage =
+        $totalReviews > 0 ? ($ratingCount / $totalReviews) * 100 : 0;
                                             @endphp
                                             <li class="py-1">
                                                 <a class="row align-items-center mx-gutters-2 font-size-1"

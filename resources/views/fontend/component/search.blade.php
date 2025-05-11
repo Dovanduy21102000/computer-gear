@@ -55,7 +55,7 @@
                     <ul class="d-flex list-unstyled mb-0">
 
                         <li class="col"><a
-                                href="https://transvelo.github.io/electro-html/2.0/html/shop/wishlist.html"
+                                href="{{route('wishlist.index')}}"
                                 class="text-gray-90" data-toggle="tooltip" data-placement="top" title="Yêu thích"><i
                                     class="font-size-22 ec ec-favorites"></i></a></li>
                         <li class="col pr-0">

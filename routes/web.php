@@ -40,25 +40,26 @@ use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SpecificationController;
 use App\Http\Controllers\Client\ChatController as ClientChatController;
 use App\Http\Controllers\Client\UserOrderController;
+use App\Http\Controllers\Client\WishlistController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 // Admin Routes
 Route::prefix('admin')->group(function () {
     // Đăng nhập và đăng xuất dành cho admin
-    Route::get('login', [AuthController::class, 'index'])->name('auth.admin'); // Hiển thị form đăng nhập
-    Route::post('login', [AuthController::class, 'login'])->name('auth.login'); // Xử lý đăng nhập
-    Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
+    Route::get('login', [AuthController::class, 'index'])->name('auth.admin'); 
+    Route::post('login', [AuthController::class, 'login'])->name('auth.login'); 
+    Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); 
     // Route admin cần quyền truy cập
 
     Route::middleware(['auth', 'admin'])->group(function () {
         // Routes cho Profile Admin
 
-        Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
+        Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); 
 
         Route::prefix('profile')->name('backend.profile.')->group(function () {
-            Route::get('/', [ProfileController::class, 'show'])->name('show'); // Trang hiển thị Profile
-            Route::put('/update', [ProfileController::class, 'update'])->name('update'); // Xử lý cập nhật Profile
+            Route::get('/', [ProfileController::class, 'show'])->name('show'); 
+            Route::put('/update', [ProfileController::class, 'update'])->name('update'); 
             Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('changePassword');
             Route::get('/delete-image', [ProfileController::class, 'deleteImage'])->name('deleteImage');
         });
@@ -259,6 +260,16 @@ Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('c
 //
 Route::get('/comments/{productId}', [CommentController::class, 'getComments']);
 
+
+// sản phẩm yêu thích
+Route::middleware('auth')->group(function () {
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/{productId}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+
+});
+
 // Coupon routes
 Route::post('/apply-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'applyCoupon'])->name('coupon.apply');
 Route::post('/remove-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'removeCoupon'])->name('coupon.remove');
+
