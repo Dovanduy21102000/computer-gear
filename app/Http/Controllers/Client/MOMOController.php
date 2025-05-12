@@ -107,8 +107,8 @@ class MOMOController extends Controller
 
             $finalPrice = max(0, $totalPrice - $couponDiscount);
 
-            // Generate a unique order code
-            $orderCode = 'ORD' . time() . rand(1000, 9999);
+            // Generate a unique order code using structured timestamp without separators
+            $orderCode = date('YmdHis') . rand(100, 999);
 
             // Create payment request
             $endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";

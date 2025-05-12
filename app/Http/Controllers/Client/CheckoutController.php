@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class CheckoutController extends Controller
 {
@@ -29,16 +30,37 @@ class CheckoutController extends Controller
             $buyNowItem = session('buy_now_item');
             $cartItems = [];
 
-            // Get provinces data
-            $provincesResponse = Http::get('https://provinces.open-api.vn/api/');
-            $provinces = $provincesResponse->json();
+            // Get provinces data from cache
+            $provinces = Cache::remember('provinces', now()->addDays(30), function () {
+                try {
+                    $response = Http::timeout(30)->get('https://provinces.open-api.vn/api/');
+                    return $response->json();
+                } catch (\Exception $e) {
+                    Log::error('Error fetching provinces:', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    return [];
+                }
+            });
 
-            // Get districts data for each province
-            $districtsByProvince = [];
-            foreach ($provinces as $province) {
-                $districtsResponse = Http::get("https://provinces.open-api.vn/api/p/{$province['code']}?depth=2");
-                $districtsByProvince[$province['code']] = $districtsResponse->json()['districts'] ?? [];
-            }
+            // Get districts data from cache
+            $districtsByProvince = Cache::remember('districts_by_province', now()->addDays(30), function () use ($provinces) {
+                $districts = [];
+                foreach ($provinces as $province) {
+                    try {
+                        $response = Http::timeout(30)->get("https://provinces.open-api.vn/api/p/{$province['code']}?depth=2");
+                        $districts[$province['code']] = $response->json()['districts'] ?? [];
+                    } catch (\Exception $e) {
+                        Log::error("Error fetching districts for province {$province['code']}:", [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                        $districts[$province['code']] = [];
+                    }
+                }
+                return $districts;
+            });
 
             // If buy now item exists, use it instead of cart items
             if ($buyNowItem) {
@@ -330,7 +352,7 @@ class CheckoutController extends Controller
 
             // Create Order
             $order = Order::create([
-                'code' => 'ORD' . time() . rand(1000, 9999),
+                'code' => date('YmdHis') . rand(100, 999),
                 'user_id' => $userId,
                 'shipping_user_name' => $request->shipping_user_name,
                 'shipping_email' => $request->shipping_email,

@@ -226,7 +226,7 @@
                                 <!-- Payment Methods -->
                                 <div class="border-top border-width-3 border-color-1 pt-3 mb-3">
                                     <div id="basicsAccordion1">
-                                        {{-- <div class="border-bottom border-color-1 border-dotted-bottom">
+                                        <div class="border-bottom border-color-1 border-dotted-bottom">
                                             <div class="p-3">
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="vnpay"
@@ -235,7 +235,7 @@
                                                         toán qua VNPay</label>
                                                 </div>
                                             </div>
-                                        </div> --}}
+                                        </div>
 
                                         <div class="border-bottom border-color-1 border-dotted-bottom">
                                             <div class="p-3">

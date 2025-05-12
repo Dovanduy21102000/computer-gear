@@ -24,6 +24,7 @@ class Order extends Model
         'final_price',
         'payment_status',
         'payment_method',
+        'payment_details',
         'status',
         'notes',
     ];
@@ -34,7 +35,7 @@ class Order extends Model
     protected $casts = [
         'payment_status' => 'integer',
         'status' => 'string',
-
+        'payment_details' => 'array'
     ];
     public function orderItems()
 {

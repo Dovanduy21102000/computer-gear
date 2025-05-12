@@ -162,17 +162,17 @@ Route::prefix('admin')->group(function () {
 
 // Client Routes
 Route::middleware(['web'])->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login.form'); 
-    Route::post('login', [LoginController::class, 'login'])->name('login'); 
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout'); 
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login.form');
+    Route::post('login', [LoginController::class, 'login'])->name('login');
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register.form'); 
-    Route::post('register', [RegisterController::class, 'register'])->name('register'); 
+    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register.form');
+    Route::post('register', [RegisterController::class, 'register'])->name('register');
 
-    Route::get('forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request'); 
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request');
     Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
     Route::get('reset_password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-    Route::post('reset_password', [ResetPasswordController::class, 'reset'])->name('password.update'); 
+    Route::post('reset_password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
@@ -245,7 +245,10 @@ Route::post('/checkout/buy-now', [CheckoutController::class, 'buyNow'])->name('c
 
 
 Route::post('/vnpay/create', [VNPayController::class, 'createPayment'])->name('vnpay.create');
-Route::get('/vnpay/return', [VNPayController::class, 'paymentReturn'])->name('vnpay.return');
+Route::get('/vnpay/return', [VNPayController::class, 'handleReturn'])->name('vnpay.return');
+Route::get('/vnpay/test-hash', [VNPayController::class, 'testHash']);
+Route::get('/vnpay/test-payment', [VNPayController::class, 'testPayment']);
+Route::get('/vnpay/debug', [VNPayController::class, 'debugPayment']);
 Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 
 Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
