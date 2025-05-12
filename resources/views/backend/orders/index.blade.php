@@ -42,6 +42,7 @@
                                     <th>Tổng tiền thanh toán</th>
                                     <th>Trạng thái</th>
                                     <th>PTTT</th>
+                                    <th>Trạng Thái TT</th>
                                     <th>Ngày tạo</th>
                                     <th>Thao tác</th>
                                 </tr>
@@ -51,7 +52,7 @@
                                     <tr>
                                         <td>{{ $order->code }}</td>
                                         <td>{{ $order->shipping_user_name }}</td>
-                                        <td>{{ $order->total_price }}</td>
+                                        <td>{{ number_format($order->total_price) }}</td>
                                         <td>{{ number_format($order->coupon_discount) }}</td>
                                         <td>{{ number_format($order->final_price) }}</td>
                                         <td>
@@ -92,11 +93,18 @@
                                                 {{ $order->payment_method === 'momo'
                                                     ? 'Momo'
                                                     : ($order->payment_method === 'cash'
-                                                        ? 'Thanh toán khi nhận hàng'
+                                                        ? 'Khi nhận hàng'
                                                         : ($order->payment_method === 'vn_pay'
                                                             ? 'VN Pay'
                                                             : '')) }}
                                             </span>
+                                        </td>
+                                        <td>
+                                            @if ($order->payment_status)
+                                                <span class="badge bg-success">Đã thanh toán</span>
+                                            @else
+                                                <span class="badge bg-danger">Chưa thanh toán</span>
+                                            @endif
                                         </td>
                                         <td>{{ $order->created_at ? $order->created_at->format('d-m-Y') : 'Không' }}
                                         </td>
