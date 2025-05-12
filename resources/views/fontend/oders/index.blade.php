@@ -9,6 +9,7 @@
                 'processing' => 'Đang xử lý',
                 'delivered' => 'Đang giao',
                 'completed' => 'Đã giao',
+                'success'=> 'Đã nhận hàng',
                 'canceled' => 'Đã huỷ',
                 'pending_cancel' => 'Chờ duyệt',
                 

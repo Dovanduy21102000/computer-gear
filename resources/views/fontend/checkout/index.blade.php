@@ -55,7 +55,7 @@
                 </div>
                 <div id="shopCartTwo" class="collapse border border-top-0" aria-labelledby="shopCartHeadingTwo"
                     data-parent="#shopCartAccordion1">
-                    <form action="{{ route('applyCoupon') }}" method="POST" class="p-5">
+                    <form action="{{ route('coupon.apply') }}" method="POST" class="p-5">
                         @csrf
                         <p class="w-100 text-gray-90">Nếu bạn có mã giảm giá thì hãy nhập
                             vào dưới đây</p>
@@ -165,12 +165,13 @@
                                     </tbody>
                                     <tfoot>
                                         @php
-                                            $subtotal = $cartItems->sum(function ($item) {
+                                            $subtotal = 0;
+                                            foreach ($cartItems as $item) {
                                                 $price = $item->productVariant
                                                     ? $item->productVariant->price_sale ?? $item->productVariant->price
                                                     : $item->product->price_sale ?? $item->product->price;
-                                                return $item->quantity * $price;
-                                            });
+                                                $subtotal += $item->quantity * $price;
+                                            }
 
                                             $appliedCoupon = session('coupon') ?? null;
                                             $discount = 0;
@@ -199,7 +200,7 @@
                                             <tr>
                                                 <th>
                                                     Mã giảm giá: ({{ $appliedCoupon['code'] }})
-                                                    <a href="{{ route('removeCoupon') }}"
+                                                    <a href="{{ route('remove-coupon') }}"
                                                         class="btn btn-sm btn-danger ml-2">
                                                         <i class="fas fa-times"></i> Xóa
                                                     </a>
@@ -225,7 +226,7 @@
                                 <!-- Payment Methods -->
                                 <div class="border-top border-width-3 border-color-1 pt-3 mb-3">
                                     <div id="basicsAccordion1">
-                                        {{-- <div class="border-bottom border-color-1 border-dotted-bottom">
+                                        <div class="border-bottom border-color-1 border-dotted-bottom">
                                             <div class="p-3">
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="vnpay"
@@ -234,7 +235,7 @@
                                                         toán qua VNPay</label>
                                                 </div>
                                             </div>
-                                        </div> --}}
+                                        </div>
 
                                         <div class="border-bottom border-color-1 border-dotted-bottom">
                                             <div class="p-3">

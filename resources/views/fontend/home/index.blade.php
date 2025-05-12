@@ -550,9 +550,9 @@
                                                 </div>
                                                 <div class="product-item__footer">
                                                     <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                        <a href="#" class="text-gray-6 font-size-13"><i
-                                                                class="ec ec-favorites mr-1 font-size-15"></i> Yêu
-                                                            thích</a>
+                                                        @include('fontend.component.wishlist-button', [
+                                                            'product' => $topViewedProduct,
+                                                        ])
                                                     </div>
                                                 </div>
                                             </div>
@@ -755,14 +755,10 @@
                                                         </div>
                                                         <div class="product-item__footer">
                                                             <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                                <a href="https://transvelo.github.io/electro-html/2.0/html/shop/compare.html"
-                                                                    class="text-gray-6 font-size-13"><i
-                                                                        class="ec ec-compare mr-1 font-size-15"></i>
-                                                                    Compare</a>
-                                                                <a href="https://transvelo.github.io/electro-html/2.0/html/shop/wishlist.html"
-                                                                    class="text-gray-6 font-size-13"><i
-                                                                        class="ec ec-favorites mr-1 font-size-15"></i>
-                                                                    Wishlist</a>
+                                                                @include(
+                                                                    'fontend.component.wishlist-button',
+                                                                    ['product' => $topSellingProduct]
+                                                                )
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1039,9 +1035,9 @@
                                                 </div>
                                                 <div class="product-item__footer">
                                                     <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                        <a href="#" class="text-gray-6 font-size-13"><i
-                                                                class="ec ec-favorites mr-1 font-size-15"></i> Yêu
-                                                            thích</a>
+                                                        @include('fontend.component.wishlist-button', [
+                                                            'product' => $product,
+                                                        ])
                                                     </div>
                                                 </div>
                                             </div>
@@ -1175,9 +1171,9 @@
                                             </div>
                                             <div class="product-item__footer">
                                                 <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                    <a href="#" class="text-gray-6 font-size-13"><i
-                                                            class="ec ec-favorites mr-1 font-size-15"></i> Yêu
-                                                        thích</a>
+                                                    @include('fontend.component.wishlist-button', [
+                                                        'product' => $keyboardMouseProduct,
+                                                    ])
                                                 </div>
                                             </div>
                                         </div>

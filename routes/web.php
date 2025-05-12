@@ -38,26 +38,28 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SpecificationController;
+use App\Http\Controllers\Client\ChatController as ClientChatController;
 use App\Http\Controllers\Client\UserOrderController;
+use App\Http\Controllers\Client\WishlistController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 // Admin Routes
 Route::prefix('admin')->group(function () {
     // Đăng nhập và đăng xuất dành cho admin
-    Route::get('login', [AuthController::class, 'index'])->name('auth.admin'); // Hiển thị form đăng nhập
-    Route::post('login', [AuthController::class, 'login'])->name('auth.login'); // Xử lý đăng nhập
-    Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); // Xử lý đăng xuất
+    Route::get('login', [AuthController::class, 'index'])->name('auth.admin'); 
+    Route::post('login', [AuthController::class, 'login'])->name('auth.login'); 
+    Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); 
     // Route admin cần quyền truy cập
 
     Route::middleware(['auth', 'admin'])->group(function () {
         // Routes cho Profile Admin
 
-        Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); // Dashboard
+        Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); 
 
         Route::prefix('profile')->name('backend.profile.')->group(function () {
-            Route::get('/', [ProfileController::class, 'show'])->name('show'); // Trang hiển thị Profile
-            Route::put('/update', [ProfileController::class, 'update'])->name('update'); // Xử lý cập nhật Profile
+            Route::get('/', [ProfileController::class, 'show'])->name('show'); 
+            Route::put('/update', [ProfileController::class, 'update'])->name('update'); 
             Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('changePassword');
             Route::get('/delete-image', [ProfileController::class, 'deleteImage'])->name('deleteImage');
         });
@@ -111,18 +113,27 @@ Route::prefix('admin')->group(function () {
         });
 
 
+
         Route::prefix('products/{product_id}/images')->name('backend.product_images.')->group(function () {
             // Trang danh sách ảnh
             Route::get('/', [ProductImageController::class, 'index'])->name('index');
+
             // Thêm ảnh mới
             Route::get('/create', [ProductImageController::class, 'create'])->name('create');
             Route::post('/', [ProductImageController::class, 'store'])->name('store');
+
             // Sửa toàn bộ album ảnh
             Route::get('/edit', [ProductImageController::class, 'edit'])->name('edit');  // ✅ không có {key}
             Route::put('/', [ProductImageController::class, 'update'])->name('update');  // ✅ không có {key}
+
             // Xoá ảnh cụ thể theo index trong mảng
             Route::delete('/{key}', [ProductImageController::class, 'destroy'])->name('destroy');
         });
+
+
+
+
+
         // Đảm bảo rằng route này đã được thêm vào trong routes/web.php
         Route::put('/comments/{id}/toggle-status', [CommentController::class, 'toggleStatus'])->name('admin.comments.toggleStatus');
 
@@ -151,17 +162,17 @@ Route::prefix('admin')->group(function () {
 
 // Client Routes
 Route::middleware(['web'])->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login.form'); 
-    Route::post('login', [LoginController::class, 'login'])->name('login'); 
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout'); 
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login.form');
+    Route::post('login', [LoginController::class, 'login'])->name('login');
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register.form'); 
-    Route::post('register', [RegisterController::class, 'register'])->name('register'); 
+    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register.form');
+    Route::post('register', [RegisterController::class, 'register'])->name('register');
 
-    Route::get('forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request'); 
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request');
     Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
     Route::get('reset_password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-    Route::post('reset_password', [ResetPasswordController::class, 'reset'])->name('password.update'); 
+    Route::post('reset_password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
@@ -209,8 +220,8 @@ Route::middleware(['web'])->group(function () {
     Route::put('/orders/{code}/cancel', [UserOrderController::class, 'cancel'])->name('client.orders.cancel');
 
     Route::put('/orders/{code}/confirm-received', [UserOrderController::class, 'confirmReceived'])->name('client.orders.confirmReceived');
-    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
-    Route::get('/chat/messages/{receiverId}', [ChatController::class, 'messages'])->name('chat.messages');
+    Route::post('/chat/send', [ClientChatController::class, 'send'])->name('chat.send');
+    Route::get('/chat/messages/{receiverId}', [ClientChatController::class, 'messages'])->name('chat.messages');
     //
 
 });
@@ -230,12 +241,14 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout/method', [CheckoutController::class, 'checkoutMethod'])->name('checkout.method');
 Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
 Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
-Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('applyCoupon');
-Route::get('/remove-coupon', [CheckoutController::class, 'removeCoupon'])->name('removeCoupon');
+Route::post('/checkout/buy-now', [CheckoutController::class, 'buyNow'])->name('checkout.buy-now');
 
 
 Route::post('/vnpay/create', [VNPayController::class, 'createPayment'])->name('vnpay.create');
-Route::get('/vnpay/return', [VNPayController::class, 'paymentReturn'])->name('vnpay.return');
+Route::get('/vnpay/return', [VNPayController::class, 'handleReturn'])->name('vnpay.return');
+Route::get('/vnpay/test-hash', [VNPayController::class, 'testHash']);
+Route::get('/vnpay/test-payment', [VNPayController::class, 'testPayment']);
+Route::get('/vnpay/debug', [VNPayController::class, 'debugPayment']);
 Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 
 Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
@@ -249,3 +262,17 @@ Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('c
 
 //
 Route::get('/comments/{productId}', [CommentController::class, 'getComments']);
+
+
+// sản phẩm yêu thích
+Route::middleware('auth')->group(function () {
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/{productId}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+
+});
+
+// Coupon routes
+Route::post('/apply-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'applyCoupon'])->name('coupon.apply');
+Route::post('/remove-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'removeCoupon'])->name('coupon.remove');
+

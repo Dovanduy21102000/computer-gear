@@ -31,9 +31,15 @@ class ProductVariant extends Model
 
 
     // Quan hệ với AttributeValue thông qua bảng trung gian
+    // public function attributes()
+    // {
+    //     return $this->belongsToMany(AttributeValue::class, 'product_variant_attribute_values', 'product_variant_id', 'attribute_value_id');
+    // }
     public function attributes()
     {
-        return $this->belongsToMany(AttributeValue::class, 'product_variant_attribute_values', 'product_variant_id', 'attribute_value_id');
+    return $this->belongsToMany(AttributeValue::class, 'product_variant_attribute_values', 'product_variant_id', 'attribute_value_id')
+        ->join('attributes', 'attributes.id', '=', 'attribute_values.attribute_id')
+        ->select('attributes.name as attribute_name', 'attribute_values.value as attribute_value');
     }
 
     // Nếu bạn muốn lấy các giá trị thuộc tính (AttributeValue), dùng quan hệ thuộc tính
