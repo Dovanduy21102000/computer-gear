@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attribute as ModelsAttribute;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Attribute;
@@ -22,50 +23,83 @@ class ProductVariantController extends Controller
         ]);
     }
 
-
-    /**
-     * Hiển thị form tạo biến thể.
-     */
     public function create($productId)
     {
         $template = 'backend.variants.add';
         $product = Product::findOrFail($productId);
+        $attributes = ModelsAttribute::with('attributeValues')->get();
 
-        return view('backend.dashboard.layout', compact('product', 'template'));
+        return view('backend.dashboard.layout', compact('product', 'template', 'attributes'));
     }
-
-    /**
-     * Lưu biến thể mới.
-     */
     public function store(Request $request, Product $product)
     {
-        $request->validate([
-            'sku' => 'required|string|max:255|unique:product_variants',
-            'price' => 'required|numeric',
+        $validated = $request->validate([
+            'sku'        => 'required|string|max:255|unique:product_variants,sku',
+            'price'      => 'required|numeric',
             'price_sale' => 'nullable|numeric',
-            'quantity' => 'required|integer',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'quantity'   => 'required|integer',
+            'thumbnail'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'attributes' => 'required|array',
         ]);
 
-        $thumbnailPath = $request->hasFile('image')
+        // Kiểm tra upload file cho 'thumbnail'
+        $thumbnailPath = $request->hasFile('thumbnail')
             ? $request->file('thumbnail')->store('variants', 'public')
             : null;
 
-        $product->variants()->create([
-            'sku' => $request->sku,
-            'name' => $request->name,
-            'price' => $request->price,
-            'price_sale' => $request->price_sale,
-            'quantity' => $request->quantity,
-            'thumbnail' => $thumbnailPath,
-            'attributes' => json_encode($request->attributes),
+        // Tạo biến thể sản phẩm; lưu file ảnh vào cột 'image'
+        $variant = $product->variants()->create([
+            'sku'        => $validated['sku'],
+            'price'      => $validated['price'],
+            'price_sale' => $validated['price_sale'] ?? null,
+            'quantity'   => $validated['quantity'],
+            'image'      => $thumbnailPath,
+            'status'     => 1, // Mặc định là 1 (hoạt động)
         ]);
 
-        return redirect()->route('variants.index', ['product' => $product->id])
-            ->with('success', 'Biến thể đã được thêm thành công.');
-    }
+        // Lấy dữ liệu thuộc tính từ request, tránh dùng $request->attributes vì nó là thuộc tính nội bộ
+        $attributeInput = $request->input('attributes'); // mảng dạng [attributeId => attributeValueId]
+        
+        // Nếu chỉ cần giá trị (ID của attribute value) để attach, lấy mảng các giá trị
+        $attributeValues = array_values($attributeInput);
+        
+        // Liên kết qua quan hệ many-to-many với bảng pivot
+        $variant->attributeValues()->attach($attributeValues);
 
+        return redirect()->route('variants.index', ['product' => $product->id])
+                        ->with('success', 'Biến thể đã được thêm thành công.');
+    }
+    /**
+     * Lưu biến thể mới.
+     */
+    // public function store(Request $request, Product $product)
+    // {
+    //     $request->validate([
+    //         'sku' => 'required|string|max:255|unique:product_variants',
+    //         'price' => 'required|numeric',
+    //         'price_sale' => 'nullable|numeric',
+    //         'quantity' => 'required|integer',
+    //         'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //         'attributes' => 'required|array',
+    //     ]);
+
+    //     $thumbnailPath = $request->hasFile('image')
+    //         ? $request->file('thumbnail')->store('variants', 'public')
+    //         : null;
+
+    //     $product->variants()->create([
+    //         'sku' => $request->sku,
+    //         'name' => $request->name,
+    //         'price' => $request->price,
+    //         'price_sale' => $request->price_sale,
+    //         'quantity' => $request->quantity,
+    //         'thumbnail' => $thumbnailPath,
+    //         'attributes' => json_encode($request->attributes),
+    //     ]);
+
+    //     return redirect()->route('variants.index', ['product' => $product->id])
+    //         ->with('success', 'Biến thể đã được thêm thành công.');
+    // }
     // public function show($productId, $variantId)
     // {
     //     $template = 'backend.variants.show';
