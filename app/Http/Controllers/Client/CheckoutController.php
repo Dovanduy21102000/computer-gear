@@ -25,6 +25,12 @@ class CheckoutController extends Controller
     {
         try {
             $user = Auth::user();
+            Log::info('User data in checkout:', [
+                'user_id' => $user ? $user->id : null,
+                'user_name' => $user ? $user->name : null,
+                'is_authenticated' => Auth::check()
+            ]);
+
             $addresses = $user->addresses;
             $selectedItems = session('selected_items', []);
             $buyNowItem = session('buy_now_item');
@@ -129,7 +135,8 @@ class CheckoutController extends Controller
                 'coupon',
                 'provinces',
                 'districtsByProvince',
-                'template'
+                'template',
+                'user'
             ));
         } catch (\Exception $e) {
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
