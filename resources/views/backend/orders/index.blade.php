@@ -30,7 +30,7 @@
                                 <option value="delivered">Đang giao hàng</option>
                                 <option value="delivered">Đã giao hàng</option>
                                 <option value="completed">Hoàn thành</option>
-                                {{-- <option value="canceled">Hủy đơn</option> --}}
+                                <option value="canceled">Hủy đơn</option>
                             </select>
                         </div>
                         <table class="table datatable">
@@ -43,6 +43,7 @@
                                     <th>Tổng tiền thanh toán</th>
                                     <th>Trạng thái</th>
                                     <th>PTTT</th>
+                                    <th>Trạng Thái TT</th>
                                     <th>Ngày tạo</th>
                                     <th>Thao tác</th>
                                 </tr>
@@ -52,7 +53,7 @@
                                     <tr>
                                         <td>{{ $order->code }}</td>
                                         <td>{{ $order->shipping_user_name }}</td>
-                                        <td>{{ $order->total_price }}</td>
+                                        <td>{{ number_format($order->total_price) }}</td>
                                         <td>{{ number_format($order->coupon_discount) }}</td>
                                         <td>{{ number_format($order->final_price) }}</td>
                                         <td>
@@ -97,11 +98,18 @@
                                                 {{ $order->payment_method === 'momo'
                                                     ? 'Momo'
                                                     : ($order->payment_method === 'cash'
-                                                        ? 'Thanh toán khi nhận hàng'
+                                                        ? 'Khi nhận hàng'
                                                         : ($order->payment_method === 'vn_pay'
                                                             ? 'VN Pay'
                                                             : '')) }}
                                             </span>
+                                        </td>
+                                        <td>
+                                            @if ($order->payment_status)
+                                                <span class="badge bg-success">Đã thanh toán</span>
+                                            @else
+                                                <span class="badge bg-danger">Chưa thanh toán</span>
+                                            @endif
                                         </td>
                                         <td>{{ $order->created_at ? $order->created_at->format('d-m-Y') : 'Không' }}
                                         </td>
@@ -130,14 +138,16 @@
         let filter = document.getElementById('orderStatusFilter');
 
         function filterOrders() {
-            let status = filter.value.trim().toLowerCase(); // Lấy giá trị từ dropdown
+            let status = filter.value?.trim().toLowerCase() ||
+                ""; // Lấy giá trị từ dropdown, nếu undefined thì gán ""
             let rows = document.querySelectorAll('.datatable tbody tr');
 
             rows.forEach(row => {
-                let cell = row.querySelector('td:nth-child(7) span'); // Lấy cột trạng thái
+                let cell = row.querySelector('td:nth-child(6) span'); // Lấy cột trạng thái
                 if (!cell) return; // Nếu không tìm thấy, bỏ qua
 
-                let cellStatus = cell.dataset.status.trim().toLowerCase(); // Lấy trạng thái thực tế
+                let cellStatus = cell.dataset.status?.trim().toLowerCase() ||
+                    ""; // Lấy trạng thái thực tế, nếu undefined thì gán ""
 
                 // Nếu chọn "Tất cả", hiển thị tất cả đơn hàng
                 if (status === "") {
