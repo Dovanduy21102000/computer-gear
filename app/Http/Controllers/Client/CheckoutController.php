@@ -31,7 +31,7 @@ class CheckoutController extends Controller
                 'is_authenticated' => Auth::check()
             ]);
 
-            $addresses = $user->addresses;
+            $addresses = $user ? $user->addresses : [];
             $selectedItems = session('selected_items', []);
             $buyNowItem = session('buy_now_item');
             $cartItems = [];
@@ -171,16 +171,41 @@ class CheckoutController extends Controller
     public function checkoutMethod(Request $request)
     {
         $request->validate([
-            'payment_method' => 'required|in:momo,cash,vnpay',
+            'payment_method' => 'required|in:momo,cash,vn_pay',
+            'shipping_user_name' => 'required|string|max:255',
+            'shipping_email' => 'required|email|max:255',
+            'shipping_phone' => 'required|string|max:15',
+            'shipping_address' => 'required|string',
+            'province_id' => 'required|integer',
+            'district_id' => 'required|integer',
         ], [
             'payment_method.required' => 'Vui lòng chọn phương thức thanh toán',
             'payment_method.in' => 'Invalid payment method selected.',
+            'shipping_user_name.required' => 'Vui lòng nhập họ tên người nhận hàng',
+            'shipping_email.required' => 'Vui lòng nhập email người nhận hàng',
+            'shipping_phone.required' => 'Vui lòng nhập số điện thoại người nhận hàng',
+            'shipping_address.required' => 'Vui lòng nhập địa chỉ giao hàng',
+            'province_id.required' => 'Vui lòng chọn tỉnh/thành phố',
+            'district_id.required' => 'Vui lòng chọn quận/huyện',
+        ]);
+
+        // Store shipping information in session
+        session([
+            'momo_shipping_info' => [
+                'shipping_user_name' => $request->shipping_user_name,
+                'shipping_email' => $request->shipping_email,
+                'shipping_phone' => $request->shipping_phone,
+                'shipping_address' => $request->shipping_address,
+                'province_id' => $request->province_id,
+                'district_id' => $request->district_id,
+                'notes' => $request->notes,
+            ]
         ]);
 
         // Handle different payment methods
         if ($request->payment_method === 'momo') {
             return $this->redirectToPost(route('momo.create'), $request->all());
-        } elseif ($request->payment_method === 'vnpay') {
+        } elseif ($request->payment_method === 'vn_pay') {
             return $this->redirectToPost(route('vnpay.create'), $request->all());
         } else {
             // For cash payment, submit the form directly to process checkout

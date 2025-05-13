@@ -398,15 +398,8 @@
                         return;
                     }
 
-                    if (paymentMethod.value === "momo") {
-                        checkoutForm.action = "{{ route('momo.create') }}";
-                    } else if (paymentMethod.value === "vn_pay") {
-                        checkoutForm.action = "{{ route('vnpay.create') }}";
-                    } else {
-                        checkoutForm.action = "{{ route('checkout.process') }}";
-                    }
-
-                    checkoutForm.submit();
+                    // Always submit to checkout.method first
+                    checkoutForm.action = "{{ route('checkout.method') }}";
                 });
             });
         </script>
