@@ -41,7 +41,6 @@ class ProductVariantController extends Controller
     {
         $request->validate([
             'sku' => 'required|string|max:255|unique:product_variants',
-            'name' => 'required|string|max:255',
             'price' => 'required|numeric',
             'price_sale' => 'nullable|numeric',
             'quantity' => 'required|integer',
@@ -49,7 +48,7 @@ class ProductVariantController extends Controller
             'attributes' => 'required|array',
         ]);
 
-        $thumbnailPath = $request->hasFile('thumbnail')
+        $thumbnailPath = $request->hasFile('image')
             ? $request->file('thumbnail')->store('variants', 'public')
             : null;
 
@@ -67,16 +66,28 @@ class ProductVariantController extends Controller
             ->with('success', 'Biến thể đã được thêm thành công.');
     }
 
-    public function show($productId, $variantId)
-    {
-        $template = 'backend.variants.add';
-        $variant = ProductVariant::where('id', $variantId)
-            ->where('product_id', $productId)
-            ->firstOrFail();
-        $product = Product::findOrFail($productId);
+    // public function show($productId, $variantId)
+    // {
+    //     $template = 'backend.variants.show';
+    //     $variant = ProductVariant::where('id', $variantId)
+    //         ->where('product_id', $productId)
+    //         ->firstOrFail();
+    //     $product = Product::findOrFail($productId);
 
-        return view('backend.dashboard.layout', compact('variant', 'template','product'));
-    }
+    //     return view('backend.dashboard.layout', compact('variant', 'template','product'));
+    // }
+    public function show($productId, $variantId)
+{
+    $template = 'backend.variants.show';
+
+    $variant = ProductVariant::with(['product', 'attributes'])
+        ->where('id', $variantId)
+        ->where('product_id', $productId)
+        ->firstOrFail();
+
+    return view('backend.dashboard.layout', compact('variant', 'template'));
+}
+
     public function edit(Product $product, ProductVariant $variant)
     {
         return view('backend.dashboard.layout', [
@@ -86,37 +97,70 @@ class ProductVariantController extends Controller
         ]);
     }
 
+    // public function update(Request $request, Product $product, ProductVariant $variant)
+    // {
+    //     $request->validate([
+    //         'sku' => 'required|string|max:255|unique:product_variants,sku,' . $variant->id,
+    //         'name' => 'required|string|max:255',
+    //         'price' => 'required|numeric',
+    //         'price_sale' => 'nullable|numeric',
+    //         'quantity' => 'required|integer',
+    //         'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //         'attributes' => 'required|array',
+    //     ]);
+
+    //     if ($request->hasFile('thumbnail')) {
+    //         if ($variant->thumbnail) {
+    //             Storage::disk('public')->delete($variant->thumbnail);
+    //         }
+    //         $thumbnailPath = $request->file('thumbnail')->store('variants', 'public');
+    //     } else {
+    //         $thumbnailPath = $variant->thumbnail;
+    //     }
+
+    //     $variant->update([
+    //         'sku' => $request->sku,
+    //         'name' => $request->name,
+    //         'price' => $request->price,
+    //         'price_sale' => $request->price_sale,
+    //         'quantity' => $request->quantity,
+    //         'thumbnail' => $thumbnailPath,
+    //         'attributes' => json_encode($request->attributes),
+    //     ]);
+
+    //     return redirect()->route('variants.index', ['product' => $product->id])
+    //         ->with('success', 'Biến thể đã được cập nhật.');
+    // }
+
     public function update(Request $request, Product $product, ProductVariant $variant)
     {
         $request->validate([
             'sku' => 'required|string|max:255|unique:product_variants,sku,' . $variant->id,
-            'name' => 'required|string|max:255',
             'price' => 'required|numeric',
             'price_sale' => 'nullable|numeric',
             'quantity' => 'required|integer',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'attributes' => 'required|array',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        if ($request->hasFile('thumbnail')) {
-            if ($variant->thumbnail) {
-                Storage::disk('public')->delete($variant->thumbnail);
+    
+        
+        if ($request->hasFile('image')) {
+            if ($variant->image) {
+                Storage::disk('public')->delete($variant->image);
             }
-            $thumbnailPath = $request->file('thumbnail')->store('variants', 'public');
+            $imagePath = $request->file('image')->store('variants', 'public');
         } else {
-            $thumbnailPath = $variant->thumbnail;
+            $imagePath = $variant->image; 
         }
-
+    
         $variant->update([
             'sku' => $request->sku,
-            'name' => $request->name,
             'price' => $request->price,
             'price_sale' => $request->price_sale,
             'quantity' => $request->quantity,
-            'thumbnail' => $thumbnailPath,
-            'attributes' => json_encode($request->attributes),
+            'image' => $imagePath, 
+            'status' => $request->status,
         ]);
-
+    
         return redirect()->route('variants.index', ['product' => $product->id])
             ->with('success', 'Biến thể đã được cập nhật.');
     }

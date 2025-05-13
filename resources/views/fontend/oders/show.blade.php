@@ -19,6 +19,7 @@
                             'processing' => 'info',
                             'delivered' => 'primary',
                             'completed' => 'success',
+                            'success' => 'success',
                             'cancelled' => 'danger',
                             'pending_cancel' => 'warning',
                         ];
@@ -44,6 +45,10 @@
 
                             @case('completed')
                                 Đã giao
+                            @break
+
+                            @case('success')
+                                Đã nhận hàng
                             @break
 
                             @case('pending_cancel')
@@ -92,7 +97,7 @@
                             </script>
                         @endif
                         
-                        @if ($order->status === 'delivered')
+                        @if ($order->status === 'completed')
                             <form action="{{ route('client.orders.confirmReceived', $order->code) }}" method="POST" class="mt-3">
                                 @csrf
                                 @method('PUT')
@@ -182,7 +187,7 @@
                                         <strong>
                                             <a href="{{ route('client.products.detail', $item->product->slug) }}"
                                                 class="text-dark">
-                                                {{ $item->product->name }}a
+                                                {{ $item->product->name }}
                                             </a>
                                         </strong>
                                     </div>

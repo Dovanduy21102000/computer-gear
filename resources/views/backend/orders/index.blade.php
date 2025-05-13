@@ -28,6 +28,7 @@
                                 <option value="pending">Đang chờ xử lý</option>
                                 <option value="processing">Đang xử lý</option>
                                 <option value="delivered">Đang giao hàng</option>
+                                <option value="delivered">Đã giao hàng</option>
                                 <option value="completed">Hoàn thành</option>
                                 {{-- <option value="canceled">Hủy đơn</option> --}}
                             </select>
@@ -64,9 +65,11 @@
                                                             ? 'bg-success'
                                                             : ($order->status === 'completed'
                                                                 ? 'bg-info'
-                                                                : ($order->status === 'canceled'
-                                                                    ? 'bg-danger'
-                                                                    : '')))) }}">
+                                                                : ($order->status === 'success'
+                                                                    ? 'bg-info'
+                                                                    : ($order->status === 'canceled'
+                                                                        ? 'bg-danger'
+                                                                        : ''))))) }}">
                                                 {{ $order->status === 'pending'
                                                     ? 'Đang chờ xử lý'
                                                     : ($order->status === 'processing'
@@ -74,10 +77,12 @@
                                                         : ($order->status === 'delivered'
                                                             ? 'Đang giao hàng'
                                                             : ($order->status === 'completed'
-                                                                ? 'Hoàn thành'
+                                                                ? 'Đã giao hàng'
+                                                                : ($order->status === 'success'
+                                                                    ? 'Đã nhận hàng'
                                                                 : ($order->status === 'canceled'
                                                                     ? 'Hủy đơn'
-                                                                    : '')))) }}
+                                                                    : ''))))) }}
                                             </span>
                                         </td>
                                         <td>

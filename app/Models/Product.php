@@ -62,4 +62,12 @@ class Product extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function isInWishlist()
+{
+    return auth()->check() &&
+           \App\Models\Wishlist::where('user_id', auth()->id())
+                               ->where('product_id', $this->id)
+                               ->exists();
+}
 }
