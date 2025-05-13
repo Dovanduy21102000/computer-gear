@@ -62,7 +62,7 @@
                                                     <span>Không có</span>
                                                 @endif
                                             </td>
-                                            <td class="text-end">
+                                            <td class="text-center">
                                                 {{ number_format($variant->price, 0, ',', '.') }} VNĐ
                                             </td>
                                             <td class="text-center">{{ $variant->quantity }}</td>
