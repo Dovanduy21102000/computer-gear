@@ -1,6 +1,6 @@
 <main id="content" role="main">
     <!-- Slider Section -->
-     
+
     <div class="mb-4 mt-1">
         <div class="container overflow-hidden">
             <div class="js-slick-carousel u-slick" data-autoplay="true" data-speed="3000"
@@ -282,10 +282,10 @@
                                                             <a href="{{ route('client.products.detail', $topViewedProduct->slug) }}"
                                                                 class="d-block text-center">
                                                                 <img class="img-fluid w-100"
-                                                            style="height: 150px; object-fit: cover;"
-                                                                src="{{ asset('storage/' . $topViewedProduct->thumbnail) }}"
-                                                                alt="Image Description">
-                                                           
+                                                                    style="height: 150px; object-fit: cover;"
+                                                                    src="{{ asset('storage/' . $topViewedProduct->thumbnail) }}"
+                                                                    alt="Image Description">
+
                                                             </a>
 
                                                         </div>
@@ -335,16 +335,17 @@
                                 data-arrows-classes="position-absolute top-0 font-size-17 u-slick__arrow-normal top-10"
                                 data-arrow-left-classes="fa fa-angle-left right-1"
                                 data-arrow-right-classes="fa fa-angle-right right-0">
-                    
-                                @foreach($recentPosts as $post)
+
+                                @foreach ($recentPosts as $post)
                                     <div class="js-slide post-group">
                                         <div class="post-item">
                                             <div class="product-item__body pb-xl-2">
                                                 <div class="mb-3">
-                                                    <a href="{{ route('blog.show', $post->slug) }}" class="d-block text-center">
+                                                    <a href="{{ route('blog.show', $post->slug) }}"
+                                                        class="d-block text-center">
                                                         <img class="img-fluid"
-                                                             src="{{ asset('storage/' . $post->image) }}"
-                                                             alt="{{ $post->title }}">
+                                                            src="{{ asset('storage/' . $post->image) }}"
+                                                            alt="{{ $post->title }}">
                                                     </a>
                                                 </div>
                                                 <div class="mb-1">
@@ -354,10 +355,11 @@
                                                 </div>
                                                 <h6 class="mb-2 post-item__title font-size-14">
                                                     <a href="{{ route('blog.show', $post->slug) }}"
-                                                       class="font-weight-bold text-dark">{{ $post->title }}</a>
+                                                        class="font-weight-bold text-dark">{{ $post->title }}</a>
                                                 </h6>
                                                 <div class="mb-1">
-                                                    <a href="{{ route('blog.show', $post->slug) }}" class="d-block text-gray-5">
+                                                    <a href="{{ route('blog.show', $post->slug) }}"
+                                                        class="d-block text-gray-5">
                                                         <i class="ec ec-comment"></i> {{ $post->comments_count ?? 0 }}
                                                     </a>
                                                 </div>
@@ -365,11 +367,11 @@
                                         </div>
                                     </div>
                                 @endforeach
-                    
+
                             </div>
                         </div>
                     </aside>
-                    
+
                     <!-- End From the Blog -->
                 </div>
             </div>
@@ -529,11 +531,13 @@
                                                                     <i class="ec ec-add-to-cart"></i>
                                                                 </a>
                                                             @else
-                                                                <form action="{{ route('cart.add') }}" method="POST">
+                                                                <form action="{{ route('cart.add') }}"
+                                                                    method="POST">
                                                                     @csrf
                                                                     <input type="hidden" name="product_id"
                                                                         value="{{ $topViewedProduct->id }}">
-                                                                    <input type="hidden" name="quantity" value="1">
+                                                                    <input type="hidden" name="quantity"
+                                                                        value="1">
                                                                     <!-- Default to 1 -->
                                                                     <button type="submit"
                                                                         class="btn-add-cart btn-primary transition-3d-hover">
@@ -546,7 +550,9 @@
                                                 </div>
                                                 <div class="product-item__footer">
                                                     <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                        @include('fontend.component.wishlist-button', ['product' => $topViewedProduct])
+                                                        @include('fontend.component.wishlist-button', [
+                                                            'product' => $topViewedProduct,
+                                                        ])
                                                     </div>
                                                 </div>
                                             </div>
@@ -561,76 +567,80 @@
                                 @foreach ($discountedProducts as $discountedProduct)
                                     <li class="col-6 col-md-4 col-xl product-item">
                                         <div class="product-item__outer h-100">
-                                        <div class="product-item__inner px-xl-4 p-3">
-                                            <div class="product-item__body pb-xl-2">
-                                                <div class="mb-2">
-                                                    <a href="{{ $discountedProduct->category?->slug ? route('client.products.category', ['slug' => $discountedProduct->category->slug]) : '#' }}"
-                                                        class="font-size-12 text-gray-5">
-                                                        {{ $discountedProduct->category->name ?? 'Danh mục' }}
-                                                    </a>
-                                                </div>
-                                                <h5 class="mb-1 product-item__title">
-                                                    <a href="{{ route('client.products.detail', $discountedProduct->slug) }}"
-                                                        class="text-blue font-weight-bold">
-                                                        {{ $discountedProduct->name }}
-                                                    </a>
-                                                </h5>
-                                                <div class="mb-2">
-                                                    <a href="{{ route('client.products.detail', $discountedProduct->slug) }}"
-                                                        class="d-block text-center">
-                                                        <img class="img-fluid w-100"
-                                                            style="height: 150px; object-fit: cover;"
-                                                            src="{{ asset('storage/' . $discountedProduct->thumbnail) }}"
-                                                            alt="{{ $discountedProduct->name }}">
-                                                    </a>
-                                                </div>
-                                                <div class="flex-center-between mb-1">
-                                                    <div class="prodcut-price">
-                                                        @if ($discountedProduct->price_sale)
-                                                            <div
-                                                                class="prodcut-price d-flex align-items-center position-relative">
-                                                                <ins
-                                                                    class="font-size-20 text-red text-decoration-none">{{ number_format($discountedProduct->price_sale) }}đ</ins>
-                                                                <del
-                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($discountedProduct->price, 0, ',', '.') }}đ</del>
-                                                            </div>
-                                                        @else
-                                                            <div class="text-dark fw-bold fs-5">
-                                                                {{ number_format($discountedProduct->price, 0, ',', '.') }}đ
-                                                            </div>
-                                                        @endif
+                                            <div class="product-item__inner px-xl-4 p-3">
+                                                <div class="product-item__body pb-xl-2">
+                                                    <div class="mb-2">
+                                                        <a href="{{ $discountedProduct->category?->slug ? route('client.products.category', ['slug' => $discountedProduct->category->slug]) : '#' }}"
+                                                            class="font-size-12 text-gray-5">
+                                                            {{ $discountedProduct->category->name ?? 'Danh mục' }}
+                                                        </a>
                                                     </div>
+                                                    <h5 class="mb-1 product-item__title">
+                                                        <a href="{{ route('client.products.detail', $discountedProduct->slug) }}"
+                                                            class="text-blue font-weight-bold">
+                                                            {{ $discountedProduct->name }}
+                                                        </a>
+                                                    </h5>
+                                                    <div class="mb-2">
+                                                        <a href="{{ route('client.products.detail', $discountedProduct->slug) }}"
+                                                            class="d-block text-center">
+                                                            <img class="img-fluid w-100"
+                                                                style="height: 150px; object-fit: cover;"
+                                                                src="{{ asset('storage/' . $discountedProduct->thumbnail) }}"
+                                                                alt="{{ $discountedProduct->name }}">
+                                                        </a>
+                                                    </div>
+                                                    <div class="flex-center-between mb-1">
+                                                        <div class="prodcut-price">
+                                                            @if ($discountedProduct->price_sale)
+                                                                <div
+                                                                    class="prodcut-price d-flex align-items-center position-relative">
+                                                                    <ins
+                                                                        class="font-size-20 text-red text-decoration-none">{{ number_format($discountedProduct->price_sale) }}đ</ins>
+                                                                    <del
+                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($discountedProduct->price, 0, ',', '.') }}đ</del>
+                                                                </div>
+                                                            @else
+                                                                <div class="text-dark fw-bold fs-5">
+                                                                    {{ number_format($discountedProduct->price, 0, ',', '.') }}đ
+                                                                </div>
+                                                            @endif
+                                                        </div>
 
 
-                                                    <div class="d-none d-xl-block prodcut-add-cart">
-                                                        @if ($discountedProduct->is_variant)
-                                                            <a href="{{ route('client.products.detail', $discountedProduct->slug) }}"
-                                                                class="btn-add-cart btn-primary transition-3d-hover">
-                                                                <i class="ec ec-add-to-cart"></i>
-                                                            </a>
-                                                        @else
-                                                            <form action="{{ route('cart.add') }}" method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="product_id"
-                                                                    value="{{ $discountedProduct->id }}">
-                                                                <input type="hidden" name="quantity" value="1">
-                                                                <!-- Default to 1 -->
-                                                                <button type="submit"
+                                                        <div class="d-none d-xl-block prodcut-add-cart">
+                                                            @if ($discountedProduct->is_variant)
+                                                                <a href="{{ route('client.products.detail', $discountedProduct->slug) }}"
                                                                     class="btn-add-cart btn-primary transition-3d-hover">
                                                                     <i class="ec ec-add-to-cart"></i>
-                                                                </button>
-                                                            </form>
-                                                        @endif
+                                                                </a>
+                                                            @else
+                                                                <form action="{{ route('cart.add') }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="product_id"
+                                                                        value="{{ $discountedProduct->id }}">
+                                                                    <input type="hidden" name="quantity"
+                                                                        value="1">
+                                                                    <!-- Default to 1 -->
+                                                                    <button type="submit"
+                                                                        class="btn-add-cart btn-primary transition-3d-hover">
+                                                                        <i class="ec ec-add-to-cart"></i>
+                                                                    </button>
+                                                                </form>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="product-item__footer">
-                                                <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                    {{-- @include('fontend.component.wishlist-button', ['product' => $discountedProduct]) --}}
+                                                <div class="product-item__footer">
+                                                    <div class="border-top pt-2 flex-center-between flex-wrap">
+                                                        <a href="#" class="text-gray-6 font-size-13"><i
+                                                                class="ec ec-favorites mr-1 font-size-15"></i> Yêu
+                                                            thích</a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                     </li>
                                 @endforeach
                             </ul>
@@ -745,7 +755,10 @@
                                                         </div>
                                                         <div class="product-item__footer">
                                                             <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                                @include('fontend.component.wishlist-button', ['product' => $topSellingProduct])
+                                                                @include(
+                                                                    'fontend.component.wishlist-button',
+                                                                    ['product' => $topSellingProduct]
+                                                                )
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1003,11 +1016,13 @@
                                                                     <i class="ec ec-add-to-cart"></i>
                                                                 </a>
                                                             @else
-                                                                <form action="{{ route('cart.add') }}" method="POST">
+                                                                <form action="{{ route('cart.add') }}"
+                                                                    method="POST">
                                                                     @csrf
                                                                     <input type="hidden" name="product_id"
                                                                         value="{{ $product->id }}">
-                                                                    <input type="hidden" name="quantity" value="1">
+                                                                    <input type="hidden" name="quantity"
+                                                                        value="1">
                                                                     <!-- Default to 1 -->
                                                                     <button type="submit"
                                                                         class="btn-add-cart btn-primary transition-3d-hover">
@@ -1020,7 +1035,9 @@
                                                 </div>
                                                 <div class="product-item__footer">
                                                     <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                        @include('fontend.component.wishlist-button', ['product' => $product])
+                                                        @include('fontend.component.wishlist-button', [
+                                                            'product' => $product,
+                                                        ])
                                                     </div>
                                                 </div>
                                             </div>
@@ -1154,7 +1171,9 @@
                                             </div>
                                             <div class="product-item__footer">
                                                 <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                    @include('fontend.component.wishlist-button', ['product' => $keyboardMouseProduct])
+                                                    @include('fontend.component.wishlist-button', [
+                                                        'product' => $keyboardMouseProduct,
+                                                    ])
                                                 </div>
                                             </div>
                                         </div>
@@ -1192,12 +1211,10 @@
                     }
                 }]'>
                 @foreach ($brands as $brand)
-                    <div class="js-slide d-flex align-items-center">
-                        <a href="#" class="link-hover__brand d-flex align-items-center">
+                    <div class="js-slide">
+                        <a href="#" class="link-hover__brand">
                             <img class="img-fluid m-auto max-height-50" src="{{ asset('storage/' . $brand->logo) }}"
                                 alt="Image Description">
-                            <span class="brand-name ms-3 fs-5 fw-bold">{{ $brand->name }}</span>
-                            <!-- Tên thương hiệu -->
                         </a>
                     </div>
                 @endforeach

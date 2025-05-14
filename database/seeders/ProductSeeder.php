@@ -12,25 +12,26 @@ class ProductSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
-        for ($i = 1; $i <= 25; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
+            $name = "Sản phẩm mẫu $i";
             DB::table('products')->insert([
-                'category_id' => rand(1, 4), // Giả định có 5 danh mục
-                'brand_id' => rand(1, 3), // Giả định có 5 thương hiệu
-                'sku' => 'SKU' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                'name' => 'Sản phẩm ' . $i,
-                'slug' => Str::slug('Sản phẩm ' . $i),
-                'thumbnail' => 'https://via.placeholder.com/150?text=Product+' . $i,
-                'short_description' => 'Mô tả ngắn gọn cho sản phẩm ' . $i,
-                'description' => 'Mô tả chi tiết cho sản phẩm ' . $i,
-                'price' => rand(100, 1000),
-                'price_sale' => rand(80, 99) > 90 ? rand(50, 99) : null, // Tạo giá khuyến mãi ngẫu nhiên
-                'quantity' => rand(0, 100),
+                'category_id' => rand(1, 5), // giả sử bạn có 5 danh mục
+                'brand_id' => rand(3, 5),    // giả sử bạn có 5 thương hiệu
+                'sku' => 'SPM-' . Str::random(8),
+                'name' => $name,
+                'slug' => Str::slug($name),
+                'thumbnail' => 'uploads/products/sample' . rand(1, 5) . '.jpg',
+                'short_description' => 'Mô tả ngắn cho sản phẩm mẫu ' . $i,
+                'description' => 'Chi tiết sản phẩm mẫu số ' . $i . '. Đây là một đoạn mô tả chi tiết.',
+                'price' => rand(100, 2000) * 1000,
+                'price_sale' => rand(0, 1) ? rand(100, 1500) * 1000 : null,
+                'quantity' => rand(10, 100),
                 'quantity_sold' => rand(0, 50),
-                'status' => rand(0, 1), // Ngẫu nhiên trạng thái
+                'status' => 1,
                 'views' => rand(0, 1000),
-                'is_variant' => rand(0, 1),
+                'is_variant' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

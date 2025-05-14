@@ -39,6 +39,15 @@
                     padding: 10px;
                 }
 
+                /* Add fixed width for total price column */
+                .table th.product-subtotal,
+                .table td[data-title="Total"] {
+                    width: 150px;
+                    min-width: 150px;
+                    max-width: 150px;
+                    text-align: right;
+                    white-space: nowrap;
+                }
 
                 .btn-primary-dark-w {
                     background-color: #F8D472;
@@ -171,10 +180,10 @@
 
                                                 <!-- Nút cập nhật giỏ hàng -->
                                                 <div class="d-md-flex">
-                                                    <button type="submit" id="update-cart"
+                                                    {{-- <button type="submit" id="update-cart"
                                                         class="btn btn-soft-secondary mb-3 mb-md-0 font-weight-normal px-5 px-md-4 px-lg-5 w-100 w-md-auto">
                                                         Cập nhật giỏ hàng
-                                                    </button>
+                                                    </button> --}}
 
                                                     <!-- Nút thanh toán -->
                                                     <button type="submit" id="checkout-selected"
@@ -243,18 +252,149 @@
                         }
                     });
 
-                    document.getElementById('update-cart').addEventListener('click', function(event) {
-                        event.preventDefault();
-                        let form = document.getElementById('cart-form');
-                        if (form) {
-                            form.method = "POST";
-                            form.action = "{{ route('cart.update') }}"; // Ensure update action
-                            form.submit();
-                        } else {
-                            console.error("Form not found!");
-                        }
+                    // Add quantity change handlers
+                    document.querySelectorAll('.js-result').forEach(input => {
+                        input.addEventListener('change', function() {
+                            const itemId = this.name.match(/\[(\d+)\]/)[1];
+                            const newQuantity = parseInt(this.value);
+                            const maxQuantity = parseInt(this.getAttribute('max'));
+                            const originalValue = this.defaultValue;
+
+                            if (newQuantity > maxQuantity) {
+                                alert('Số lượng sản phẩm vượt quá tồn kho.');
+                                this.value = maxQuantity;
+                                return;
+                            }
+
+                            // Get CSRF token from meta tag
+                            const token = document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                'content');
+
+                            // Update quantity via AJAX
+                            fetch('{{ route('cart.update') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': token,
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        cart: [{
+                                            id: itemId,
+                                            quantity: newQuantity
+                                        }]
+                                    })
+                                })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Network response was not ok');
+                                    }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    if (data.success) {
+                                        // Update the total price for this item
+                                        const row = this.closest('tr');
+                                        const priceCell = row.querySelector(
+                                            'td[data-title="Price"] span');
+                                        const totalCell = row.querySelector(
+                                            'td[data-title="Total"] span');
+
+                                        if (priceCell && totalCell) {
+                                            // Get the price value (remove currency symbol and dots)
+                                            const priceText = priceCell.textContent.replace(/[^\d]/g,
+                                                '');
+                                            const price = parseInt(priceText);
+                                            const newTotal = price * newQuantity;
+
+                                            // Update the total price with proper formatting
+                                            totalCell.textContent = newTotal.toLocaleString('vi-VN') +
+                                                '₫';
+
+                                            // Store the new value as the default for future changes
+                                            this.defaultValue = newQuantity;
+                                        }
+                                    } else {
+                                        alert(data.message || 'Có lỗi xảy ra khi cập nhật số lượng.');
+                                        // Reset to previous value
+                                        this.value = originalValue;
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert('Có lỗi xảy ra khi cập nhật số lượng. Vui lòng thử lại.');
+                                    // Reset to previous value
+                                    this.value = originalValue;
+                                });
+                        });
+
+                        // Add input event for immediate feedback
+                        input.addEventListener('input', function() {
+                            const newQuantity = parseInt(this.value) || 0;
+                            const maxQuantity = parseInt(this.getAttribute('max'));
+
+                            if (newQuantity > maxQuantity) {
+                                this.value = maxQuantity;
+                                return;
+                            }
+
+                            const row = this.closest('tr');
+                            const priceCell = row.querySelector('td[data-title="Price"] span');
+                            const totalCell = row.querySelector('td[data-title="Total"] span');
+
+                            if (priceCell && totalCell) {
+                                const priceText = priceCell.textContent.replace(/[^\d]/g, '');
+                                const price = parseInt(priceText);
+                                const newTotal = price * newQuantity;
+                                totalCell.textContent = newTotal.toLocaleString('vi-VN') + '₫';
+                            }
+                        });
                     });
 
+                    // Remove the update cart button click handler since we're updating in real-time
+                    document.getElementById('update-cart').addEventListener('click', function(event) {
+                        event.preventDefault();
+                        // No need to do anything here anymore since updates happen in real-time
+                    });
+
+                    // Add WebSocket listener for cart updates
+                    if (window.Echo) {
+                        window.Echo.private(`cart.${userId}`)
+                            .listen('.CartUpdated', (e) => {
+                                console.log('Cart updated:', e);
+
+                                // Update cart badge count
+                                const badge = document.getElementById('cart-badge-count');
+                                if (badge) {
+                                    badge.textContent = e.count;
+                                }
+
+                                // Update cart items
+                                const cartTable = document.querySelector('.cart-table tbody');
+                                if (cartTable) {
+                                    // Make an AJAX request to get updated cart items
+                                    fetch('{{ route('cart.index') }}')
+                                        .then(response => response.text())
+                                        .then(html => {
+                                            const parser = new DOMParser();
+                                            const doc = parser.parseFromString(html, 'text/html');
+                                            const newCartTable = doc.querySelector('.cart-table tbody');
+                                            if (newCartTable) {
+                                                cartTable.innerHTML = newCartTable.innerHTML;
+                                            }
+                                        });
+                                }
+                            });
+                    }
                 });
             </script>
+
+            @auth
+                <script>
+                    Echo.private('cart.{{ auth()->id() }}')
+                        .listen('CartUpdated', (e) => {
+                            document.getElementById("cartCount").innerText = e.cartCount;
+                        });
+                </script>
+            @endauth
         </main>

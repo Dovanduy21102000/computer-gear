@@ -242,7 +242,8 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="momo"
                                                         name="payment_method" value="momo">
-                                                    <label class="custom-control-label form-label" for="momo">Thanh
+                                                    <label class="custom-control-label form-label"
+                                                        for="momo">Thanh
                                                         toán qua MoMo</label>
                                                 </div>
                                             </div>
@@ -282,7 +283,7 @@
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Họ tên <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" name="shipping_user_name"
-                                        value="{{ old('shipping_user_name', $user->name ?? '') }}" required>
+                                        value="{{ old('shipping_user_name', Auth::user()->name ?? '') }}" required>
                                 </div>
                             </div>
 
@@ -397,15 +398,8 @@
                         return;
                     }
 
-                    if (paymentMethod.value === "momo") {
-                        checkoutForm.action = "{{ route('momo.create') }}";
-                    } else if (paymentMethod.value === "vn_pay") {
-                        checkoutForm.action = "{{ route('vnpay.create') }}";
-                    } else {
-                        checkoutForm.action = "{{ route('checkout.process') }}";
-                    }
-
-                    checkoutForm.submit();
+                    // Always submit to checkout.method first
+                    checkoutForm.action = "{{ route('checkout.method') }}";
                 });
             });
         </script>

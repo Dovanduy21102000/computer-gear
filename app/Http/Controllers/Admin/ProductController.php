@@ -21,8 +21,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        
-        $query = Product::with(['category', 'brand', 'variants.attributeValues.attribute']);
+        $query = Product::with(['category', 'brand', 'variants.attributeValues.attribute'])->latest('id');
 
         if ($request->has('category') && $request->category != '') {
             $query->where('category_id', $request->category);
@@ -64,7 +63,7 @@ class ProductController extends Controller
             'sku' => 'required|string|max:255|unique:products',
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:products',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
             'price' => 'required|numeric',
@@ -76,6 +75,32 @@ class ProductController extends Controller
             'variants.*.sku' => $request->is_variant ? 'required|string|max:255' : 'nullable|string|max:255',
             'variants.*.price' => $request->is_variant ? 'required|numeric' : 'nullable|numeric',
             'variants.*.quantity' => $request->is_variant ? 'required|integer' : 'nullable|integer',
+            'variants.*.attributes' => $request->is_variant ? 'required|array' : 'nullable|array',
+            'variants.*.attributes.*' => 'exists:attribute_values,id',
+        ], [
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+            'category_id.exists' => 'Danh mục không hợp lệ.',
+            'brand_id.required' => 'Vui lòng chọn thương hiệu.',
+            'brand_id.exists' => 'Thương hiệu không hợp lệ.',
+            'sku.required' => 'Vui lòng nhập SKU.',
+            'sku.unique' => 'SKU đã tồn tại.',
+            'name.required' => 'Vui lòng nhập tên sản phẩm.',
+            'name.max' => 'Tên sản phẩm không được vượt quá :max ký tự.',
+            'slug.unique' => 'Slug đã tồn tại.',
+            'thumbnail.image' => 'File tải lên phải là hình ảnh.',
+            'thumbnail.mimes' => 'Ảnh phải có định dạng jpeg, png, jpg, gif hoặc webp.',
+            'thumbnail.max' => 'Ảnh không được vượt quá 2MB.',
+            'price.required' => 'Vui lòng nhập giá.',
+            'price.numeric' => 'Giá phải là số.',
+            'price_sale.numeric' => 'Giá khuyến mãi phải là số.',
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'status.boolean' => 'Trạng thái không hợp lệ.',
+            'is_variant.boolean' => 'Trường biến thể không hợp lệ.',
+            'variants.required' => 'Vui lòng nhập thông tin biến thể.',
+            'variants.*.sku.required' => 'Vui lòng nhập SKU cho biến thể.',
+            'variants.*.price.required' => 'Vui lòng nhập giá cho biến thể.',
+            'variants.*.quantity.required' => 'Vui lòng nhập số lượng cho biến thể.',
         ]);
 
         if (!$request->slug) {
@@ -138,8 +163,9 @@ class ProductController extends Controller
     public function show(string $id)
     {
         $product = Product::with(['category', 'brand', 'variants.attributeValues.attribute'])->findOrFail($id);
+        $albumImages = \App\Models\ProductImage::where('product_id', $id)->first()?->images ?: [];
         $template = 'backend.products.show';
-        return view('backend.dashboard.layout', compact('product', 'template'));
+        return view('backend.dashboard.layout', compact('product', 'template', 'albumImages'));
     }
 
     /**
@@ -168,7 +194,7 @@ class ProductController extends Controller
             'sku' => 'required|string|max:255|unique:products',
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:products',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
             'price' => 'required|numeric',
@@ -180,6 +206,30 @@ class ProductController extends Controller
             'variants.*.sku' => $request->is_variant ? 'required|string|max:255' : 'nullable|string|max:255',
             'variants.*.price' => $request->is_variant ? 'required|numeric' : 'nullable|numeric',
             'variants.*.quantity' => $request->is_variant ? 'required|integer' : 'nullable|integer',
+        ], [
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+            'category_id.exists' => 'Danh mục không hợp lệ.',
+            'brand_id.required' => 'Vui lòng chọn thương hiệu.',
+            'brand_id.exists' => 'Thương hiệu không hợp lệ.',
+            'sku.required' => 'Vui lòng nhập SKU.',
+            'sku.unique' => 'SKU đã tồn tại.',
+            'name.required' => 'Vui lòng nhập tên sản phẩm.',
+            'name.max' => 'Tên sản phẩm không được vượt quá :max ký tự.',
+            'slug.unique' => 'Slug đã tồn tại.',
+            'thumbnail.image' => 'File tải lên phải là hình ảnh.',
+            'thumbnail.mimes' => 'Ảnh phải có định dạng jpeg, png, jpg, gif hoặc webp.',
+            'thumbnail.max' => 'Ảnh không được vượt quá 2MB.',
+            'price.required' => 'Vui lòng nhập giá.',
+            'price.numeric' => 'Giá phải là số.',
+            'price_sale.numeric' => 'Giá khuyến mãi phải là số.',
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'status.boolean' => 'Trạng thái không hợp lệ.',
+            'is_variant.boolean' => 'Trường biến thể không hợp lệ.',
+            'variants.required' => 'Vui lòng nhập thông tin biến thể.',
+            'variants.*.sku.required' => 'Vui lòng nhập SKU cho biến thể.',
+            'variants.*.price.required' => 'Vui lòng nhập giá cho biến thể.',
+            'variants.*.quantity.required' => 'Vui lòng nhập số lượng cho biến thể.',
         ]);
 
         if ($request->hasFile('thumbnail')) {

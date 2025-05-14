@@ -298,12 +298,12 @@ class MOMOController extends Controller
             $order = Order::create([
                 'code' => $request->orderId,
                 'user_id' => $userId,
-                'shipping_user_name' => $request->shipping_user_name,
-                'shipping_email' => $request->shipping_email,
-                'shipping_phone' => $request->shipping_phone,
-                'shipping_address' => $request->shipping_address,
-                'province_id' => $request->province_id,
-                'district_id' => $request->district_id,
+                'shipping_user_name' => session('momo_shipping_info.shipping_user_name'),
+                'shipping_email' => session('momo_shipping_info.shipping_email'),
+                'shipping_phone' => session('momo_shipping_info.shipping_phone'),
+                'shipping_address' => session('momo_shipping_info.shipping_address'),
+                'province_id' => session('momo_shipping_info.province_id'),
+                'district_id' => session('momo_shipping_info.district_id'),
                 'coupon_code' => $coupon['code'] ?? null,
                 'coupon_discount' => $couponDiscount,
                 'total_price' => $totalPrice,
@@ -311,7 +311,7 @@ class MOMOController extends Controller
                 'payment_status' => 1,
                 'status' => 'pending',
                 'payment_method' => 'momo',
-                'notes' => $request->notes,
+                'notes' => session('momo_shipping_info.notes'),
             ]);
 
             // Record coupon usage
@@ -350,8 +350,11 @@ class MOMOController extends Controller
                 $item->delete();
             }
 
-            // Clear coupon session
+            // Clear sessions
             session()->forget('coupon');
+            session()->forget('momo_selected_items');
+            session()->forget('momo_shipping_info');
+            session()->forget('buy_now_item');
 
             DB::commit();
 

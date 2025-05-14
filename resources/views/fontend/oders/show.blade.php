@@ -26,6 +26,7 @@
                         $paymentText = match ($order->payment_method) {
                             'cash' => 'Thanh toán khi nhận hàng',
                             'momo' => 'Thanh toán qua MoMo',
+                            'vn_pay' => 'Thanh toán qua VN PAY',
                             default => 'Chưa rõ',
                         };
                     @endphp
