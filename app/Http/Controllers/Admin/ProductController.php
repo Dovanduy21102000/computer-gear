@@ -21,7 +21,9 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+
         $query = Product::with(['category', 'brand', 'variants.attributeValues.attribute'])->latest('id');
+
 
         if ($request->has('category') && $request->category != '') {
             $query->where('category_id', $request->category);
@@ -56,6 +58,7 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
+
     {
         $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -102,6 +105,7 @@ class ProductController extends Controller
             'variants.*.price.required' => 'Vui lòng nhập giá cho biến thể.',
             'variants.*.quantity.required' => 'Vui lòng nhập số lượng cho biến thể.',
         ]);
+
 
         if (!$request->slug) {
             $request->merge(['slug' => Str::slug($request->name)]);
