@@ -107,8 +107,8 @@ class MOMOController extends Controller
 
             $finalPrice = max(0, $totalPrice - $couponDiscount);
 
-            // Generate a unique order code
-            $orderCode = 'ORD' . time() . rand(1000, 9999);
+            // Generate a unique order code using structured timestamp without separators
+            $orderCode = date('YmdHis') . rand(100, 999);
 
             // Create payment request
             $endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
@@ -184,6 +184,32 @@ class MOMOController extends Controller
     public function handleReturn(Request $request)
     {
         try {
+            // Log the return data from MOMO
+            Log::info('MOMO Return Data:', $request->all());
+
+            // Check payment status
+            if ($request->resultCode != 0) {
+                Log::error('MOMO Payment Failed:', [
+                    'resultCode' => $request->resultCode,
+                    'message' => $request->message ?? 'Payment failed'
+                ]);
+
+                // Clear any existing sessions that might cause loops
+                session()->forget('momo_selected_items');
+                session()->forget('coupon');
+
+                return redirect('/')
+                    ->with('error', 'Thanh toán thất bại: ' . ($request->message ?? 'Vui lòng thử lại sau.'));
+            }
+
+            // Check if order already exists to prevent duplicate processing
+            $existingOrder = Order::where('code', $request->orderId)->first();
+            if ($existingOrder) {
+                Log::info('Order already processed:', ['order_id' => $existingOrder->id]);
+                return redirect()->route('checkout.success', ['order_id' => $existingOrder->id])
+                    ->with('success', 'Đặt hàng thành công!');
+            }
+
             DB::beginTransaction();
 
             $userId = Auth::id();
@@ -259,16 +285,25 @@ class MOMOController extends Controller
 
             $finalPrice = max(0, $totalPrice - $couponDiscount);
 
+            // Verify the amount matches
+            if ($request->amount != $finalPrice) {
+                Log::error('MOMO Amount Mismatch:', [
+                    'expected' => $finalPrice,
+                    'received' => $request->amount
+                ]);
+                throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
+            }
+
             // Create Order
             $order = Order::create([
                 'code' => $request->orderId,
                 'user_id' => $userId,
-                'shipping_user_name' => $request->shipping_user_name,
-                'shipping_email' => $request->shipping_email,
-                'shipping_phone' => $request->shipping_phone,
-                'shipping_address' => $request->shipping_address,
-                'province_id' => $request->province_id,
-                'district_id' => $request->district_id,
+                'shipping_user_name' => session('momo_shipping_info.shipping_user_name'),
+                'shipping_email' => session('momo_shipping_info.shipping_email'),
+                'shipping_phone' => session('momo_shipping_info.shipping_phone'),
+                'shipping_address' => session('momo_shipping_info.shipping_address'),
+                'province_id' => session('momo_shipping_info.province_id'),
+                'district_id' => session('momo_shipping_info.district_id'),
                 'coupon_code' => $coupon['code'] ?? null,
                 'coupon_discount' => $couponDiscount,
                 'total_price' => $totalPrice,
@@ -276,7 +311,7 @@ class MOMOController extends Controller
                 'payment_status' => 1,
                 'status' => 'pending',
                 'payment_method' => 'momo',
-                'notes' => $request->notes,
+                'notes' => session('momo_shipping_info.notes'),
             ]);
 
             // Record coupon usage
@@ -315,8 +350,11 @@ class MOMOController extends Controller
                 $item->delete();
             }
 
-            // Clear coupon session
+            // Clear sessions
             session()->forget('coupon');
+            session()->forget('momo_selected_items');
+            session()->forget('momo_shipping_info');
+            session()->forget('buy_now_item');
 
             DB::commit();
 
@@ -324,6 +362,10 @@ class MOMOController extends Controller
                 ->with('success', 'Đặt hàng thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('MOMO Return Error:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->back()
                 ->with('error', $e->getMessage())
                 ->withInput();

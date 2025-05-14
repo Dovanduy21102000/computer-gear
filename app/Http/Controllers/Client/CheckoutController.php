@@ -17,202 +17,131 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class CheckoutController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = Auth::id();
-        if (!$userId) {
-            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
-        }
-
-        // Clear any existing coupon from session when entering checkout page
-        session()->forget('coupon');
-
-        $user = User::find($userId);
-        $cart = Cart::where('user_id', $userId)->first();
-
-        if (!$cart) {
-            return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống');
-        }
-
-        // Get selected items from the cart
-        $selectedItemIds = $request->input('selected_items', []);
-
-        // Convert string to array if it's a comma-separated string
-        if (is_string($selectedItemIds)) {
-            $selectedItemIds = explode(',', $selectedItemIds);
-        }
-
-        // Ensure selectedItemIds is an array
-        $selectedItemIds = is_array($selectedItemIds) ? $selectedItemIds : [];
-
-        // If no items are selected, show error
-        if (empty($selectedItemIds)) {
-            return redirect()->route('cart.index')->with('error', 'Vui lòng chọn sản phẩm để thanh toán');
-        }
-
-        // Retrieve only selected items with their relationships
-        $cartItems = CartItem::with(['product', 'productVariant.attributeValues.attribute'])
-            ->where('cart_id', $cart->id)
-            ->whereIn('id', $selectedItemIds)
-            ->get();
-
-        // Process cart items to handle multiple variants
-        $processedCartItems = collect();
-        foreach ($cartItems as $item) {
-            // If the item has multiple variants (stored as "id1 | id2")
-            if (strpos($item->product_variant_id, '|') !== false) {
-                $variantIds = array_map('trim', explode('|', $item->product_variant_id));
-                // Only process the first variant if it's a selected item
-                if (in_array($item->id, $selectedItemIds)) {
-                    $variantId = $variantIds[0]; // Only take the first variant
-                    $variantItem = clone $item;
-                    $variantItem->setAttribute('product_variant_id', $variantId);
-                    $variantItem->setRelation('productVariant', ProductVariant::with('attributeValues.attribute')
-                        ->find($variantId));
-                    $processedCartItems->push($variantItem);
-                }
-            } else {
-                $processedCartItems->push($item);
-            }
-        }
-
-        // Log the processed cart items for debugging
-        Log::info('Processed cart items in checkout:', [
-            'selected_ids' => $selectedItemIds,
-            'cart_items' => $processedCartItems->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'variant_id' => $item->product_variant_id,
-                    'quantity' => $item->quantity
-                ];
-            })->toArray()
-        ]);
-
-        // Validate products status and availability
-        $invalidItems = [];
-        $validCartItems = $processedCartItems->filter(function ($item) use (&$invalidItems) {
-            // Check if product exists and is active
-            if (!$item->product) {
-                $invalidItems[] = 'Sản phẩm không tồn tại';
-                $item->delete();
-                return false;
-            }
-
-            // Log product status for debugging
-            Log::info('Product status check:', [
-                'product_id' => $item->product->id,
-                'product_name' => $item->product->name,
-                'status' => $item->product->status,
-                'variant_id' => $item->productVariant ? $item->productVariant->id : null,
-                'variant_status' => $item->productVariant ? $item->productVariant->status : null
+        try {
+            $user = Auth::user();
+            Log::info('User data in checkout:', [
+                'user_id' => $user ? $user->id : null,
+                'user_name' => $user ? $user->name : null,
+                'is_authenticated' => Auth::check()
             ]);
 
-            if (!$item->product->status) {
-                $invalidItems[] = $item->product->name . ' (Sản phẩm không khả dụng)';
-                $item->delete();
-                return false;
-            }
+            $addresses = $user ? $user->addresses : [];
+            $selectedItems = session('selected_items', []);
+            $buyNowItem = session('buy_now_item');
+            $cartItems = [];
 
-            // Check product quantity
-            $availableQuantity = $item->productVariant
-                ? $item->productVariant->quantity
-                : $item->product->quantity;
-
-            if ($availableQuantity < $item->quantity) {
-                $invalidItems[] = $item->product->name .
-                    ($item->productVariant ? ' - ' . $item->productVariant->name : '') .
-                    ' (Chỉ còn ' . $availableQuantity . ' sản phẩm)';
-                $item->delete();
-                return false;
-            }
-
-            // If product has variant, check variant status
-            if ($item->productVariant) {
-                if (!$item->productVariant->status) {
-                    $invalidItems[] = $item->product->name . ' - ' . $item->productVariant->name . ' (Biến thể không khả dụng)';
-                    $item->delete();
-                    return false;
+            // Get provinces data from cache
+            $provinces = Cache::remember('provinces', now()->addDays(30), function () {
+                try {
+                    $response = Http::timeout(30)->get('https://provinces.open-api.vn/api/');
+                    return $response->json();
+                } catch (\Exception $e) {
+                    Log::error('Error fetching provinces:', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    return [];
                 }
-            }
+            });
 
-            return true;
-        });
-
-        // If there are invalid items, redirect back to cart with error message
-        if (!empty($invalidItems)) {
-            $errorMessage = 'Các sản phẩm sau không khả dụng hoặc không đủ số lượng: ' . implode(', ', $invalidItems);
-            return redirect()->route('cart.index')->with('error', $errorMessage);
-        }
-
-        if ($validCartItems->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'Không có sản phẩm hợp lệ.');
-        }
-
-        // Calculate the total price of selected items
-        $totalPrice = 0;
-        foreach ($validCartItems as $item) {
-            $price = $item->productVariant ?
-                ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
-            $totalPrice += $price * $item->quantity;
-        }
-
-        // Apply Coupon Discount
-        $appliedCoupon = session('coupon');
-        $discount = 0;
-
-        if ($appliedCoupon && $totalPrice >= $appliedCoupon['min_order_total']) {
-            if ($appliedCoupon['type'] === 'percentage') {
-                $discount = min($totalPrice * ($appliedCoupon['value'] / 100), $appliedCoupon['maximum_amount']);
-            } else {
-                $discount = min($totalPrice, $appliedCoupon['value']);
-            }
-        }
-
-        $finalPrice = max(0, $totalPrice - $discount);
-
-        // Fetch provinces and districts
-        $provinces = [];
-        $districtsByProvince = [];
-
-        try {
-            $response = Http::get('https://provinces.open-api.vn/api/p');
-            if ($response->successful()) {
-                $provinces = $response->json() ?? [];
-
-                // Fetch districts for each province
+            // Get districts data from cache
+            $districtsByProvince = Cache::remember('districts_by_province', now()->addDays(30), function () use ($provinces) {
+                $districts = [];
                 foreach ($provinces as $province) {
-                    $provinceId = $province['code'];
-                    $districtResponse = Http::get("https://provinces.open-api.vn/api/p/{$provinceId}?depth=2");
-                    if ($districtResponse->successful()) {
-                        $districtData = $districtResponse->json();
-                        if (isset($districtData['districts'])) {
-                            $districtsByProvince[$provinceId] = $districtData['districts'];
-                        }
+                    try {
+                        $response = Http::timeout(30)->get("https://provinces.open-api.vn/api/p/{$province['code']}?depth=2");
+                        $districts[$province['code']] = $response->json()['districts'] ?? [];
+                    } catch (\Exception $e) {
+                        Log::error("Error fetching districts for province {$province['code']}:", [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                        $districts[$province['code']] = [];
                     }
                 }
+                return $districts;
+            });
+
+            // If buy now item exists, use it instead of cart items
+            if ($buyNowItem) {
+                $cartItems[] = $buyNowItem;
+            } else {
+                // Get selected items from URL parameters
+                $selectedItems = [];
+                if ($request->has('selected_items')) {
+                    $selectedItems = explode(',', $request->input('selected_items'));
+                }
+
+                Log::info('Selected items from URL:', ['selected_items' => $selectedItems]);
+
+                if (!empty($selectedItems)) {
+                    // Get cart items from database for selected items
+                    $cart = Cart::where('user_id', Auth::id())->first();
+                    if ($cart) {
+                        $cartItems = CartItem::with(['product', 'productVariant'])
+                            ->where('cart_id', $cart->id)
+                            ->whereIn('id', $selectedItems)
+                            ->get()
+                            ->map(function ($item) {
+                                $cartItem = new \stdClass();
+                                $cartItem->product = $item->product;
+                                $cartItem->productVariant = $item->productVariant;
+                                $cartItem->quantity = $item->quantity;
+                                $cartItem->price = $item->productVariant ?
+                                    ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
+                                return $cartItem;
+                            })
+                            ->toArray();
+                    }
+
+                    Log::info('Cart items from database for selected items:', [
+                        'items' => $cartItems
+                    ]);
+                }
             }
+
+            // Calculate total price
+            $totalPrice = 0;
+            foreach ($cartItems as $item) {
+                $totalPrice += $item->price * $item->quantity;
+            }
+
+            // Apply coupon if exists
+            $coupon = session('coupon');
+            $couponDiscount = 0;
+            if ($coupon && $totalPrice >= $coupon['min_order_total']) {
+                if ($coupon['type'] === 'percentage') {
+                    $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                } else {
+                    $couponDiscount = min($totalPrice, $coupon['value']);
+                }
+            }
+
+            $finalPrice = max(0, $totalPrice - $couponDiscount);
+
+            $template = 'fontend.checkout.index';
+            return view('fontend.layout', compact(
+                'addresses',
+                'cartItems',
+                'totalPrice',
+                'couponDiscount',
+                'finalPrice',
+                'coupon',
+                'provinces',
+                'districtsByProvince',
+                'template',
+                'user'
+            ));
         } catch (\Exception $e) {
-            Log::error('Error fetching provinces/districts: ' . $e->getMessage());
+            return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
-
-        $template = 'fontend.checkout.index';
-        return view('fontend.layout', [
-            'template' => $template,
-            'provinces' => $provinces,
-            'districtsByProvince' => $districtsByProvince,
-            'cartItems' => $processedCartItems,
-            'appliedCoupon' => $appliedCoupon,
-            'discount' => $discount,
-            'user' => $user,
-            'totalPrice' => $totalPrice,
-            'finalPrice' => $finalPrice
-        ]);
     }
-
 
     public function trackOrderView(Request $request)
     {
@@ -242,16 +171,41 @@ class CheckoutController extends Controller
     public function checkoutMethod(Request $request)
     {
         $request->validate([
-            'payment_method' => 'required|in:momo,cash,vnpay',
+            'payment_method' => 'required|in:momo,cash,vn_pay',
+            'shipping_user_name' => 'required|string|max:255',
+            'shipping_email' => 'required|email|max:255',
+            'shipping_phone' => 'required|string|max:15',
+            'shipping_address' => 'required|string',
+            'province_id' => 'required|integer',
+            'district_id' => 'required|integer',
         ], [
             'payment_method.required' => 'Vui lòng chọn phương thức thanh toán',
             'payment_method.in' => 'Invalid payment method selected.',
+            'shipping_user_name.required' => 'Vui lòng nhập họ tên người nhận hàng',
+            'shipping_email.required' => 'Vui lòng nhập email người nhận hàng',
+            'shipping_phone.required' => 'Vui lòng nhập số điện thoại người nhận hàng',
+            'shipping_address.required' => 'Vui lòng nhập địa chỉ giao hàng',
+            'province_id.required' => 'Vui lòng chọn tỉnh/thành phố',
+            'district_id.required' => 'Vui lòng chọn quận/huyện',
+        ]);
+
+        // Store shipping information in session
+        session([
+            'momo_shipping_info' => [
+                'shipping_user_name' => $request->shipping_user_name,
+                'shipping_email' => $request->shipping_email,
+                'shipping_phone' => $request->shipping_phone,
+                'shipping_address' => $request->shipping_address,
+                'province_id' => $request->province_id,
+                'district_id' => $request->district_id,
+                'notes' => $request->notes,
+            ]
         ]);
 
         // Handle different payment methods
         if ($request->payment_method === 'momo') {
             return $this->redirectToPost(route('momo.create'), $request->all());
-        } elseif ($request->payment_method === 'vnpay') {
+        } elseif ($request->payment_method === 'vn_pay') {
             return $this->redirectToPost(route('vnpay.create'), $request->all());
         } else {
             // For cash payment, submit the form directly to process checkout
@@ -298,7 +252,7 @@ class CheckoutController extends Controller
     public function processCheckout(Request $request)
     {
         $request->validate([
-            'payment_method' => 'required|in:momo,cash,vnpay',
+            'payment_method' => 'required|in:momo,cash,vn_pay',
             'shipping_user_name' => 'required|string|max:255',
             'shipping_email' => 'required|email|max:255',
             'shipping_phone' => 'required|string|max:15',
@@ -316,7 +270,89 @@ class CheckoutController extends Controller
                 throw new \Exception('Vui lòng đăng nhập để tiếp tục.');
             }
 
-            // Check if Cart Exists
+            // Check for buy now item first
+            $buyNowItem = session('buy_now_item');
+            if ($buyNowItem) {
+                // Calculate total price for buy now item
+                $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
+
+                // Apply coupon if exists
+                $coupon = session('coupon');
+                $couponDiscount = 0;
+                $couponId = null;
+
+                if ($coupon) {
+                    if ($totalPrice >= $coupon['min_order_total']) {
+                        if ($coupon['type'] === 'percentage') {
+                            $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                        } else {
+                            $couponDiscount = min($totalPrice, $coupon['value']);
+                        }
+                        $couponId = $coupon['id'];
+                    }
+                }
+
+                $finalPrice = max(0, $totalPrice - $couponDiscount);
+
+                // Create Order
+                $order = Order::create([
+                    'code' => date('YmdHis') . rand(100, 999),
+                    'user_id' => $userId,
+                    'shipping_user_name' => $request->shipping_user_name,
+                    'shipping_email' => $request->shipping_email,
+                    'shipping_phone' => $request->shipping_phone,
+                    'shipping_address' => $request->shipping_address,
+                    'province_id' => $request->province_id,
+                    'district_id' => $request->district_id,
+                    'coupon_code' => $coupon['code'] ?? null,
+                    'coupon_discount' => $couponDiscount,
+                    'total_price' => $totalPrice,
+                    'final_price' => $finalPrice,
+                    'payment_status' => $request->payment_method === 'cash' ? 0 : 1,
+                    'status' => 'pending',
+                    'payment_method' => $request->payment_method,
+                    'notes' => $request->notes,
+                ]);
+
+                if ($couponId) {
+                    CouponUser::create([
+                        'user_id' => $userId,
+                        'coupon_id' => $couponId,
+                        'order_id' => $order->id
+                    ]);
+                }
+
+                // Create order item for buy now item
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $buyNowItem->product->id,
+                    'product_variant_id' => $buyNowItem->productVariant ? $buyNowItem->productVariant->id : null,
+                    'price' => $buyNowItem->price,
+                    'quantity' => $buyNowItem->quantity,
+                    'product_info' => json_encode([
+                        'product' => $buyNowItem->product->toArray(),
+                        'variant' => $buyNowItem->productVariant ? $buyNowItem->productVariant->toArray() : null
+                    ]),
+                ]);
+
+                // Update stock
+                if ($buyNowItem->productVariant) {
+                    $buyNowItem->productVariant->decrement('quantity', $buyNowItem->quantity);
+                } else {
+                    $buyNowItem->product->decrement('quantity', $buyNowItem->quantity);
+                }
+
+                // Clear sessions
+                session()->forget('coupon');
+                session()->forget('buy_now_item');
+
+                DB::commit();
+
+                return redirect()->route('checkout.success', ['order_id' => $order->id])
+                    ->with('success', 'Đặt hàng thành công! Vui lòng thanh toán khi nhận hàng.');
+            }
+
+            // Handle regular cart items
             $cart = Cart::where('user_id', $userId)->first();
             if (!$cart) {
                 throw new \Exception('Giỏ hàng không tồn tại.');
@@ -338,32 +374,8 @@ class CheckoutController extends Controller
                 ->whereIn('id', $selectedItemIds)
                 ->get();
 
-            if ($cartItems->isEmpty()) {
-                throw new \Exception('Giỏ hàng của bạn đang trống.');
-            }
-
-            // Process cart items to handle multiple variants
-            $processedCartItems = collect();
+            // Check stock availability
             foreach ($cartItems as $item) {
-                // If the item has multiple variants (stored as "id1 | id2")
-                if (strpos($item->product_variant_id, '|') !== false) {
-                    $variantIds = array_map('trim', explode('|', $item->product_variant_id));
-                    // Only process variants that are in the selected items
-                    foreach ($variantIds as $variantId) {
-                        // Create a new cart item for each variant
-                        $variantItem = clone $item;
-                        $variantItem->setAttribute('product_variant_id', $variantId);
-                        $variantItem->setRelation('productVariant', ProductVariant::with('attributeValues.attribute')
-                            ->find($variantId));
-                        $processedCartItems->push($variantItem);
-                    }
-                } else {
-                    $processedCartItems->push($item);
-                }
-            }
-
-            // Validate stock availability for processed items
-            foreach ($processedCartItems as $item) {
                 if ($item->productVariant) {
                     if ($item->productVariant->quantity < $item->quantity) {
                         throw new \Exception("Sản phẩm {$item->product->name} - {$item->productVariant->name} không đủ số lượng trong kho.");
@@ -377,7 +389,7 @@ class CheckoutController extends Controller
 
             // Calculate Total Price
             $totalPrice = 0;
-            foreach ($processedCartItems as $item) {
+            foreach ($cartItems as $item) {
                 $price = $item->productVariant ?
                     ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
                 $totalPrice += $price * $item->quantity;
@@ -403,7 +415,7 @@ class CheckoutController extends Controller
 
             // Create Order
             $order = Order::create([
-                'code' => 'ORD' . time() . rand(1000, 9999),
+                'code' => date('YmdHis') . rand(100, 999),
                 'user_id' => $userId,
                 'shipping_user_name' => $request->shipping_user_name,
                 'shipping_email' => $request->shipping_email,
@@ -466,17 +478,18 @@ class CheckoutController extends Controller
             switch ($request->payment_method) {
                 case 'momo':
                     return redirect()->route('momo.process', ['order_id' => $order->id]);
-                case 'vnpay':
+                case 'vn_pay':
                     return redirect()->route('vnpay.process', ['order_id' => $order->id]);
+                case 'cash':
+                    return redirect()->route('checkout.success', ['order_id' => $order->id])
+                        ->with('success', 'Đặt hàng thành công! Vui lòng thanh toán khi nhận hàng.');
                 default:
                     return redirect()->route('checkout.success', ['order_id' => $order->id])
                         ->with('success', 'Đặt hàng thành công!');
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
-                ->with('error', $e->getMessage())
-                ->withInput();
+            return back()->with('error', $e->getMessage())->withInput();
         }
     }
 
@@ -523,7 +536,7 @@ class CheckoutController extends Controller
 
     public function success(Request $request)
     {
-        $order = Order::with(['orderItems.product', 'orderItems.productVariant'])
+        $order = Order::with(['items.product', 'items.productVariant'])
             ->findOrFail($request->order_id);
 
         $template = 'fontend.checkout.success';
@@ -534,5 +547,239 @@ class CheckoutController extends Controller
     {
         session()->forget('coupon');
         return back()->with('success', 'Mã khuyến mại đã được xóa!');
+    }
+
+    public function buyNow(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Log the incoming request data
+            Log::info('Buy Now Request Data:', [
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'variant_id' => $request->variant_id,
+                'attributes' => $request->all()
+            ]);
+
+            // Validate request
+            $request->validate([
+                'product_id' => 'required|exists:products,id',
+                'quantity' => 'required|integer|min:1',
+                'variant_id' => 'nullable|exists:product_variants,id',
+            ]);
+
+            // Get product
+            $product = Product::findOrFail($request->product_id);
+
+            // Log product details
+            Log::info('Product Details:', [
+                'product_id' => $product->id,
+                'name' => $product->name,
+                'is_variant' => $product->is_variant
+            ]);
+
+            // Check if product is available
+            if (!$product->status) {
+                throw new \Exception('Sản phẩm không khả dụng.');
+            }
+
+            // Handle variant product
+            if ($product->is_variant) {
+                if (!$request->variant_id && empty($request->except(['product_id', 'quantity', '_token']))) {
+                    throw new \Exception('Vui lòng chọn biến thể sản phẩm.');
+                }
+
+                // If variant_id is provided, use it directly
+                if ($request->variant_id) {
+                    $variant = ProductVariant::findOrFail($request->variant_id);
+                    Log::info('Using provided variant:', [
+                        'variant_id' => $variant->id,
+                        'variant_name' => $variant->name
+                    ]);
+                } else {
+                    // Get selected attributes from request
+                    $selectedAttributes = $request->input('attributes', []);
+                    if (empty($selectedAttributes)) {
+                        $selectedAttributes = $request->except(['product_id', 'quantity', '_token']);
+                    }
+
+                    Log::info('Selected attributes:', [
+                        'attributes' => $selectedAttributes
+                    ]);
+
+                    // Find the product variant by matching selected attributes
+                    $requestAttributeValues = [];
+
+                    // Handle nested attributes array
+                    if (is_array($selectedAttributes)) {
+                        foreach ($selectedAttributes as $key => $value) {
+                            // Find the attribute value ID for this value
+                            $attributeValue = \App\Models\AttributeValue::where('value', $value)->first();
+                            if ($attributeValue) {
+                                $requestAttributeValues[] = $attributeValue->id;
+                            }
+                        }
+                    }
+
+                    // Log the request attributes
+                    // Log::info('Request attributes processed', [
+                    //     'product_id' => $request->product_id,
+                    //     'raw_attributes' => $selectedAttributes,
+                    //     'attribute_value_ids' => $requestAttributeValues
+                    // ]);
+
+                    // Find all variants for this product
+                    $variants = ProductVariant::where('product_id', $request->product_id)
+                        ->with('attributeValues')
+                        ->get();
+
+                    // Log all variants found
+                    // Log::info('All variants found', [
+                    //     'variants' => $variants->map(function ($v) {
+                    //         return [
+                    //             'id' => $v->id,
+                    //             'price' => $v->price,
+                    //             'attribute_values' => $v->attributeValues->pluck('id')->toArray()
+                    //         ];
+                    //     })->toArray()
+                    // ]);
+
+                    // Find the matching variant by checking attributes
+                    $matchingVariant = null;
+                    foreach ($variants as $variant) {
+                        // Get attribute value IDs for this variant
+                        $variantAttributeIds = $variant->attributeValues->pluck('id')->toArray();
+
+                        // Log variant check
+                        // Log::info('Checking variant', [
+                        //     'variant_id' => $variant->id,
+                        //     'variant_price' => $variant->price,
+                        //     'variant_attributes' => $variantAttributeIds,
+                        //     'request_attributes' => $requestAttributeValues
+                        // ]);
+
+                        // Check if this variant matches all the requested attributes
+                        $isMatch = true;
+                        foreach ($requestAttributeValues as $requestAttributeId) {
+                            if (!in_array($requestAttributeId, $variantAttributeIds)) {
+                                $isMatch = false;
+                                break;
+                            }
+                        }
+
+                        if ($isMatch) {
+                            $matchingVariant = $variant;
+                            Log::info('Found matching variant', [
+                                'variant_id' => $variant->id,
+                                'price' => $variant->price
+                            ]);
+                            break;
+                        }
+                    }
+
+                    $variant = $matchingVariant;
+
+                    // if (!$variant) {
+                    //     Log::error('No matching variant found for attributes:', [
+                    //         'selected_attributes' => $selectedAttributes,
+                    //         'product_id' => $product->id
+                    //     ]);
+                    //     throw new \Exception('Không tìm thấy biến thể phù hợp.');
+                    // }
+
+                    // Log::info('Selected variant', [
+                    //     'variant_id' => $variant->id,
+                    //     'price' => $variant->price,
+                    //     'request_attributes' => $requestAttributeValues
+                    // ]);
+                }
+
+                // Check variant availability
+                if (!$variant->status) {
+                    throw new \Exception('Biến thể không khả dụng.');
+                }
+
+                if ($variant->quantity < $request->quantity) {
+                    throw new \Exception('Số lượng sản phẩm không đủ.');
+                }
+
+                $price = $variant->price_sale ?? $variant->price;
+                $productVariantId = $variant->id;
+            } else {
+                // Handle non-variant product
+                if ($product->quantity < $request->quantity) {
+                    throw new \Exception('Số lượng sản phẩm không đủ.');
+                }
+
+                $price = $product->price_sale ?? $product->price;
+                $productVariantId = null;
+            }
+
+            // Calculate total price
+            $totalPrice = $price * $request->quantity;
+
+            // Apply coupon if exists
+            $coupon = session('coupon');
+            $couponDiscount = 0;
+            $couponId = null;
+
+            if ($coupon && $totalPrice >= $coupon['min_order_total']) {
+                if ($coupon['type'] === 'percentage') {
+                    $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                } else {
+                    $couponDiscount = min($totalPrice, $coupon['value']);
+                }
+                $couponId = $coupon['id'];
+            }
+
+            $finalPrice = max(0, $totalPrice - $couponDiscount);
+
+            // Create temporary cart item for checkout
+            $cartItem = new \stdClass();
+            $cartItem->product = $product;
+            $cartItem->productVariant = $productVariantId ? ProductVariant::with(['attributeValues.attribute'])->find($productVariantId) : null;
+            $cartItem->quantity = $request->quantity;
+            $cartItem->price = $price;
+
+            // Store only the selected attributes
+            $cartItem->attributes = [];
+            if ($product->is_variant && !$request->variant_id) {
+                $selectedAttributes = $request->except(['product_id', 'quantity', '_token']);
+                foreach ($selectedAttributes as $name => $value) {
+                    $cartItem->attributes[] = [
+                        'name' => $name,
+                        'value' => $value
+                    ];
+                }
+            }
+
+            // Log the final cart item data
+            Log::info('Final Cart Item Data:', [
+                'product_id' => $cartItem->product->id,
+                'variant_id' => $productVariantId,
+                'quantity' => $cartItem->quantity,
+                'price' => $cartItem->price,
+                'attributes' => $cartItem->attributes
+            ]);
+
+            // Store cart item in session for checkout
+            session(['buy_now_item' => $cartItem]);
+
+            // Log session data
+            Log::info('Session Data After Storing:', [
+                'buy_now_item' => session('buy_now_item')
+            ]);
+
+            // Redirect to checkout page
+            return redirect()->route('checkout.index', ['buy_now' => true]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Buy Now Error:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('error', $e->getMessage());
+        }
     }
 }

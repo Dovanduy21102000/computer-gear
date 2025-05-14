@@ -19,12 +19,14 @@
                             'processing' => 'info',
                             'delivered' => 'primary',
                             'completed' => 'success',
+                            'success' => 'success',
                             'cancelled' => 'danger',
                             'pending_cancel' => 'warning',
                         ];
                         $paymentText = match ($order->payment_method) {
                             'cash' => 'Thanh toán khi nhận hàng',
                             'momo' => 'Thanh toán qua MoMo',
+                            'vn_pay' => 'Thanh toán qua VN PAY',
                             default => 'Chưa rõ',
                         };
                     @endphp
@@ -44,6 +46,10 @@
 
                             @case('completed')
                                 Đã giao
+                            @break
+
+                            @case('success')
+                                Đã nhận hàng
                             @break
 
                             @case('pending_cancel')
@@ -66,41 +72,64 @@
                     <p><strong>Tổng tiền:</strong> <span
                             class="text-danger h5">{{ number_format($order->final_price, 0, ',', '.') }}₫</span></p>
 
-                    @if (in_array($order->status, ['pending', 'processing']))
-                        <div id="cancel-section" class="mt-3">
-                            <button class="btn btn-outline-danger" onclick="toggleCancelForm()">❌ Huỷ đơn hàng</button>
-
-                            <form id="cancel-form" action="{{ route('client.orders.cancel', $order->code) }}"
-                                method="POST" class="mt-3 d-none">
+                            @if (in_array($order->status, ['pending', 'processing']))
+                            <div id="cancel-section" class="mt-3">
+                                <button class="btn btn-outline-danger" onclick="toggleCancelForm()">❌ Huỷ đơn hàng</button>
+                        
+                                <form id="cancel-form" action="{{ route('client.orders.cancel', $order->code) }}"
+                                    method="POST" class="mt-3 d-none">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="form-group">
+                                        <label for="cancel_reason"><strong>Lý do huỷ đơn hàng:</strong></label>
+                                        <textarea name="cancel_reason" id="cancel_reason" class="form-control" rows="3" required
+                                            placeholder="Nhập lý do..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger">Xác nhận huỷ</button>
+                                    <button type="button" class="btn btn-secondary ml-2" onclick="toggleCancelForm()">Huỷ bỏ</button>
+                                </form>
+                            </div>
+                        
+                            <script>
+                                function toggleCancelForm() {
+                                    const form = document.getElementById('cancel-form');
+                                    form.classList.toggle('d-none');
+                                }
+                            </script>
+                        @endif
+                        
+                        @if ($order->status === 'completed')
+                            <form action="{{ route('client.orders.confirmReceived', $order->code) }}" method="POST" class="mt-3">
                                 @csrf
                                 @method('PUT')
-                                <div class="form-group">
-                                    <label for="cancel_reason"><strong>Lý do huỷ đơn hàng:</strong></label>
-                                    <textarea name="cancel_reason" id="cancel_reason" class="form-control" rows="3" required
-                                        placeholder="Nhập lý do..."></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-danger">Xác nhận huỷ</button>
-                                <button type="button" class="btn btn-secondary ml-2" onclick="toggleCancelForm()">Huỷ
-                                    bỏ</button>
+                                <button type="submit" class="btn btn-success">✅ Tôi đã nhận được hàng</button>
                             </form>
-                        </div>
-
-                        <script>
-                            function toggleCancelForm() {
-                                const form = document.getElementById('cancel-form');
-                                form.classList.toggle('d-none');
-                            }
-                        </script>
-                    @endif
-                    @if ($order->status === 'delivered')
-                        <form action="{{ route('client.orders.confirmReceived', $order->code) }}" method="POST"
-                            class="mt-3">
-                            @csrf
-                            @method('PUT')
-                            <button type="submit" class="btn btn-success">✅ Tôi đã nhận được hàng</button>
-                        </form>
-                    @endif
-
+                        
+                            <div id="refuse-section" class="mt-3">
+                                <button class="btn btn-outline-danger" onclick="toggleRefuseForm()">❌ Không nhận hàng</button>
+                        
+                                <form id="refuse-form" action="{{ route('client.orders.cancel', $order->code) }}"
+                                    method="POST" class="mt-3 d-none">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="form-group">
+                                        <label for="refuse_reason"><strong>Lý do không nhận:</strong></label>
+                                        <textarea name="cancel_reason" id="refuse_reason" class="form-control" rows="3" required
+                                            placeholder="Nhập lý do..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger">Xác nhận</button>
+                                    <button type="button" class="btn btn-secondary ml-2" onclick="toggleRefuseForm()">Huỷ bỏ</button>
+                                </form>
+                            </div>
+                        
+                            <script>
+                                function toggleRefuseForm() {
+                                    const form = document.getElementById('refuse-form');
+                                    form.classList.toggle('d-none');
+                                }
+                            </script>
+                        @endif
+                        
 
                 </div>
             </div>
@@ -126,9 +155,9 @@
             <div class="table-responsive">
                 <table class="table table-bordered text-center align-middle">
                     @php
-                    $hasVariant = $order->items->contains(fn($item) => $item->product_variant_id !== null);
-                    $colspan = $hasVariant ? 4 : 3;
-                @endphp
+                        $hasVariant = $order->items->contains(fn($item) => $item->product_variant_id !== null);
+                        $colspan = $hasVariant ? 4 : 3;
+                    @endphp
 
                     <thead class="thead-light">
                         <tr>

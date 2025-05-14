@@ -1,0 +1,23 @@
+.wishlist-toggle i {
+    margin-right: 8px;
+    /* Khoảng cách giữa icon và chữ */
+}
+
+/* Trái tim mặc định: xám */
+.wishlist-icon {
+    color: #999;
+    /* xám */
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+/* Khi được yêu thích: toàn bộ trái tim màu đỏ */
+.wishlist-icon.active {
+    color: #ee4d2d;
+    
+}
+/* Text giữ nguyên màu */
+.wishlist-label {
+    color: #666;
+    font-size: 14px;
+}

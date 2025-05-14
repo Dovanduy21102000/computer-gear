@@ -53,7 +53,7 @@ class UserOrderController extends Controller
             ->firstOrFail();
 
         // Kiểm tra trạng thái đơn hàng có cho phép huỷ không
-        if (!in_array($order->status, ['pending', 'processing'])) {
+        if (!in_array($order->status, ['pending', 'processing','delivered'])) {
             return back()->with('error', 'Không thể huỷ đơn hàng này.');
         }
 
@@ -76,11 +76,11 @@ class UserOrderController extends Controller
     {
         $order = Order::where('code', $code)->firstOrFail();
 
-        if ($order->status !== 'delivered') {
+        if ($order->status !== 'completed') {
             return back()->with('error', 'Chỉ có thể xác nhận đơn hàng đang giao.');
         }
 
-        $order->status = 'completed';
+        $order->status = 'success';
         $order->save();
 
         return back()->with('success', 'Cảm ơn bạn đã xác nhận đã nhận hàng!');

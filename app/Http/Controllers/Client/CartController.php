@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Events\CartUpdated;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Cart;
@@ -130,34 +131,43 @@ class CartController extends Controller
             })->toArray()
         ]);
 
-        // Filter out invalid products
-        $validCartItems = $processedItems->filter(function ($item) {
+        // Filter out invalid products and collect IDs of invalid items
+        $invalidItemIds = collect();
+        $validCartItems = $processedItems->filter(function ($item) use ($invalidItemIds) {
+            $isValid = true;
+
             // Check if product exists and is active
             if (!$item->product || !$item->product->status) {
-                return false;
+                $isValid = false;
             }
 
             // If product has variants, check variant status
-            if (isset($item->variants)) {
+            if ($isValid && isset($item->variants)) {
                 foreach ($item->variants as $variant) {
                     if (!$variant->status) {
-                        return false;
+                        $isValid = false;
+                        break;
                     }
                 }
             }
 
-            return true;
+            if (!$isValid) {
+                $invalidItemIds->push($item->id);
+            }
+
+            return $isValid;
         });
 
-        // If any items were removed, update the cart
-        if ($validCartItems->count() < $processedItems->count()) {
+        // If any items were invalid, delete them from the database
+        if ($invalidItemIds->isNotEmpty()) {
+            CartItem::whereIn('id', $invalidItemIds)->delete();
             session()->flash('warning', 'Một số sản phẩm không còn khả dụng đã được xóa khỏi giỏ hàng.');
         }
 
         $cartItems = $validCartItems;
 
         $template = 'fontend.cart.index';
-        return view('fontend.layout', compact('template', 'cart', 'cartItems'));
+        return view('fontend.layout', compact('template', 'cart', 'cartItems', 'userId'));
     }
 
     // Add Product to Cart
@@ -291,7 +301,15 @@ class CartController extends Controller
                 // Update quantity if variant exists
                 $newQuantity = $existingItem->quantity + $request->quantity;
                 if ($newQuantity > $variant->quantity) {
-                    return redirect()->back()->with('error', 'Số lượng sản phẩm vượt quá tồn kho.');
+
+                    $payload = [
+                        'error' => true,
+                        'message' => 'Số lượng sản phẩm vượt quá tồn kho.',
+                    ];
+                    if ($request->ajax()) {
+                        return response()->json($payload, 200);
+                    }
+                    return redirect()->back()->with('error', $payload['message']);
                 }
                 $existingItem->update(['quantity' => $newQuantity]);
             } else {
@@ -322,7 +340,14 @@ class CartController extends Controller
                 // Update quantity if item exists
                 $newQuantity = $existingItem->quantity + $request->quantity;
                 if ($newQuantity > $product->quantity) {
-                    return redirect()->back()->with('error', 'Số lượng sản phẩm vượt quá tồn kho.');
+                    $payload = [
+                        'error' => true,
+                        'message' => 'Số lượng sản phẩm vượt quá tồn kho.',
+                    ];
+                    if ($request->ajax()) {
+                        return response()->json($payload, 200);
+                    }
+                    return redirect()->back()->with('error', $payload['message']);
                 }
                 $existingItem->update(['quantity' => $newQuantity]);
             } else {
@@ -335,48 +360,94 @@ class CartController extends Controller
                 ]);
             }
         }
+        event(new CartUpdated($userId, $cart->items()->count()));
+        $payload = [
+            'success'   => true,
+            'message'   => 'Sản phẩm đã được thêm vào giỏ hàng.',
+            'cartCount' => $cart->items()->count() // Số lượng giỏ hàng mới
+        ];
 
-        return redirect()->back()->with('success', 'Sản phẩm đã được thêm vào giỏ hàng.');
+        if ($request->ajax()) {
+            return response()->json($payload, 200);
+        }
+
+        return redirect()->back()->with('success', $payload['message']);
+
+        //     return response()->json([
+        //     'success' => true,
+        //     'message' => 'Sản phẩm đã được thêm vào giỏ hàng.',
+        //     'cartCount' => $cart->items()->count() // Số lượng giỏ hàng mới
+        // ]);
     }
 
     // Update Cart Item Quantity
     public function update(Request $request)
     {
         if (!$request->has('cart') || !is_array($request->cart)) {
-            return back()->with('error', 'Không có mục giỏ hàng nào để cập nhật.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có mục giỏ hàng nào để cập nhật.'
+            ], 400);
         }
 
-        foreach ($request->cart as $cartItem) {
-            $cartItemModel = CartItem::where('id', $cartItem['id'])->first();
+        try {
+            foreach ($request->cart as $cartItem) {
+                $cartItemModel = CartItem::where('id', $cartItem['id'])->first();
 
-            if ($cartItemModel) {
+                if (!$cartItemModel) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Không tìm thấy sản phẩm trong giỏ hàng.'
+                    ], 404);
+                }
+
                 $newQuantity = (int) $cartItem['quantity'];
 
                 // Check if this is a variant product
                 if ($cartItemModel->product_variant_id) {
                     $variant = ProductVariant::find($cartItemModel->product_variant_id);
                     if (!$variant) {
-                        return back()->with('error', 'Biến thể sản phẩm không tồn tại.');
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Biến thể sản phẩm không tồn tại.'
+                        ], 404);
                     }
 
                     // Check stock limit for variant
                     if ($newQuantity > $variant->quantity) {
-                        return back()->with('error', 'Số lượng sản phẩm biến thể không đủ. Số lượng còn lại: ' . $variant->quantity);
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Số lượng sản phẩm biến thể không đủ. Số lượng còn lại: ' . $variant->quantity
+                        ], 400);
                     }
                 } else {
                     $product = Product::findOrFail($cartItemModel->product_id);
                     // Check stock limit for regular product
                     if ($newQuantity > $product->quantity) {
-                        return back()->with('error', 'Số lượng sản phẩm không đủ. Số lượng còn lại: ' . $product->quantity);
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Số lượng sản phẩm không đủ. Số lượng còn lại: ' . $product->quantity
+                        ], 400);
                     }
                 }
 
                 $cartItemModel->quantity = $newQuantity;
                 $cartItemModel->save();
             }
-        }
 
-        return back()->with('success', 'Cập nhật giỏ hàng thành công!');
+            // Broadcast cart update event
+            event(new CartUpdated(Auth::id(), Cart::where('user_id', Auth::id())->first()->items()->count()));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật giỏ hàng thành công!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function remove(Request $request, $id)

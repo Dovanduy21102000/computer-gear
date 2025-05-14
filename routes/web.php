@@ -3,13 +3,14 @@
 use App\Http\Controllers\Admin\AlbumImageController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\AttributeValueController;
+use App\Http\Controllers\Admin\AdminChatController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\ChatController;
+use App\Http\Controllers\Client\ChatController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -37,8 +38,9 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SpecificationController;
+use App\Http\Controllers\Client\ChatController as ClientChatController;
 use App\Http\Controllers\Client\UserOrderController;
-use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\Client\WishlistController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -65,7 +67,6 @@ Route::prefix('admin')->group(function () {
         Route::get('orders/cancel-tabs', [OrderController::class, 'cancelTabs'])->name('orders.cancelTabs');
         Route::put('orders/{id}/approve-cancel', [OrderController::class, 'approveCancel'])->name('orders.cancel-approve');
         Route::put('orders/{id}/reject-cancel', [OrderController::class, 'rejectCancel'])->name('orders.cancel-reject');
-        //
 
         // Các route resource dành cho admin
         $objects = [
@@ -79,7 +80,6 @@ Route::prefix('admin')->group(function () {
             'posts'             => PostController::class,
             'users'             => UserController::class,
             'orders'            => OrderController::class,
-            'orderitems'        => OrderItemController::class,
             'contacts'          => ContactController::class,
             'productvariants'   => ProductVariantController::class,
             'category_post'     => CategoryPostController::class,
@@ -113,6 +113,7 @@ Route::prefix('admin')->group(function () {
         });
 
 
+
         Route::prefix('products/{product_id}/images')->name('backend.product_images.')->group(function () {
             // Trang danh sách ảnh
             Route::get('/', [ProductImageController::class, 'index'])->name('index');
@@ -139,8 +140,11 @@ Route::prefix('admin')->group(function () {
         Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
         Route::get('/comments/{id}/show', [CommentController::class, 'show'])->name('comments.show');
 
-        Route::post('/chat/send', [ChatController::class, 'sendMessage']);
-        Route::get('/chat/messages/{user_id}', [ChatController::class, 'getMessages']);
+        //Chat realtime
+        Route::get('/chats', [AdminChatController::class, 'index'])->name('chats.index');
+        Route::get('/chat/users', [AdminChatController::class, 'getUsers']);
+        Route::get('/chat/messages/{userId}', [AdminChatController::class, 'getMessages']);
+        Route::post('/chat/send', [AdminChatController::class, 'sendMessage']);
     });
     //Biêns thể
     Route::prefix('products/{product}/variants')->group(function () {
@@ -158,17 +162,17 @@ Route::prefix('admin')->group(function () {
 
 // Client Routes
 Route::middleware(['web'])->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login.form'); 
-    Route::post('login', [LoginController::class, 'login'])->name('login'); 
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout'); 
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login.form');
+    Route::post('login', [LoginController::class, 'login'])->name('login');
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register.form'); 
-    Route::post('register', [RegisterController::class, 'register'])->name('register'); 
+    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register.form');
+    Route::post('register', [RegisterController::class, 'register'])->name('register');
 
-    Route::get('forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request'); 
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request');
     Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
     Route::get('reset_password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-    Route::post('reset_password', [ResetPasswordController::class, 'reset'])->name('password.update'); 
+    Route::post('reset_password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
@@ -214,10 +218,12 @@ Route::middleware(['web'])->group(function () {
     Route::get('/orders', [UserOrderController::class, 'index'])->name('client.orders.index');
     Route::get('/orders/{code}', [UserOrderController::class, 'show'])->name('client.orders.show');
     Route::put('/orders/{code}/cancel', [UserOrderController::class, 'cancel'])->name('client.orders.cancel');
+
     Route::put('/orders/{code}/confirm-received', [UserOrderController::class, 'confirmReceived'])->name('client.orders.confirmReceived');
-    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
-    Route::get('/chat/messages/{receiverId}', [ChatController::class, 'messages'])->name('chat.messages');
+    Route::post('/chat/send', [ClientChatController::class, 'send'])->name('chat.send');
+    Route::get('/chat/messages/{receiverId}', [ClientChatController::class, 'messages'])->name('chat.messages');
     //
+
 });
 
 Route::get('/api/districts/{province_id}', function ($province_id) {
@@ -235,12 +241,14 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout/method', [CheckoutController::class, 'checkoutMethod'])->name('checkout.method');
 Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
 Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
-Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('applyCoupon');
-Route::get('/remove-coupon', [CheckoutController::class, 'removeCoupon'])->name('removeCoupon');
+Route::post('/checkout/buy-now', [CheckoutController::class, 'buyNow'])->name('checkout.buy-now');
 
 
 Route::post('/vnpay/create', [VNPayController::class, 'createPayment'])->name('vnpay.create');
-Route::get('/vnpay/return', [VNPayController::class, 'paymentReturn'])->name('vnpay.return');
+Route::get('/vnpay/return', [VNPayController::class, 'handleReturn'])->name('vnpay.return');
+Route::get('/vnpay/test-hash', [VNPayController::class, 'testHash']);
+Route::get('/vnpay/test-payment', [VNPayController::class, 'testPayment']);
+Route::get('/vnpay/debug', [VNPayController::class, 'debugPayment']);
 Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 
 Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
@@ -254,3 +262,17 @@ Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('c
 
 //
 Route::get('/comments/{productId}', [CommentController::class, 'getComments']);
+
+
+// sản phẩm yêu thích
+Route::middleware('auth')->group(function () {
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/{productId}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+
+});
+
+// Coupon routes
+Route::post('/apply-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'applyCoupon'])->name('coupon.apply');
+Route::post('/remove-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'removeCoupon'])->name('coupon.remove');
+

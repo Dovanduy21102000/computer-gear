@@ -15,12 +15,15 @@
             <div class="col-lg-12">
 
                 @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2" style="font-size:1.5rem;"></i>
+                        <div>
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                     </div>
                 @endif
                 <div class="card">
@@ -38,7 +41,7 @@
                                     <select class="form-select" id="category_id" name="category_id" required>
                                         <option value="">Chọn danh mục</option>
                                         @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -51,7 +54,7 @@
                                     <select class="form-select" id="brand_id" name="brand_id" required>
                                         <option value="">Chọn thương hiệu</option>
                                         @foreach ($brands as $brand)
-                                            <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                                            <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -61,7 +64,7 @@
                             <div class="row mb-3">
                                 <label for="name" class="col-sm-2 col-form-label">Tên sản phẩm</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="name" name="name" required>
+                                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required>
                                 </div>
                             </div>
 
@@ -69,7 +72,7 @@
                             <div class="row mb-3">
                                 <label for="slug" class="col-sm-2 col-form-label">Slug</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="slug" name="slug">
+                                    <input type="text" class="form-control" id="slug" name="slug" value="{{ old('slug') }}">
                                 </div>
                             </div>
 
@@ -77,7 +80,7 @@
                             <div class="row mb-3">
                                 <label for="sku" class="col-sm-2 col-form-label">SKU</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="sku" name="sku" required>
+                                    <input type="text" class="form-control" id="sku" name="sku" value="{{ old('sku') }}" required>
                                 </div>
                             </div>
 
@@ -86,6 +89,7 @@
                                 <label for="thumbnail" class="col-sm-2 col-form-label">Ảnh đại diện</label>
                                 <div class="col-sm-10">
                                     <input type="file" class="form-control" id="thumbnail" name="thumbnail">
+                                    <img id="thumb-preview" style="max-width:120px; margin-top:10px; display:none;" />
                                 </div>
                             </div>
                             <!-- Có biến thể -->
@@ -103,7 +107,7 @@
                             <div class="row mb-3">
                                 <label for="short_description" class="col-sm-2 col-form-label">Mô tả ngắn</label>
                                 <div class="col-sm-10">
-                                    <textarea id="ck_short_description" name="short_description" class="form-control" rows="3"></textarea>
+                                    <textarea id="ck_short_description" name="short_description" class="form-control" rows="3">{{ old('short_description') }}</textarea>
                                 </div>
                             </div>
 
@@ -111,7 +115,7 @@
                             <div class="row mb-3">
                                 <label for="description" class="col-sm-2 col-form-label">Mô tả chi tiết</label>
                                 <div class="col-sm-10">
-                                    <textarea id="ck_description" name="description" class="form-control" rows="5"></textarea>
+                                    <textarea id="ck_description" name="description" class="form-control" rows="5">{{ old('description') }}</textarea>
                                 </div>
                             </div>
 
@@ -166,8 +170,7 @@
                             <div class="row mb-3">
                                 <label for="price" class="col-sm-2 col-form-label">Giá</label>
                                 <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="price" name="price"
-                                        >
+                                    <input type="number" class="form-control" id="price" name="price" value="{{ old('price') }}">
                                 </div>
                             </div>
 
@@ -175,7 +178,7 @@
                             <div class="row mb-3">
                                 <label for="price_sale" class="col-sm-2 col-form-label">Giá khuyến mãi</label>
                                 <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="price_sale" name="price_sale">
+                                    <input type="number" class="form-control" id="price_sale" name="price_sale" value="{{ old('price_sale') }}">
                                 </div>
                             </div>
 
@@ -183,7 +186,7 @@
                             <div class="row mb-3" id="quantity-section">
                                 <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
                                 <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="quantity" name="quantity">
+                                    <input type="number" class="form-control" id="quantity" name="quantity" value="{{ old('quantity') }}">
                                 </div>
                             </div>
 
@@ -192,8 +195,8 @@
                                 <label for="status" class="col-sm-2 col-form-label">Trạng thái</label>
                                 <div class="col-sm-10">
                                     <select class="form-select" id="status" name="status" required>
-                                        <option value="1">Kích hoạt</option>
-                                        <option value="0">Vô hiệu hóa</option>
+                                        <option value="1" {{ old('status', '1') == '1' ? 'selected' : '' }}>Kích hoạt</option>
+                                        <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Vô hiệu hóa</option>
                                     </select>
                                 </div>
                             </div>
@@ -202,21 +205,21 @@
 
                             <!-- Phần Nhập Liệu Cho Biến Thể -->
                             <div id="variants-section" style="display: none;">
-                                <h5 class="card-title">Thông tin biến thể</h5>
+                                <h5 class="card-title text-primary"><i class="bi bi-layers me-1"></i> Thông tin biến thể</h5>
                                 <div id="variants">
-                                    <div class="variant mb-4">
+                                    <div class="variant mb-4 bg-white shadow-sm p-3 rounded">
                                         <div class="row mb-3">
                                             <label for="variants[0][sku]" class="col-sm-2 col-form-label">SKU Biến
                                                 thể</label>
                                             <div class="col-sm-10">
-                                                <input type="text" class="form-control" name="variants[0][sku]">
+                                                <input type="text" class="form-control" name="variants[0][sku]" value="{{ old('variants.0.sku') }}">
                                             </div>
                                         </div>
                                         <div class="row mb-3">
                                             <label for="variants[0][price]" class="col-sm-2 col-form-label">Giá Biến
                                                 thể</label>
                                             <div class="col-sm-10">
-                                                <input type="number" class="form-control" name="variants[0][price]">
+                                                <input type="number" class="form-control" name="variants[0][price]" value="{{ old('variants.0.price') }}">
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -224,7 +227,7 @@
                                                 lượng Biến thể</label>
                                             <div class="col-sm-10">
                                                 <input type="number" class="form-control"
-                                                    name="variants[0][quantity]">
+                                                    name="variants[0][quantity]" value="{{ old('variants.0.quantity') }}">
                                             </div>
                                         </div>
                                         <!-- Có biến thể -->
@@ -241,7 +244,8 @@
                                                                     <input class="form-check-input" type="checkbox"
                                                                         id="attribute_{{ $attribute->id }}_{{ $value->id }}"
                                                                         name="variants[0][attributes][{{ $attribute->id }}]"
-                                                                        value="{{ $value->id }}">
+                                                                        value="{{ $value->id }}"
+                                                                        @if (in_array($value->id, old('variants.0.attributes', []))) checked @endif>
                                                                     <label class="form-check-label"
                                                                         for="attribute_{{ $attribute->id }}_{{ $value->id }}">
                                                                         {{ $value->value }}
@@ -255,15 +259,14 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-secondary" onclick="addVariant()">Thêm biến
-                                    thể</button>
+                                <button type="button" class="btn btn-secondary" onclick="addVariant()"><i class="bi bi-plus-circle me-1"></i> Thêm biến thể</button>
                             </div>
 
                             <!-- Nút Submit -->
                             <div class="row mb-3">
                                 <div class="col-sm-10 offset-sm-2">
-                                    <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
-                                    <a href="{{ route('products.index') }}" class="btn btn-secondary">Hủy bỏ</a>
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i> Thêm sản phẩm</button>
+                                    <a href="{{ route('products.index') }}" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i> Hủy bỏ</a>
                                 </div>
                             </div>
                         </form><!-- End Form Thêm Mới Sản Phẩm -->
@@ -393,7 +396,8 @@
                                                                     <input class="form-check-input" type="checkbox"
                                                                         id="attribute_{{ $value->id }}"
                                                                         name="variants[0][attributes][]"
-                                                                        value="{{ $value->id }}">
+                                                                        value="{{ $value->id }}"
+                                                                        @if (in_array($value->id, old('variants.0.attributes', []))) checked @endif>
                                                                     <label class="form-check-label"
                                                                         for="attribute_{{ $value->id }}">
                                                                         {{ $value->value }}
@@ -409,4 +413,15 @@
         variantsDiv.appendChild(newVariant);
         variantCount++;
     }
+
+    document.getElementById('thumbnail').addEventListener('change', function(e) {
+        const [file] = this.files;
+        const preview = document.getElementById('thumb-preview');
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    });
 </script>
