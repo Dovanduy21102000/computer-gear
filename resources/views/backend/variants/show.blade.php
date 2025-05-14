@@ -27,6 +27,7 @@
                               <p><strong>Danh mục:</strong> {{ $variant->product->category->name ?? 'Không có' }}</p>
                               <p><strong>Thương hiệu:</strong> {{ $variant->product->brand->name ?? 'Không có' }}</p>
                               <p><strong>Giá:</strong> {{ number_format($variant->price, 0, ',', '.') }} VNĐ</p>
+                              <p><strong>Giá giảm giá:</strong> {{ number_format($variant->price_sale, 0, ',', '.') }} VNĐ</p>
                               <p><strong>Số lượng:</strong> {{ $variant->quantity }}</p>
                               <p><strong>Trạng thái:</strong>
                                   @if ($variant->status == 1)
