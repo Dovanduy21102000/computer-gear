@@ -77,29 +77,29 @@ class ProductClientController extends Controller
             });
         }
         $brands = $brandsQuery->get();
-        // $newProducts = $this->getNewProducts();
+        $newProduct = $this->getNewProduct();
 
         $template = 'fontend.products.index';
 
 
-        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category', 'newProducts'));
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category', 'newProduct'));
     }
 
-    // public function getNewProducts()
-    // {
-    //     $activeCategoryBrand = function ($query) {
-    //         $query->where('is_active', 1);
-    //     };
+    public function getNewProduct()
+    {
+        $activeCategoryBrand = function ($query) {
+            $query->where('is_active', 1);
+        };
 
-    //     // Lấy sản phẩm mới nhất
-    //     return Product::whereHas('category', $activeCategoryBrand)
-    //         ->whereHas('brand', $activeCategoryBrand)
-    //         ->where('status', true)
-    //         ->orderByDesc('created_at')
-    //         ->inRandomOrder()
-    //         ->take(5)
-    //         ->get();
-    // }
+        // Lấy sản phẩm mới nhất
+        return Product::whereHas('category', $activeCategoryBrand)
+            ->whereHas('brand', $activeCategoryBrand)
+            ->where('status', true)
+            ->orderByDesc('created_at')
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
+    }
 
 
 

@@ -158,25 +158,25 @@
                         });
                     </script>
                 </div>
-                {{-- <div class="mb-8">
+                <div class="mb-8">
                     <div class="border-bottom border-color-1 mb-5">
                         <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">
                             Sản phẩm mới nhất
                         </h3>
                     </div>
                     <ul class="list-unstyled">
-                        @foreach ($newProducts as $product)
+                        @foreach ($newProduct as $product)
                             <li class="mb-4">
                                 <div class="row">
                                     <div class="col-auto">
-                                        <a href="{{ route('product.show', $product->slug) }}" class="d-block width-75">
-                                            <img class="img-fluid" src="{{ asset('storage/' . $product->image) }}"
+                                        <a href="{{ route('client.products.detail', $product->slug) }}" class="d-block width-75">
+                                            <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
                                                 alt="{{ $product->name }}">
                                         </a>
                                     </div>
                                     <div class="col">
                                         <h3 class="text-lh-1dot2 font-size-14 mb-0">
-                                            <a href="{{ route('product.show', $product->slug) }}">
+                                            <a href="{{ route('client.products.detail', $product->slug) }}">
                                                 {{ $product->name }}
                                             </a>
                                         </h3>
@@ -199,7 +199,7 @@
                             </li>
                         @endforeach
                     </ul>
-                </div> --}}
+                </div>
 
             </div>
 
