@@ -166,7 +166,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 col-xl-4 mb-md-6 mb-lg-0">
-                    <div class="mb-2">
+                    <div class="mb-1">
                         <a href="#" class="font-size-12 text-gray-5 mb-2 d-inline-block">
                             {{ $product->category->name ?? 'Danh mục' }}</a>
                         <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
@@ -208,7 +208,7 @@
                             <p class="mb-1 fw-bold">✔ Windows bản quyền tích hợp.</p>
                         </div>
 
-                        <div class="mb-2">
+                        <div class="mb-1">
                             <p>{!! $product->short_description !!}</p>
                         </div>
 
@@ -260,38 +260,36 @@
                             </div>
 
                             <!-- End Quantity -->
+                            @php
+                                $attributes = [];
 
-                        </div>
-                        @php
-$attributes = [];
+                                foreach ($variants as $variant) {
+                                    foreach ($variant->attributeValues as $attributeValue) {
+                                        if (isset($attributeValue->attribute)) {
+                                            $attributeName = trim($attributeValue->attribute->name);
+                                            $attributeValueText = trim($attributeValue->value);
 
-foreach ($variants as $variant) {
-    foreach ($variant->attributeValues as $attributeValue) {
-        if (isset($attributeValue->attribute)) {
-            $attributeName = trim($attributeValue->attribute->name);
-            $attributeValueText = trim($attributeValue->value);
-
-            // Lưu các giá trị vào nhóm thuộc tính
-            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
-        }
-    }
-}
-                        @endphp
+                                            // Lưu các giá trị vào nhóm thuộc tính
+                                            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
+                                        }
+                                    }
+                                }
+                            @endphp
 
                             @php
-$attributes = [];
+                                $attributes = [];
 
-foreach ($variants as $variant) {
-    foreach ($variant->attributeValues as $attributeValue) {
-        if (isset($attributeValue->attribute)) {
-            $attributeName = trim($attributeValue->attribute->name);
-            $attributeValueText = trim($attributeValue->value);
+                                foreach ($variants as $variant) {
+                                    foreach ($variant->attributeValues as $attributeValue) {
+                                        if (isset($attributeValue->attribute)) {
+                                            $attributeName = trim($attributeValue->attribute->name);
+                                            $attributeValueText = trim($attributeValue->value);
 
-            // Lưu các giá trị vào nhóm thuộc tính
-            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
-        }
-    }
-}
+                                            // Lưu các giá trị vào nhóm thuộc tính
+                                            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
+                                        }
+                                    }
+                                }
                             @endphp
 
 
@@ -332,6 +330,8 @@ foreach ($variants as $variant) {
                                     @include('fontend.component.wishlist-button', ['product' => $product])
                                 </div>
                             </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -456,9 +456,9 @@ foreach ($variants as $variant) {
                                     <ul class="list-unstyled">
                                         @for ($i = 5; $i >= 1; $i--)
                                             @php
-    $ratingCount = $ratingsCount[$i] ?? 0;
-    $percentage =
-        $totalReviews > 0 ? ($ratingCount / $totalReviews) * 100 : 0;
+                                                $ratingCount = $ratingsCount[$i] ?? 0;
+                                                $percentage =
+                                                    $totalReviews > 0 ? ($ratingCount / $totalReviews) * 100 : 0;
                                             @endphp
                                             <li class="py-1">
                                                 <a class="row align-items-center mx-gutters-2 font-size-1"

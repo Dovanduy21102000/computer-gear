@@ -22,7 +22,8 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         // Khởi tạo query để lấy sản phẩm
-        $query = Product::with(['category', 'brand', 'variants.attributeValues.attribute']);
+        $query = Product::with(['category', 'brand', 'variants.attributeValues.attribute'])->latest('id');
+
 
         // Lọc theo danh mục
         if ($request->has('category') && $request->category != '') {
@@ -71,7 +72,7 @@ class ProductController extends Controller
         'sku' => 'required|string|max:255|unique:products',
         'name' => 'required|string|max:255',
         'slug' => 'nullable|string|max:255|unique:products',
-        'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         'short_description' => 'nullable|string',
         'description' => 'nullable|string',
         'price' => 'required|numeric',
@@ -175,7 +176,7 @@ class ProductController extends Controller
             'sku' => 'required|string|max:255|unique:products',
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:products',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
             'price' => 'required|numeric',

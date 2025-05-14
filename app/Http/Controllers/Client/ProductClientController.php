@@ -22,7 +22,6 @@ class ProductClientController extends Controller
     {
         $query = Product::where('status', true);
         $category = null;
-
         // Nếu có truyền category dạng slug (?category=printer)
         if ($request->filled('category')) {
             $category = Category::where('slug', $request->category)
@@ -78,11 +77,29 @@ class ProductClientController extends Controller
             });
         }
         $brands = $brandsQuery->get();
+        // $newProducts = $this->getNewProducts();
 
         $template = 'fontend.products.index';
 
-        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category'));
+
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category', 'newProducts'));
     }
+
+    // public function getNewProducts()
+    // {
+    //     $activeCategoryBrand = function ($query) {
+    //         $query->where('is_active', 1);
+    //     };
+
+    //     // Lấy sản phẩm mới nhất
+    //     return Product::whereHas('category', $activeCategoryBrand)
+    //         ->whereHas('brand', $activeCategoryBrand)
+    //         ->where('status', true)
+    //         ->orderByDesc('created_at')
+    //         ->inRandomOrder()
+    //         ->take(5)
+    //         ->get();
+    // }
 
 
 
@@ -97,9 +114,9 @@ class ProductClientController extends Controller
             ->with(['attributeValues.attribute'])
             ->get();
 
-            $productImage = ProductImage::where('product_id', $product->id)->first();
-            $images = $productImage ? $productImage->images : [];
-            
+        $productImage = ProductImage::where('product_id', $product->id)->first();
+        $images = $productImage ? $productImage->images : [];
+
 
         // Lấy các sản phẩm liên quan
         $relatedProducts = Product::where('category_id', $product->category_id)
@@ -174,37 +191,54 @@ class ProductClientController extends Controller
             'quantity' => $variant->quantity ?? 0,
         ]);
     }
+    private function getAllCategoryIds($category)
+    {
+        $ids = [$category->id];
+
+        foreach ($category->children as $child) {
+            $ids = array_merge($ids, $this->getAllCategoryIds($child));
+        }
+
+        return $ids;
+    }
 
     public function categoryProducts($slug)
     {
-        // Lấy danh mục theo slug
-        $category = Category::where('slug', $slug)->firstOrFail();
+        $category = Category::with('children')->where('slug', $slug)->firstOrFail();
 
-        // Lấy danh sách sản phẩm thuộc danh mục này
-        $products = Product::where('category_id', $category->id)
-            ->where('status', true)
-            ->paginate(20);
+        // Lấy tất cả ID của danh mục cha + con
+        $categoryIds = $this->getAllCategoryIds($category);
 
-        // Lấy danh sách danh mục cha
-        $categories = Category::where('is_active', true)->whereNull('parent_id')->with('children')->get();
-
-        // Lấy danh sách sản phẩm thuộc danh mục này, với bộ lọc nếu có thương hiệu
-        $productsQuery = Product::where('category_id', $category->id)
+        // Truy vấn sản phẩm theo nhiều category_id
+        $productsQuery = Product::whereIn('category_id', $categoryIds)
             ->where('status', true);
 
-        // Lấy danh sách thương hiệu (CẦN DÒNG NÀY ĐỂ TRÁNH LỖI Undefined variable $brands)
-        $brands = Brand::where('is_active', 1)->get();
-        // Nếu có thương hiệu trong request, lọc theo thương hiệu
+        // Lọc theo thương hiệu nếu có
         if ($brandIds = request('brand')) {
             $productsQuery->whereIn('brand_id', $brandIds);
         }
 
-        // Lấy các sản phẩm theo bộ lọc
         $products = $productsQuery->paginate(20);
+
+        // Dữ liệu khác
+        $brands = Brand::where('is_active', 1)->get();
+        $categories = Category::with(['children.products', 'products'])
+            ->whereNull('parent_id')
+            ->get();
+
+        foreach ($categories as $category) {
+            $category->total_products = $category->products->count()
+                + $category->children->sum(fn($child) => $child->products->count());
+
+            foreach ($category->children as $child) {
+                $child->total_products = $child->products->count();
+            }
+        }
         $template = 'fontend.products.index';
 
-        return view('fontend.layout', compact('template', 'products', 'categories', 'category', 'brands'));
+        return view('fontend.layout', compact('template', 'products', 'category', 'categories', 'brands'));
     }
+
 
     public function showByBrand($brandSlug)
     {
@@ -265,6 +299,8 @@ class ProductClientController extends Controller
             $brandIds = (array) $request->brand;
             $productsQuery->whereIn('brand_id', $brandIds);
         }
+
+
 
         $products = $productsQuery->paginate(20);
 

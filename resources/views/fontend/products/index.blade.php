@@ -59,46 +59,59 @@
                             </a>
 
                             <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
-                                <ul id="sidebarNav1" class="list-unstyled dropdown-list">
-                                    <!-- Danh mục -->
-                                    @foreach ($categories as $category)
-                                        <li>
-                                            @php
-    $query = request()->all();
-    $query['category'] = $category->slug;
-                                            @endphp
-                                            <a class="dropdown-item"
-                                                href="{{ route('client.products.filter', $query) }}">
-                                                {{ $category->name }}
-                                                <span class="text-gray-25 font-size-12 font-weight-normal">
-                                                    ({{ $category->products()->count() }})
-                                                </span>
-                                            </a>
+                                <ul id="sidebarNav" class="list-unstyled mb-0">
+                                    <li class="nav-item">
+                                        <a class="dropdown-toggle text-uppercase font-weight-bold d-block p-3 bg-light rounded"
+                                            href="javascript:;" role="button" data-toggle="collapse"
+                                            aria-expanded="false" aria-controls="sidebarNav1Collapse"
+                                            data-target="#sidebarNav1Collapse">
+                                            <i class="bi bi-list"></i> Tất cả danh mục
+                                        </a>
 
-                                            @if ($category->children->count())
-                                                <ul class="list-unstyled dropdown-list">
-                                                    @foreach ($category->children as $child)
+                                        <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
+                                            <ul id="sidebarNav1" class="list-unstyled pl-3">
+                                                <!-- Danh mục -->
+                                                @foreach ($categories as $category)
+                                                    <li class="nav-item">
                                                         @php
-            $query = request()->all();
-            $query['category'] = $child->slug;
+                                                            $query = request()->all();
+                                                            $query['category'] = $category->slug;
                                                         @endphp
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('client.products.filter', $query) }}">
-                                                                {{ $child->name }}
-                                                                <span
-                                                                    class="text-gray-25 font-size-12 font-weight-normal">
-                                                                    ({{ $child->products()->count() }})
-                                                                </span>
-                                                            </a>
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                            @endif
-                                        </li>
-                                    @endforeach
+                                                        <a class="dropdown-item d-flex justify-content-between align-items-center"
+                                                            href="{{ route('client.products.filter', $query) }}">
+                                                            <span>{{ $category->name }}</span>
+                                                            <span class="badge badge-pill badge-secondary">
+                                                                {{ $category->products()->count() }}
+                                                            </span>
+                                                        </a>
 
+                                                        @if ($category->children->count())
+                                                            <ul class="list-unstyled pl-3">
+                                                                @foreach ($category->children as $child)
+                                                                    @php
+                                                                        $query = request()->all();
+                                                                        $query['category'] = $child->slug;
+                                                                    @endphp
+                                                                    <li class="nav-item">
+                                                                        <a class="dropdown-item d-flex justify-content-between align-items-center"
+                                                                            href="{{ route('client.products.filter', $query) }}">
+                                                                            <span>{{ $child->name }}</span>
+                                                                            <span
+                                                                                class="badge badge-pill badge-secondary">
+                                                                                {{ $child->products()->count() }}
+                                                                            </span>
+                                                                        </a>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </li>
                                 </ul>
+
                             </div>
 
                         </li>
@@ -145,12 +158,51 @@
                         });
                     </script>
                 </div>
-
-
-
-
+                {{-- <div class="mb-8">
+                    <div class="border-bottom border-color-1 mb-5">
+                        <h3 class="section-title section-title__sm mb-0 pb-2 font-size-18">
+                            Sản phẩm mới nhất
+                        </h3>
+                    </div>
+                    <ul class="list-unstyled">
+                        @foreach ($newProducts as $product)
+                            <li class="mb-4">
+                                <div class="row">
+                                    <div class="col-auto">
+                                        <a href="{{ route('product.show', $product->slug) }}" class="d-block width-75">
+                                            <img class="img-fluid" src="{{ asset('storage/' . $product->image) }}"
+                                                alt="{{ $product->name }}">
+                                        </a>
+                                    </div>
+                                    <div class="col">
+                                        <h3 class="text-lh-1dot2 font-size-14 mb-0">
+                                            <a href="{{ route('product.show', $product->slug) }}">
+                                                {{ $product->name }}
+                                            </a>
+                                        </h3>
+                                        <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <small
+                                                    class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                            @endfor
+                                        </div>
+                                        <div class="font-weight-bold">
+                                            @if ($product->old_price)
+                                                <del
+                                                    class="font-size-11 text-gray-9 d-block">{{ number_format($product->old_price) }}₫</del>
+                                            @endif
+                                            <ins
+                                                class="font-size-15 text-red text-decoration-none d-block">{{ number_format($product->price) }}₫</ins>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div> --}}
 
             </div>
+
             <div class="col-xl-9 col-wd-9gdot5">
 
 
@@ -159,8 +211,8 @@
                     <div class="d-xl-none">
                         <!-- Account Sidebar Toggle Button -->
                         <a id="sidebarNavToggler1" class="btn btn-sm py-1 font-weight-normal" href="javascript:;"
-                            role="button" aria-controls="sidebarContent1" aria-haspopup="true" aria-expanded="false"
-                            data-unfold-event="click" data-unfold-hide-on-scroll="false"
+                            role="button" aria-controls="sidebarContent1" aria-haspopup="true"
+                            aria-expanded="false" data-unfold-event="click" data-unfold-hide-on-scroll="false"
                             data-unfold-target="#sidebarContent1" data-unfold-type="css-animation"
                             data-unfold-animation-in="fadeInLeft" data-unfold-animation-out="fadeOutLeft"
                             data-unfold-duration="500">
@@ -288,7 +340,9 @@
                                             </div>
                                             <div class="product-item__footer">
                                                 <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                    @include('fontend.component.wishlist-button', ['product' => $product])
+                                                    @include('fontend.component.wishlist-button', [
+                                                        'product' => $product,
+                                                    ])
                                                 </div>
                                             </div>
                                         </div>
@@ -307,6 +361,7 @@
                             {{ $products->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
+
 
                     <!-- List View -->
                     <!-- List View -->
