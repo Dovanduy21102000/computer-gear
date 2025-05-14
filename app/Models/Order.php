@@ -37,7 +37,10 @@ class Order extends Model
         'status' => 'string',
         'payment_details' => 'array'
     ];
-
+    public function orderItems()
+{
+    return $this->hasMany(OrderItem::class);
+}
     public function user()
     {
         return $this->belongsTo(User::class);

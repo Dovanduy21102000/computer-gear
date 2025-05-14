@@ -10,7 +10,7 @@ use App\Http\Controllers\Auth\RegisterController;
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\ChatController;
+use App\Http\Controllers\Client\ChatController;
 use App\Http\Controllers\Client\BlogController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
