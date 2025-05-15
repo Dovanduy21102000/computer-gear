@@ -115,10 +115,10 @@ class CheckoutController extends Controller
             $coupon = session('coupon');
             $couponDiscount = 0;
             if ($coupon && $totalPrice >= $coupon['min_order_total']) {
-                if ($coupon['type'] === 'percentage') {
-                    $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                if ($coupon['type'] === 'percent') {
+                    $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
                 } else {
-                    $couponDiscount = min($totalPrice, $coupon['value']);
+                    $couponDiscount = min($totalPrice, $coupon['price']);
                 }
             }
 
@@ -282,10 +282,10 @@ class CheckoutController extends Controller
 
                 if ($coupon) {
                     if ($totalPrice >= $coupon['min_order_total']) {
-                        if ($coupon['type'] === 'percentage') {
-                            $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                        if ($coupon['type'] === 'percent') {
+                            $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
                         } else {
-                            $couponDiscount = min($totalPrice, $coupon['value']);
+                            $couponDiscount = min($totalPrice, $coupon['price']);
                         }
                         $couponId = $coupon['id'];
                     }
@@ -401,10 +401,10 @@ class CheckoutController extends Controller
 
             if ($coupon) {
                 if ($totalPrice >= $coupon['min_order_total']) {
-                    if ($coupon['type'] === 'percentage') {
-                        $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                    if ($coupon['type'] === 'percent') {
+                        $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
                     } else {
-                        $couponDiscount = min($totalPrice, $coupon['value']);
+                        $couponDiscount = min($totalPrice, $coupon['price']);
                     }
                     $couponId = $coupon['id'];
                 }
@@ -494,17 +494,21 @@ class CheckoutController extends Controller
 
     public function applyCoupon(Request $request)
     {
+        $isAjax = $request->expectsJson() || $request->ajax();
         $request->validate([
             'coupon_code' => 'required|string|exists:coupons,code',
         ]);
 
         $coupon = Coupon::where('code', $request->coupon_code)
             ->where('status', 1)
-            ->where('expire_date', '>=', now())
+            ->where(function ($q) {
+                $q->whereNull('expire_date')->orWhere('expire_date', '>=', now());
+            })
             ->first();
 
         if (!$coupon) {
-            return back()->with('error', 'Mã khuyến mại không hợp lệ hoặc đã hết hạn.');
+            $msg = 'Mã khuyến mại không hợp lệ hoặc đã hết hạn.';
+            return $isAjax ? response()->json(['success' => false, 'message' => $msg]) : back()->with('error', $msg);
         }
 
         // Ensure user hasn't used the coupon before
@@ -513,24 +517,26 @@ class CheckoutController extends Controller
                 ->where('coupon_id', $coupon->id)
                 ->exists();
             if ($couponUsed) {
-                return back()->with('error', 'Bạn dã sử dụng mã khuyến mại này rồi!');
+                $msg = 'Bạn đã sử dụng mã khuyến mại này rồi!';
+                return $isAjax ? response()->json(['success' => false, 'message' => $msg]) : back()->with('error', $msg);
             }
         }
 
-        // Store coupon details in session with a timestamp to track when it was applied
+        // Store coupon details in session
         session([
             'coupon' => [
                 'id' => $coupon->id,
                 'code' => $coupon->code,
-                'type' => $coupon->type, // 'fixed' or 'percentage'
-                'value' => $coupon->price, // Discount value (amount or percentage)
-                'maximum_amount' => $coupon->maximum_amount, // Limit discount for percentage type
-                'min_order_total' => $coupon->min_order_total, // Minimum order value required
-                'applied_at' => now()->timestamp // Add timestamp to track when coupon was applied
+                'type' => $coupon->type, // 'fixed' or 'percent'
+                'price' => $coupon->price, // Discount value (amount or percent)
+                'maximum_amount' => $coupon->maximum_amount,
+                'min_order_total' => $coupon->min_order_total,
+                'applied_at' => now()->timestamp
             ]
         ]);
 
-        return back()->with('success', 'Mã khuyến mại đã được áp dụng!');
+        $msg = 'Mã khuyến mại đã được áp dụng!';
+        return $isAjax ? response()->json(['success' => true, 'message' => $msg]) : back()->with('success', $msg);
     }
 
     public function success(Request $request)
@@ -724,10 +730,10 @@ class CheckoutController extends Controller
             $couponId = null;
 
             if ($coupon && $totalPrice >= $coupon['min_order_total']) {
-                if ($coupon['type'] === 'percentage') {
-                    $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                if ($coupon['type'] === 'percent') {
+                    $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
                 } else {
-                    $couponDiscount = min($totalPrice, $coupon['value']);
+                    $couponDiscount = min($totalPrice, $coupon['price']);
                 }
                 $couponId = $coupon['id'];
             }

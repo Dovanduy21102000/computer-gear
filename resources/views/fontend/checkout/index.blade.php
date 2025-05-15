@@ -217,13 +217,13 @@
                                             $discount = 0;
 
                                             if ($appliedCoupon) {
-                                                if ($appliedCoupon['type'] === 'percentage') {
+                                                if ($appliedCoupon['type'] === 'percent') {
                                                     $discount = min(
-                                                        $subtotal * ($appliedCoupon['value'] / 100),
+                                                        $subtotal * ($appliedCoupon['price'] / 100),
                                                         $appliedCoupon['maximum_amount'] ?? $subtotal,
                                                     );
                                                 } else {
-                                                    $discount = min($appliedCoupon['value'], $subtotal);
+                                                    $discount = min($appliedCoupon['price'], $subtotal);
                                                 }
                                             }
 
@@ -237,23 +237,6 @@
                                                 {{ number_format($subtotal, 0, ',', '.') }}₫</td>
                                         </tr>
 
-                                        @if ($appliedCoupon)
-                                            <tr>
-                                                <th>
-                                                    Mã giảm giá: ({{ $appliedCoupon['code'] }})
-                                                    <a href="{{ route('remove-coupon') }}"
-                                                        class="btn btn-sm btn-danger ml-2">
-                                                        <i class="fas fa-times"></i> Xóa
-                                                    </a>
-                                                </th>
-                                                <td class="text-danger">-{{ number_format($discount, 0, ',', '.') }}₫
-                                                </td>
-                                            </tr>
-                                            <input type="hidden" name="coupon_code"
-                                                value="{{ $appliedCoupon['code'] }}">
-                                            <input type="hidden" name="coupon_discount" value="{{ $discount }}">
-                                        @endif
-
                                         <tr>
                                             <th>Thành tiền</th>
                                             <td class="text-right font-medium">
@@ -261,6 +244,14 @@
                                             </td>
                                             <input type="hidden" name="total_price" value="{{ (int) $total }}">
                                         </tr>
+                                        @if ($appliedCoupon)
+                                            <tr>
+                                                <td colspan="2" class="text-right text-danger"
+                                                    style="font-size: 0.95em; border: none;">
+                                                    Giảm giá: -{{ number_format($discount, 0, ',', '.') }}₫
+                                                </td>
+                                            </tr>
+                                        @endif
                                     </tfoot>
 
 
@@ -279,20 +270,28 @@
 
                                     <div id="couponDisplay" class="mb-3">
                                         @if ($appliedCoupon)
-                                            <div class="alert alert-success mb-0">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <i class="fas fa-check-circle mr-2"></i>
-                                                        Đã áp dụng mã: <strong>{{ $appliedCoupon['code'] }}</strong>
-                                                        @if ($appliedCoupon['type'] === 'percentage')
-                                                            ({{ $appliedCoupon['value'] }}%)
-                                                        @else
-                                                            ({{ number_format($appliedCoupon['value'], 0, ',', '.') }}₫)
-                                                        @endif
+                                            <div class="card mb-3 shadow-sm border-left border-success"
+                                                style="border-left-width: 6px !important;">
+                                                <div
+                                                    class="card-body d-flex align-items-center justify-content-between p-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-check-circle text-success mr-2"></i>
+                                                        <span class="font-weight-bold text-success mr-2">Đã áp dụng
+                                                            mã:</span>
+                                                        <span
+                                                            class="font-weight-bold text-dark mr-2">{{ $appliedCoupon['code'] }}</span>
+                                                        <span class="badge badge-success ml-2" style="font-size: 1em;">
+                                                            @if ($appliedCoupon['type'] === 'percent')
+                                                                {{ (int) $appliedCoupon['price'] }}%
+                                                            @else
+                                                                {{ number_format($appliedCoupon['price'], 0, ',', '.') }}₫
+                                                            @endif
+                                                        </span>
                                                     </div>
                                                     <button type="button"
-                                                        class="btn btn-sm btn-outline-danger remove-coupon">
-                                                        <i class="fas fa-times"></i>
+                                                        class="btn btn-link text-danger p-0 remove-coupon"
+                                                        title="Xóa mã giảm giá" style="font-size: 1.3em;">
+                                                        <i class="fas fa-times-circle"></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -541,7 +540,7 @@
                             <div class="col-md-4">
                                 <select id="couponFilter" class="form-control">
                                     <option value="all">Tất cả</option>
-                                    <option value="percentage">Giảm theo %</option>
+                                    <option value="percent">Giảm theo %</option>
                                     <option value="fixed">Giảm theo số tiền</option>
                                 </select>
                             </div>
@@ -638,13 +637,19 @@
                 }
 
                 coupons.forEach(coupon => {
-                    const discountText = coupon.type === 'percentage' ?
-                        `${coupon.value}%` :
-                        `${new Intl.NumberFormat('vi-VN').format(coupon.value)}₫`;
+                    const discountText = coupon.type === 'percent' ?
+                        `${parseInt(coupon.price)}%` :
+                        `${new Intl.NumberFormat('vi-VN').format(coupon.price)}₫`;
 
                     const minOrderText = coupon.min_order_total ?
                         `Đơn hàng tối thiểu ${new Intl.NumberFormat('vi-VN').format(coupon.min_order_total)}₫` :
                         'Không giới hạn giá trị đơn hàng';
+
+                    let maxAmountText = '';
+                    if (coupon.type === 'percent' && coupon.maximum_amount && coupon.maximum_amount > 0) {
+                        maxAmountText =
+                            ` <span class="text-muted ml-2">Giảm tối đa: ${new Intl.NumberFormat('vi-VN').format(coupon.maximum_amount)}₫</span>`;
+                    }
 
                     const isDisabled = coupon.min_order_total > {{ $total }};
 
@@ -655,7 +660,7 @@
                                     <h5 class="card-title">${coupon.code}</h5>
                                     <p class="card-text">
                                         <span class="badge badge-primary">Giảm ${discountText}</span>
-                                        <small class="d-block text-muted mt-2">${minOrderText}</small>
+                                        <small class="d-block text-muted mt-2">${minOrderText}${maxAmountText}</small>
                                     </p>
                                     <button class="btn btn-outline-primary btn-sm apply-coupon" 
                                             data-code="${coupon.code}"
@@ -677,7 +682,9 @@
             }
 
             function loadAvailableCoupons() {
-                fetch('{{ route('coupon.available') }}')
+                // Get the total from the hidden input (or fallback to 0)
+                const total = document.querySelector('input[name="total_price"]')?.value || 0;
+                fetch(`/cart/coupon/available?total=${total}`)
                     .then(response => response.json())
                     .then(data => {
                         allCoupons = data.coupons; // Store all coupons
@@ -686,7 +693,7 @@
             }
 
             function applyCoupon(code) {
-                fetch('{{ route('coupon.apply') }}', {
+                fetch('{{ route('cart.applyCoupon') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -699,9 +706,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Close modal
                             $('#couponModal').modal('hide');
-                            // Reload page to update totals
                             window.location.reload();
                         } else {
                             alert(data.message || 'Có lỗi xảy ra khi áp dụng mã giảm giá');

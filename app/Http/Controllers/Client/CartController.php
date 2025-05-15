@@ -14,6 +14,7 @@ use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Events\CouponApplied;
 
 class CartController extends Controller
 {
@@ -424,87 +425,138 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Đã xóa giỏ hàng!');
     }
 
+    public function getAvailableCoupons()
+    {
+        $userId = Auth::id();
+        $total = request()->input('total', 0);
+
+        // Public coupons not used by this user
+        $publicCoupons = DB::table('coupons')
+            ->where('is_public', true)
+            ->where('status', 1)
+            ->where(function ($query) use ($total) {
+                $query->whereNull('min_order_total')
+                    ->orWhere('min_order_total', '<=', $total);
+            })
+            ->whereNotIn('id', function ($query) use ($userId) {
+                $query->select('coupon_id')
+                    ->from('coupon_user')
+                    ->where('user_id', $userId)
+                    ->where('used', true);
+            })
+            ->select(
+                'id',
+                'code',
+                'type',
+                'price',
+                'min_order_total',
+                'maximum_amount',
+                DB::raw('false as used'),
+                DB::raw('true as is_public')
+            )
+            ->get();
+
+        // Private coupons assigned to user and not used
+        $privateCoupons = DB::table('coupon_user')
+            ->join('coupons', 'coupon_user.coupon_id', '=', 'coupons.id')
+            ->where('coupon_user.user_id', $userId)
+            ->where('coupon_user.used', false)
+            ->where('coupons.status', 1)
+            ->where(function ($query) use ($total) {
+                $query->whereNull('coupons.min_order_total')
+                    ->orWhere('coupons.min_order_total', '<=', $total);
+            })
+            ->select(
+                'coupons.id',
+                'coupons.code',
+                'coupons.type',
+                'coupons.price',
+                'coupons.min_order_total',
+                'coupons.maximum_amount',
+                'coupon_user.used',
+                DB::raw('false as is_public')
+            )
+            ->get();
+
+        // Merge and return
+        Log::info('Private coupons fetched for user', ['user_id' => $userId, 'privateCoupons' => $privateCoupons]);
+        $coupons = $publicCoupons->merge($privateCoupons);
+
+        return response()->json([
+            'success' => true,
+            'coupons' => $coupons
+        ]);
+    }
+
     public function applyCoupon(Request $request)
     {
         $request->validate([
             'code' => 'required|string',
         ]);
 
-        $coupon = Coupon::where('code', $request->code)
+        $userId = Auth::id();
+
+        // Check public coupon
+        $publicCoupon = DB::table('coupons')
+            ->where('code', $request->code)
+            ->where('is_public', true)
             ->where('status', 1)
-            ->where('start_date', '<=', now())
-            ->where('end_date', '>=', now())
             ->first();
 
-        if (!$coupon) {
-            return back()->with('error', 'Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+        if ($publicCoupon) {
+            // Check if user has already used this public coupon
+            $used = DB::table('coupon_user')
+                ->where('user_id', $userId)
+                ->where('coupon_id', $publicCoupon->id)
+                ->where('used', true)
+                ->exists();
+
+            if ($used) {
+                return response()->json(['success' => false, 'message' => 'Bạn đã sử dụng mã giảm giá này trước đó.']);
+            }
+
+            // Store coupon in session
+            session(['coupon' => [
+                'id' => $publicCoupon->id,
+                'code' => $publicCoupon->code,
+                'type' => $publicCoupon->type,
+                'price' => $publicCoupon->price,
+                'min_order_total' => $publicCoupon->min_order_total,
+                'maximum_amount' => $publicCoupon->maximum_amount,
+                'is_public' => true,
+            ]]);
+            return response()->json(['success' => true, 'message' => 'Áp dụng mã giảm giá thành công!']);
         }
 
-        // Check if user has already used this coupon
-        $userId = Auth::id();
-        $hasUsed = CouponUser::where('user_id', $userId)
-            ->where('coupon_id', $coupon->id)
-            ->exists();
+        // Check private coupon
+        $privateCoupon = DB::table('coupon_user')
+            ->join('coupons', 'coupon_user.coupon_id', '=', 'coupons.id')
+            ->where('coupon_user.user_id', $userId)
+            ->where('coupons.code', $request->code)
+            ->where('coupon_user.used', false)
+            ->where('coupons.status', 1)
+            ->select('coupons.*', 'coupon_user.coupon_id')
+            ->first();
 
-        if ($hasUsed) {
-            return back()->with('error', 'Bạn đã sử dụng mã giảm giá này trước đó.');
+        if ($privateCoupon) {
+            session(['coupon' => [
+                'id' => $privateCoupon->id,
+                'code' => $privateCoupon->code,
+                'type' => $privateCoupon->type,
+                'price' => $privateCoupon->price,
+                'min_order_total' => $privateCoupon->min_order_total,
+                'maximum_amount' => $privateCoupon->maximum_amount,
+                'is_public' => false,
+            ]]);
+            return response()->json(['success' => true, 'message' => 'Áp dụng mã giảm giá thành công!']);
         }
 
-        // Store coupon in session
-        session(['coupon' => [
-            'id' => $coupon->id,
-            'code' => $coupon->code,
-            'type' => $coupon->type,
-            'value' => $coupon->value,
-            'min_order_total' => $coupon->min_order_total,
-            'maximum_amount' => $coupon->maximum_amount,
-        ]]);
-
-        return back()->with('success', 'Áp dụng mã giảm giá thành công!');
+        return response()->json(['success' => false, 'message' => 'Bạn không có mã giảm giá này hoặc đã sử dụng rồi!']);
     }
 
     public function removeCoupon()
     {
         session()->forget('coupon');
         return response()->json(['success' => true]);
-    }
-
-    public function getAvailableCoupons()
-    {
-        $userId = Auth::id();
-        $total = request()->input('total', 0);
-
-        // Get all active coupons
-        $coupons = Coupon::where('status', 1)
-            ->where(function ($query) use ($total) {
-                $query->whereNull('min_order_total')
-                    ->orWhere('min_order_total', '<=', $total);
-            })
-            ->get()
-            ->map(function ($coupon) use ($userId) {
-                // Check if user has already used this coupon
-                $hasUsed = CouponUser::where('user_id', $userId)
-                    ->where('coupon_id', $coupon->id)
-                    ->exists();
-
-                return [
-                    'id' => $coupon->id,
-                    'code' => $coupon->code,
-                    'type' => $coupon->type,
-                    'value' => $coupon->value,
-                    'min_order_total' => $coupon->min_order_total,
-                    'maximum_amount' => $coupon->maximum_amount,
-                    'is_used' => $hasUsed
-                ];
-            })
-            ->filter(function ($coupon) {
-                return !$coupon['is_used'];
-            })
-            ->values();
-
-        return response()->json([
-            'success' => true,
-            'coupons' => $coupons
-        ]);
     }
 }
