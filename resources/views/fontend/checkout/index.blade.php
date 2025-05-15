@@ -118,45 +118,6 @@
             <h1 class="text-center">Thanh toán đơn hàng</h1>
         </div>
 
-        <!-- Accordion -->
-        <div id="shopCartAccordion1" class="accordion rounded mb-6">
-            <div class="card border-0">
-                <div id="shopCartHeadingTwo" class="alert alert-primary mb-0" role="alert">
-                    Có mã giảm giá? <a href="#" class="alert-link" data-toggle="collapse"
-                        data-target="#shopCartTwo" aria-expanded="false" aria-controls="shopCartTwo">Hãy nhấp vào đây
-                        để
-                        nhập</a>
-                </div>
-                <div id="shopCartTwo" class="collapse border border-top-0" aria-labelledby="shopCartHeadingTwo"
-                    data-parent="#shopCartAccordion1">
-                    <form action="{{ route('coupon.apply') }}" method="POST" class="p-5">
-                        @csrf
-                        <p class="w-100 text-gray-90">Nếu bạn có mã giảm giá thì hãy nhập
-                            vào dưới đây</p>
-                        <div class="input-group input-group-pill max-width-660-xl">
-                            <input type="text" class="form-control" name="coupon_code" placeholder="Coupon code"
-                                aria-label="Promo code" required>
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-block btn-dark font-weight-normal btn-pill px-4">
-                                    <i class="fas fa-tags d-md-none"></i>
-                                    <span class="d-none d-md-inline">Áp dụng mã</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Display validation messages -->
-                        @if (session('success'))
-                            <div class="mt-3 text-success">{{ session('success') }}</div>
-                        @endif
-                        @if (session('error'))
-                            <div class="mt-3 text-danger">{{ session('error') }}</div>
-                        @endif
-                    </form>
-                </div>
-            </div>
-        </div>
-        <!-- End Card -->
-        <!-- End Accordion -->
         <form action="{{ route('checkout.method') }}" id="checkout-form" method="POST" class="js-validate">
             @csrf
 
@@ -352,8 +313,7 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="vnpay"
                                                         name="payment_method" value="vn_pay" checked>
-                                                    <label class="custom-control-label form-label"
-                                                        for="vnpay">Thanh
+                                                    <label class="custom-control-label form-label" for="vnpay">Thanh
                                                         toán qua VNPay</label>
                                                 </div>
                                             </div>
@@ -364,8 +324,7 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="momo"
                                                         name="payment_method" value="momo">
-                                                    <label class="custom-control-label form-label"
-                                                        for="momo">Thanh
+                                                    <label class="custom-control-label form-label" for="momo">Thanh
                                                         toán qua MoMo</label>
                                                 </div>
                                             </div>
