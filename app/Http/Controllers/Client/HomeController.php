@@ -22,19 +22,19 @@ class HomeController extends Controller
     {
         // Hiển thị banner đang hoạt động
         $banners = Banner::where('status', 1)->get();
-    
+
         // Điều kiện chung: category và brand đều active
         $activeCategoryBrand = function ($query) {
             $query->where('is_active', 1);
         };
-    
+
         // Sản phẩm mới nhất
         $newProducts = Product::whereHas('category', $activeCategoryBrand)
             ->whereHas('brand', $activeCategoryBrand)
             ->latest()
             ->take(24)
             ->get();
-    
+
         // Sản phẩm được xem nhiều
         $topViewedProducts = Product::with('brand')
             ->whereHas('category', $activeCategoryBrand)
@@ -42,7 +42,7 @@ class HomeController extends Controller
             ->orderByDesc('views')
             ->take(5)
             ->get();
-    
+
         // Sản phẩm có giảm giá
         $discountedProducts = Product::whereNotNull('price_sale')
             ->where('price_sale', '>', 0)
@@ -51,30 +51,30 @@ class HomeController extends Controller
             ->latest()
             ->take(5)
             ->get();
-    
+
         // Sản phẩm bán chạy (ở đây chưa có tiêu chí cụ thể, lấy dạng paginate để show nhiều)
         $topSellingProducts = Product::with('brand')
             ->whereHas('category', $activeCategoryBrand)
             ->whereHas('brand', $activeCategoryBrand)
             ->paginate(9);
-    
+
         // Một số sản phẩm nổi bật
         $products = Product::with('category')
             ->whereHas('category', $activeCategoryBrand)
             ->whereHas('brand', $activeCategoryBrand)
             ->take(4)
             ->get();
-    
+
         // Sản phẩm thuộc một số danh mục nổi bật
         $topCategories = ['Chuột', 'Bàn phím', 'Bộ bàn phím và Chuột'];
         $keyboardMouseProducts = Product::whereHas('category', function ($query) use ($topCategories) {
-                $query->whereIn('name', $topCategories)->where('is_active', 1);
-            })
+            $query->whereIn('name', $topCategories)->where('is_active', 1);
+        })
             ->whereHas('brand', $activeCategoryBrand)
             ->latest()
             ->take(10)
             ->get();
-    
+
         // Danh sách thương hiệu đang hoạt động
         $brands = Brand::where('is_active', 1)->get();
         $total_items = CartItem::whereHas('cart', function ($query) {
@@ -92,7 +92,7 @@ class HomeController extends Controller
         $category_post = CategoryPost::all();
 
         $template = 'fontend.home.index';
-    
+
         return view('fontend.layout', compact(
             'template',
             'banners',
@@ -108,7 +108,7 @@ class HomeController extends Controller
             'category_post'
         ));
     }
-    
+
 
     public function add(Request $request)
     {
@@ -170,5 +170,30 @@ class HomeController extends Controller
     {
         $template = 'fontend.home.about_us';
         return view('fontend.layout', compact('template'));
+    }
+
+    public function footer()
+    {
+
+        $topViewedProducts = Product::orderByDesc('views') // Sắp xếp theo lượt xem giảm dần
+            ->take(10) // Lấy top 10 sản phẩm nhiều lượt xem nhất (có thể điều chỉnh)
+            ->get()
+            ->shuffle() // Trộn ngẫu nhiên
+            ->take(3); // Lấy 3 sản phẩm ngẫu nhiên trong số đó
+
+
+        $activeProducts = Product::where('status', '1') // hoặc status = 1 tuỳ bạn định nghĩa
+
+            ->take(10) // Lấy top 10 sản phẩm nhiều lượt xem nhất (có thể điều chỉnh)
+            ->get()
+            ->shuffle() // Trộn ngẫu nhiên
+            ->take(3); // Lấy 3 sản phẩm ngẫu nhiên trong số đó
+        $template = 'fontend.component.footer';
+
+        return view('fontend.layout', compact(
+            'template',
+            'topViewedProducts',
+            'activeProducts'
+        ));
     }
 }

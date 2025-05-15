@@ -220,8 +220,8 @@ h6 {
 .card {
     margin-bottom: 30px;
     border: none;
-    border-radius: 5px;
-    box-shadow: 0px 0 30px rgba(1, 41, 112, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
 }
 
 .card-header,
@@ -1228,4 +1228,38 @@ h6 {
     text-align: center;
     font-size: 13px;
     color: #012970;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #4154f1;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #4154f1;
+    box-shadow: 0 0 0 0.2rem rgba(65,84,241,.1);
+}
+
+.variant {
+    border: 1px solid #e0e6ed;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: #f8fafd;
+}
+
+.btn-primary, .btn-warning {
+    box-shadow: 0 2px 8px rgba(65,84,241,0.08);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.alert-danger {
+    background: #fff6f6;
+    color: #d93025;
+    border: 1px solid #f8d7da;
+}
+
+input[type="file"] {
+    background: #f8fafd;
 }
