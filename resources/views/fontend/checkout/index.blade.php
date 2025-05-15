@@ -118,9 +118,15 @@
                                         @foreach ($cartItems as $item)
                                             <tr class="cart_item">
                                                 <td>
-                                                    {{ $item->product->name }}
+                                                    <div>
+                                                        <span style="display: inline;">
+                                                            {{ $item->product->name }}
+                                                            <strong style="display: inline; margin-left: 12px;">×
+                                                                {{ $item->quantity }}</strong>
+                                                        </span>
+                                                    </div>
                                                     @if ($item->productVariant)
-                                                        <div class="variant-attributes">
+                                                        <div class="variant-attributes mt-1">
                                                             @php
                                                                 $groupedAttributes = [];
                                                                 foreach (
@@ -148,7 +154,6 @@
                                                             </small>
                                                         </div>
                                                     @endif
-                                                    <strong class="product-quantity">× {{ $item->quantity }}</strong>
                                                 </td>
                                                 <td>
                                                     @php
@@ -193,7 +198,8 @@
 
                                         <tr>
                                             <th>Tổng cộng</th>
-                                            <td>{{ number_format($subtotal, 0, ',', '.') }}₫</td>
+                                            <td class="text-right font-medium">
+                                                {{ number_format($subtotal, 0, ',', '.') }}₫</td>
                                         </tr>
 
                                         @if ($appliedCoupon)
@@ -215,7 +221,9 @@
 
                                         <tr>
                                             <th>Thành tiền</th>
-                                            <td><strong>{{ number_format($total, 0, ',', '.') }}₫</strong></td>
+                                            <td class="text-right font-medium">
+                                                <strong>{{ number_format($total, 0, ',', '.') }}₫</strong>
+                                            </td>
                                             <input type="hidden" name="total_price" value="{{ (int) $total }}">
                                         </tr>
                                     </tfoot>
