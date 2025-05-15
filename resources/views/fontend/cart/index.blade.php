@@ -85,7 +85,16 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                    $hasInvalidItems = false;
+                                @endphp
                                 @foreach ($cartItems as $item)
+                                    @if (!$item->productVariant && $item->product->is_variant)
+                                        @php
+                                            $hasInvalidItems = true;
+                                            continue;
+                                        @endphp
+                                    @endif
                                     <tr>
                                         <td class="text-center">
                                             <input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
@@ -104,48 +113,37 @@
                                         </td>
                                         <td>
                                             <a href="#" class="text-gray-90">{{ $item->product->name }}</a>
-                                            @if (isset($item->variants))
+                                            @if ($item->productVariant)
                                                 <div class="variant-attributes">
-                                                    @foreach ($item->variants as $variant)
-                                                        <div class="variant-group mb-2">
-                                                            @php
-                                                                $groupedAttributes = [];
-                                                                foreach ($variant->attributeValues as $value) {
-                                                                    if (isset($value->attribute)) {
-                                                                        $attrName = $value->attribute->name;
-                                                                        if (!isset($groupedAttributes[$attrName])) {
-                                                                            $groupedAttributes[$attrName] =
-                                                                                $value->value;
-                                                                        }
-                                                                    }
+                                                    @php
+                                                        $groupedAttributes = [];
+                                                        foreach ($item->productVariant->attributeValues as $value) {
+                                                            if (isset($value->attribute)) {
+                                                                $attrName = $value->attribute->name;
+                                                                if (!isset($groupedAttributes[$attrName])) {
+                                                                    $groupedAttributes[$attrName] = $value->value;
                                                                 }
-                                                                // Sort attributes by name to ensure consistent order
-                                                                ksort($groupedAttributes);
-                                                                $formattedAttributes = [];
-                                                                foreach ($groupedAttributes as $name => $value) {
-                                                                    $formattedAttributes[] = $name . ': ' . $value;
-                                                                }
-                                                            @endphp
-                                                            <small class="text-dark d-block">
-                                                                {{ implode(' | ', $formattedAttributes) }}
-                                                            </small>
-                                                        </div>
-                                                    @endforeach
+                                                            }
+                                                        }
+                                                        ksort($groupedAttributes);
+                                                        $formattedAttributes = [];
+                                                        foreach ($groupedAttributes as $name => $value) {
+                                                            $formattedAttributes[] = $name . ': ' . $value;
+                                                        }
+                                                    @endphp
+                                                    <small class="text-dark d-block">
+                                                        {{ implode(' | ', $formattedAttributes) }}
+                                                    </small>
                                                 </div>
                                             @endif
                                         </td>
                                         <td data-title="Price">
                                             @php
-                                                $totalPrice = 0;
-                                                if (isset($item->variants)) {
-                                                    foreach ($item->variants as $variant) {
-                                                        $totalPrice += $variant->price_sale ?? $variant->price;
-                                                    }
-                                                } else {
-                                                    $totalPrice = $item->product->price_sale ?? $item->product->price;
-                                                }
+                                                $price = $item->productVariant
+                                                    ? $item->productVariant->price_sale ?? $item->productVariant->price
+                                                    : $item->product->price_sale ?? $item->product->price;
                                             @endphp
-                                            <span>{{ number_format($totalPrice, 0, ',', '.') }}₫</span>
+                                            <span>{{ number_format($price, 0, ',', '.') }}₫</span>
                                         </td>
 
                                         <td data-title="Quantity">
@@ -167,10 +165,25 @@
 
                                         <td data-title="Total">
                                             <span
-                                                class="">{{ number_format($item->quantity * $totalPrice, 0, ',', '.') }}₫</span>
+                                                class="">{{ number_format($item->quantity * $price, 0, ',', '.') }}₫</span>
                                         </td>
                                     </tr>
                                 @endforeach
+
+                                @if ($hasInvalidItems)
+                                    <tr>
+                                        <td colspan="8" class="text-center text-danger">
+                                            <div class="alert alert-warning mb-0">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                Một số sản phẩm trong giỏ hàng không còn khả dụng.
+                                                <a href="{{ route('cart.clear') }}" class="alert-link">Xóa giỏ hàng</a>
+                                                hoặc <a href="{{ route('cart.index') }}" class="alert-link">làm mới
+                                                    trang</a>
+                                                để cập nhật.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
 
                                 <tr>
                                     <td colspan="8" class="border-top space-top-2 justify-content-center">

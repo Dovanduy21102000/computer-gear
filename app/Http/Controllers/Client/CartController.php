@@ -49,55 +49,40 @@ class CartController extends Controller
 
         // Process each cart item to handle multiple variant IDs
         $processedItems = collect();
-        $cartItems->each(function ($item) use ($processedItems) {
-            if ($item->product_variant_id) {
-                // Split the variant IDs if they exist
-                $variantIds = explode(' | ', $item->product_variant_id);
+        $invalidItemIds = collect();
 
-                // Log the variant IDs
-                Log::info('Processing cart item', [
-                    'item_id' => $item->id,
-                    'variant_ids' => $variantIds
-                ]);
+        $cartItems->each(function ($item) use ($processedItems, $invalidItemIds) {
+            // Check if product exists and is active
+            if (!$item->product || !$item->product->status) {
+                $invalidItemIds->push($item->id);
+                return;
+            }
 
-                // Get all variants with their attribute values
-                $variants = ProductVariant::whereIn('id', $variantIds)
-                    ->with(['attributeValues' => function ($query) {
-                        $query->with('attribute')
-                            ->orderBy('attribute_id'); // Order by attribute_id to ensure consistent order
-                    }])
-                    ->get();
+            // If product has variants, check variant status
+            if ($item->product->is_variant) {
+                if (!$item->productVariant || !$item->productVariant->status) {
+                    $invalidItemIds->push($item->id);
+                    return;
+                }
 
-                // Log the variants found
-                Log::info('Variants found', [
-                    'variants' => $variants->map(function ($v) {
-                        return [
-                            'id' => $v->id,
-                            'attributes' => $v->attributeValues->map(function ($av) {
-                                return [
-                                    'name' => $av->attribute->name,
-                                    'value' => $av->value
-                                ];
-                            })->toArray()
-                        ];
-                    })->toArray()
-                ]);
+                // Get the variant with its attribute values
+                $variant = ProductVariant::with(['attributeValues' => function ($query) {
+                    $query->with('attribute')
+                        ->orderBy('attribute_id');
+                }])->find($item->product_variant_id);
 
-                // Create a new cart item for each variant
-                foreach ($variants as $variant) {
+                if ($variant) {
                     // Create a new cart item instance
                     $newItem = new CartItem();
                     $newItem->id = $item->id;
                     $newItem->cart_id = $item->cart_id;
                     $newItem->product_id = $item->product_id;
-                    $newItem->product_variant_id = (string)$variant->id;
+                    $newItem->product_variant_id = $variant->id;
                     $newItem->quantity = $item->quantity;
                     $newItem->product = $item->product;
+                    $newItem->productVariant = $variant;
 
-                    // Create a new variants collection with just this variant
-                    $newItem->variants = collect([$variant]);
-
-                    // Add the variant's attributes to the item, ensuring unique attribute names
+                    // Add the variant's attributes to the item
                     $newItem->variant_attributes = $variant->attributeValues->unique('attribute_id')->map(function ($value) {
                         return [
                             'name' => $value->attribute->name,
@@ -105,57 +90,13 @@ class CartController extends Controller
                         ];
                     })->toArray();
 
-                    // Log the new item details
-                    Log::info('Created new cart item', [
-                        'original_id' => $item->id,
-                        'variant_id' => $variant->id,
-                        'attributes' => $newItem->variant_attributes
-                    ]);
-
                     $processedItems->push($newItem);
+                } else {
+                    $invalidItemIds->push($item->id);
                 }
             } else {
                 $processedItems->push($item);
             }
-        });
-
-        // Log the final processed items
-        Log::info('Final processed items', [
-            'items' => $processedItems->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'variant_id' => $item->product_variant_id,
-                    'attributes' => isset($item->variant_attributes) ? $item->variant_attributes : []
-                ];
-            })->toArray()
-        ]);
-
-        // Filter out invalid products and collect IDs of invalid items
-        $invalidItemIds = collect();
-        $validCartItems = $processedItems->filter(function ($item) use ($invalidItemIds) {
-            $isValid = true;
-
-            // Check if product exists and is active
-            if (!$item->product || !$item->product->status) {
-                $isValid = false;
-            }
-
-            // If product has variants, check variant status
-            if ($isValid && isset($item->variants)) {
-                foreach ($item->variants as $variant) {
-                    if (!$variant->status) {
-                        $isValid = false;
-                        break;
-                    }
-                }
-            }
-
-            if (!$isValid) {
-                $invalidItemIds->push($item->id);
-            }
-
-            return $isValid;
         });
 
         // If any items were invalid, delete them from the database
@@ -164,7 +105,7 @@ class CartController extends Controller
             session()->flash('warning', 'Một số sản phẩm không còn khả dụng đã được xóa khỏi giỏ hàng.');
         }
 
-        $cartItems = $validCartItems;
+        $cartItems = $processedItems;
 
         $template = 'fontend.cart.index';
         return view('fontend.layout', compact('template', 'cart', 'cartItems', 'userId'));
@@ -490,7 +431,7 @@ class CartController extends Controller
         ]);
 
         $coupon = Coupon::where('code', $request->code)
-            ->where('is_active', true)
+            ->where('status', 1)
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now())
             ->first();
@@ -525,6 +466,45 @@ class CartController extends Controller
     public function removeCoupon()
     {
         session()->forget('coupon');
-        return back()->with('success', 'Đã xóa mã giảm giá.');
+        return response()->json(['success' => true]);
+    }
+
+    public function getAvailableCoupons()
+    {
+        $userId = Auth::id();
+        $total = request()->input('total', 0);
+
+        // Get all active coupons
+        $coupons = Coupon::where('status', 1)
+            ->where(function ($query) use ($total) {
+                $query->whereNull('min_order_total')
+                    ->orWhere('min_order_total', '<=', $total);
+            })
+            ->get()
+            ->map(function ($coupon) use ($userId) {
+                // Check if user has already used this coupon
+                $hasUsed = CouponUser::where('user_id', $userId)
+                    ->where('coupon_id', $coupon->id)
+                    ->exists();
+
+                return [
+                    'id' => $coupon->id,
+                    'code' => $coupon->code,
+                    'type' => $coupon->type,
+                    'value' => $coupon->value,
+                    'min_order_total' => $coupon->min_order_total,
+                    'maximum_amount' => $coupon->maximum_amount,
+                    'is_used' => $hasUsed
+                ];
+            })
+            ->filter(function ($coupon) {
+                return !$coupon['is_used'];
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'coupons' => $coupons
+        ]);
     }
 }

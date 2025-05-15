@@ -19,6 +19,80 @@
             margin-top: 5px;
             color: #6c757d;
         }
+
+        .coupon-list-container {
+            scrollbar-width: thin;
+            scrollbar-color: #D9B867 #FFF6DC;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 1rem;
+        }
+
+        .coupon-list-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .coupon-list-container::-webkit-scrollbar-track {
+            background: #FFF6DC;
+        }
+
+        .coupon-list-container::-webkit-scrollbar-thumb {
+            background-color: #D9B867;
+            border-radius: 4px;
+        }
+
+        .coupon-card {
+            transition: all 0.3s ease;
+        }
+
+        .coupon-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .coupon-card.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .empty-coupon-state {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .empty-coupon-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #D9B867;
+        }
+
+        .empty-coupon-state small {
+            color: #bfa14a;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .empty-coupon-state small .fa-info-circle {
+            font-size: 1.1em !important;
+            margin-bottom: 0;
+            margin-right: 6px;
+            color: #bfa14a;
+        }
+
+        .coupon-icon {
+            color: #D9B867;
+            font-size: 1.2em;
+            vertical-align: middle;
+        }
     </style>
     <!-- breadcrumb -->
     <div class="bg-gray-13 bg-md-transparent">
@@ -231,6 +305,45 @@
 
 
                                 </table>
+
+                                <!-- Coupon Section -->
+                                <div class="border-top border-width-3 border-color-1 pt-3 mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h4 class="mb-0">Mã giảm giá</h4>
+                                        <button type="button" class="btn btn-link p-0" data-toggle="modal"
+                                            data-target="#couponModal">
+                                            <i class="fas fa-tags mr-1 coupon-icon"></i> Xem mã giảm giá
+                                        </button>
+                                    </div>
+
+                                    <div id="couponDisplay" class="mb-3">
+                                        @if ($appliedCoupon)
+                                            <div class="alert alert-success mb-0">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <i class="fas fa-check-circle mr-2"></i>
+                                                        Đã áp dụng mã: <strong>{{ $appliedCoupon['code'] }}</strong>
+                                                        @if ($appliedCoupon['type'] === 'percentage')
+                                                            ({{ $appliedCoupon['value'] }}%)
+                                                        @else
+                                                            ({{ number_format($appliedCoupon['value'], 0, ',', '.') }}₫)
+                                                        @endif
+                                                    </div>
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-danger remove-coupon">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="text-muted">
+                                                <i class="fas fa-info-circle mr-1"></i>
+                                                Chọn mã giảm giá để nhận ưu đãi
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
                                 <!-- Payment Methods -->
                                 <div class="border-top border-width-3 border-color-1 pt-3 mb-3">
                                     <div id="basicsAccordion1">
@@ -239,7 +352,8 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="vnpay"
                                                         name="payment_method" value="vn_pay" checked>
-                                                    <label class="custom-control-label form-label" for="vnpay">Thanh
+                                                    <label class="custom-control-label form-label"
+                                                        for="vnpay">Thanh
                                                         toán qua VNPay</label>
                                                 </div>
                                             </div>
@@ -413,4 +527,245 @@
         </script>
 
     </div>
+
+    <!-- Coupon Modal -->
+    <div class="modal fade" id="couponModal" tabindex="-1" role="dialog" aria-labelledby="couponModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="couponModalLabel">Mã giảm giá khả dụng</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Manual Coupon Input -->
+                    <div class="manual-coupon-section mb-4">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3">
+                                    <i class="fas fa-tags mr-2 coupon-icon"></i>
+                                    Bạn có mã giảm giá?
+                                </h6>
+                                <div class="input-group">
+                                    <input type="text" id="manualCouponInput" class="form-control"
+                                        placeholder="Nhập mã giảm giá của bạn...">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="button" id="applyManualCoupon">
+                                            Áp dụng
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-2 d-block">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Nhập mã giảm giá nếu bạn đã có
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter Section -->
+                    <div class="mb-4">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" id="couponSearch" class="form-control"
+                                        placeholder="Tìm kiếm mã giảm giá...">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="couponFilter" class="form-control">
+                                    <option value="all">Tất cả</option>
+                                    <option value="percentage">Giảm theo %</option>
+                                    <option value="fixed">Giảm theo số tiền</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coupons List with Fixed Height -->
+                    <div class="coupon-list-container" style="height: 500px; overflow-y: auto;">
+                        <div class="row" id="couponList">
+                            <!-- Coupons will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let allCoupons = []; // Store all coupons for filtering
+
+            // Load available coupons when modal opens
+            $('#couponModal').on('show.bs.modal', function() {
+                loadAvailableCoupons();
+            });
+
+            // Handle manual coupon input
+            $('#applyManualCoupon').on('click', function() {
+                const code = $('#manualCouponInput').val().trim();
+                if (code) {
+                    applyCoupon(code);
+                } else {
+                    alert('Vui lòng nhập mã giảm giá');
+                }
+            });
+
+            // Handle Enter key in manual coupon input
+            $('#manualCouponInput').on('keypress', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('#applyManualCoupon').click();
+                }
+            });
+
+            // Handle coupon removal
+            $('.remove-coupon').on('click', function() {
+                removeCoupon();
+            });
+
+            // Search functionality
+            $('#couponSearch').on('input', function() {
+                filterCoupons();
+            });
+
+            // Filter functionality
+            $('#couponFilter').on('change', function() {
+                filterCoupons();
+            });
+
+            function filterCoupons() {
+                const searchTerm = $('#couponSearch').val().toLowerCase();
+                const filterType = $('#couponFilter').val();
+
+                const filteredCoupons = allCoupons.filter(coupon => {
+                    const matchesSearch = coupon.code.toLowerCase().includes(searchTerm);
+                    const matchesFilter = filterType === 'all' || coupon.type === filterType;
+                    return matchesSearch && matchesFilter;
+                });
+
+                displayCoupons(filteredCoupons);
+            }
+
+            function displayCoupons(coupons) {
+                const couponList = document.getElementById('couponList');
+                couponList.innerHTML = '';
+
+                if (coupons.length === 0) {
+                    couponList.innerHTML = `
+                        <div class="col-12">
+                            <div class="empty-coupon-state">
+                                <i class="fas fa-tags fa-3x mb-3"></i>
+                                <h5 class="text-dark mb-2">Không có mã giảm giá khả dụng</h5>
+                                <p class="text-muted mb-0">Hiện tại không có mã giảm giá nào phù hợp với đơn hàng của bạn</p>
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Bạn có thể thử nhập mã giảm giá ở trên
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                coupons.forEach(coupon => {
+                    const discountText = coupon.type === 'percentage' ?
+                        `${coupon.value}%` :
+                        `${new Intl.NumberFormat('vi-VN').format(coupon.value)}₫`;
+
+                    const minOrderText = coupon.min_order_total ?
+                        `Đơn hàng tối thiểu ${new Intl.NumberFormat('vi-VN').format(coupon.min_order_total)}₫` :
+                        'Không giới hạn giá trị đơn hàng';
+
+                    const isDisabled = coupon.min_order_total > {{ $total }};
+
+                    couponList.innerHTML += `
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 coupon-card ${isDisabled ? 'disabled' : ''}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${coupon.code}</h5>
+                                    <p class="card-text">
+                                        <span class="badge badge-primary">Giảm ${discountText}</span>
+                                        <small class="d-block text-muted mt-2">${minOrderText}</small>
+                                    </p>
+                                    <button class="btn btn-outline-primary btn-sm apply-coupon" 
+                                            data-code="${coupon.code}"
+                                            ${isDisabled ? 'disabled' : ''}>
+                                        Áp dụng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Add event listeners to apply buttons
+                document.querySelectorAll('.apply-coupon').forEach(button => {
+                    button.addEventListener('click', function() {
+                        applyCoupon(this.dataset.code);
+                    });
+                });
+            }
+
+            function loadAvailableCoupons() {
+                fetch('{{ route('coupon.available') }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        allCoupons = data.coupons; // Store all coupons
+                        displayCoupons(allCoupons); // Display all coupons initially
+                    });
+            }
+
+            function applyCoupon(code) {
+                fetch('{{ route('coupon.apply') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            code: code
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Close modal
+                            $('#couponModal').modal('hide');
+                            // Reload page to update totals
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Có lỗi xảy ra khi áp dụng mã giảm giá');
+                        }
+                    });
+            }
+
+            function removeCoupon() {
+                fetch('{{ route('remove-coupon') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        }
+                    });
+            }
+        });
+    </script>
+
 </main>

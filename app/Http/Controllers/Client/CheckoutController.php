@@ -96,8 +96,7 @@ class CheckoutController extends Controller
                                 $cartItem->price = $item->productVariant ?
                                     ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
                                 return $cartItem;
-                            })
-                            ->toArray();
+                            });
                     }
 
                     Log::info('Cart items from database for selected items:', [
