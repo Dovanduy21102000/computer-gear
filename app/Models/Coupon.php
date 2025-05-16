@@ -8,46 +8,44 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Coupon extends Model
 {
-    use HasFactory, SoftDeletes;
+  use HasFactory, SoftDeletes;
 
-    protected $table = 'coupons'; 
-    protected $fillable = [
-      'name',
-      'code',
-      'type',
-      'price',
-      'maximum_amount',
-      'min_order_total',
-      'quantity',
-      'used_count',
-      'status',
-      'expire_date',
-    ];
+  protected $table = 'coupons';
+  protected $fillable = [
+    'name',
+    'code',
+    'type',
+    'price',
+    'maximum_amount',
+    'min_order_total',
+    'used_count',
+    'status',
+    'is_public',
+    'expire_date',
+    'quantity'
+  ];
 
-    public function users()
-    {
-        return $this->belongsToMany(User::class, 'coupon_user')->withTimestamps();
+  protected $casts = [
+    'expire_date' => 'datetime',
+    'is_public' => 'boolean',
+    'status' => 'boolean'
+  ];
+
+  public function checkAndUpdateStatus()
+  {
+    if ($this->quantity <= 0) {
+      $this->status = false;
+      $this->save();
     }
+  }
 
-    // public function checkAndUpdateStatus()
-    // {
-    //     if ($this->quantity <= 0) {
-    //         $this->update(['status' => 0]); // Cập nhật trạng thái thành ngưng hoạt động
-    //     }
-    // }
-
-    
-
-    // public function useCoupon()
-    // {
-    //     if ($this->quantity > 0) {
-    //         $this->decrement('quantity'); // Giảm số lượng còn lại
-    //         $this->increment('used_count'); // Tăng số lần sử dụng
-
-    //         // Kiểm tra nếu số lượng về 0, cập nhật trạng thái "ngưng hoạt động"
-    //         if ($this->quantity <= 0) {
-    //             $this->update(['status' => 0]);
-    //         }
-    //     }
-    // }
+  public function useCoupon()
+  {
+    $this->quantity--;
+    $this->used_count++;
+    if ($this->quantity <= 0) {
+      $this->status = false;
+    }
+    $this->save();
+  }
 }
