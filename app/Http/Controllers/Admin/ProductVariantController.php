@@ -38,7 +38,7 @@ public function store(Request $request, Product $product)
         'price'             => 'required|numeric',
         'price_sale'        => 'nullable|numeric',
         'quantity'          => 'required|integer',
-        'thumbnail'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'attributes'        => 'required|array',
         'attributes.*.key'   => 'required',
         'attributes.*.value' => 'required',
@@ -69,8 +69,8 @@ public function store(Request $request, Product $product)
                          ->with('success', 'Biến thể đã tồn tại, số lượng đã được cập nhật.');
     }
 
-    $thumbnailPath = $request->hasFile('thumbnail')
-        ? $request->file('thumbnail')->store('variants', 'public')
+    $imagePath = $request->hasFile('image')
+        ? $request->file('image')->store('variants', 'public')
         : null;
 
     $variant = $product->variants()->create([
@@ -78,7 +78,7 @@ public function store(Request $request, Product $product)
         'price'      => $validated['price'],
         'price_sale' => $validated['price_sale'] ?? null,
         'quantity'   => $validated['quantity'],
-        'image'      => $thumbnailPath,
+        'image'      => $imagePath,
         'status'     => 1, 
     ]);
 
@@ -149,8 +149,8 @@ public function store(Request $request, Product $product)
 
     public function destroy(Product $product, ProductVariant $variant)
     {
-        if ($variant->thumbnail) {
-            Storage::disk('public')->delete($variant->thumbnail);
+        if ($variant->image) {
+            Storage::disk('public')->delete($variant->image);
         }
         $variant->delete();
 
