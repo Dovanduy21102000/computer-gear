@@ -64,4 +64,19 @@ return [
 
     ],
 
+    'channels' => [
+        'checkout.*' => [
+            'driver' => 'pusher',
+            'app_id' => env('PUSHER_APP_ID'),
+            'key' => env('PUSHER_APP_KEY'),
+            'secret' => env('PUSHER_APP_SECRET'),
+            'app_cluster' => env('PUSHER_APP_CLUSTER'),
+            'options' => [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'encrypted' => true,
+                'useTLS' => true,
+            ],
+        ],
+    ],
+
 ];
