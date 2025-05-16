@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Events\CouponApplied;
+use App\Events\CheckoutSessionUpdated;
+use App\Models\CheckoutSession;
 
 class CartController extends Controller
 {
@@ -38,15 +40,15 @@ class CartController extends Controller
             ->get();
 
         // Log initial cart items
-        Log::info('Initial cart items', [
-            'items' => $cartItems->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'variant_id' => $item->product_variant_id
-                ];
-            })->toArray()
-        ]);
+        // Log::info('Initial cart items', [
+        //     'items' => $cartItems->map(function ($item) {
+        //         return [
+        //             'id' => $item->id,
+        //             'product_id' => $item->product_id,
+        //             'variant_id' => $item->product_variant_id
+        //         ];
+        //     })->toArray()
+        // ]);
 
         // Process each cart item to handle multiple variant IDs
         $processedItems = collect();
@@ -333,63 +335,121 @@ class CartController extends Controller
         }
 
         try {
-            foreach ($request->cart as $cartItem) {
-                $cartItemModel = CartItem::where('id', $cartItem['id'])->first();
+            DB::beginTransaction();
+
+            $userId = Auth::id();
+            $cart = Cart::where('user_id', $userId)->first();
+            $updatedItems = [];
+
+            foreach ($request->cart as $item) {
+                $cartItemModel = CartItem::with(['product', 'productVariant'])
+                    ->where('id', $item['id'])
+                    ->first();
 
                 if (!$cartItemModel) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Không tìm thấy sản phẩm trong giỏ hàng.'
-                    ], 404);
+                    continue;
                 }
 
-                $newQuantity = (int) $cartItem['quantity'];
+                $newQuantity = (int)$item['quantity'];
+                $maxQuantity = $cartItemModel->productVariant ?
+                    $cartItemModel->productVariant->quantity :
+                    $cartItemModel->product->quantity;
 
-                // Check if this is a variant product
-                if ($cartItemModel->product_variant_id) {
-                    $variant = ProductVariant::find($cartItemModel->product_variant_id);
-                    if (!$variant) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Biến thể sản phẩm không tồn tại.'
-                        ], 404);
-                    }
-
-                    // Check stock limit for variant
-                    if ($newQuantity > $variant->quantity) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Số lượng sản phẩm biến thể không đủ. Số lượng còn lại: ' . $variant->quantity
-                        ], 400);
-                    }
-                } else {
-                    $product = Product::findOrFail($cartItemModel->product_id);
-                    // Check stock limit for regular product
-                    if ($newQuantity > $product->quantity) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Số lượng sản phẩm không đủ. Số lượng còn lại: ' . $product->quantity
-                        ], 400);
-                    }
+                if ($newQuantity > $maxQuantity) {
+                    throw new \Exception('Số lượng sản phẩm vượt quá tồn kho.');
                 }
 
                 $cartItemModel->quantity = $newQuantity;
                 $cartItemModel->save();
+
+                // Add to updated items for broadcasting
+                $updatedItems[] = [
+                    'id' => $cartItemModel->id,
+                    'quantity' => $newQuantity,
+                    'price' => $cartItemModel->productVariant ?
+                        ($cartItemModel->productVariant->price_sale ?? $cartItemModel->productVariant->price) : ($cartItemModel->product->price_sale ?? $cartItemModel->product->price)
+                ];
             }
 
-            // Broadcast cart update event
-            event(new CartUpdated(Auth::id(), Cart::where('user_id', Auth::id())->first()->items()->count()));
+            // Calculate new totals
+            $subtotal = 0;
+            foreach ($updatedItems as $item) {
+                $subtotal += $item['price'] * $item['quantity'];
+            }
+
+            // Apply coupon if exists
+            $coupon = session('coupon');
+            $discount = 0;
+            if ($coupon) {
+                if ($coupon['type'] === 'percent') {
+                    $discount = min(
+                        $subtotal * ($coupon['price'] / 100),
+                        $coupon['maximum_amount'] ?? $subtotal
+                    );
+                } else {
+                    $discount = min($coupon['price'], $subtotal);
+                }
+            }
+
+            $total = max(0, $subtotal - $discount);
+
+            // Broadcast cart update event only for cart page
+            event(new CartUpdated($userId, $cart->items()->count()));
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Cập nhật giỏ hàng thành công!'
+                'message' => 'Cập nhật giỏ hàng thành công!',
+                'data' => [
+                    'items' => $updatedItems,
+                    'subtotal' => $subtotal,
+                    'discount' => $discount,
+                    'total' => $total,
+                    'coupon' => $coupon ? [
+                        'code' => $coupon['code'],
+                        'type' => $coupon['type'],
+                        'price' => $coupon['price'],
+                        'maximum_amount' => $coupon['maximum_amount'] ?? null
+                    ] : null
+                ]
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
-            ], 500);
+            ], 400);
         }
+    }
+
+    private function getCartItems($user)
+    {
+        return Cart::where('user_id', $user->id)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'quantity' => $item->quantity,
+                    'price' => $item->productVariant
+                        ? ($item->productVariant->price_sale ?? $item->productVariant->price)
+                        : ($item->product->price_sale ?? $item->product->price),
+                ];
+            })->toArray();
+    }
+
+    private function calculateTotal($user)
+    {
+        return Cart::where('user_id', $user->id)
+            ->get()
+            ->sum(function ($item) {
+                $price = $item->productVariant
+                    ? ($item->productVariant->price_sale ?? $item->productVariant->price)
+                    : ($item->product->price_sale ?? $item->product->price);
+                return $item->quantity * $price;
+            });
     }
 
     public function remove(Request $request, $id)
@@ -558,5 +618,44 @@ class CartController extends Controller
     {
         session()->forget('coupon');
         return response()->json(['success' => true]);
+    }
+
+    public function checkChanges(Request $request)
+    {
+        try {
+            $initialState = $request->input('initial_state', []);
+            $userId = Auth::id();
+            $cart = Cart::where('user_id', $userId)->first();
+
+            if (!$cart) {
+                return response()->json(['has_changes' => false]);
+            }
+
+            $currentItems = CartItem::where('cart_id', $cart->id)
+                ->whereIn('id', array_keys($initialState))
+                ->get();
+
+            foreach ($currentItems as $item) {
+                $initialItem = $initialState[$item->id] ?? null;
+                if (!$initialItem) {
+                    return response()->json(['has_changes' => true]);
+                }
+
+                if ($item->quantity != $initialItem['quantity']) {
+                    return response()->json(['has_changes' => true]);
+                }
+
+                $currentPrice = $item->productVariant ?
+                    ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
+
+                if ($currentPrice != $initialItem['price']) {
+                    return response()->json(['has_changes' => true]);
+                }
+            }
+
+            return response()->json(['has_changes' => false]);
+        } catch (\Exception $e) {
+            return response()->json(['has_changes' => false]);
+        }
     }
 }

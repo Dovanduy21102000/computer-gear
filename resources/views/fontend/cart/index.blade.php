@@ -218,6 +218,8 @@
 
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
+                    const userId = {{ auth()->id() }};
+
                     document.getElementById('select-all').addEventListener('click', function(event) {
                         document.querySelectorAll('.select-item').forEach(checkbox => {
                             checkbox.checked = event.target.checked;
@@ -327,17 +329,45 @@
                                             // Store the new value as the default for future changes
                                             this.defaultValue = newQuantity;
                                         }
+
+                                        // Show success message
+                                        const toast = Swal.mixin({
+                                            toast: true,
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 3000,
+                                            timerProgressBar: true
+                                        });
+
+                                        toast.fire({
+                                            icon: 'success',
+                                            title: data.message ||
+                                                'Cập nhật giỏ hàng thành công!'
+                                        });
                                     } else {
-                                        alert(data.message || 'Có lỗi xảy ra khi cập nhật số lượng.');
-                                        // Reset to previous value
-                                        this.value = originalValue;
+                                        throw new Error(data.message ||
+                                            'Có lỗi xảy ra khi cập nhật số lượng.');
                                     }
                                 })
                                 .catch(error => {
                                     console.error('Error:', error);
-                                    alert('Có lỗi xảy ra khi cập nhật số lượng. Vui lòng thử lại.');
                                     // Reset to previous value
                                     this.value = originalValue;
+
+                                    // Show error message
+                                    const toast = Swal.mixin({
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 3000,
+                                        timerProgressBar: true
+                                    });
+
+                                    toast.fire({
+                                        icon: 'error',
+                                        title: error.message ||
+                                            'Có lỗi xảy ra khi cập nhật số lượng. Vui lòng thử lại.'
+                                    });
                                 });
                         });
 
@@ -373,7 +403,7 @@
                     // Add WebSocket listener for cart updates
                     if (window.Echo) {
                         window.Echo.private(`cart.${userId}`)
-                            .listen('.CartUpdated', (e) => {
+                            .listen('CartUpdated', (e) => {
                                 console.log('Cart updated:', e);
 
                                 // Update cart badge count
@@ -398,6 +428,13 @@
                                         });
                                 }
                             });
+                    }
+
+                    function formatPrice(price) {
+                        return new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                        }).format(price);
                     }
                 });
             </script>
