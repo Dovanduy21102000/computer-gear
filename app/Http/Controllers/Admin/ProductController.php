@@ -13,6 +13,7 @@ use App\Models\ProductVariantAttributeValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -168,6 +169,10 @@ class ProductController extends Controller
     {
         $product = Product::with(['category', 'brand', 'variants.attributeValues.attribute'])->findOrFail($id);
         $albumImages = \App\Models\ProductImage::where('product_id', $id)->first()?->images ?: [];
+        Log::debug('SHOW PRODUCT DATA', [
+            'product' => $product->toArray(),
+            'albumImages' => $albumImages
+        ]);
         $template = 'backend.products.show';
         return view('backend.dashboard.layout', compact('product', 'template', 'albumImages'));
     }
