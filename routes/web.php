@@ -156,6 +156,12 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
         Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
     });
+
+    // Coupon Distribution Routes
+    Route::get('coupon-distribution', [App\Http\Controllers\Admin\CouponDistributionController::class, 'index'])->name('coupon-distribution.index');
+    Route::get('coupon-distribution/{id}', [App\Http\Controllers\Admin\CouponDistributionController::class, 'show'])->name('coupon-distribution.show');
+    Route::post('coupon-distribution/{id}/assign', [App\Http\Controllers\Admin\CouponDistributionController::class, 'assignUsers'])->name('coupon-distribution.assign');
+    Route::get('coupon-distribution/users/available', [App\Http\Controllers\Admin\CouponDistributionController::class, 'getAvailableUsers'])->name('coupon-distribution.get-available-users');
 });
 
 
