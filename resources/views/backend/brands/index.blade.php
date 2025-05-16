@@ -23,7 +23,7 @@
                             <table class="table datatable table-bordered">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th class="text-center">ID</th>
+                                        <th class="text-center">STT</th>
                                         <th class="text-center">Tên thương hiệu</th>
                                         <th class="text-center">Logo</th>
                                         <th class="text-center">Trạng thái</th>
@@ -33,7 +33,7 @@
                                 <tbody>
                                     @foreach ($data as $item)
                                         <tr>
-                                            <td class="text-center">{{ $item->id }}</td>
+                                             <td class="text-center">{{ $loop->iteration }}</td>
                                             <td class="text-center">{{ $item->name }}</td>
                                             <td class="text-center">
                                                 <img src="{{ $item->logo ? asset('storage/' . $item->logo) : asset('backend/img/mvc_logo.png') }}" 

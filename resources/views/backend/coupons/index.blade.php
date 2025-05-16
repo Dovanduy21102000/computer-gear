@@ -32,7 +32,7 @@
                                 <table class="table datatable">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
+                                            <th>STT</th>
                                             <th>Tên</th>
                                             <th>Mã</th>
                                             <th>Loại</th>
@@ -46,7 +46,7 @@
                                     <tbody>
                                         @foreach ($coupons as $coupon)
                                             <tr>
-                                                <td>{{ $coupon->id }}</td>
+                                                 <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td>{{ $coupon->name }}</td>
                                                 <td>{{ $coupon->code }}</td>
                                                 <td>{{ $coupon->type == 'percent' ? 'Phần trăm' : 'Cố định' }}</td>
