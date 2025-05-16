@@ -15,6 +15,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\PaymentAttempt;
 
 class VNPayController extends Controller
 {
@@ -135,6 +136,19 @@ class VNPayController extends Controller
 
             // Generate a unique order code using structured timestamp without separators
             $orderCode = date('YmdHis') . rand(100, 999);
+
+            // Store payment attempt
+            PaymentAttempt::create([
+                'user_id' => $userId,
+                'payment_method' => 'vn_pay',
+                'order_code' => $orderCode,
+                'amount' => $finalPrice,
+                'status' => 'pending',
+                'selected_items' => $selectedItemIds ?? null,
+                'shipping_info' => session('vnpay_shipping_info'),
+                'coupon_info' => $coupon,
+                'expires_at' => now()->addHours(24)
+            ]);
 
             // VNPay payment request
             $amount = (int)($finalPrice * 100); // VNPay expects amount in VND * 100
@@ -406,8 +420,6 @@ class VNPayController extends Controller
                     } else {
                         $item->product->decrement('quantity', $item->quantity);
                     }
-
-                    $item->delete();
                 }
             }
 
@@ -419,6 +431,13 @@ class VNPayController extends Controller
             session()->forget('buy_now_item');
 
             DB::commit();
+
+            // Delete cart items AFTER successful transaction
+            if (isset($cartItems)) {
+                foreach ($cartItems as $item) {
+                    $item->delete();
+                }
+            }
 
             return redirect()->route('checkout.success', ['order_id' => $order->id])
                 ->with('success', 'Đặt hàng thành công!');

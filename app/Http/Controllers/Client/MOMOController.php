@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\PaymentAttempt;
 
 class MOMOController extends Controller
 {
@@ -110,6 +111,19 @@ class MOMOController extends Controller
             // Generate a unique order code using structured timestamp without separators
             $orderCode = date('YmdHis') . rand(100, 999);
 
+            // Store payment attempt
+            PaymentAttempt::create([
+                'user_id' => $userId,
+                'payment_method' => 'momo',
+                'order_code' => $orderCode,
+                'amount' => $finalPrice,
+                'status' => 'pending',
+                'selected_items' => $selectedItemIds,
+                'shipping_info' => session('momo_shipping_info'),
+                'coupon_info' => $coupon,
+                'expires_at' => now()->addHours(24)
+            ]);
+
             // Create payment request
             $endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
             $partnerCode = 'MOMOBKUN20180529';
@@ -120,7 +134,7 @@ class MOMOController extends Controller
             $orderId = $orderCode;
             $redirectUrl = route('momo.return');
             $ipnUrl = route('momo.ipn');
-            $extraData = json_encode(['selected_items' => $selectedItemIds]); // Store selected items in extraData
+            $extraData = json_encode(['selected_items' => $selectedItemIds]);
 
             $requestId = time() . "";
             $requestType = "payWithCC";
@@ -345,9 +359,6 @@ class MOMOController extends Controller
                 } else {
                     $item->product->decrement('quantity', $item->quantity);
                 }
-
-                // Delete only this specific cart item
-                $item->delete();
             }
 
             // Clear sessions
@@ -357,6 +368,11 @@ class MOMOController extends Controller
             session()->forget('buy_now_item');
 
             DB::commit();
+
+            // Delete cart items AFTER successful transaction
+            foreach ($cartItems as $item) {
+                $item->delete();
+            }
 
             return redirect()->route('checkout.success', ['order_id' => $order->id])
                 ->with('success', 'Đặt hàng thành công!');
