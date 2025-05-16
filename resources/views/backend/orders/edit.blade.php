@@ -173,29 +173,27 @@
                             <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label">Trạng thái đơn hàng</label>
                                 <div class="col-sm-10">
-                                    <select name="status" class="form-select">
-                                        <!-- Trạng thái "pending" chỉ có thể chuyển sang "processing" hoặc "canceled" -->
-                                        @if ($order->status == 'pending')
+                                    <select name="status" class="form-select"
+                                        {{ $order->status === 'success' ? 'disabled' : '' }}>
+                                        @if ($order->status === 'pending')
                                             <option value="pending" selected>Chờ xử lý</option>
                                             <option value="processing">Đang xử lý</option>
                                             <option value="canceled">Hủy đơn</option>
-                                            <!-- Trạng thái "processing" chỉ có thể chuyển sang "delivered" hoặc "canceled" -->
-                                        @elseif($order->status == 'processing')
+                                        @elseif ($order->status === 'processing')
                                             <option value="processing" selected>Đang xử lý</option>
                                             <option value="delivered">Đang giao hàng</option>
                                             <option value="canceled">Hủy đơn</option>
-                                            <!-- Trạng thái "delivered" không thể quay lại trạng thái "processing", chỉ có thể chuyển sang "completed","delivered" hoặc "canceled" -->
-                                        @elseif($order->status == 'delivered')
+                                        @elseif ($order->status === 'delivered')
                                             <option value="delivered" selected>Đang giao hàng</option>
+                                            <option value="completed">Đã giao hàng</option>
+                                            <option value="canceled">Hủy đơn</option>
+                                        @elseif ($order->status === 'completed')
                                             <option value="completed" selected>Đã giao hàng</option>
-                                            
-                                            <!-- Trạng thái "completed" không thể thay đổi, chỉ có thể giữ nguyên -->
-                                        @elseif($order->status == 'completed')
-                                            <option value="completed" selected>Đã giao hàng</option>
-                                            <!-- Trạng thái "canceled" có thể quay lại "pending", "processing", hoặc "delivered" -->
-                                        
-                                        @elseif($order->status == 'canceled')
-                                            <option value="canceled" selected>Hủy đơn</option>
+                                            <option value="success">Hoàn thành</option>
+                                        @elseif ($order->status === 'success')
+                                            <option value="success" selected>Hoàn thành</option>
+                                        @elseif ($order->status === 'canceled')
+                                            <option value="canceled" selected>Đã hủy</option>
                                             <option value="pending">Chờ xử lý</option>
                                             <option value="processing">Đang xử lý</option>
                                             <option value="delivered">Đang giao hàng</option>
@@ -203,7 +201,6 @@
                                     </select>
                                 </div>
                             </div>
-
                             <!-- Phương thức thanh toán -->
                             <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label">Phương thức thanh toán</label>
