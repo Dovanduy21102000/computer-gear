@@ -80,10 +80,10 @@
                                                             : ($order->status === 'completed'
                                                                 ? 'Đã giao hàng'
                                                                 : ($order->status === 'success'
-                                                                    ? 'Đã nhận hàng'
-                                                                : ($order->status === 'canceled'
-                                                                    ? 'Hủy đơn'
-                                                                    : ''))))) }}
+                                                                    ? 'Hoàn thành'
+                                                                    : ($order->status === 'canceled'
+                                                                        ? 'Hủy đơn'
+                                                                        : ''))))) }}
                                             </span>
                                         </td>
                                         <td>

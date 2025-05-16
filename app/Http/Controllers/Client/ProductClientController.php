@@ -234,9 +234,10 @@ class ProductClientController extends Controller
                 $child->total_products = $child->products->count();
             }
         }
+        $newProduct = $this->getNewProduct();
         $template = 'fontend.products.index';
 
-        return view('fontend.layout', compact('template', 'products', 'category', 'categories', 'brands'));
+        return view('fontend.layout', compact('template', 'products', 'category', 'categories', 'brands','newProduct'));
     }
 
 
@@ -251,10 +252,11 @@ class ProductClientController extends Controller
         $categories = Category::where('is_active', true)->whereNull('parent_id')->with('children')->get();
 
         $brands = Brand::all();
+         $newProduct = $this->getNewProduct();
 
         $template = 'fontend.products.index';
 
-        return view('fontend.layout', compact('template', 'products', 'categories', 'brand', 'brands'));
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brand', 'brands','newProduct'));
     }
 
     public function search(Request $request)
@@ -311,9 +313,9 @@ class ProductClientController extends Controller
             ->get();
 
         $brands = Brand::where('is_active', 1)->get();
-
+        $newProduct = $this->getNewProduct();
         $template = 'fontend.products.index';
 
-        return view('fontend.layout', compact('template', 'products', 'categories', 'brands'));
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brands','newProduct'));
     }
 }

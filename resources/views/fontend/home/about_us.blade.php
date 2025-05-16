@@ -1,6 +1,6 @@
 <!-- ========== MAIN CONTENT ========== -->
 <main id="content" role="main">
-    <div class="bg-img-hero mb-14" style="background-image: url(public/fontend/assets/img/1920x600/img1.jpg);">
+    <div class="bg-img-hero mb-14" style="background-image: url(fontend/assets/img/1920x600/img1.jpg);">
         <div class="container">
             <div class="flex-content-center max-width-620-lg flex-column mx-auto text-center min-height-564">
                 <h1 class="h1 font-weight-bold">Về Chúng Tôi</h1>
@@ -12,7 +12,7 @@
         <div class="row">
             <div class="col-md-4 mb-4 mb-md-0">
                 <div class="card mb-3 border-0 text-center rounded-0">
-                    <img class="img-fluid mb-3" src="public/fontend/assets/img/500X300/img1.jpg" alt="Card image cap">
+                    <img class="img-fluid mb-3" src="fontend/assets/img/500X300/img1.jpg" alt="Card image cap">
                     <div class="card-body">
                         <h5 class="font-size-18 font-weight-semi-bold mb-3">Chúng Tôi Làm Gì?</h5>
                         <p class="text-gray-90 max-width-334 mx-auto">Chúng tôi cung cấp các sản phẩm máy tính và phụ kiện công nghệ chất lượng cao, từ laptop, PC cho đến bàn phím, chuột và các thiết bị ngoại vi khác.</p>
@@ -21,7 +21,7 @@
             </div>
             <div class="col-md-4 mb-4 mb-md-0">
                 <div class="card mb-3 border-0 text-center rounded-0">
-                    <img class="img-fluid mb-3" src="public/fontend/assets/img/500X300/img2.jpg" alt="Card image cap">
+                    <img class="img-fluid mb-3" src="fontend/assets/img/500X300/img2.jpg" alt="Card image cap">
                     <div class="card-body">
                         <h5 class="font-size-18 font-weight-semi-bold mb-3">Tầm Nhìn Của Chúng Tôi</h5>
                         <p class="text-gray-90 max-width-334 mx-auto">Chúng tôi mong muốn trở thành đơn vị cung cấp các sản phẩm công nghệ hàng đầu tại Việt Nam, với chất lượng đảm bảo và giá cả hợp lý.</p>
@@ -30,7 +30,7 @@
             </div>
             <div class="col-md-4">
                 <div class="card mb-3 border-0 text-center rounded-0">
-                    <img class="img-fluid mb-3" src="public/fontend/assets/img/500X300/img3.jpg" alt="Card image cap">
+                    <img class="img-fluid mb-3" src="fontend/assets/img/500X300/img3.jpg" alt="Card image cap">
                     <div class="card-body">
                         <h5 class="font-size-18 font-weight-semi-bold mb-3">Lịch Sử Thành Lập</h5>
                         <p class="text-gray-90 max-width-334 mx-auto">Chúng tôi bắt đầu từ một nhóm đam mê công nghệ, mang đến những sản phẩm máy tính chất lượng cao với mức giá hợp lý để phục vụ cộng đồng yêu thích công nghệ.</p>
@@ -43,32 +43,32 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-5 mb-xl-0 col-xl text-center">
-                    <img class="img-fluid mb-3 rounded-circle" src="public/fontend/assets/img/300X300/img16.jpg" alt="Card image cap">
+                    <img class="img-fluid mb-3 rounded-circle" src="fontend/assets/img/300X300/img16.jpg" alt="Card image cap">
                     <h2 class="font-size-18 font-weight-semi-bold mb-0">Nguyễn Minh Tuấn</h2>
                     <span class="text-gray-41">Giám Đốc/Founder</span>
                 </div>
                 <div class="col-md-4 mb-5 mb-xl-0 col-xl text-center">
-                    <img class="img-fluid mb-3 rounded-circle" src="public/fontend/assets/img/300X300/img17.jpg" alt="Card image cap">
+                    <img class="img-fluid mb-3 rounded-circle" src="fontend/assets/img/300X300/img17.jpg" alt="Card image cap">
                     <h2 class="font-size-18 font-weight-semi-bold mb-0">Mai Lan Anh</h2>
                     <span class="text-gray-41">Chăm Sóc Khách Hàng</span>
                 </div>
                 <div class="col-md-4 mb-5 mb-xl-0 col-xl text-center">
-                    <img class="img-fluid mb-3 rounded-circle" src="public/fontend/assets/img/300X300/img18.jpg" alt="Card image cap">
+                    <img class="img-fluid mb-3 rounded-circle" src="fontend/assets/img/300X300/img18.jpg" alt="Card image cap">
                     <h2 class="font-size-18 font-weight-semi-bold mb-0">Hoàng Nam</h2>
                     <span class="text-gray-41">Hỗ Trợ Kỹ Thuật</span>
                 </div>
                 <div class="col-md-4 mb-5 mb-xl-0 col-xl text-center">
-                    <img class="img-fluid mb-3 rounded-circle" src="public/fontend/assets/img/300X300/img19.jpg" alt="Card image cap">
+                    <img class="img-fluid mb-3 rounded-circle" src="fontend/assets/img/300X300/img19.jpg" alt="Card image cap">
                     <h2 class="font-size-18 font-weight-semi-bold mb-0">Phạm Hương</h2>
                     <span class="text-gray-41">Vận Chuyển</span>
                 </div>
                 <div class="col-md-4 mb-5 mb-xl-0 col-xl text-center">
-                    <img class="img-fluid mb-3 rounded-circle" src="public/fontend/assets/img/300X300/img20.jpg" alt="Card image cap">
+                    <img class="img-fluid mb-3 rounded-circle" src="fontend/assets/img/300X300/img20.jpg" alt="Card image cap">
                     <h2 class="font-size-18 font-weight-semi-bold mb-0">Trần Duy</h2>
                     <span class="text-gray-41">Đóng Gói</span>
                 </div>
                 <div class="col-md-4 mb-5 mb-xl-0 col-xl text-center">
-                    <img class="img-fluid mb-3 rounded-circle" src="public/fontend/assets/img/300X300/img21.png" alt="Card image cap">
+                    <img class="img-fluid mb-3 rounded-circle" src="fontend/assets/img/300X300/img21.png" alt="Card image cap">
                     <h2 class="font-size-18 font-weight-semi-bold mb-0">Xem Chi Tiết</h2>
                 </div>
             </div>
