@@ -804,6 +804,7 @@ class CheckoutController extends Controller
 
             // Create temporary cart item for checkout
             $cartItem = new \stdClass();
+            $cartItem->id = 'buy_now_' . time(); // Add a unique ID
             $cartItem->product = $product;
             $cartItem->productVariant = $productVariantId ? ProductVariant::with(['attributeValues.attribute'])->find($productVariantId) : null;
             $cartItem->quantity = $request->quantity;

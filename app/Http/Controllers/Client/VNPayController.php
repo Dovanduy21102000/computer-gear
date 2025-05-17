@@ -210,6 +210,9 @@ class VNPayController extends Controller
 
             $existingOrder = Order::where('code', $request->vnp_TxnRef)->first();
             if ($existingOrder) {
+                // Mark payment attempt as completed
+                \App\Models\PaymentAttempt::where('order_code', $existingOrder->code)
+                    ->update(['status' => 'completed']);
                 Log::info('Order already processed:', ['order_id' => $existingOrder->id]);
                 return redirect()->route('checkout.success', ['order_id' => $existingOrder->id])
                     ->with('success', 'Đặt hàng thành công!');
@@ -438,6 +441,10 @@ class VNPayController extends Controller
                     $item->delete();
                 }
             }
+
+            // Mark payment attempt as completed
+            \App\Models\PaymentAttempt::where('order_code', $order->code)
+                ->update(['status' => 'completed']);
 
             return redirect()->route('checkout.success', ['order_id' => $order->id])
                 ->with('success', 'Đặt hàng thành công!');

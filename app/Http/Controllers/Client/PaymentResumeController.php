@@ -13,13 +13,13 @@ class PaymentResumeController extends Controller
     public function index()
     {
         $userId = Auth::id();
-        $pendingPayments = PaymentAttempt::where('user_id', $userId)
-            ->where('status', 'pending')
+        $allPayments = PaymentAttempt::where('user_id', $userId)
             ->where('expires_at', '>', now())
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('fontend.payment.resume', compact('pendingPayments'));
+        $template = 'fontend.payment.resume';
+        return view('fontend.layout', ['allPayments' => $allPayments, 'template' => $template]);
     }
 
     public function resume($id)
@@ -37,13 +37,12 @@ class PaymentResumeController extends Controller
             'coupon' => $paymentAttempt->coupon_info
         ]);
 
-        // Redirect to appropriate payment method
         if ($paymentAttempt->payment_method === 'momo') {
             session(['momo_selected_items' => $paymentAttempt->selected_items]);
-            return redirect()->route('momo.create');
+            return view('fontend.payment.resume_momo_post');
         } else if ($paymentAttempt->payment_method === 'vn_pay') {
             session(['vnpay_selected_items' => $paymentAttempt->selected_items]);
-            return redirect()->route('vnpay.create');
+            return view('fontend.payment.resume_vnpay_post');
         }
 
         return back()->with('error', 'Phương thức thanh toán không hợp lệ.');

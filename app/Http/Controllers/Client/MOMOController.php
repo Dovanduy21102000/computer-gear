@@ -328,6 +328,10 @@ class MOMOController extends Controller
                 'notes' => session('momo_shipping_info.notes'),
             ]);
 
+            // Mark payment attempt as completed
+            \App\Models\PaymentAttempt::where('order_code', $order->code)
+                ->update(['status' => 'completed']);
+
             // Record coupon usage
             if ($couponId) {
                 CouponUser::create([
