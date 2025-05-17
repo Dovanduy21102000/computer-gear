@@ -130,7 +130,7 @@
 
     <div class="container">
         <!-- Checkout Navigation -->
-        <div class="checkout-navigation">
+        {{-- <div class="checkout-navigation">
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <div class="alert alert-info mb-0" role="alert">
@@ -148,7 +148,7 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <div class="mb-5">
             <h1 class="text-center">Thanh toán đơn hàng</h1>
@@ -361,8 +361,7 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="momo"
                                                         name="payment_method" value="momo">
-                                                    <label class="custom-control-label form-label"
-                                                        for="momo">Thanh
+                                                    <label class="custom-control-label form-label" for="momo">Thanh
                                                         toán qua MoMo</label>
                                                 </div>
                                             </div>
