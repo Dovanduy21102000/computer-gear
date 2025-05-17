@@ -14,6 +14,7 @@
                 'canceled' => 'Đã huỷ',
                 'pending_cancel' => 'Chờ duyệt',
             ];
+
         @endphp
 
         @foreach ($orderTabs as $key => $label)
@@ -42,22 +43,41 @@
                             <thead class="thead-light">
                                 <tr class="bg-light">
                                     <th class="text-uppercase small">Mã đơn</th>
+                                    <th class="text-uppercase small">Người đặt</th>
+                                    <th class="text-uppercase small">Địa chỉ</th>
                                     <th class="text-uppercase small">Ngày đặt</th>
+                                    <th class="text-uppercase small">Trạng thái thanh toán</th>
                                     <th class="text-uppercase small">Tổng tiền</th>
-                                     @if ($statusKey === 'completed')
-                                                <th class="text-uppercase small">Hàng động</th>
-                                            
-                                            @endif
-                                    
+                                    @if ($statusKey === 'completed')
+                                        <th class="text-uppercase small">Hành động</th>
+                                    @endif
+
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($ordersByStatus as $order)
+                                    @php
+                                        $paymentText = match ($order->payment_method) {
+                                            'cash' => 'Thanh toán khi nhận hàng',
+                                            'momo' => 'Đã thanh toán',
+                                            'vn_pay' => 'Đã thanh toán',
+                                            default => 'Chưa rõ',
+                                        };
+                                    @endphp
                                     <tr>
                                         <td class=" font-weight-bold"><a
-                                                href="{{ route('client.orders.show', $order->code) }}" class="text-dark">#{{ $order->code }}</a>
+                                                href="{{ route('client.orders.show', $order->code) }}"
+                                                class="text-dark">#{{ $order->code }}</a>
+                                        </td>
+                                        <td class=" font-weight-bold"><a
+                                                class="text-dark">{{ $order->shipping_user_name }}</a>
+                                        </td>
+                                        <td class=" font-weight-bold"><a
+                                                class="text-dark">{{ $order->shipping_address }}</a>
                                         </td>
                                         <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                                        <td class=" font-weight-bold"><a class="text-dark">{{ $paymentText }}</a>
+                                        </td>
                                         <td class="text-danger">{{ number_format($order->final_price, 0, ',', '.') }}₫
                                         </td>
                                         <td>
@@ -70,7 +90,6 @@
                                                     <button type="submit" class="btn btn-success">✅ Đã nhận
                                                         hàng</button>
                                                 </form>
-                                            
                                             @endif
                                         </td>
 
