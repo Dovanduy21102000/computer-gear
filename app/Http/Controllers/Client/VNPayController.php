@@ -27,12 +27,21 @@ class VNPayController extends Controller
                 return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
             }
 
+            // Restore coupon from request if present
+            if ($request->has('coupon')) {
+                $couponData = is_string($request->coupon) ? json_decode($request->coupon, true) : $request->coupon;
+                session(['coupon' => $couponData]);
+            }
+
+            // Log the coupon state
+            Log::info('VNPay - Coupon state at payment creation:', [
+                'coupon_in_request' => $request->coupon,
+                'coupon_in_session' => session('coupon')
+            ]);
+
             // Check for buy now item first
             $buyNowItem = session('buy_now_item');
             if ($buyNowItem) {
-                // Store buy now item in session for later use
-                session(['vnpay_buy_now_item' => $buyNowItem]);
-
                 // Calculate total price for buy now item
                 $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
 
@@ -41,20 +50,40 @@ class VNPayController extends Controller
                 $couponDiscount = 0;
                 $couponId = null;
 
-                if ($coupon) {
-                    if ($totalPrice >= $coupon['min_order_total']) {
-                        if ($coupon['type'] === 'percentage') {
-                            $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                if ($coupon && is_array($coupon)) {
+                    if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
+                        if ($coupon['type'] === 'percent') {
+                            // Calculate percentage discount
+                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                            // Apply maximum amount limit if set
+                            $couponDiscount = isset($coupon['maximum_amount']) ?
+                                min($percentageDiscount, $coupon['maximum_amount']) :
+                                $percentageDiscount;
                         } else {
-                            $couponDiscount = min($totalPrice, $coupon['value']);
+                            $couponDiscount = min($coupon['price'], $totalPrice);
                         }
                         $couponId = $coupon['id'];
                     }
                 }
 
                 $finalPrice = max(0, $totalPrice - $couponDiscount);
+
+                // Log price calculations
+                Log::info('VNPay - Price calculations (Buy Now):', [
+                    'totalPrice' => $totalPrice,
+                    'coupon' => $coupon,
+                    'couponDiscount' => $couponDiscount,
+                    'finalPrice' => $finalPrice
+                ]);
+
+                // Store buy now item in session for later use
+                session(['vnpay_buy_now_item' => $buyNowItem]);
+
+                if ($finalPrice < 10000) {
+                    return redirect('/')->with('error', 'Số tiền giao dịch không hợp lệ. Số tiền hợp lệ phải từ 10.000 VND trở lên.');
+                }
             } else {
-                // Handle regular cart items
+                // Regular cart items logic
                 $cart = Cart::where('user_id', $userId)->first();
                 if (!$cart) {
                     return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống');
@@ -109,18 +138,35 @@ class VNPayController extends Controller
                 $couponDiscount = 0;
                 $couponId = null;
 
-                if ($coupon) {
-                    if ($totalPrice >= $coupon['min_order_total']) {
-                        if ($coupon['type'] === 'percentage') {
-                            $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                if ($coupon && is_array($coupon)) {
+                    if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
+                        if ($coupon['type'] === 'percent') {
+                            // Calculate percentage discount
+                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                            // Apply maximum amount limit if set
+                            $couponDiscount = isset($coupon['maximum_amount']) ?
+                                min($percentageDiscount, $coupon['maximum_amount']) :
+                                $percentageDiscount;
                         } else {
-                            $couponDiscount = min($totalPrice, $coupon['value']);
+                            $couponDiscount = min($coupon['price'], $totalPrice);
                         }
                         $couponId = $coupon['id'];
                     }
                 }
 
                 $finalPrice = max(0, $totalPrice - $couponDiscount);
+
+                // Log price calculations
+                Log::info('VNPay - Price calculations:', [
+                    'totalPrice' => $totalPrice,
+                    'coupon' => $coupon,
+                    'couponDiscount' => $couponDiscount,
+                    'finalPrice' => $finalPrice
+                ]);
+
+                if ($finalPrice < 10000) {
+                    return redirect('/')->with('error', 'Số tiền giao dịch không hợp lệ. Số tiền hợp lệ phải từ 10.000 VND trở lên.');
+                }
             }
 
             // Store shipping info in session
@@ -236,12 +282,17 @@ class VNPayController extends Controller
                 $couponDiscount = 0;
                 $couponId = null;
 
-                if ($coupon) {
-                    if ($totalPrice >= $coupon['min_order_total']) {
-                        if ($coupon['type'] === 'percentage') {
-                            $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                if ($coupon && is_array($coupon)) {
+                    if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
+                        if ($coupon['type'] === 'percent') {
+                            // Calculate percentage discount
+                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                            // Apply maximum amount limit if set
+                            $couponDiscount = isset($coupon['maximum_amount']) ?
+                                min($percentageDiscount, $coupon['maximum_amount']) :
+                                $percentageDiscount;
                         } else {
-                            $couponDiscount = min($totalPrice, $coupon['value']);
+                            $couponDiscount = min($coupon['price'], $totalPrice);
                         }
                         $couponId = $coupon['id'];
                     }
@@ -353,12 +404,17 @@ class VNPayController extends Controller
                 $couponDiscount = 0;
                 $couponId = null;
 
-                if ($coupon) {
-                    if ($totalPrice >= $coupon['min_order_total']) {
-                        if ($coupon['type'] === 'percentage') {
-                            $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                if ($coupon && is_array($coupon)) {
+                    if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
+                        if ($coupon['type'] === 'percent') {
+                            // Calculate percentage discount
+                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                            // Apply maximum amount limit if set
+                            $couponDiscount = isset($coupon['maximum_amount']) ?
+                                min($percentageDiscount, $coupon['maximum_amount']) :
+                                $percentageDiscount;
                         } else {
-                            $couponDiscount = min($totalPrice, $coupon['value']);
+                            $couponDiscount = min($coupon['price'], $totalPrice);
                         }
                         $couponId = $coupon['id'];
                     }

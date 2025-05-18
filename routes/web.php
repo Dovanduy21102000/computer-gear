@@ -235,9 +235,9 @@ Route::middleware(['web'])->group(function () {
     //
 
     // Payment Resume Routes
-    Route::get('/payment/resume', [App\Http\Controllers\Client\PaymentResumeController::class, 'index'])->name('payment.resume');
-    Route::get('/payment/resume/{id}', [App\Http\Controllers\Client\PaymentResumeController::class, 'resume'])->name('payment.resume');
-    Route::get('/payment/cancel/{id}', [App\Http\Controllers\Client\PaymentResumeController::class, 'cancel'])->name('payment.cancel');
+    Route::get('/payment/resume', [PaymentResumeController::class, 'index'])->name('payment.resume.index');
+    Route::get('/payment/resume/{id}', [PaymentResumeController::class, 'resume'])->name('payment.resume.process');
+    Route::get('/payment/cancel/{id}', [PaymentResumeController::class, 'cancel'])->name('payment.resume.cancel');
 });
 
 Route::get('/api/districts/{province_id}', function ($province_id) {

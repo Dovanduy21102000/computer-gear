@@ -32,9 +32,13 @@ class PaymentResumeController extends Controller
             ->firstOrFail();
 
         // Restore session data
+        $couponInfo = $paymentAttempt->coupon_info;
+        if (is_string($couponInfo)) {
+            $couponInfo = json_decode($couponInfo, true);
+        }
         session([
             'shipping_info' => $paymentAttempt->shipping_info,
-            'coupon' => $paymentAttempt->coupon_info
+            'coupon' => $couponInfo
         ]);
 
         if ($paymentAttempt->payment_method === 'momo') {
@@ -57,6 +61,6 @@ class PaymentResumeController extends Controller
             ->firstOrFail();
 
         $paymentAttempt->update(['status' => 'cancelled']);
-        return redirect()->route('payment.resume')->with('success', 'Đã hủy thanh toán.');
+        return redirect()->route('payment.resume.index')->with('success', 'Đã hủy thanh toán.');
     }
 }
