@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\PaymentAttempt;
 
 class MOMOController extends Controller
 {
@@ -38,6 +39,113 @@ class MOMOController extends Controller
             $userId = Auth::id();
             if (!$userId) {
                 return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
+            }
+
+            // Check for buy now item first
+            $buyNowItem = session('buy_now_item');
+            if ($buyNowItem) {
+                // Store buy now item in session for later use
+                session(['momo_buy_now_item' => $buyNowItem]);
+
+                // Calculate total price for buy now item
+                $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
+
+                // Apply coupon if exists
+                $coupon = session('coupon');
+                $couponDiscount = 0;
+                $couponId = null;
+
+                if ($coupon) {
+                    if ($totalPrice >= $coupon['min_order_total']) {
+                        if ($coupon['type'] === 'percentage') {
+                            $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                        } else {
+                            $couponDiscount = min($totalPrice, $coupon['value']);
+                        }
+                        $couponId = $coupon['id'];
+                    }
+                }
+
+                $finalPrice = max(0, $totalPrice - $couponDiscount);
+
+                // Generate a unique order code
+                $orderCode = date('YmdHis') . rand(100, 999);
+
+                // Store payment attempt
+                PaymentAttempt::create([
+                    'user_id' => $userId,
+                    'payment_method' => 'momo',
+                    'order_code' => $orderCode,
+                    'amount' => $finalPrice,
+                    'status' => 'pending',
+                    'selected_items' => null,
+                    'shipping_info' => session('momo_shipping_info'),
+                    'coupon_info' => $coupon,
+                    'expires_at' => now()->addHours(24)
+                ]);
+
+                // Create payment request
+                $endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
+                $partnerCode = 'MOMOBKUN20180529';
+                $accessKey = 'klm05TvNBzhg7h7j';
+                $secretKey = 'at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa';
+                $orderInfo = "Thanh toán qua MoMo";
+                $amount = $finalPrice;
+                $orderId = $orderCode;
+                $redirectUrl = route('momo.return');
+                $ipnUrl = route('momo.ipn');
+                $extraData = json_encode(['buy_now' => true]);
+
+                $requestId = time() . "";
+                $requestType = "payWithCC";
+                $rawHash = "accessKey=" . $accessKey . "&amount=" . $amount . "&extraData=" . $extraData . "&ipnUrl=" . $ipnUrl . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&partnerCode=" . $partnerCode . "&redirectUrl=" . $redirectUrl . "&requestId=" . $requestId . "&requestType=" . $requestType;
+                $signature = hash_hmac("sha256", $rawHash, $secretKey);
+
+                $response = \Illuminate\Support\Facades\Http::post('https://test-payment.momo.vn/v2/gateway/api/create', [
+                    'partnerCode' => $partnerCode,
+                    'partnerName' => "Test",
+                    'storeId' => "MomoTestStore",
+                    'requestId' => $requestId,
+                    'amount' => $amount,
+                    'orderId' => $orderId,
+                    'orderInfo' => $orderInfo,
+                    'redirectUrl' => $redirectUrl,
+                    'ipnUrl' => $ipnUrl,
+                    'lang' => "vi",
+                    'requestType' => "payWithCC",
+                    'autoCapture' => true,
+                    'extraData' => $extraData,
+                    'signature' => $signature
+                ]);
+
+                $jsonResult = $response->json();
+
+                // Log the full response for debugging
+                \Log::info('MOMO Payment Response (Buy Now):', [
+                    'status' => $response->status(),
+                    'response' => $jsonResult,
+                    'request_data' => [
+                        'partnerCode' => $partnerCode,
+                        'amount' => $amount,
+                        'orderId' => $orderId,
+                        'orderInfo' => $orderInfo,
+                        'redirectUrl' => $redirectUrl,
+                        'ipnUrl' => $ipnUrl,
+                        'extraData' => $extraData,
+                        'signature' => $signature
+                    ]
+                ]);
+
+                if (isset($jsonResult['payUrl'])) {
+                    return redirect($jsonResult['payUrl']);
+                } else {
+                    $errorMessage = $jsonResult['message'] ?? 'Không thể tạo thanh toán. Vui lòng thử lại.';
+                    \Log::error('MOMO Payment Error (Buy Now):', [
+                        'error' => $errorMessage,
+                        'response' => $jsonResult
+                    ]);
+                    return back()->with('error', $errorMessage);
+                }
             }
 
             $cart = Cart::where('user_id', $userId)->first();
@@ -110,6 +218,19 @@ class MOMOController extends Controller
             // Generate a unique order code using structured timestamp without separators
             $orderCode = date('YmdHis') . rand(100, 999);
 
+            // Store payment attempt
+            PaymentAttempt::create([
+                'user_id' => $userId,
+                'payment_method' => 'momo',
+                'order_code' => $orderCode,
+                'amount' => $finalPrice,
+                'status' => 'pending',
+                'selected_items' => $selectedItemIds,
+                'shipping_info' => session('momo_shipping_info'),
+                'coupon_info' => $coupon,
+                'expires_at' => now()->addHours(24)
+            ]);
+
             // Create payment request
             $endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
             $partnerCode = 'MOMOBKUN20180529';
@@ -120,7 +241,7 @@ class MOMOController extends Controller
             $orderId = $orderCode;
             $redirectUrl = route('momo.return');
             $ipnUrl = route('momo.ipn');
-            $extraData = json_encode(['selected_items' => $selectedItemIds]); // Store selected items in extraData
+            $extraData = json_encode(['selected_items' => $selectedItemIds]);
 
             $requestId = time() . "";
             $requestType = "payWithCC";
@@ -294,6 +415,20 @@ class MOMOController extends Controller
                 throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
             }
 
+            $shippingInfo = session('momo_shipping_info');
+            if (
+                empty($shippingInfo['shipping_user_name']) ||
+                empty($shippingInfo['shipping_phone']) ||
+                empty($shippingInfo['shipping_address'])
+            ) {
+                Log::error('Missing shipping info in session for MoMo order creation', [
+                    'orderId' => $request->orderId,
+                    'userId' => $userId,
+                    'shippingInfo' => $shippingInfo
+                ]);
+                return redirect()->route('cart.index')->with('error', 'Thông tin giao hàng không hợp lệ. Vui lòng thử lại.');
+            }
+
             // Create Order
             $order = Order::create([
                 'code' => $request->orderId,
@@ -313,6 +448,10 @@ class MOMOController extends Controller
                 'payment_method' => 'momo',
                 'notes' => session('momo_shipping_info.notes'),
             ]);
+
+            // Mark payment attempt as completed
+            \App\Models\PaymentAttempt::where('order_code', $order->code)
+                ->update(['status' => 'completed']);
 
             // Record coupon usage
             if ($couponId) {
@@ -345,9 +484,6 @@ class MOMOController extends Controller
                 } else {
                     $item->product->decrement('quantity', $item->quantity);
                 }
-
-                // Delete only this specific cart item
-                $item->delete();
             }
 
             // Clear sessions
@@ -357,6 +493,11 @@ class MOMOController extends Controller
             session()->forget('buy_now_item');
 
             DB::commit();
+
+            // Delete cart items AFTER successful transaction
+            foreach ($cartItems as $item) {
+                $item->delete();
+            }
 
             return redirect()->route('checkout.success', ['order_id' => $order->id])
                 ->with('success', 'Đặt hàng thành công!');

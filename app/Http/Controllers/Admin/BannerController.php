@@ -11,7 +11,7 @@ class BannerController extends Controller
 {
     public function index()
     {
-        $banners = Banner::all();
+        $banners = Banner::latest('id')->get();
         $template = 'backend.banners.index';
 
         return view('backend.dashboard.layout', compact('banners', 'template'));

@@ -2,28 +2,26 @@
     <h3 class="mb-4 font-weight-bold text-dark">🧾 Đơn hàng của bạn</h3>
 
     <!-- Tabs -->
-    <ul class="nav nav-tabs nav-justified border-0 rounded shadow-sm mb-3 bg-white overflow-auto" id="orderTabs" role="tablist" style="white-space: nowrap;">
+    <ul class="nav nav-tabs nav-justified border-0 rounded shadow-sm mb-3 bg-white overflow-auto" id="orderTabs"
+        role="tablist" style="white-space: nowrap;">
         @php
             $orderTabs = [
                 'pending' => 'Chờ xác nhận',
                 'processing' => 'Đang xử lý',
                 'delivered' => 'Đang giao',
                 'completed' => 'Đã giao',
-                'success'=> 'Đã nhận hàng',
+                'success' => 'Đã nhận hàng',
                 'canceled' => 'Đã huỷ',
                 'pending_cancel' => 'Chờ duyệt',
-                
             ];
+
         @endphp
 
-        @foreach($orderTabs as $key => $label)
+        @foreach ($orderTabs as $key => $label)
             <li class="nav-item" role="presentation">
-                <a class="nav-link px-4 py-2 @if($loop->first) active @endif text-dark font-weight-medium"
-                   id="{{ $key }}-tab"
-                   data-toggle="tab"
-                   href="#{{ $key }}"
-                   role="tab"
-                   style="border-radius: 0.5rem;">
+                <a class="nav-link px-4 py-2 @if ($loop->first) active @endif text-dark font-weight-medium"
+                    id="{{ $key }}-tab" data-toggle="tab" href="#{{ $key }}" role="tab"
+                    style="border-radius: 0.5rem;">
                     {{ $label }}
                 </a>
             </li>
@@ -32,38 +30,69 @@
 
     <!-- Tab Content -->
     <div class="tab-content bg-white shadow-sm p-4 rounded border" id="orderTabsContent">
-        @foreach($orderTabs as $statusKey => $statusLabel)
-            <div class="tab-pane fade @if($loop->first) show active @endif" id="{{ $statusKey }}" role="tabpanel">
+        @foreach ($orderTabs as $statusKey => $statusLabel)
+            <div class="tab-pane fade @if ($loop->first) show active @endif" id="{{ $statusKey }}"
+                role="tabpanel">
                 @php
                     $ordersByStatus = $orders->where('status', $statusKey);
                 @endphp
 
-                @if($ordersByStatus->count())
+                @if ($ordersByStatus->count())
                     <div class="table-responsive">
                         <table class="table table-hover text-center align-middle">
                             <thead class="thead-light">
                                 <tr class="bg-light">
                                     <th class="text-uppercase small">Mã đơn</th>
+                                    <th class="text-uppercase small">Người đặt</th>
+                                    <th class="text-uppercase small">Địa chỉ</th>
                                     <th class="text-uppercase small">Ngày đặt</th>
+                                    <th class="text-uppercase small">Trạng thái thanh toán</th>
                                     <th class="text-uppercase small">Tổng tiền</th>
-                                    <th class="text-uppercase small">Chi tiết</th>
+                                    @if ($statusKey === 'completed')
+                                        <th class="text-uppercase small">Hành động</th>
+                                    @endif
+
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($ordersByStatus as $order)
+                                @foreach ($ordersByStatus as $order)
+                                    @php
+                                        $paymentText = match ($order->payment_method) {
+                                            'cash' => 'Thanh toán khi nhận hàng',
+                                            'momo' => 'Đã thanh toán',
+                                            'vn_pay' => 'Đã thanh toán',
+                                            default => 'Chưa rõ',
+                                        };
+                                    @endphp
                                     <tr>
-                                        <td class=" font-weight-bold">#{{ $order->code }}</td>
-                                        <td>{{ $order->created_at->format('d/m/Y') }}</td>
-                                        <td class="text-danger">{{ number_format($order->final_price, 0, ',', '.') }}₫</td>
-                                        <td>
-                                            <a href="{{ route('client.orders.show', $order->code) }}" 
-                                                class="btn btn-sm rounded-pill px-4 text-white"
-                                                style="background-color: #5d6d7e;">
-                                                Xem chi tiết
-                                             </a>
-                                             
-                                            
+                                        <td class=" font-weight-bold"><a
+                                                href="{{ route('client.orders.show', $order->code) }}"
+                                                class="text-dark">#{{ $order->code }}</a>
                                         </td>
+                                        <td class=" font-weight-bold"><a
+                                                class="text-dark">{{ $order->shipping_user_name }}</a>
+                                        </td>
+                                        <td class=" font-weight-bold"><a
+                                                class="text-dark">{{ $order->shipping_address }}</a>
+                                        </td>
+                                        <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                                        <td class=" font-weight-bold"><a class="text-dark">{{ $paymentText }}</a>
+                                        </td>
+                                        <td class="text-danger">{{ number_format($order->final_price, 0, ',', '.') }}₫
+                                        </td>
+                                        <td>
+                                            @if ($statusKey === 'completed')
+                                                <form
+                                                    action="{{ route('client.orders.confirmReceived', $order->code) }}"
+                                                    method="POST" class="mt-1">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <button type="submit" class="btn btn-success">✅ Đã nhận
+                                                        hàng</button>
+                                                </form>
+                                            @endif
+                                        </td>
+
                                     </tr>
                                 @endforeach
                             </tbody>

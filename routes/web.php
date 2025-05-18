@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminChatController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Client\PaymentResumeController;
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -156,6 +157,12 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
         Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
     });
+
+    // Coupon Distribution Routes
+    Route::get('coupon-distribution', [App\Http\Controllers\Admin\CouponDistributionController::class, 'index'])->name('coupon-distribution.index');
+    Route::get('coupon-distribution/{id}', [App\Http\Controllers\Admin\CouponDistributionController::class, 'show'])->name('coupon-distribution.show');
+    Route::post('coupon-distribution/{id}/assign', [App\Http\Controllers\Admin\CouponDistributionController::class, 'assignUsers'])->name('coupon-distribution.assign');
+    Route::get('coupon-distribution/users/available', [App\Http\Controllers\Admin\CouponDistributionController::class, 'getAvailableUsers'])->name('coupon-distribution.get-available-users');
 });
 
 
@@ -227,6 +234,10 @@ Route::middleware(['web'])->group(function () {
     Route::get('/chat/messages/{receiverId}', [ClientChatController::class, 'messages'])->name('chat.messages');
     //
 
+    // Payment Resume Routes
+    Route::get('/payment/resume', [App\Http\Controllers\Client\PaymentResumeController::class, 'index'])->name('payment.resume');
+    Route::get('/payment/resume/{id}', [App\Http\Controllers\Client\PaymentResumeController::class, 'resume'])->name('payment.resume');
+    Route::get('/payment/cancel/{id}', [App\Http\Controllers\Client\PaymentResumeController::class, 'cancel'])->name('payment.cancel');
 });
 
 Route::get('/api/districts/{province_id}', function ($province_id) {
@@ -277,3 +288,10 @@ Route::middleware('auth')->group(function () {
 // Coupon routes
 Route::post('/apply-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'applyCoupon'])->name('coupon.apply');
 Route::post('/remove-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'removeCoupon'])->name('coupon.remove');
+
+// Payment Resume Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/payment/resume', [PaymentResumeController::class, 'index'])->name('payment.resume.index');
+    Route::get('/payment/resume/{id}', [PaymentResumeController::class, 'resume'])->name('payment.resume.process');
+    Route::get('/payment/cancel/{id}', [PaymentResumeController::class, 'cancel'])->name('payment.resume.cancel');
+});

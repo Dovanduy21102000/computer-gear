@@ -18,6 +18,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use App\Events\CheckoutSessionUpdated;
+use App\Models\CheckoutSession;
+use App\Models\Address;
+use App\Models\Province;
+use App\Models\District;
+use App\Models\Ward;
+use App\Models\PaymentMethod;
 
 class CheckoutController extends Controller
 {
@@ -25,14 +32,14 @@ class CheckoutController extends Controller
     {
         try {
             $user = Auth::user();
-            Log::info('User data in checkout:', [
-                'user_id' => $user ? $user->id : null,
-                'user_name' => $user ? $user->name : null,
-                'is_authenticated' => Auth::check()
-            ]);
+            // Log::info('User data in checkout:', [
+            //     'user_id' => $user ? $user->id : null,
+            //     'user_name' => $user ? $user->name : null,
+            //     'is_authenticated' => Auth::check()
+            // ]);
 
             $addresses = $user ? $user->addresses : [];
-            $selectedItems = session('selected_items', []);
+            $selectedItems = [];
             $buyNowItem = session('buy_now_item');
             $cartItems = [];
 
@@ -42,10 +49,10 @@ class CheckoutController extends Controller
                     $response = Http::timeout(30)->get('https://provinces.open-api.vn/api/');
                     return $response->json();
                 } catch (\Exception $e) {
-                    Log::error('Error fetching provinces:', [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
-                    ]);
+                    // Log::error('Error fetching provinces:', [
+                    //     'error' => $e->getMessage(),
+                    //     'trace' => $e->getTraceAsString()
+                    // ]);
                     return [];
                 }
             });
@@ -58,10 +65,10 @@ class CheckoutController extends Controller
                         $response = Http::timeout(30)->get("https://provinces.open-api.vn/api/p/{$province['code']}?depth=2");
                         $districts[$province['code']] = $response->json()['districts'] ?? [];
                     } catch (\Exception $e) {
-                        Log::error("Error fetching districts for province {$province['code']}:", [
-                            'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString()
-                        ]);
+                        // Log::error("Error fetching districts for province {$province['code']}:", [
+                        //     'error' => $e->getMessage(),
+                        //     'trace' => $e->getTraceAsString()
+                        // ]);
                         $districts[$province['code']] = [];
                     }
                 }
@@ -73,12 +80,11 @@ class CheckoutController extends Controller
                 $cartItems[] = $buyNowItem;
             } else {
                 // Get selected items from URL parameters
-                $selectedItems = [];
                 if ($request->has('selected_items')) {
                     $selectedItems = explode(',', $request->input('selected_items'));
                 }
 
-                Log::info('Selected items from URL:', ['selected_items' => $selectedItems]);
+                // Log::info('Selected items from URL:', ['selected_items' => $selectedItems]);
 
                 if (!empty($selectedItems)) {
                     // Get cart items from database for selected items
@@ -90,6 +96,7 @@ class CheckoutController extends Controller
                             ->get()
                             ->map(function ($item) {
                                 $cartItem = new \stdClass();
+                                $cartItem->id = $item->id;
                                 $cartItem->product = $item->product;
                                 $cartItem->productVariant = $item->productVariant;
                                 $cartItem->quantity = $item->quantity;
@@ -99,9 +106,9 @@ class CheckoutController extends Controller
                             });
                     }
 
-                    Log::info('Cart items from database for selected items:', [
-                        'items' => $cartItems
-                    ]);
+                    // Log::info('Cart items from database for selected items:', [
+                    //     'items' => $cartItems
+                    // ]);
                 }
             }
 
@@ -140,6 +147,61 @@ class CheckoutController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
+    }
+
+    private function getCartItems($user)
+    {
+        return CartItem::whereHas('cart', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+            ->with(['product', 'productVariant'])
+            ->get()
+            ->map(function ($item) {
+                if (!$item->product) {
+                    return null;
+                }
+
+                $price = 0;
+                if ($item->productVariant) {
+                    $price = $item->productVariant->price_sale ?? $item->productVariant->price ?? 0;
+                } else {
+                    $price = $item->product->price_sale ?? $item->product->price ?? 0;
+                }
+
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'quantity' => $item->quantity,
+                    'price' => $price,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->toArray();
+    }
+
+    private function calculateTotal($user)
+    {
+        return CartItem::whereHas('cart', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+            ->with(['product', 'productVariant'])
+            ->get()
+            ->sum(function ($item) {
+                if (!$item->product) {
+                    return 0;
+                }
+
+                $price = 0;
+                if ($item->productVariant) {
+                    $price = $item->productVariant->price_sale ?? $item->productVariant->price ?? 0;
+                } else {
+                    $price = $item->product->price_sale ?? $item->product->price ?? 0;
+                }
+
+                return $item->quantity * $price;
+            });
     }
 
     public function trackOrderView(Request $request)
@@ -742,6 +804,7 @@ class CheckoutController extends Controller
 
             // Create temporary cart item for checkout
             $cartItem = new \stdClass();
+            $cartItem->id = 'buy_now_' . time(); // Add a unique ID
             $cartItem->product = $product;
             $cartItem->productVariant = $productVariantId ? ProductVariant::with(['attributeValues.attribute'])->find($productVariantId) : null;
             $cartItem->quantity = $request->quantity;

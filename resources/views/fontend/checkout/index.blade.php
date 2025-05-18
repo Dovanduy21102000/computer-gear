@@ -93,6 +93,21 @@
             font-size: 1.2em;
             vertical-align: middle;
         }
+
+        .checkout-navigation {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .checkout-navigation .btn {
+            margin-right: 1rem;
+        }
+
+        .checkout-navigation .btn i {
+            margin-right: 0.5rem;
+        }
     </style>
     <!-- breadcrumb -->
     <div class="bg-gray-13 bg-md-transparent">
@@ -114,6 +129,27 @@
     <!-- End breadcrumb -->
 
     <div class="container">
+        <!-- Checkout Navigation -->
+        {{-- <div class="checkout-navigation">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="alert alert-info mb-0" role="alert">
+                        <i class="fas fa-info-circle"></i>
+                        Đây là bước cuối cùng để xác nhận đơn hàng của bạn.
+                        Nếu bạn muốn thay đổi giỏ hàng, vui lòng quay lại trang giỏ hàng.
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-right">
+                    <a href="{{ route('cart.index') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Quay lại giỏ hàng
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" id="refreshOrder">
+                        <i class="fas fa-sync-alt"></i> Cập nhật đơn hàng
+                    </button>
+                </div>
+            </div>
+        </div> --}}
+
         <div class="mb-5">
             <h1 class="text-center">Thanh toán đơn hàng</h1>
         </div>
@@ -151,7 +187,9 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($cartItems as $item)
-                                            <tr class="cart_item">
+                                            <tr class="cart-item" data-item-id="{{ $item->id }}"
+                                                data-quantity="{{ $item->quantity }}"
+                                                data-price="{{ $item->productVariant ? $item->productVariant->price_sale ?? $item->productVariant->price : $item->product->price_sale ?? $item->product->price }}">
                                                 <td>
                                                     <div>
                                                         <span style="display: inline;">
@@ -467,19 +505,189 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", function() {
-                let checkoutForm = document.getElementById("checkout-form");
+                const userId = {{ Auth::id() }};
 
+                // Subscribe to the checkout channel
+                if (window.Echo) {
+                    window.Echo.private(`checkout.${userId}`)
+                        .listen('.CheckoutSessionUpdated', (e) => {
+                            console.log('Received checkout update:', e);
+
+                            // Update cart items
+                            e.checkoutData.items.forEach(item => {
+                                const itemElement = document.querySelector(`[data-item-id="${item.id}"]`);
+                                if (itemElement) {
+                                    // Update quantity display
+                                    const quantityElement = itemElement.querySelector('strong');
+                                    if (quantityElement) {
+                                        quantityElement.textContent = `× ${item.quantity}`;
+                                    }
+
+                                    // Update price
+                                    const priceElement = itemElement.querySelector('td:last-child');
+                                    if (priceElement) {
+                                        priceElement.textContent = formatPrice(item.price * item.quantity);
+                                    }
+                                }
+                            });
+
+                            // Update totals
+                            const subtotalElement = document.querySelector(
+                                'tr:has(th:contains("Tổng cộng")) td:last-child');
+                            if (subtotalElement) {
+                                subtotalElement.textContent = formatPrice(e.checkoutData.subtotal);
+                            }
+
+                            const totalElement = document.querySelector(
+                                'tr:has(th:contains("Thành tiền")) td:last-child strong');
+                            if (totalElement) {
+                                totalElement.textContent = formatPrice(e.checkoutData.total);
+                            }
+
+                            // Update hidden total price input
+                            const totalPriceInput = document.querySelector('input[name="total_price"]');
+                            if (totalPriceInput) {
+                                totalPriceInput.value = e.checkoutData.total;
+                            }
+
+                            // Update coupon display if exists
+                            const couponDisplay = document.getElementById('couponDisplay');
+                            if (couponDisplay) {
+                                if (e.checkoutData.coupon) {
+                                    const discountText = e.checkoutData.coupon.type === 'percent' ?
+                                        `${parseInt(e.checkoutData.coupon.price)}%` :
+                                        `${formatPrice(e.checkoutData.coupon.price)}`;
+
+                                    couponDisplay.innerHTML = `
+                                        <div class="card mb-3 shadow-sm border-left border-success" style="border-left-width: 6px !important;">
+                                            <div class="card-body d-flex align-items-center justify-content-between p-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-check-circle text-success mr-2"></i>
+                                                    <span class="font-weight-bold text-success mr-2">Đã áp dụng mã:</span>
+                                                    <span class="font-weight-bold text-dark mr-2">${e.checkoutData.coupon.code}</span>
+                                                    <span class="badge badge-success ml-2" style="font-size: 1em;">
+                                                        ${discountText}
+                                                    </span>
+                                                </div>
+                                                <button type="button" class="btn btn-link text-danger p-0 remove-coupon" title="Xóa mã giảm giá" style="font-size: 1.3em;">
+                                                    <i class="fas fa-times-circle"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+
+                                    // Reattach event listener to remove coupon button
+                                    const removeButton = couponDisplay.querySelector('.remove-coupon');
+                                    if (removeButton) {
+                                        removeButton.addEventListener('click', function() {
+                                            fetch('{{ route('remove-coupon') }}', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'X-CSRF-TOKEN': document.querySelector(
+                                                            'meta[name="csrf-token"]').content
+                                                    }
+                                                })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    if (data.success) {
+                                                        // Instead of reloading, update the UI
+                                                        couponDisplay.innerHTML = `
+                                                        <div class="text-muted">
+                                                            <i class="fas fa-info-circle mr-1"></i>
+                                                            Chọn mã giảm giá để nhận ưu đãi
+                                                        </div>
+                                                    `;
+                                                    }
+                                                });
+                                        });
+                                    }
+                                } else {
+                                    couponDisplay.innerHTML = `
+                                        <div class="text-muted">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            Chọn mã giảm giá để nhận ưu đãi
+                                        </div>
+                                    `;
+                                }
+                            }
+
+                            // Show a subtle notification
+                            const toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+
+                            toast.fire({
+                                icon: 'info',
+                                title: 'Giỏ hàng đã được cập nhật'
+                            });
+                        });
+                }
+
+                function formatPrice(price) {
+                    return new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                    }).format(price);
+                }
+
+                // Handle refresh order button
+                const refreshOrderBtn = document.getElementById('refreshOrder');
+                if (refreshOrderBtn) {
+                    refreshOrderBtn.addEventListener('click', function() {
+                        const selectedItems = Array.from(document.querySelectorAll(
+                                'input[name="selected_items[]"]'))
+                            .map(input => input.value);
+
+                        if (selectedItems.length > 0) {
+                            window.location.href = "{{ route('checkout.index') }}?selected_items=" +
+                                selectedItems.join(',');
+                        } else {
+                            window.location.href = "{{ route('checkout.index') }}";
+                        }
+                    });
+                }
+
+                // Handle coupon removal
+                const removeCouponButton = document.querySelector('.remove-coupon');
+                if (removeCouponButton) {
+                    removeCouponButton.addEventListener('click', function() {
+                        if (confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?')) {
+                            fetch('{{ route('remove-coupon') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                            .content
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        window.location.reload();
+                                    }
+                                });
+                        }
+                    });
+                }
+
+                // Simple form submission handler
+                let checkoutForm = document.getElementById("checkout-form");
                 checkoutForm.addEventListener("submit", function(event) {
+                    event.preventDefault();
                     let paymentMethod = document.querySelector('input[name="payment_method"]:checked');
 
                     if (!paymentMethod) {
-                        event.preventDefault();
-                        alert("Please select a payment method before proceeding.");
+                        alert("Vui lòng chọn phương thức thanh toán trước khi tiếp tục.");
                         return;
                     }
 
-                    // Always submit to checkout.method first
-                    checkoutForm.action = "{{ route('checkout.method') }}";
+                    // Proceed with form submission
+                    this.submit();
                 });
             });
         </script>
@@ -731,5 +939,156 @@
             }
         });
     </script>
+
+    @push('scripts')
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const userId = {{ Auth::id() }};
+
+                // Subscribe to the checkout channel
+                if (window.Echo) {
+                    window.Echo.private(`checkout.${userId}`)
+                        .listen('.CheckoutSessionUpdated', (e) => {
+                            console.log('Received checkout update:', e);
+
+                            // Update cart items
+                            e.checkoutData.items.forEach(item => {
+                                const itemElement = document.querySelector(`[data-item-id="${item.id}"]`);
+                                if (itemElement) {
+                                    // Update quantity display
+                                    const quantityElement = itemElement.querySelector('strong');
+                                    if (quantityElement) {
+                                        quantityElement.textContent = `× ${item.quantity}`;
+                                    }
+
+                                    // Update price
+                                    const priceElement = itemElement.querySelector('td:last-child');
+                                    if (priceElement) {
+                                        priceElement.textContent = formatPrice(item.price * item.quantity);
+                                    }
+                                }
+                            });
+
+                            // Update totals
+                            const subtotalElement = document.querySelector(
+                                'tr:has(th:contains("Tổng cộng")) td:last-child');
+                            if (subtotalElement) {
+                                subtotalElement.textContent = formatPrice(e.checkoutData.subtotal);
+                            }
+
+                            const totalElement = document.querySelector(
+                                'tr:has(th:contains("Thành tiền")) td:last-child strong');
+                            if (totalElement) {
+                                totalElement.textContent = formatPrice(e.checkoutData.total);
+                            }
+
+                            // Update hidden total price input
+                            const totalPriceInput = document.querySelector('input[name="total_price"]');
+                            if (totalPriceInput) {
+                                totalPriceInput.value = e.checkoutData.total;
+                            }
+
+                            // Update coupon display if exists
+                            const couponDisplay = document.getElementById('couponDisplay');
+                            if (couponDisplay) {
+                                if (e.checkoutData.coupon) {
+                                    const discountText = e.checkoutData.coupon.type === 'percent' ?
+                                        `${parseInt(e.checkoutData.coupon.price)}%` :
+                                        `${formatPrice(e.checkoutData.coupon.price)}`;
+
+                                    couponDisplay.innerHTML = `
+                                        <div class="card mb-3 shadow-sm border-left border-success" style="border-left-width: 6px !important;">
+                                            <div class="card-body d-flex align-items-center justify-content-between p-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-check-circle text-success mr-2"></i>
+                                                    <span class="font-weight-bold text-success mr-2">Đã áp dụng mã:</span>
+                                                    <span class="font-weight-bold text-dark mr-2">${e.checkoutData.coupon.code}</span>
+                                                    <span class="badge badge-success ml-2" style="font-size: 1em;">
+                                                        ${discountText}
+                                                    </span>
+                                                </div>
+                                                <button type="button" class="btn btn-link text-danger p-0 remove-coupon" title="Xóa mã giảm giá" style="font-size: 1.3em;">
+                                                    <i class="fas fa-times-circle"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+
+                                    // Reattach event listener to remove coupon button
+                                    const removeButton = couponDisplay.querySelector('.remove-coupon');
+                                    if (removeButton) {
+                                        removeButton.addEventListener('click', function() {
+                                            fetch('{{ route('remove-coupon') }}', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'X-CSRF-TOKEN': document.querySelector(
+                                                            'meta[name="csrf-token"]').content
+                                                    }
+                                                })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    if (data.success) {
+                                                        // Instead of reloading, update the UI
+                                                        couponDisplay.innerHTML = `
+                                                        <div class="text-muted">
+                                                            <i class="fas fa-info-circle mr-1"></i>
+                                                            Chọn mã giảm giá để nhận ưu đãi
+                                                        </div>
+                                                    `;
+                                                    }
+                                                });
+                                        });
+                                    }
+                                } else {
+                                    couponDisplay.innerHTML = `
+                                        <div class="text-muted">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            Chọn mã giảm giá để nhận ưu đãi
+                                        </div>
+                                    `;
+                                }
+                            }
+
+                            // Show a subtle notification
+                            const toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+
+                            toast.fire({
+                                icon: 'info',
+                                title: 'Giỏ hàng đã được cập nhật'
+                            });
+                        });
+                }
+
+                function formatPrice(price) {
+                    return new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                    }).format(price);
+                }
+
+                // Simple form submission handler
+                let checkoutForm = document.getElementById("checkout-form");
+                checkoutForm.addEventListener("submit", function(event) {
+                    event.preventDefault();
+                    let paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+
+                    if (!paymentMethod) {
+                        alert("Vui lòng chọn phương thức thanh toán trước khi tiếp tục.");
+                        return;
+                    }
+
+                    // Proceed with form submission
+                    this.submit();
+                });
+            });
+        </script>
+    @endpush
 
 </main>

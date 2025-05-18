@@ -118,6 +118,7 @@
                             <div class="row mb-3">
                                 <label for="is_public" class="col-sm-2 col-form-label">Công khai?</label>
                                 <div class="col-sm-10">
+                                    <input type="hidden" name="is_public" value="0">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="is_public"
                                             id="is_public" value="1" {{ old('is_public') ? 'checked' : '' }}>
