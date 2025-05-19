@@ -74,7 +74,7 @@
     </div><!-- End Page Title -->
 
     <section class="section">
-        <!-- Block hiển thị lỗi từ server -->
+        <!-- Block thông báo lỗi hiển thị ở đầu (như phần "thêm mới") -->
         @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
@@ -121,10 +121,10 @@
                 <input type="file" class="form-control" name="image">
             </div>
             
-            <!-- Thông báo lỗi thuộc tính phía client -->
+            <!-- Phần thông báo lỗi thuộc tính phía client -->
             <div id="attributeError" class="alert alert-danger" style="display: none;"></div>
             
-            <!-- Nhóm thuộc tính động -->
+            <!-- Nhóm thuộc tính -->
             <div id="dynamicAttributes">
                 @if(old('attributes'))
                     @foreach(old('attributes') as $index => $attribute)
@@ -162,10 +162,9 @@
                         </div>
                     @endforeach
                 @else
-                    {{-- Nếu không có old input, hiển thị dữ liệu thuộc tính của biến thể hiện tại --}}
+                    {{-- Hiển thị thuộc tính hiện tại của biến thể --}}
                     @foreach($variant->attributeValues as $index => $attrValue)
                         @php
-                            // Mỗi attribute value được giả định có quan hệ attribute để lấy thông tin thuộc tính cha
                             $attributeKey = $attrValue->attribute->id;
                             $valueId = $attrValue->id;
                         @endphp
@@ -229,17 +228,16 @@
     );
 </script>
 
-<!-- Script xử lý thêm, xóa, cập nhật dropdown thuộc tính và kiểm tra duplicate ngay phía client -->
+<!-- Script xử lý thêm, xóa, cập nhật dropdown thuộc tính và kiểm tra duplicate phía client -->
 <script>
     // Khởi tạo index dựa trên số lượng nhóm thuộc tính hiện có
     let attributeIndex = {{ old('attributes') ? count(old('attributes')) : count($variant->attributeValues) }};
 
-    // Sự kiện để thêm nhóm thuộc tính mới
     document.getElementById("addAttributeBtn").addEventListener("click", function() {
         attributeIndex++; // Tăng chỉ số cho nhóm mới
         const container = document.getElementById("dynamicAttributes");
         
-        // Tạo nhóm thuộc tính mới với HTML mẫu
+        // Tạo nhóm thuộc tính mới
         const rowDiv = document.createElement("div");
         rowDiv.className = "row mb-3 attribute-group";
         rowDiv.innerHTML = `
@@ -262,7 +260,7 @@
         `;
         container.appendChild(rowDiv);
         
-        // Thiết lập sự kiện cập nhật dropdown value khi thay đổi thuộc tính key
+        // Cập nhật dropdown giá trị khi thay đổi thuộc tính key
         const attributeKeySelect = rowDiv.querySelector(".attribute-key");
         attributeKeySelect.addEventListener("change", function() {
             const selectedAttributeId = this.value;
@@ -280,14 +278,14 @@
         });
     });
 
-    // Sử dụng event delegation để xử lý xóa nhóm thuộc tính
+    // Xử lý xóa nhóm thuộc tính
     document.addEventListener("click", function(event) {
         if (event.target && event.target.classList.contains("remove-attribute")) {
             event.target.closest(".attribute-group").remove();
         }
     });
 
-    // Kiểm tra duplicate attribute key phía client khi thay đổi lựa chọn
+    // Kiểm tra duplicate attribute key phía client
     document.addEventListener('change', function(e) {
         if (e.target && e.target.classList.contains('attribute-key')) {
             const attributeSelects = document.querySelectorAll('.attribute-key');
@@ -316,5 +314,6 @@
         }
     });
 </script>
+
 
 
