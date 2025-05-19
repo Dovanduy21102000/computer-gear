@@ -38,7 +38,7 @@ public function store(Request $request, Product $product)
         'price'             => 'required|numeric',
         'price_sale'        => 'nullable|numeric',
         'quantity'          => 'required|integer',
-        'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'image'             => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'attributes'        => 'required|array',
         'attributes.*.key'   => 'required',
         'attributes.*.value' => 'required',
