@@ -28,48 +28,36 @@
                         <h5 class="card-title">Tạo biến thể cho sản phẩm: {{ $product->name }}</h5>
                         <form action="{{ route('variants.store', ['product' => $product->id]) }}" method="POST" enctype="multipart/form-data">
                             @csrf
-
-                            <!-- SKU biến thể -->
                             <div class="row mb-3">
                                 <label for="sku" class="col-sm-2 col-form-label">SKU biến thể</label>
                                 <div class="col-sm-10">
                                     <input type="text" name="sku" id="sku" class="form-control" value="{{ old('sku') }}" required>
                                 </div>
                             </div>
-
-                            <!-- Giá biến thể -->
                             <div class="row mb-3">
                                 <label for="price" class="col-sm-2 col-form-label">Giá</label>
                                 <div class="col-sm-10">
                                     <input type="number" step="0.01" name="price" id="price" class="form-control" value="{{ old('price') }}" required>
                                 </div>
                             </div>
-
-                            <!-- Giá khuyến mãi (nếu có) -->
                             <div class="row mb-3">
                                 <label for="price_sale" class="col-sm-2 col-form-label">Giá khuyến mãi</label>
                                 <div class="col-sm-10">
                                     <input type="number" step="0.01" name="price_sale" id="price_sale" class="form-control" value="{{ old('price_sale') }}">
                                 </div>
                             </div>
-
-                            <!-- Số lượng -->
                             <div class="row mb-3">
                                 <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
                                 <div class="col-sm-10">
                                     <input type="number" name="quantity" id="quantity" class="form-control" value="{{ old('quantity') }}" required>
                                 </div>
                             </div>
-
-                            <!-- Ảnh biến thể -->
                             <div class="row mb-3">
-                                <label for="thumbnail" class="col-sm-2 col-form-label">Ảnh biến thể</label>
+                                <label for="image" class="col-sm-2 col-form-label">Ảnh biến thể</label>
                                 <div class="col-sm-10">
-                                    <input type="file" name="thumbnail" id="thumbnail" class="form-control">
+                                    <input type="file" name="image" id="image" class="form-control">
                                 </div>
                             </div>
-
-                            <!-- Vùng chứa các nhóm thuộc tính động -->
                             <div id="dynamicAttributes">
                                 @if(old('attributes'))
                                     @foreach(old('attributes') as $index => $attribute)
