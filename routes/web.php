@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminChatController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Client\PaymentResumeController;
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -47,19 +48,19 @@ use Illuminate\Support\Facades\Route;
 // Admin Routes
 Route::prefix('admin')->group(function () {
     // Đăng nhập và đăng xuất dành cho admin
-    Route::get('login', [AuthController::class, 'index'])->name('auth.admin'); 
-    Route::post('login', [AuthController::class, 'login'])->name('auth.login'); 
-    Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout'); 
+    Route::get('login', [AuthController::class, 'index'])->name('auth.admin');
+    Route::post('login', [AuthController::class, 'login'])->name('auth.login');
+    Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout');
     // Route admin cần quyền truy cập
 
     Route::middleware(['auth', 'admin'])->group(function () {
         // Routes cho Profile Admin
 
-        Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index'); 
+        Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
 
         Route::prefix('profile')->name('backend.profile.')->group(function () {
-            Route::get('/', [ProfileController::class, 'show'])->name('show'); 
-            Route::put('/update', [ProfileController::class, 'update'])->name('update'); 
+            Route::get('/', [ProfileController::class, 'show'])->name('show');
+            Route::put('/update', [ProfileController::class, 'update'])->name('update');
             Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('changePassword');
             Route::get('/delete-image', [ProfileController::class, 'deleteImage'])->name('deleteImage');
         });
@@ -156,6 +157,12 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
         Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
     });
+
+    // Coupon Distribution Routes
+    Route::get('coupon-distribution', [App\Http\Controllers\Admin\CouponDistributionController::class, 'index'])->name('coupon-distribution.index');
+    Route::get('coupon-distribution/{id}', [App\Http\Controllers\Admin\CouponDistributionController::class, 'show'])->name('coupon-distribution.show');
+    Route::post('coupon-distribution/{id}/assign', [App\Http\Controllers\Admin\CouponDistributionController::class, 'assignUsers'])->name('coupon-distribution.assign');
+    Route::get('coupon-distribution/users/available', [App\Http\Controllers\Admin\CouponDistributionController::class, 'getAvailableUsers'])->name('coupon-distribution.get-available-users');
 });
 
 
@@ -190,6 +197,9 @@ Route::middleware(['web'])->group(function () {
     Route::post('/cart/bulk-delete', [CartController::class, 'bulkDelete'])->name('cart.bulkDelete');
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.applyCoupon');
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::post('/cart/coupon/apply', [CartController::class, 'applyCoupon'])->name('coupon.apply');
+    Route::post('/cart/coupon/remove', [CartController::class, 'removeCoupon'])->name('remove-coupon');
+    Route::get('/cart/coupon/available', [CartController::class, 'getAvailableCoupons'])->name('coupon.available');
 
 
     Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
@@ -224,6 +234,10 @@ Route::middleware(['web'])->group(function () {
     Route::get('/chat/messages/{receiverId}', [ClientChatController::class, 'messages'])->name('chat.messages');
     //
 
+    // Payment Resume Routes
+    Route::get('/payment/resume', [PaymentResumeController::class, 'index'])->name('payment.resume.index');
+    Route::get('/payment/resume/{id}', [PaymentResumeController::class, 'resume'])->name('payment.resume.process');
+    Route::get('/payment/cancel/{id}', [PaymentResumeController::class, 'cancel'])->name('payment.resume.cancel');
 });
 
 Route::get('/api/districts/{province_id}', function ($province_id) {
@@ -251,9 +265,9 @@ Route::get('/vnpay/test-payment', [VNPayController::class, 'testPayment']);
 Route::get('/vnpay/debug', [VNPayController::class, 'debugPayment']);
 Route::post('/vnpay/ipn', [VNPayController::class, 'ipn'])->name('vnpay.ipn');
 
-Route::post('/momo/create', [MomoController::class, 'createPayment'])->name('momo.create');
+Route::post('/momo/create', [MOMOController::class, 'createPayment'])->name('momo.create');
 Route::get('/momo-return', [MOMOController::class, 'handleReturn'])->name('momo.return');
-Route::get('/momo/ipn', [MomoController::class, 'ipn'])->name('momo.ipn');
+Route::get('/momo/ipn', [MOMOController::class, 'ipn'])->name('momo.ipn');
 
 
 
@@ -269,10 +283,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::delete('/wishlist/{productId}', [WishlistController::class, 'remove'])->name('wishlist.remove');
-
 });
 
 // Coupon routes
 Route::post('/apply-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'applyCoupon'])->name('coupon.apply');
 Route::post('/remove-coupon', [App\Http\Controllers\Client\CheckoutController::class, 'removeCoupon'])->name('coupon.remove');
 
+// Payment Resume Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/payment/resume', [PaymentResumeController::class, 'index'])->name('payment.resume.index');
+    Route::get('/payment/resume/{id}', [PaymentResumeController::class, 'resume'])->name('payment.resume.process');
+    Route::get('/payment/cancel/{id}', [PaymentResumeController::class, 'cancel'])->name('payment.resume.cancel');
+});

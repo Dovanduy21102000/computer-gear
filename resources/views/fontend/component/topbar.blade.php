@@ -9,34 +9,40 @@
             <div class="topbar-right ml-auto">
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item u-header-topbar__nav-item u-header-topbar__nav-item-border">
-                        <a href="{{ route('client.contacts.index') }}" class="u-header-topbar__nav-link"><i class="ec ec-map-pointer mr-1"></i> Vị trí cửa hàng</a>
+                        <a href="{{ route('client.contacts.index') }}" class="u-header-topbar__nav-link"><i
+                                class="ec ec-map-pointer mr-1"></i> Vị trí cửa hàng</a>
                     </li>
                     <li class="list-inline-item u-header-topbar__nav-item u-header-topbar__nav-item-border">
                         <a href="{{ route('order.track') }}" class="u-header-topbar__nav-link"><i
                                 class="ec ec-transport mr-1"></i> Theo dõi đơn hàng</a>
                     </li>
-                    
+
                     <li class="list-inline-item u-header-topbar__nav-item u-header-topbar__nav-item-border">
                         <a id="sidebarNavToggler" href="javascript:;" class="u-header-topbar__nav-link">
                             @auth
-                            <div class="dropdown">
-                                <a id="userDropdown" href="javascript:;" class="dropdown-toggle d-flex align-items-center text-dark" role="button" data-toggle="dropdown">
-                                    <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
-                                </a>
-                                
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="{{ route('user.show') }}">Quản lý tài khoản</a>
-                                    <a class="dropdown-item" href="{{ route('client.orders.index') }}">Quản lý đơn hàng</a>
-                                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        Đăng xuất
+                                <div class="dropdown">
+                                    <a id="userDropdown" href="javascript:;"
+                                        class="dropdown-toggle d-flex align-items-center text-dark" role="button"
+                                        data-toggle="dropdown">
+                                        <i class="ec ec-user mr-1"></i> Xin chào, {{ Auth::user()->name }}
                                     </a>
-                                </div>
-                            </div>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                @csrf
-                            </form>
-                            @else
 
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="{{ route('user.show') }}">Quản lý tài khoản</a>
+                                        <a class="dropdown-item" href="{{ route('client.orders.index') }}">Quản lý đơn
+                                            hàng</a>
+                                        <a class="dropdown-item" href="{{ route('payment.resume.index') }}">Thanh toán đang
+                                            chờ</a>
+                                        <a class="dropdown-item" href="{{ route('logout') }}"
+                                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            Đăng xuất
+                                        </a>
+                                    </div>
+                                </div>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                    @csrf
+                                </form>
+                            @else
                                 <div>
                                     <i class="ec ec-user mr-1"></i>
                                     <a class="text-dark" href="{{ route('login.form') }}">Đăng nhập</a>

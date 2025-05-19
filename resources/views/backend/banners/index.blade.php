@@ -32,7 +32,7 @@
                                 <table class="table datatable table-bordered">
                                     <thead>
                                         <tr>
-                                            <th class="text-center">ID</th>
+                                            <th class="text-center">STT</th>
                                              <th class="text-center">Tiêu đề</th>
                                              <th class="text-center">Ảnh</th>
 
@@ -43,7 +43,7 @@
                                     <tbody>
                                         @foreach ($banners as $banner)
                                             <tr>
-                                                <td class="text-center">{{ $banner->id }}</td>
+                                                 <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td class="text-center">{{ $banner->title }}</td>
                                                 <td class="text-center">
                                                     @if ($banner->image)

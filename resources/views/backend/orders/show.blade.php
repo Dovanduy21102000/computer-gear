@@ -56,7 +56,8 @@
                                             ],
                                             'processing' => ['label' => 'Đang xử lý', 'class' => 'badge bg-primary'],
                                             'delivered' => ['label' => 'Đang giao', 'class' => 'badge bg-info'],
-                                            'completed' => ['label' => 'Hoàn thành', 'class' => 'badge bg-success'],
+                                            'completed' => ['label' => 'Đã giao', 'class' => 'badge bg-success'],
+                                            'success' => ['label' => 'Hoàn thành', 'class' => 'badge bg-success'],
                                             'canceled' => ['label' => 'Đã hủy', 'class' => 'badge bg-danger'],
                                         ];
                                         $status = $statuses[$order->status] ?? [

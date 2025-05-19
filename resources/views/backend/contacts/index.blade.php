@@ -28,7 +28,7 @@
                                 <table class="table datatable table-bordered">
                                     <thead>
                                         <tr>
-                                            <th class="text-center">ID</th>
+                                            <th class="text-center">STT</th>
                                             <th class="text-center">Tên</th>
                                             <th class="text-center">Email</th>
                                             <th class="text-center">Số điện thoại</th>
@@ -40,7 +40,7 @@
                                     <tbody>
                                         @foreach ($contacts as $contact)
                                             <tr>
-                                                <td class="text-center">{{ $contact->id }}</td>
+                                                 <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td class="text-center">{{ $contact->name }}</td>
                                                 <td class="text-center">{{ $contact->email }}</td>
                                                 <td class="text-center">{{ $contact->phone ?? 'Không có' }}</td>

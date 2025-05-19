@@ -56,6 +56,45 @@
                     border: none;
                     border-radius: 5px;
                 }
+
+                /* Custom checkbox styles */
+                input[type="checkbox"] {
+                    appearance: none;
+                    -webkit-appearance: none;
+                    width: 20px;
+                    height: 20px;
+                    border: 2px solid #D9B867;
+                    border-radius: 4px;
+                    background-color: #fff;
+                    cursor: pointer;
+                    position: relative;
+                    transition: all 0.2s ease;
+                }
+
+                input[type="checkbox"]:checked {
+                    background-color: #fff;
+                    border-color: #F8D472;
+                }
+
+                input[type="checkbox"]:checked::after {
+                    content: '✓';
+                    position: absolute;
+                    color: #F8D472;
+                    font-size: 14px;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                }
+
+                input[type="checkbox"]:hover {
+                    border-color: #F8D472;
+                    box-shadow: 0 0 3px rgba(248, 212, 114, 0.2);
+                }
+
+                input[type="checkbox"]:focus {
+                    outline: none;
+                    box-shadow: 0 0 3px rgba(248, 212, 114, 0.3);
+                }
             </style>
             <div class="container">
                 <div class="mb-4">
@@ -85,7 +124,16 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                    $hasInvalidItems = false;
+                                @endphp
                                 @foreach ($cartItems as $item)
+                                    @if (!$item->productVariant && $item->product->is_variant)
+                                        @php
+                                            $hasInvalidItems = true;
+                                            continue;
+                                        @endphp
+                                    @endif
                                     <tr>
                                         <td class="text-center">
                                             <input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
@@ -104,48 +152,37 @@
                                         </td>
                                         <td>
                                             <a href="#" class="text-gray-90">{{ $item->product->name }}</a>
-                                            @if (isset($item->variants))
+                                            @if ($item->productVariant)
                                                 <div class="variant-attributes">
-                                                    @foreach ($item->variants as $variant)
-                                                        <div class="variant-group mb-2">
-                                                            @php
-                                                                $groupedAttributes = [];
-                                                                foreach ($variant->attributeValues as $value) {
-                                                                    if (isset($value->attribute)) {
-                                                                        $attrName = $value->attribute->name;
-                                                                        if (!isset($groupedAttributes[$attrName])) {
-                                                                            $groupedAttributes[$attrName] =
-                                                                                $value->value;
-                                                                        }
-                                                                    }
+                                                    @php
+                                                        $groupedAttributes = [];
+                                                        foreach ($item->productVariant->attributeValues as $value) {
+                                                            if (isset($value->attribute)) {
+                                                                $attrName = $value->attribute->name;
+                                                                if (!isset($groupedAttributes[$attrName])) {
+                                                                    $groupedAttributes[$attrName] = $value->value;
                                                                 }
-                                                                // Sort attributes by name to ensure consistent order
-                                                                ksort($groupedAttributes);
-                                                                $formattedAttributes = [];
-                                                                foreach ($groupedAttributes as $name => $value) {
-                                                                    $formattedAttributes[] = $name . ': ' . $value;
-                                                                }
-                                                            @endphp
-                                                            <small class="text-dark d-block">
-                                                                {{ implode(' | ', $formattedAttributes) }}
-                                                            </small>
-                                                        </div>
-                                                    @endforeach
+                                                            }
+                                                        }
+                                                        ksort($groupedAttributes);
+                                                        $formattedAttributes = [];
+                                                        foreach ($groupedAttributes as $name => $value) {
+                                                            $formattedAttributes[] = $name . ': ' . $value;
+                                                        }
+                                                    @endphp
+                                                    <small class="text-dark d-block">
+                                                        {{ implode(' | ', $formattedAttributes) }}
+                                                    </small>
                                                 </div>
                                             @endif
                                         </td>
                                         <td data-title="Price">
                                             @php
-                                                $totalPrice = 0;
-                                                if (isset($item->variants)) {
-                                                    foreach ($item->variants as $variant) {
-                                                        $totalPrice += $variant->price_sale ?? $variant->price;
-                                                    }
-                                                } else {
-                                                    $totalPrice = $item->product->price_sale ?? $item->product->price;
-                                                }
+                                                $price = $item->productVariant
+                                                    ? $item->productVariant->price_sale ?? $item->productVariant->price
+                                                    : $item->product->price_sale ?? $item->product->price;
                                             @endphp
-                                            <span>{{ number_format($totalPrice, 0, ',', '.') }}₫</span>
+                                            <span>{{ number_format($price, 0, ',', '.') }}₫</span>
                                         </td>
 
                                         <td data-title="Quantity">
@@ -167,10 +204,25 @@
 
                                         <td data-title="Total">
                                             <span
-                                                class="">{{ number_format($item->quantity * $totalPrice, 0, ',', '.') }}₫</span>
+                                                class="">{{ number_format($item->quantity * $price, 0, ',', '.') }}₫</span>
                                         </td>
                                     </tr>
                                 @endforeach
+
+                                @if ($hasInvalidItems)
+                                    <tr>
+                                        <td colspan="8" class="text-center text-danger">
+                                            <div class="alert alert-warning mb-0">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                Một số sản phẩm trong giỏ hàng không còn khả dụng.
+                                                <a href="{{ route('cart.clear') }}" class="alert-link">Xóa giỏ hàng</a>
+                                                hoặc <a href="{{ route('cart.index') }}" class="alert-link">làm mới
+                                                    trang</a>
+                                                để cập nhật.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
 
                                 <tr>
                                     <td colspan="8" class="border-top space-top-2 justify-content-center">
@@ -205,6 +257,8 @@
 
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
+                    const userId = {{ auth()->id() }};
+
                     document.getElementById('select-all').addEventListener('click', function(event) {
                         document.querySelectorAll('.select-item').forEach(checkbox => {
                             checkbox.checked = event.target.checked;
@@ -314,17 +368,45 @@
                                             // Store the new value as the default for future changes
                                             this.defaultValue = newQuantity;
                                         }
+
+                                        // Show success message
+                                        const toast = Swal.mixin({
+                                            toast: true,
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 3000,
+                                            timerProgressBar: true
+                                        });
+
+                                        toast.fire({
+                                            icon: 'success',
+                                            title: data.message ||
+                                                'Cập nhật giỏ hàng thành công!'
+                                        });
                                     } else {
-                                        alert(data.message || 'Có lỗi xảy ra khi cập nhật số lượng.');
-                                        // Reset to previous value
-                                        this.value = originalValue;
+                                        throw new Error(data.message ||
+                                            'Có lỗi xảy ra khi cập nhật số lượng.');
                                     }
                                 })
                                 .catch(error => {
                                     console.error('Error:', error);
-                                    alert('Có lỗi xảy ra khi cập nhật số lượng. Vui lòng thử lại.');
                                     // Reset to previous value
                                     this.value = originalValue;
+
+                                    // Show error message
+                                    const toast = Swal.mixin({
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 3000,
+                                        timerProgressBar: true
+                                    });
+
+                                    toast.fire({
+                                        icon: 'error',
+                                        title: error.message ||
+                                            'Có lỗi xảy ra khi cập nhật số lượng. Vui lòng thử lại.'
+                                    });
                                 });
                         });
 
@@ -360,7 +442,7 @@
                     // Add WebSocket listener for cart updates
                     if (window.Echo) {
                         window.Echo.private(`cart.${userId}`)
-                            .listen('.CartUpdated', (e) => {
+                            .listen('CartUpdated', (e) => {
                                 console.log('Cart updated:', e);
 
                                 // Update cart badge count
@@ -385,6 +467,13 @@
                                         });
                                 }
                             });
+                    }
+
+                    function formatPrice(price) {
+                        return new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                        }).format(price);
                     }
                 });
             </script>

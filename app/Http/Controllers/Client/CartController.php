@@ -14,6 +14,9 @@ use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Events\CouponApplied;
+use App\Events\CheckoutSessionUpdated;
+use App\Models\CheckoutSession;
 
 class CartController extends Controller
 {
@@ -37,67 +40,52 @@ class CartController extends Controller
             ->get();
 
         // Log initial cart items
-        Log::info('Initial cart items', [
-            'items' => $cartItems->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'variant_id' => $item->product_variant_id
-                ];
-            })->toArray()
-        ]);
+        // Log::info('Initial cart items', [
+        //     'items' => $cartItems->map(function ($item) {
+        //         return [
+        //             'id' => $item->id,
+        //             'product_id' => $item->product_id,
+        //             'variant_id' => $item->product_variant_id
+        //         ];
+        //     })->toArray()
+        // ]);
 
         // Process each cart item to handle multiple variant IDs
         $processedItems = collect();
-        $cartItems->each(function ($item) use ($processedItems) {
-            if ($item->product_variant_id) {
-                // Split the variant IDs if they exist
-                $variantIds = explode(' | ', $item->product_variant_id);
+        $invalidItemIds = collect();
 
-                // Log the variant IDs
-                Log::info('Processing cart item', [
-                    'item_id' => $item->id,
-                    'variant_ids' => $variantIds
-                ]);
+        $cartItems->each(function ($item) use ($processedItems, $invalidItemIds) {
+            // Check if product exists and is active
+            if (!$item->product || !$item->product->status) {
+                $invalidItemIds->push($item->id);
+                return;
+            }
 
-                // Get all variants with their attribute values
-                $variants = ProductVariant::whereIn('id', $variantIds)
-                    ->with(['attributeValues' => function ($query) {
-                        $query->with('attribute')
-                            ->orderBy('attribute_id'); // Order by attribute_id to ensure consistent order
-                    }])
-                    ->get();
+            // If product has variants, check variant status
+            if ($item->product->is_variant) {
+                if (!$item->productVariant || !$item->productVariant->status) {
+                    $invalidItemIds->push($item->id);
+                    return;
+                }
 
-                // Log the variants found
-                Log::info('Variants found', [
-                    'variants' => $variants->map(function ($v) {
-                        return [
-                            'id' => $v->id,
-                            'attributes' => $v->attributeValues->map(function ($av) {
-                                return [
-                                    'name' => $av->attribute->name,
-                                    'value' => $av->value
-                                ];
-                            })->toArray()
-                        ];
-                    })->toArray()
-                ]);
+                // Get the variant with its attribute values
+                $variant = ProductVariant::with(['attributeValues' => function ($query) {
+                    $query->with('attribute')
+                        ->orderBy('attribute_id');
+                }])->find($item->product_variant_id);
 
-                // Create a new cart item for each variant
-                foreach ($variants as $variant) {
+                if ($variant) {
                     // Create a new cart item instance
                     $newItem = new CartItem();
                     $newItem->id = $item->id;
                     $newItem->cart_id = $item->cart_id;
                     $newItem->product_id = $item->product_id;
-                    $newItem->product_variant_id = (string)$variant->id;
+                    $newItem->product_variant_id = $variant->id;
                     $newItem->quantity = $item->quantity;
                     $newItem->product = $item->product;
+                    $newItem->productVariant = $variant;
 
-                    // Create a new variants collection with just this variant
-                    $newItem->variants = collect([$variant]);
-
-                    // Add the variant's attributes to the item, ensuring unique attribute names
+                    // Add the variant's attributes to the item
                     $newItem->variant_attributes = $variant->attributeValues->unique('attribute_id')->map(function ($value) {
                         return [
                             'name' => $value->attribute->name,
@@ -105,57 +93,13 @@ class CartController extends Controller
                         ];
                     })->toArray();
 
-                    // Log the new item details
-                    Log::info('Created new cart item', [
-                        'original_id' => $item->id,
-                        'variant_id' => $variant->id,
-                        'attributes' => $newItem->variant_attributes
-                    ]);
-
                     $processedItems->push($newItem);
+                } else {
+                    $invalidItemIds->push($item->id);
                 }
             } else {
                 $processedItems->push($item);
             }
-        });
-
-        // Log the final processed items
-        Log::info('Final processed items', [
-            'items' => $processedItems->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'variant_id' => $item->product_variant_id,
-                    'attributes' => isset($item->variant_attributes) ? $item->variant_attributes : []
-                ];
-            })->toArray()
-        ]);
-
-        // Filter out invalid products and collect IDs of invalid items
-        $invalidItemIds = collect();
-        $validCartItems = $processedItems->filter(function ($item) use ($invalidItemIds) {
-            $isValid = true;
-
-            // Check if product exists and is active
-            if (!$item->product || !$item->product->status) {
-                $isValid = false;
-            }
-
-            // If product has variants, check variant status
-            if ($isValid && isset($item->variants)) {
-                foreach ($item->variants as $variant) {
-                    if (!$variant->status) {
-                        $isValid = false;
-                        break;
-                    }
-                }
-            }
-
-            if (!$isValid) {
-                $invalidItemIds->push($item->id);
-            }
-
-            return $isValid;
         });
 
         // If any items were invalid, delete them from the database
@@ -164,7 +108,7 @@ class CartController extends Controller
             session()->flash('warning', 'Một số sản phẩm không còn khả dụng đã được xóa khỏi giỏ hàng.');
         }
 
-        $cartItems = $validCartItems;
+        $cartItems = $processedItems;
 
         $template = 'fontend.cart.index';
         return view('fontend.layout', compact('template', 'cart', 'cartItems', 'userId'));
@@ -391,63 +335,121 @@ class CartController extends Controller
         }
 
         try {
-            foreach ($request->cart as $cartItem) {
-                $cartItemModel = CartItem::where('id', $cartItem['id'])->first();
+            DB::beginTransaction();
+
+            $userId = Auth::id();
+            $cart = Cart::where('user_id', $userId)->first();
+            $updatedItems = [];
+
+            foreach ($request->cart as $item) {
+                $cartItemModel = CartItem::with(['product', 'productVariant'])
+                    ->where('id', $item['id'])
+                    ->first();
 
                 if (!$cartItemModel) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Không tìm thấy sản phẩm trong giỏ hàng.'
-                    ], 404);
+                    continue;
                 }
 
-                $newQuantity = (int) $cartItem['quantity'];
+                $newQuantity = (int)$item['quantity'];
+                $maxQuantity = $cartItemModel->productVariant ?
+                    $cartItemModel->productVariant->quantity :
+                    $cartItemModel->product->quantity;
 
-                // Check if this is a variant product
-                if ($cartItemModel->product_variant_id) {
-                    $variant = ProductVariant::find($cartItemModel->product_variant_id);
-                    if (!$variant) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Biến thể sản phẩm không tồn tại.'
-                        ], 404);
-                    }
-
-                    // Check stock limit for variant
-                    if ($newQuantity > $variant->quantity) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Số lượng sản phẩm biến thể không đủ. Số lượng còn lại: ' . $variant->quantity
-                        ], 400);
-                    }
-                } else {
-                    $product = Product::findOrFail($cartItemModel->product_id);
-                    // Check stock limit for regular product
-                    if ($newQuantity > $product->quantity) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Số lượng sản phẩm không đủ. Số lượng còn lại: ' . $product->quantity
-                        ], 400);
-                    }
+                if ($newQuantity > $maxQuantity) {
+                    throw new \Exception('Số lượng sản phẩm vượt quá tồn kho.');
                 }
 
                 $cartItemModel->quantity = $newQuantity;
                 $cartItemModel->save();
+
+                // Add to updated items for broadcasting
+                $updatedItems[] = [
+                    'id' => $cartItemModel->id,
+                    'quantity' => $newQuantity,
+                    'price' => $cartItemModel->productVariant ?
+                        ($cartItemModel->productVariant->price_sale ?? $cartItemModel->productVariant->price) : ($cartItemModel->product->price_sale ?? $cartItemModel->product->price)
+                ];
             }
 
-            // Broadcast cart update event
-            event(new CartUpdated(Auth::id(), Cart::where('user_id', Auth::id())->first()->items()->count()));
+            // Calculate new totals
+            $subtotal = 0;
+            foreach ($updatedItems as $item) {
+                $subtotal += $item['price'] * $item['quantity'];
+            }
+
+            // Apply coupon if exists
+            $coupon = session('coupon');
+            $discount = 0;
+            if ($coupon) {
+                if ($coupon['type'] === 'percent') {
+                    $discount = min(
+                        $subtotal * ($coupon['price'] / 100),
+                        $coupon['maximum_amount'] ?? $subtotal
+                    );
+                } else {
+                    $discount = min($coupon['price'], $subtotal);
+                }
+            }
+
+            $total = max(0, $subtotal - $discount);
+
+            // Broadcast cart update event only for cart page
+            event(new CartUpdated($userId, $cart->items()->count()));
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Cập nhật giỏ hàng thành công!'
+                'message' => 'Cập nhật giỏ hàng thành công!',
+                'data' => [
+                    'items' => $updatedItems,
+                    'subtotal' => $subtotal,
+                    'discount' => $discount,
+                    'total' => $total,
+                    'coupon' => $coupon ? [
+                        'code' => $coupon['code'],
+                        'type' => $coupon['type'],
+                        'price' => $coupon['price'],
+                        'maximum_amount' => $coupon['maximum_amount'] ?? null
+                    ] : null
+                ]
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
-            ], 500);
+            ], 400);
         }
+    }
+
+    private function getCartItems($user)
+    {
+        return Cart::where('user_id', $user->id)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'quantity' => $item->quantity,
+                    'price' => $item->productVariant
+                        ? ($item->productVariant->price_sale ?? $item->productVariant->price)
+                        : ($item->product->price_sale ?? $item->product->price),
+                ];
+            })->toArray();
+    }
+
+    private function calculateTotal($user)
+    {
+        return Cart::where('user_id', $user->id)
+            ->get()
+            ->sum(function ($item) {
+                $price = $item->productVariant
+                    ? ($item->productVariant->price_sale ?? $item->productVariant->price)
+                    : ($item->product->price_sale ?? $item->product->price);
+                return $item->quantity * $price;
+            });
     }
 
     public function remove(Request $request, $id)
@@ -483,48 +485,247 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Đã xóa giỏ hàng!');
     }
 
+    public function getAvailableCoupons()
+    {
+        $userId = Auth::id();
+        $total = request()->input('total', 0);
+
+        // Public coupons not used by this user
+        $publicCoupons = DB::table('coupons')
+            ->where('is_public', true)
+            ->where('status', 1)
+            ->where(function ($query) use ($total) {
+                $query->whereNull('min_order_total')
+                    ->orWhere('min_order_total', '<=', $total);
+            })
+            ->whereNotIn('id', function ($query) use ($userId) {
+                $query->select('coupon_id')
+                    ->from('coupon_user')
+                    ->where('user_id', $userId)
+                    ->where('used', true);
+            })
+            ->select(
+                'id',
+                'code',
+                'type',
+                'price',
+                'min_order_total',
+                'maximum_amount',
+                DB::raw('false as used'),
+                DB::raw('true as is_public')
+            )
+            ->get();
+
+        // Private coupons assigned to user and not used
+        $privateCoupons = DB::table('coupon_user')
+            ->join('coupons', 'coupon_user.coupon_id', '=', 'coupons.id')
+            ->where('coupon_user.user_id', $userId)
+            ->where('coupon_user.used', false)
+            ->where('coupons.status', 1)
+            ->where(function ($query) use ($total) {
+                $query->whereNull('coupons.min_order_total')
+                    ->orWhere('coupons.min_order_total', '<=', $total);
+            })
+            ->select(
+                'coupons.id',
+                'coupons.code',
+                'coupons.type',
+                'coupons.price',
+                'coupons.min_order_total',
+                'coupons.maximum_amount',
+                'coupon_user.used',
+                DB::raw('false as is_public')
+            )
+            ->get();
+
+        // Merge and return
+        Log::info('Private coupons fetched for user', ['user_id' => $userId, 'privateCoupons' => $privateCoupons]);
+        $coupons = $publicCoupons->merge($privateCoupons);
+
+        return response()->json([
+            'success' => true,
+            'coupons' => $coupons
+        ]);
+    }
+
     public function applyCoupon(Request $request)
     {
         $request->validate([
             'code' => 'required|string',
         ]);
 
-        $coupon = Coupon::where('code', $request->code)
-            ->where('is_active', true)
-            ->where('start_date', '<=', now())
-            ->where('end_date', '>=', now())
+        $userId = Auth::id();
+
+        // Check public coupon
+        $publicCoupon = DB::table('coupons')
+            ->where('code', $request->code)
+            ->where('is_public', true)
+            ->where('status', 1)
             ->first();
 
-        if (!$coupon) {
-            return back()->with('error', 'Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+        if ($publicCoupon) {
+            // Check if user has already used this public coupon
+            $used = DB::table('coupon_user')
+                ->where('user_id', $userId)
+                ->where('coupon_id', $publicCoupon->id)
+                ->where('used', true)
+                ->exists();
+
+            if ($used) {
+                return response()->json(['success' => false, 'message' => 'Bạn đã sử dụng mã giảm giá này trước đó.']);
+            }
+
+            // Store coupon in session
+            session(['coupon' => [
+                'id' => $publicCoupon->id,
+                'code' => $publicCoupon->code,
+                'type' => $publicCoupon->type,
+                'price' => $publicCoupon->price,
+                'min_order_total' => $publicCoupon->min_order_total,
+                'maximum_amount' => $publicCoupon->maximum_amount,
+                'is_public' => true,
+            ]]);
+
+            // Calculate new totals
+            $cartItems = CartItem::with(['product', 'productVariant'])
+                ->where('cart_id', optional(Cart::where('user_id', $userId)->first())->id)
+                ->get();
+            $subtotal = 0;
+            foreach ($cartItems as $item) {
+                $price = $item->productVariant
+                    ? ($item->productVariant->price_sale ?? $item->productVariant->price)
+                    : ($item->product->price_sale ?? $item->product->price);
+                $subtotal += $item->quantity * $price;
+            }
+            $discount = 0;
+            if ($publicCoupon->type === 'percent') {
+                $discount = min(
+                    $subtotal * ($publicCoupon->price / 100),
+                    $publicCoupon->maximum_amount ?? $subtotal
+                );
+            } else {
+                $discount = min($publicCoupon->price, $subtotal);
+            }
+            $total = max(0, $subtotal - $discount);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Áp dụng mã giảm giá thành công!',
+                'coupon' => [
+                    'code' => $publicCoupon->code,
+                    'type' => $publicCoupon->type,
+                    'price' => $publicCoupon->price,
+                    'maximum_amount' => $publicCoupon->maximum_amount ?? null
+                ],
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'total' => $total
+            ]);
         }
 
-        // Check if user has already used this coupon
-        $userId = Auth::id();
-        $hasUsed = CouponUser::where('user_id', $userId)
-            ->where('coupon_id', $coupon->id)
-            ->exists();
+        // Check private coupon
+        $privateCoupon = DB::table('coupon_user')
+            ->join('coupons', 'coupon_user.coupon_id', '=', 'coupons.id')
+            ->where('coupon_user.user_id', $userId)
+            ->where('coupons.code', $request->code)
+            ->where('coupon_user.used', false)
+            ->where('coupons.status', 1)
+            ->select('coupons.*', 'coupon_user.coupon_id')
+            ->first();
 
-        if ($hasUsed) {
-            return back()->with('error', 'Bạn đã sử dụng mã giảm giá này trước đó.');
+        if ($privateCoupon) {
+            session(['coupon' => [
+                'id' => $privateCoupon->id,
+                'code' => $privateCoupon->code,
+                'type' => $privateCoupon->type,
+                'price' => $privateCoupon->price,
+                'min_order_total' => $privateCoupon->min_order_total,
+                'maximum_amount' => $privateCoupon->maximum_amount,
+                'is_public' => false,
+            ]]);
+
+            // Calculate new totals
+            $cartItems = CartItem::with(['product', 'productVariant'])
+                ->where('cart_id', optional(Cart::where('user_id', $userId)->first())->id)
+                ->get();
+            $subtotal = 0;
+            foreach ($cartItems as $item) {
+                $price = $item->productVariant
+                    ? ($item->productVariant->price_sale ?? $item->productVariant->price)
+                    : ($item->product->price_sale ?? $item->product->price);
+                $subtotal += $item->quantity * $price;
+            }
+            $discount = 0;
+            if ($privateCoupon->type === 'percent') {
+                $discount = min(
+                    $subtotal * ($privateCoupon->price / 100),
+                    $privateCoupon->maximum_amount ?? $subtotal
+                );
+            } else {
+                $discount = min($privateCoupon->price, $subtotal);
+            }
+            $total = max(0, $subtotal - $discount);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Áp dụng mã giảm giá thành công!',
+                'coupon' => [
+                    'code' => $privateCoupon->code,
+                    'type' => $privateCoupon->type,
+                    'price' => $privateCoupon->price,
+                    'maximum_amount' => $privateCoupon->maximum_amount ?? null
+                ],
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'total' => $total
+            ]);
         }
 
-        // Store coupon in session
-        session(['coupon' => [
-            'id' => $coupon->id,
-            'code' => $coupon->code,
-            'type' => $coupon->type,
-            'value' => $coupon->value,
-            'min_order_total' => $coupon->min_order_total,
-            'maximum_amount' => $coupon->maximum_amount,
-        ]]);
-
-        return back()->with('success', 'Áp dụng mã giảm giá thành công!');
+        return response()->json(['success' => false, 'message' => 'Bạn không có mã giảm giá này hoặc đã sử dụng rồi!']);
     }
 
     public function removeCoupon()
     {
         session()->forget('coupon');
-        return back()->with('success', 'Đã xóa mã giảm giá.');
+        return response()->json(['success' => true]);
+    }
+
+    public function checkChanges(Request $request)
+    {
+        try {
+            $initialState = $request->input('initial_state', []);
+            $userId = Auth::id();
+            $cart = Cart::where('user_id', $userId)->first();
+
+            if (!$cart) {
+                return response()->json(['has_changes' => false]);
+            }
+
+            $currentItems = CartItem::where('cart_id', $cart->id)
+                ->whereIn('id', array_keys($initialState))
+                ->get();
+
+            foreach ($currentItems as $item) {
+                $initialItem = $initialState[$item->id] ?? null;
+                if (!$initialItem) {
+                    return response()->json(['has_changes' => true]);
+                }
+
+                if ($item->quantity != $initialItem['quantity']) {
+                    return response()->json(['has_changes' => true]);
+                }
+
+                $currentPrice = $item->productVariant ?
+                    ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
+
+                if ($currentPrice != $initialItem['price']) {
+                    return response()->json(['has_changes' => true]);
+                }
+            }
+
+            return response()->json(['has_changes' => false]);
+        } catch (\Exception $e) {
+            return response()->json(['has_changes' => false]);
+        }
     }
 }

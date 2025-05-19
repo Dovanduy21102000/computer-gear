@@ -22,3 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::apiResource('coupons', CouponController::class);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/cart/check-changes', [App\Http\Controllers\Client\CartController::class, 'checkChanges']);
+});

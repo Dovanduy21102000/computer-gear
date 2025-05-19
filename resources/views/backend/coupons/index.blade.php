@@ -21,18 +21,24 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Danh sách khuyến mại</h5>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-primary" href="{{ route('coupons.create') }}">Thêm mới</a>
+                            <a class="btn btn-info" href="{{ route('coupon-distribution.index') }}">
+                                <i class="bi bi-people"></i> Phân phối mã giảm giá
+                            </a>
+                        </div>
                         <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
-                            <div class="datatable-top">
+                            {{-- <div class="datatable-top">
                                 <div>
                                     <a class="btn btn-primary" href="{{ route('coupons.create') }}">Thêm mới</a>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="datatable-container">
                                 <!-- Table with stripped rows -->
                                 <table class="table datatable">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
+                                            <th>STT</th>
                                             <th>Tên</th>
                                             <th>Mã</th>
                                             <th>Loại</th>
@@ -46,7 +52,7 @@
                                     <tbody>
                                         @foreach ($coupons as $coupon)
                                             <tr>
-                                                <td>{{ $coupon->id }}</td>
+                                                 <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td>{{ $coupon->name }}</td>
                                                 <td>{{ $coupon->code }}</td>
                                                 <td>{{ $coupon->type == 'percent' ? 'Phần trăm' : 'Cố định' }}</td>

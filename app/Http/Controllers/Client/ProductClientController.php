@@ -234,9 +234,10 @@ class ProductClientController extends Controller
                 $child->total_products = $child->products->count();
             }
         }
+        $newProduct = $this->getNewProduct();
         $template = 'fontend.products.index';
 
-        return view('fontend.layout', compact('template', 'products', 'category', 'categories', 'brands'));
+        return view('fontend.layout', compact('template', 'products', 'category', 'categories', 'brands', 'newProduct'));
     }
 
 
@@ -251,10 +252,11 @@ class ProductClientController extends Controller
         $categories = Category::where('is_active', true)->whereNull('parent_id')->with('children')->get();
 
         $brands = Brand::all();
+        $newProduct = $this->getNewProduct();
 
         $template = 'fontend.products.index';
 
-        return view('fontend.layout', compact('template', 'products', 'categories', 'brand', 'brands'));
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brand', 'brands', 'newProduct'));
     }
 
     public function search(Request $request)
@@ -291,7 +293,9 @@ class ProductClientController extends Controller
         // Lấy danh mục theo slug nếu có
         if ($request->has('category')) {
             $category = Category::where('slug', $request->category)->firstOrFail();
-            $productsQuery->where('category_id', $category->id);
+            // Get all category IDs including parent and children
+            $categoryIds = $this->getAllCategoryIds($category);
+            $productsQuery->whereIn('category_id', $categoryIds);
         }
 
         // Lọc theo thương hiệu nếu có
@@ -300,10 +304,7 @@ class ProductClientController extends Controller
             $productsQuery->whereIn('brand_id', $brandIds);
         }
 
-
-
         $products = $productsQuery->paginate(20);
-
 
         $categories = Category::where('is_active', true)
             ->whereNull('parent_id')
@@ -311,9 +312,9 @@ class ProductClientController extends Controller
             ->get();
 
         $brands = Brand::where('is_active', 1)->get();
-
+        $newProduct = $this->getNewProduct();
         $template = 'fontend.products.index';
 
-        return view('fontend.layout', compact('template', 'products', 'categories', 'brands'));
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'newProduct'));
     }
 }
