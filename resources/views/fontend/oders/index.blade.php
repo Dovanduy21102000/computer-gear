@@ -108,3 +108,29 @@
         @endforeach
     </div>
 </div>
+{{-- <script src="https://js.pusher.com/7.0/pusher.min.js"></script> 
+ <script src="{{ mix('js/app.js') }}"></script> --}}
+{{-- <script src="/js/app.js"></script>
+
+
+<script>
+    // Lắng nghe sự kiện cập nhật đơn hàng trên channel chung
+  Echo.channel('orders')
+    .listen('.OrderStatusUpdated', (e) => {
+        console.log('Event nhận được:', e);
+
+        // Cập nhật UI trực tiếp ở đây, ví dụ thêm, sửa, xoá row đơn hàng
+
+        // Ví dụ xóa row đơn hàng cũ
+        const row = document.querySelector(`[data-order-code="${e.order_code}"]`);
+        if (row) row.remove();
+
+        // Thêm row mới dựa vào data e.order
+        // Hoặc gọi ajax load lại dữ liệu tab
+
+        alert(`Đơn hàng #${e.order_code} đã chuyển sang trạng thái "${e.new_status}"`);
+    });
+
+
+</script> --}}
+

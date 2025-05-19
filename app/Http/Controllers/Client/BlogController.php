@@ -23,17 +23,17 @@ class BlogController extends Controller
         if ($request->has('category_post_id') && !empty($request->category_post_id)) {
             $query->where('category_post_id', $request->category_post_id);
         }
-    
+
         // Lọc theo từ khóa tìm kiếm nếu có
         if ($request->has('search') && !empty($request->search)) {
             $query->where('title', 'like', '%' . $request->search . '%');
         }
-    
+
         $posts = $query->latest()->paginate(5);
-    
+
         // Lấy danh sách danh mục để hiển thị trên form tìm kiếm
         $category_post = CategoryPost::all();
-    
+
         $template = 'fontend.blog.index';
         return view('fontend.layout', compact('template', 'posts', 'category_post'));
     }
@@ -43,7 +43,7 @@ class BlogController extends Controller
         $post = Post::where('slug', $slug)->firstOrFail();
         $recentPosts = Post::where('status', 1)->latest()->take(5)->get();
         $category_post = CategoryPost::all();
-    
+
         // Kiểm tra xem có tham số category_post_id trong request không
         $categoryId = $request->input('category_post_id');
         if ($categoryId) {
@@ -56,10 +56,18 @@ class BlogController extends Controller
         } else {
             $filteredPosts = collect(); // Trả về collection rỗng nếu không lọc theo danh mục
         }
-    
+
         $template = 'fontend.blog.show';
-    
+
         return view('fontend.layout', compact('template', 'post', 'recentPosts', 'category_post', 'filteredPosts'));
     }
-    
+
+    public function category($slug)
+    {
+        $category = CategoryPost::where('slug', $slug)->firstOrFail();
+        $posts = $category->posts()->where('is_active', 1)->paginate(10);
+        $template = 'fontend.blog.show';
+
+        return view('fontend.layout', compact('template', 'category', 'posts'));
+    }
 }

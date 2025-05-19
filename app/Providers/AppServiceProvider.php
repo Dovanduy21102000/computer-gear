@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\CartItem;
+use App\Models\Category;
+use App\Models\CategoryPost;
 use App\Models\Product;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
@@ -57,13 +59,21 @@ class AppServiceProvider extends ServiceProvider
             ->get()
             ->shuffle() // Trộn ngẫu nhiên
             ->take(3);
+            $categories = Category::where('is_active', 1)
+                      ->whereNull('parent_id')
+                      ->get();
+$categories_post = CategoryPost::where('is_active', 1)
+                      ->whereNull('parent_id')
+                      ->get();
 
             $view->with([
                 'total_items' => $total_items,
                 'topViewedProducts' => $topViewedProducts,
                 'activeProducts' => $activeProducts,
                 'topRatedProducts' =>$topRatedProducts,
-                'activeProducts' =>$activeProducts
+                'activeProducts' =>$activeProducts,
+                'categories'=>$categories,
+                'categories_post'=>$categories_post
             ]);
 
             // $view->with('total_items', $total_items);
