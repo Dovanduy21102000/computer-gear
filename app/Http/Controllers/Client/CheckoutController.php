@@ -131,6 +131,9 @@ class CheckoutController extends Controller
 
             $finalPrice = max(0, $totalPrice - $couponDiscount);
 
+            // Log coupon in session
+            Log::info('Coupon in session at checkout:', ['coupon' => session('coupon')]);
+
             $template = 'fontend.checkout.index';
             return view('fontend.layout', compact(
                 'addresses',
@@ -306,6 +309,18 @@ class CheckoutController extends Controller
 
         // Ensure selected_items is always an array
         $data['selected_items'] = is_array($selectedItems) ? $selectedItems : [];
+
+        // Preserve the coupon in session
+        if (session()->has('coupon')) {
+            $data['coupon'] = session('coupon');
+        }
+
+        // Log the data being passed
+        Log::info('Redirecting to payment with data:', [
+            'url' => $url,
+            'data' => $data,
+            'coupon_in_session' => session('coupon')
+        ]);
 
         return view('fontend.checkout.post', ['url' => $url, 'data' => $data]);
     }
@@ -585,17 +600,20 @@ class CheckoutController extends Controller
         }
 
         // Store coupon details in session
-        session([
-            'coupon' => [
-                'id' => $coupon->id,
-                'code' => $coupon->code,
-                'type' => $coupon->type, // 'fixed' or 'percent'
-                'price' => $coupon->price, // Discount value (amount or percent)
-                'maximum_amount' => $coupon->maximum_amount,
-                'min_order_total' => $coupon->min_order_total,
-                'applied_at' => now()->timestamp
-            ]
-        ]);
+        $couponData = [
+            'id' => $coupon->id,
+            'code' => $coupon->code,
+            'type' => $coupon->type, // 'fixed' or 'percent'
+            'price' => (float)$coupon->price, // Convert to float to ensure proper calculation
+            'maximum_amount' => $coupon->maximum_amount ? (float)$coupon->maximum_amount : null,
+            'min_order_total' => $coupon->min_order_total ? (float)$coupon->min_order_total : 0,
+            'applied_at' => now()->timestamp
+        ];
+
+        // Log the coupon data being stored
+        Log::info('Storing coupon in session:', $couponData);
+
+        session(['coupon' => $couponData]);
 
         $msg = 'Mã khuyến mại đã được áp dụng!';
         return $isAjax ? response()->json(['success' => true, 'message' => $msg]) : back()->with('success', $msg);

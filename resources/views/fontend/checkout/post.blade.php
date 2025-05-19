@@ -7,18 +7,21 @@
     <title>Redirecting...</title>
 </head>
 
-<body onload="document.getElementById('redirect-form').submit();">
-    <form id="redirect-form" action="{{ $url }}" method="POST">
+<body onload="document.getElementById('paymentForm').submit();">
+    <form id="paymentForm" action="{{ $url }}" method="POST">
         @csrf
         @foreach ($data as $key => $value)
             @if (is_array($value))
-                @foreach ($value as $item)
-                    <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+                @foreach ($value as $subKey => $subValue)
+                    <input type="hidden" name="{{ $key }}[]" value="{{ $subValue }}">
                 @endforeach
             @else
                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
             @endif
         @endforeach
+        @if (session()->has('coupon'))
+            <input type="hidden" name="coupon" value="{{ json_encode(session('coupon')) }}">
+        @endif
     </form>
     <p>Redirecting...</p>
 </body>

@@ -1,3 +1,22 @@
+@php
+    $appliedCoupon = $appliedCoupon ?? (session('coupon') ?? null);
+    $subtotal = 0;
+    foreach ($cartItems as $item) {
+        $price = $item->productVariant
+            ? $item->productVariant->price_sale ?? $item->productVariant->price
+            : $item->product->price_sale ?? $item->product->price;
+        $subtotal += $item->quantity * $price;
+    }
+    $discount = 0;
+    if ($appliedCoupon) {
+        if ($appliedCoupon['type'] === 'percent') {
+            $discount = min($subtotal * ($appliedCoupon['price'] / 100), $appliedCoupon['maximum_amount'] ?? $subtotal);
+        } else {
+            $discount = min($appliedCoupon['price'], $subtotal);
+        }
+    }
+    $total = max(0, $subtotal - $discount);
+@endphp
 <main id="content" role="main" class="checkout-page">
     <style>
         .variant-attributes {
@@ -241,59 +260,6 @@
                                             </tr>
                                         @endforeach
                                     </tbody>
-                                    <tfoot>
-                                        @php
-                                            $subtotal = 0;
-                                            foreach ($cartItems as $item) {
-                                                $price = $item->productVariant
-                                                    ? $item->productVariant->price_sale ?? $item->productVariant->price
-                                                    : $item->product->price_sale ?? $item->product->price;
-                                                $subtotal += $item->quantity * $price;
-                                            }
-
-                                            $appliedCoupon = session('coupon') ?? null;
-                                            $discount = 0;
-
-                                            if ($appliedCoupon) {
-                                                if ($appliedCoupon['type'] === 'percent') {
-                                                    $discount = min(
-                                                        $subtotal * ($appliedCoupon['price'] / 100),
-                                                        $appliedCoupon['maximum_amount'] ?? $subtotal,
-                                                    );
-                                                } else {
-                                                    $discount = min($appliedCoupon['price'], $subtotal);
-                                                }
-                                            }
-
-                                            $total = max(0, $subtotal - $discount);
-                                        @endphp
-
-
-                                        <tr>
-                                            <th>Tổng cộng</th>
-                                            <td class="text-right font-medium">
-                                                {{ number_format($subtotal, 0, ',', '.') }}₫</td>
-                                        </tr>
-
-                                        <tr>
-                                            <th>Thành tiền</th>
-                                            <td class="text-right font-medium">
-                                                <strong>{{ number_format($total, 0, ',', '.') }}₫</strong>
-                                            </td>
-                                            <input type="hidden" name="total_price" value="{{ (int) $total }}">
-                                        </tr>
-                                        @if ($appliedCoupon)
-                                            <tr>
-                                                <td colspan="2" class="text-right text-danger"
-                                                    style="font-size: 0.95em; border: none;">
-                                                    Giảm giá: -{{ number_format($discount, 0, ',', '.') }}₫
-                                                </td>
-                                            </tr>
-                                        @endif
-                                    </tfoot>
-
-
-
                                 </table>
 
                                 <!-- Coupon Section -->
@@ -372,8 +338,7 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="cash"
                                                         name="payment_method" value="cash">
-                                                    <label class="custom-control-label form-label"
-                                                        for="cash">Thanh
+                                                    <label class="custom-control-label form-label" for="cash">Thanh
                                                         toán trực tiếp</label>
                                                 </div>
                                             </div>
@@ -502,6 +467,26 @@
             </div>
         </form>
 
+        <tfoot>
+            <tr>
+                <th>Tổng cộng</th>
+                <td class="text-right font-medium">{{ number_format($subtotal, 0, ',', '.') }}₫</td>
+            </tr>
+            @if ($appliedCoupon)
+                <tr class="discount-row">
+                    <td colspan="2" class="text-right text-danger" style="font-size: 0.95em; border: none;">
+                        Giảm giá: -{{ number_format($discount, 0, ',', '.') }}₫
+                    </td>
+                </tr>
+            @endif
+            <tr>
+                <th>Thành tiền</th>
+                <td class="text-right font-medium">
+                    <strong>{{ number_format($total, 0, ',', '.') }}₫</strong>
+                </td>
+            </tr>
+        </tfoot>
+        <input type="hidden" name="total_price" value="{{ (int) $total }}">
 
         <script>
             document.addEventListener("DOMContentLoaded", function() {
@@ -559,18 +544,18 @@
                                         `${formatPrice(e.checkoutData.coupon.price)}`;
 
                                     couponDisplay.innerHTML = `
-                                        <div class="card mb-3 shadow-sm border-left border-success" style="border-left-width: 6px !important;">
-                                            <div class="card-body d-flex align-items-center justify-content-between p-3">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="fas fa-check-circle text-success mr-2"></i>
-                                                    <span class="font-weight-bold text-success mr-2">Đã áp dụng mã:</span>
-                                                    <span class="font-weight-bold text-dark mr-2">${e.checkoutData.coupon.code}</span>
-                                                    <span class="badge badge-success ml-2" style="font-size: 1em;">
+                                        <div class=\"card mb-3 shadow-sm border-left border-success\" style=\"border-left-width: 6px !important;\">
+                                            <div class=\"card-body d-flex align-items-center justify-content-between p-3\">
+                                                <div class=\"d-flex align-items-center\">
+                                                    <i class=\"fas fa-check-circle text-success mr-2\"></i>
+                                                    <span class=\"font-weight-bold text-success mr-2\">Đã áp dụng mã:</span>
+                                                    <span class=\"font-weight-bold text-dark mr-2\">${e.checkoutData.coupon.code}</span>
+                                                    <span class=\"badge badge-success ml-2\" style=\"font-size: 1em;\">
                                                         ${discountText}
                                                     </span>
                                                 </div>
-                                                <button type="button" class="btn btn-link text-danger p-0 remove-coupon" title="Xóa mã giảm giá" style="font-size: 1.3em;">
-                                                    <i class="fas fa-times-circle"></i>
+                                                <button type=\"button\" class=\"btn btn-link text-danger p-0 remove-coupon\" title=\"Xóa mã giảm giá\" style=\"font-size: 1.3em;\">
+                                                    <i class=\"fas fa-times-circle\"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -593,8 +578,8 @@
                                                     if (data.success) {
                                                         // Instead of reloading, update the UI
                                                         couponDisplay.innerHTML = `
-                                                        <div class="text-muted">
-                                                            <i class="fas fa-info-circle mr-1"></i>
+                                                        <div class=\"text-muted\">
+                                                            <i class=\"fas fa-info-circle mr-1\"></i>
                                                             Chọn mã giảm giá để nhận ưu đãi
                                                         </div>
                                                     `;
@@ -604,8 +589,8 @@
                                     }
                                 } else {
                                     couponDisplay.innerHTML = `
-                                        <div class="text-muted">
-                                            <i class="fas fa-info-circle mr-1"></i>
+                                        <div class=\"text-muted\">
+                                            <i class=\"fas fa-info-circle mr-1\"></i>
                                             Chọn mã giảm giá để nhận ưu đãi
                                         </div>
                                     `;
@@ -668,7 +653,58 @@
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.success) {
-                                        window.location.reload();
+                                        // Update coupon display
+                                        const couponDisplay = document.getElementById('couponDisplay');
+                                        if (couponDisplay) {
+                                            couponDisplay.innerHTML = `
+                                                <div class=\"text-muted\">
+                                                    <i class=\"fas fa-info-circle mr-1\"></i>
+                                                    Chọn mã giảm giá để nhận ưu đãi
+                                                </div>
+                                            `;
+                                        }
+                                        // Insert discount row after 'Tổng cộng'
+                                        let tongCongRow = null;
+                                        document.querySelectorAll('table.table tfoot tr').forEach(row => {
+                                            const th = row.querySelector('th');
+                                            if (th && th.textContent.trim().includes('Tổng cộng')) {
+                                                tongCongRow = row;
+                                            }
+                                        });
+                                        if (tongCongRow) {
+                                            // Remove existing discount row if any
+                                            let discountRow = document.querySelector('tr.discount-row');
+                                            if (discountRow) discountRow.remove();
+                                            // Insert new discount row after 'Tổng cộng'
+                                            const newDiscountRow = document.createElement('tr');
+                                            newDiscountRow.classList.add('discount-row');
+                                            newDiscountRow.innerHTML =
+                                                `<td colspan="2" class="text-right text-danger" style="font-size: 0.95em; border: none;">Giảm giá: -${data.discount.toLocaleString('vi-VN')}₫</td>`;
+                                            tongCongRow.parentNode.insertBefore(newDiscountRow, tongCongRow
+                                                .nextSibling);
+                                        }
+                                        // Update subtotal and total (set total = subtotal)
+                                        let subtotalCell = null;
+                                        document.querySelectorAll('table.table tfoot tr').forEach(row => {
+                                            const th = row.querySelector('th');
+                                            if (th && th.textContent.trim().includes(
+                                                    'Thành tiền')) {
+                                                subtotalCell = row.querySelector(
+                                                    'td.text-right.font-medium strong');
+                                            }
+                                        });
+                                        if (subtotalCell) {
+                                            subtotalCell.innerHTML = tongCongRow.querySelector(
+                                                'td.text-right.font-medium').textContent;
+                                        }
+                                        // Update hidden input
+                                        const totalInput = document.querySelector(
+                                            'input[name="total_price"]');
+                                        if (totalInput && subtotalCell) {
+                                            totalInput.value = parseInt(subtotalCell.textContent.replace(
+                                                /[^\d]/g, ''));
+                                        }
+                                        Swal.fire('Thành công', 'Mã giảm giá đã được xóa!', 'success');
                                     }
                                 });
                         }
@@ -913,9 +949,155 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success) {
+                        if (data.success && data.coupon) {
                             $('#couponModal').modal('hide');
-                            window.location.reload();
+                            // Update coupon display
+                            const couponDisplay = document.getElementById('couponDisplay');
+                            if (couponDisplay) {
+                                couponDisplay.innerHTML = `
+                                    <div class=\"card mb-3 shadow-sm border-left border-success\" style=\"border-left-width: 6px !important;\">
+                                        <div class=\"card-body d-flex align-items-center justify-content-between p-3\">
+                                            <div class=\"d-flex align-items-center\">
+                                                <i class=\"fas fa-check-circle text-success mr-2\"></i>
+                                                <span class=\"font-weight-bold text-success mr-2\">Đã áp dụng mã:</span>
+                                                <span class=\"font-weight-bold text-dark mr-2\">${data.coupon.code}</span>
+                                                <span class=\"badge badge-success ml-2\" style=\"font-size: 1em;\">
+                                                    ${data.coupon.type === 'percent' ? data.coupon.price + '%' : new Intl.NumberFormat('vi-VN').format(data.coupon.price) + '₫'}
+                                                </span>
+                                            </div>
+                                            <button type=\"button\" class=\"btn btn-link text-danger p-0 remove-coupon\" title=\"Xóa mã giảm giá\" style=\"font-size: 1.3em;\">
+                                                <i class=\"fas fa-times-circle\"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                            // Insert discount row after 'Tổng cộng'
+                            let tongCongRow = null;
+                            document.querySelectorAll('table.table tfoot tr').forEach(row => {
+                                const th = row.querySelector('th');
+                                if (th && th.textContent.trim().includes('Tổng cộng')) {
+                                    tongCongRow = row;
+                                }
+                            });
+                            if (tongCongRow) {
+                                // Remove existing discount row if any
+                                let discountRow = document.querySelector('tr.discount-row');
+                                if (discountRow) discountRow.remove();
+                                // Insert new discount row after 'Tổng cộng'
+                                const newDiscountRow = document.createElement('tr');
+                                newDiscountRow.classList.add('discount-row');
+                                newDiscountRow.innerHTML =
+                                    `<td colspan="2" class="text-right text-danger" style="font-size: 0.95em; border: none;">Giảm giá: -${data.discount.toLocaleString('vi-VN')}₫</td>`;
+                                tongCongRow.parentNode.insertBefore(newDiscountRow, tongCongRow.nextSibling);
+                            }
+                            // Update subtotal
+                            let subtotalCell = null;
+                            document.querySelectorAll('table.table tfoot tr').forEach(row => {
+                                const th = row.querySelector('th');
+                                if (th && th.textContent.trim().includes('Thành tiền')) {
+                                    subtotalCell = row.querySelector(
+                                        'td.text-right.font-medium strong');
+                                }
+                            });
+                            if (subtotalCell) {
+                                subtotalCell.innerHTML = data.subtotal.toLocaleString('vi-VN') + '₫';
+                            }
+                            // Update total
+                            let totalCell = null;
+                            document.querySelectorAll('table.table tfoot tr').forEach(row => {
+                                const th = row.querySelector('th');
+                                if (th && th.textContent.trim().includes('Thành tiền')) {
+                                    totalCell = row.querySelector('td.text-right.font-medium strong');
+                                }
+                            });
+                            if (totalCell) {
+                                totalCell.innerHTML = data.total.toLocaleString('vi-VN') + '₫';
+                            }
+                            // Update hidden input
+                            const totalInput = document.querySelector('input[name="total_price"]');
+                            if (totalInput) {
+                                totalInput.value = data.total;
+                            }
+                            // Re-attach remove-coupon event listener
+                            const removeCouponButton = document.querySelector('.remove-coupon');
+                            if (removeCouponButton) {
+                                removeCouponButton.addEventListener('click', function() {
+                                    if (confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?')) {
+                                        fetch('{{ route('remove-coupon') }}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': document.querySelector(
+                                                        'meta[name="csrf-token"]').content
+                                                }
+                                            })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                if (data.success) {
+                                                    // Update coupon display
+                                                    const couponDisplay = document.getElementById(
+                                                        'couponDisplay');
+                                                    if (couponDisplay) {
+                                                        couponDisplay.innerHTML = `
+                                                            <div class=\"text-muted\">
+                                                                <i class=\"fas fa-info-circle mr-1\"></i>
+                                                                Chọn mã giảm giá để nhận ưu đãi
+                                                            </div>
+                                                        `;
+                                                    }
+                                                    // Remove discount row
+                                                    let discountRow = document.querySelector(
+                                                        'tr.discount-row');
+                                                    if (discountRow) {
+                                                        discountRow.remove();
+                                                    }
+                                                    // Update subtotal and total (set total = subtotal)
+                                                    let subtotalCell = null;
+                                                    document.querySelectorAll(
+                                                        'table.table tfoot tr').forEach(row => {
+                                                        const th = row.querySelector('th');
+                                                        if (th && th.textContent.trim()
+                                                            .includes('Tổng cộng')) {
+                                                            subtotalCell = row
+                                                                .querySelector(
+                                                                    'td.text-right.font-medium'
+                                                                );
+                                                        }
+                                                    });
+                                                    let totalCell = null;
+                                                    document.querySelectorAll(
+                                                        'table.table tfoot tr').forEach(row => {
+                                                        const th = row.querySelector('th');
+                                                        if (th && th.textContent.trim()
+                                                            .includes('Thành tiền')) {
+                                                            totalCell = row.querySelector(
+                                                                'td.text-right.font-medium strong'
+                                                            );
+                                                        }
+                                                    });
+                                                    if (subtotalCell && totalCell) {
+                                                        totalCell.innerHTML = subtotalCell
+                                                            .textContent;
+                                                    }
+                                                    // Update hidden input
+                                                    const totalInput = document.querySelector(
+                                                        'input[name="total_price"]');
+                                                    if (totalInput && subtotalCell) {
+                                                        totalInput.value = parseInt(subtotalCell
+                                                            .textContent.replace(/[^\d]/g, ''));
+                                                    }
+                                                    Swal.fire('Thành công',
+                                                        'Mã giảm giá đã được xóa!', 'success');
+                                                }
+                                            });
+                                    }
+                                });
+                            }
+                            // Show success message
+                            Swal.fire('Thành công', 'Mã giảm giá đã được áp dụng!', 'success');
+                        } else if (data.success) {
+                            Swal.fire('Thành công', 'Mã giảm giá đã được áp dụng!', 'success');
                         } else {
                             alert(data.message || 'Có lỗi xảy ra khi áp dụng mã giảm giá');
                         }
@@ -997,18 +1179,18 @@
                                         `${formatPrice(e.checkoutData.coupon.price)}`;
 
                                     couponDisplay.innerHTML = `
-                                        <div class="card mb-3 shadow-sm border-left border-success" style="border-left-width: 6px !important;">
-                                            <div class="card-body d-flex align-items-center justify-content-between p-3">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="fas fa-check-circle text-success mr-2"></i>
-                                                    <span class="font-weight-bold text-success mr-2">Đã áp dụng mã:</span>
-                                                    <span class="font-weight-bold text-dark mr-2">${e.checkoutData.coupon.code}</span>
-                                                    <span class="badge badge-success ml-2" style="font-size: 1em;">
+                                        <div class=\"card mb-3 shadow-sm border-left border-success\" style=\"border-left-width: 6px !important;\">
+                                            <div class=\"card-body d-flex align-items-center justify-content-between p-3\">
+                                                <div class=\"d-flex align-items-center\">
+                                                    <i class=\"fas fa-check-circle text-success mr-2\"></i>
+                                                    <span class=\"font-weight-bold text-success mr-2\">Đã áp dụng mã:</span>
+                                                    <span class=\"font-weight-bold text-dark mr-2\">${e.checkoutData.coupon.code}</span>
+                                                    <span class=\"badge badge-success ml-2\" style=\"font-size: 1em;\">
                                                         ${discountText}
                                                     </span>
                                                 </div>
-                                                <button type="button" class="btn btn-link text-danger p-0 remove-coupon" title="Xóa mã giảm giá" style="font-size: 1.3em;">
-                                                    <i class="fas fa-times-circle"></i>
+                                                <button type=\"button\" class=\"btn btn-link text-danger p-0 remove-coupon\" title=\"Xóa mã giảm giá\" style=\"font-size: 1.3em;\">
+                                                    <i class=\"fas fa-times-circle\"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -1031,8 +1213,8 @@
                                                     if (data.success) {
                                                         // Instead of reloading, update the UI
                                                         couponDisplay.innerHTML = `
-                                                        <div class="text-muted">
-                                                            <i class="fas fa-info-circle mr-1"></i>
+                                                        <div class=\"text-muted\">
+                                                            <i class=\"fas fa-info-circle mr-1\"></i>
                                                             Chọn mã giảm giá để nhận ưu đãi
                                                         </div>
                                                     `;
@@ -1042,8 +1224,8 @@
                                     }
                                 } else {
                                     couponDisplay.innerHTML = `
-                                        <div class="text-muted">
-                                            <i class="fas fa-info-circle mr-1"></i>
+                                        <div class=\"text-muted\">
+                                            <i class=\"fas fa-info-circle mr-1\"></i>
                                             Chọn mã giảm giá để nhận ưu đãi
                                         </div>
                                     `;

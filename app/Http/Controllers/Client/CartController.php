@@ -585,7 +585,42 @@ class CartController extends Controller
                 'maximum_amount' => $publicCoupon->maximum_amount,
                 'is_public' => true,
             ]]);
-            return response()->json(['success' => true, 'message' => 'Áp dụng mã giảm giá thành công!']);
+
+            // Calculate new totals
+            $cartItems = CartItem::with(['product', 'productVariant'])
+                ->where('cart_id', optional(Cart::where('user_id', $userId)->first())->id)
+                ->get();
+            $subtotal = 0;
+            foreach ($cartItems as $item) {
+                $price = $item->productVariant
+                    ? ($item->productVariant->price_sale ?? $item->productVariant->price)
+                    : ($item->product->price_sale ?? $item->product->price);
+                $subtotal += $item->quantity * $price;
+            }
+            $discount = 0;
+            if ($publicCoupon->type === 'percent') {
+                $discount = min(
+                    $subtotal * ($publicCoupon->price / 100),
+                    $publicCoupon->maximum_amount ?? $subtotal
+                );
+            } else {
+                $discount = min($publicCoupon->price, $subtotal);
+            }
+            $total = max(0, $subtotal - $discount);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Áp dụng mã giảm giá thành công!',
+                'coupon' => [
+                    'code' => $publicCoupon->code,
+                    'type' => $publicCoupon->type,
+                    'price' => $publicCoupon->price,
+                    'maximum_amount' => $publicCoupon->maximum_amount ?? null
+                ],
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'total' => $total
+            ]);
         }
 
         // Check private coupon
@@ -608,7 +643,42 @@ class CartController extends Controller
                 'maximum_amount' => $privateCoupon->maximum_amount,
                 'is_public' => false,
             ]]);
-            return response()->json(['success' => true, 'message' => 'Áp dụng mã giảm giá thành công!']);
+
+            // Calculate new totals
+            $cartItems = CartItem::with(['product', 'productVariant'])
+                ->where('cart_id', optional(Cart::where('user_id', $userId)->first())->id)
+                ->get();
+            $subtotal = 0;
+            foreach ($cartItems as $item) {
+                $price = $item->productVariant
+                    ? ($item->productVariant->price_sale ?? $item->productVariant->price)
+                    : ($item->product->price_sale ?? $item->product->price);
+                $subtotal += $item->quantity * $price;
+            }
+            $discount = 0;
+            if ($privateCoupon->type === 'percent') {
+                $discount = min(
+                    $subtotal * ($privateCoupon->price / 100),
+                    $privateCoupon->maximum_amount ?? $subtotal
+                );
+            } else {
+                $discount = min($privateCoupon->price, $subtotal);
+            }
+            $total = max(0, $subtotal - $discount);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Áp dụng mã giảm giá thành công!',
+                'coupon' => [
+                    'code' => $privateCoupon->code,
+                    'type' => $privateCoupon->type,
+                    'price' => $privateCoupon->price,
+                    'maximum_amount' => $privateCoupon->maximum_amount ?? null
+                ],
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'total' => $total
+            ]);
         }
 
         return response()->json(['success' => false, 'message' => 'Bạn không có mã giảm giá này hoặc đã sử dụng rồi!']);

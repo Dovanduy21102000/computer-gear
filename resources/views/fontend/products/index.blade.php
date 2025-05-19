@@ -81,7 +81,13 @@
                                                             href="{{ route('client.products.filter', $query) }}">
                                                             <span>{{ $category->name }}</span>
                                                             <span class="badge badge-pill badge-secondary">
-                                                                {{ $category->products()->count() }}
+                                                                @php
+                                                                    $totalProducts = $category->products()->count();
+                                                                    foreach ($category->children as $child) {
+                                                                        $totalProducts += $child->products()->count();
+                                                                    }
+                                                                @endphp
+                                                                {{ $totalProducts }}
                                                             </span>
                                                         </a>
 
@@ -169,7 +175,8 @@
                             <li class="mb-4">
                                 <div class="row">
                                     <div class="col-auto">
-                                        <a href="{{ route('client.products.detail', $product->slug) }}" class="d-block width-75">
+                                        <a href="{{ route('client.products.detail', $product->slug) }}"
+                                            class="d-block width-75">
                                             <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
                                                 alt="{{ $product->name }}">
                                         </a>

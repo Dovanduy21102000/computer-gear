@@ -41,6 +41,18 @@ class MOMOController extends Controller
                 return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
             }
 
+            // Restore coupon from request if present
+            if ($request->has('coupon')) {
+                $couponData = is_string($request->coupon) ? json_decode($request->coupon, true) : $request->coupon;
+                session(['coupon' => $couponData]);
+            }
+
+            // Log the coupon state
+            Log::info('Coupon state at payment creation:', [
+                'coupon_in_request' => $request->coupon,
+                'coupon_in_session' => session('coupon')
+            ]);
+
             // Check for buy now item first
             $buyNowItem = session('buy_now_item');
             if ($buyNowItem) {
@@ -55,12 +67,12 @@ class MOMOController extends Controller
                 $couponDiscount = 0;
                 $couponId = null;
 
-                if ($coupon) {
-                    if ($totalPrice >= $coupon['min_order_total']) {
-                        if ($coupon['type'] === 'percentage') {
-                            $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+                if ($coupon && is_array($coupon)) {
+                    if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
+                        if ($coupon['type'] === 'percent') {
+                            $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount'] ?? $totalPrice);
                         } else {
-                            $couponDiscount = min($totalPrice, $coupon['value']);
+                            $couponDiscount = min($coupon['price'], $totalPrice);
                         }
                         $couponId = $coupon['id'];
                     }
@@ -202,18 +214,31 @@ class MOMOController extends Controller
             $couponDiscount = 0;
             $couponId = null;
 
-            if ($coupon) {
-                if ($totalPrice >= $coupon['min_order_total']) {
-                    if ($coupon['type'] === 'percentage') {
-                        $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+            if ($coupon && is_array($coupon)) {
+                if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
+                    if ($coupon['type'] === 'percent') {
+                        // Calculate percentage discount
+                        $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                        // Apply maximum amount limit if set
+                        $couponDiscount = isset($coupon['maximum_amount']) ?
+                            min($percentageDiscount, $coupon['maximum_amount']) :
+                            $percentageDiscount;
                     } else {
-                        $couponDiscount = min($totalPrice, $coupon['value']);
+                        $couponDiscount = min($coupon['price'], $totalPrice);
                     }
                     $couponId = $coupon['id'];
                 }
             }
 
             $finalPrice = max(0, $totalPrice - $couponDiscount);
+
+            // Log the price calculations for debugging
+            Log::info('Price calculations:', [
+                'totalPrice' => $totalPrice,
+                'coupon' => $coupon,
+                'couponDiscount' => $couponDiscount,
+                'finalPrice' => $finalPrice
+            ]);
 
             // Generate a unique order code using structured timestamp without separators
             $orderCode = date('YmdHis') . rand(100, 999);
@@ -393,12 +418,17 @@ class MOMOController extends Controller
             $couponDiscount = 0;
             $couponId = null;
 
-            if ($coupon) {
-                if ($totalPrice >= $coupon['min_order_total']) {
-                    if ($coupon['type'] === 'percentage') {
-                        $couponDiscount = min($totalPrice * ($coupon['value'] / 100), $coupon['maximum_amount']);
+            if ($coupon && is_array($coupon)) {
+                if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
+                    if ($coupon['type'] === 'percent') {
+                        // Calculate percentage discount
+                        $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                        // Apply maximum amount limit if set
+                        $couponDiscount = isset($coupon['maximum_amount']) ?
+                            min($percentageDiscount, $coupon['maximum_amount']) :
+                            $percentageDiscount;
                     } else {
-                        $couponDiscount = min($totalPrice, $coupon['value']);
+                        $couponDiscount = min($coupon['price'], $totalPrice);
                     }
                     $couponId = $coupon['id'];
                 }
