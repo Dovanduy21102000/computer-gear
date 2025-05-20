@@ -22,7 +22,6 @@
                         </ul>
                     </div>
                 @endif
-
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">ewqeqw</h5>
@@ -131,15 +130,12 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Nút lưu form -->
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-secondary">Lưu biến thể</button>
-                            </div>
-                        </form>
+                            <button type="submitsubmit" class="btn btn-secondary">Thêm biến thể</button>
                     </div>
+                    </form>
                 </div>
             </div>
+        </div>
         </div>
     </section>
 </main>
@@ -270,15 +266,151 @@
                 </div>
               </form>
             </div>
-            <div class="col-sm-6">
-                <select name="attributes[${attributeIndex}][value]" class="form-select attribute-value" required>
-                    <option value="">Chọn giá trị</option>
-                </select>
+          </div>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+          <div id="print">
+            <div class="box box-default box-chart">
+              <div class="box-header with-border text-center">
+                <h3 class="box-title">Biểu Đồ Kinh Doanh Tháng {{ date('m').' Năm '.date('Y') }}</h3>
+              </div>
+              <div class="box-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="chart">
+                      <!-- Sales Chart Canvas -->
+                      <canvas id="salesChart" style="height: 300px;"></canvas>
+                    </div>
+                    <p class="text-center">
+                      <i>Hình 1: Biểu đồ doanh số bán hàng</i>
+                    </p>
+                    <!-- /.chart-responsive -->
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+                <div class="row">
+                  <div class="col-md-4 col-sm-4 col-xs-4">
+                    <div class="chart" style="margin-bottom: 10px;">
+                      <!-- Sales Chart Canvas -->
+                      <div id="quantityChart" style="width: 200px; height: 200px; margin: 0 auto;"></div>
+                    </div>
+                    <!-- /.chart-responsive -->
+                    <p class="text-center">
+                      <i>Hình 2: Thị phần sản phẩm bán được theo nhà sản xuất</i>
+                    </p>
+                  </div>
+                  <!-- /.col -->
+                  <div class="col-md-4 col-sm-4 col-xs-4">
+                    <div class="chart" style="margin-bottom: 10px;">
+                      <!-- Sales Chart Canvas -->
+                      <div id="revenueChart" style="width: 200px; height: 200px; margin: 0 auto;"></div>
+                    </div>
+                    <!-- /.chart-responsive -->
+                    <p class="text-center">
+                      <i>Hình 3: Thị phần doanh thu theo nhà sản xuất</i>
+                    </p>
+                  </div>
+                  <!-- /.col -->
+                  <div class="col-md-4 col-sm-4 col-xs-4">
+                    <div class="chart" style="margin-bottom: 10px;">
+                      <!-- Sales Chart Canvas -->
+                      <div id="profitChart" style="width: 200px; height: 200px; margin: 0 auto;"></div>
+                    </div>
+                    <!-- /.chart-responsive -->
+                    <p class="text-center">
+                      <i>Hình 4: Thị phần lợi nhuận theo nhà sản xuất</i>
+                    </p>
+                  </div>
+                  <!-- /.col -->
+                </div>
+              </div>
+              <div class="box-footer" style="border-bottom: 1px solid #f4f4f4;">
+                <div class="row">
+                  <!-- /.col -->
+                  <div class="col-sm-3 col-xs-3">
+                    <div class="description-block border-right description-order">
+                      <h5 class="description-header">{{ $data['count_orders'] }}</h5>
+                      <span class="description-text">ĐƠN HÀNG</span>
+                    </div>
+                    <!-- /.description-block -->
+                  </div>
+                  <div class="col-sm-3 col-xs-3">
+                    <div class="description-block border-right description-product">
+                      <h5 class="description-header">{{ $data['count_products'] }}</h5>
+                      <span class="description-text">SẢN PHẨM BÁN RA</span>
+                    </div>
+                    <!-- /.description-block -->
+                  </div>
+                  <!-- /.col -->
+                  <div class="col-sm-3 col-xs-3">
+                    <div class="description-block border-right description-revenue">
+                      <h5 class="description-header"><span style="color: #f30;">{{ number_format($data['total_revenue'],0,',','.').' VNĐ' }}</span></h5>
+                      <span class="description-text">DOANH THU THÁNG</span>
+                    </div>
+                    <!-- /.description-block -->
+                  </div>
+                  <!-- /.col -->
+                  <div class="col-sm-3 col-xs-3">
+                    <div class="description-block description-profit">
+                      <h5 class="description-header"><span style="color: #f30;">{{ number_format($data['total_profit'],0,',','.').' VNĐ' }}</span></h5>
+                      <span class="description-text">LỢI NHUẬN THÁNG</span>
+                    </div>
+                    <!-- /.description-block -->
+                  </div>
+                  <!-- /.col -->
+                </div>
+              </div>
             </div>
-            <div class="col-sm-2">
-                <button type="button" class="btn btn-danger remove-attribute">
-                    Xóa
-                </button>
+            <div class="box box-default box-table">
+              <div class="box-header with-border text-center">
+                <h3 class="box-title">Danh Sách Sản Phẩm Xuất Kho Tháng {{ date('m').' Năm '.date('Y') }}</h3>
+              </div>
+              <div class="box-body">
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th style="text-align: center; vertical-align: middle;">STT</th>
+                        <th style="vertical-align: middle;">Mã Sản Phẩm</th>
+                        <th style="vertical-align: middle;">Tên Sản Phẩm</th>
+                        <th style="vertical-align: middle;">Mầu Sắc</th>
+                        <th style="vertical-align: middle;">Đơn Hàng</th>
+                        <th style="vertical-align: middle;">Ngày Xuất</th>
+                        <th style="text-align: center; vertical-align: middle;">Số Lượng</th>
+                        <th style="vertical-align: middle;">Giá Nhập</th>
+                        <th style="vertical-align: middle;">Giá Xuất</th>
+                        <th style="vertical-align: middle;">Doanh Thu</th>
+                        <th style="vertical-align: middle;">Lợi Nhuận</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                          <td style="text-align: center; vertical-align: middle;">{{ $key + 1 }}</td>
+                          <td style="vertical-align: middle;">{{ '#'.$order_detail->product_detail->product->sku_code }}</td>
+                          <td style="vertical-align: middle;">{{ $order_detail->product_detail->product->name }}</td>
+                          <td style="vertical-align: middle;">{{ $order_detail->product_detail->color }}</td>
+                          <td style="vertical-align: middle;">{{ '#'.$order_detail->order->order_code }}</td>
+                          <td style="vertical-align: middle;">{{ date_format($order_detail->created_at, 'd/m/Y') }}</td>
+                          <td style="text-align: center; vertical-align: middle;">{{ $order_detail->quantity }}</td>
+                          <td style="vertical-align: middle;"><span style="color: #f30;">{{ number_format($order_detail->product_detail->import_price,0,',','.') }} VNĐ</span></td>
+                          <td style="vertical-align: middle;"><span style="color: #f30;">{{ number_format($order_detail->price,0,',','.') }} VNĐ</span></td>
+                          <td style="vertical-align: middle;"><span style="color: #f30;">{{ number_format($order_detail->price * $order_detail->quantity,0,',','.') }} VNĐ</span></td>
+                          <td style="vertical-align: middle;"><span style="color: #f30;">{{ number_format($order_detail->quantity * ($order_detail->price - $order_detail->product_detail->import_price),0,',','.') }} VNĐ</span></td>
+                        </tr>
+                      @endforeach
+                      <tr>
+                        <td colspan="11" style="text-align: right;">
+                          <i style="margin-right: 10px;">*Tổng Doanh Thu = <span style="color: #f30;">{{ number_format($price,0,',','.') }} VNĐ</span></i>
+                          <i>*Tổng Lợi Nhuận = <span style="color: #f30;">{{ number_format($profit,0,',','.') }} VNĐ</span></i>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -554,12 +686,42 @@
         }
       });
     });
-    
-    // Xử lý nút xóa cho các nhóm thuộc tính (dùng event delegation)
-    document.addEventListener("click", function(event) {
-        if (event.target && event.target.classList.contains("remove-attribute")) {
-            event.target.closest(".attribute-group").remove();
-        }
+  });
+</script>
+
+<!-- Page script -->
+<script>
+  function labelFormatter(label, series) {
+    return '<div style="font-size:13px; text-align:center; padding:2px; color: #fff; font-weight: 600;">'
+      + label + '<br>' + Math.round(series.percent) + '%</div>'
+  }
+  function formatMoney(argument) {
+    return argument.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' VNĐ';
+  }
+  function formatDate(argument) {
+    var date = new Date(argument);
+    return date.getDate().toString() + '/' + (date.getMonth() + 1).toString() + '/' + date.getFullYear().toString();
+  }
+</script>
+<script>
+  $(document).ready(function() {
+    $('.btn-print').click(function(){
+      printJS({
+        printable: 'print',
+        type: 'html',
+        documentTitle: ' ',
+        header: 'Báo Cáo Tình Hình Kinh Doanh Website PhoneStore',
+        headerStyle: 'font-size: 14px; margin-bottom: 10px;',
+        style: '.box { margin-top: 10px; border-top: none; box-shadow: none; } ' +
+                '@media print { .box-footer { page-break-after: always; } } ' +
+                'table { page-break-inside:auto } ' +
+                'tr { page-break-inside:avoid; page-break-after:auto }',
+        css: [
+          '{{ asset('AdminLTE/bower_components/bootstrap/dist/css/bootstrap.min.css') }}',
+          '{{ asset('AdminLTE/dist/css/AdminLTE.min.css') }}'
+        ]
+      });
     });
+  });
 </script>
 @endsection --}}

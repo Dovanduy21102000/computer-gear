@@ -24,6 +24,10 @@ class ProductVariantController extends Controller
         ]);
     }
 
+
+    /**
+     * Hiển thị form tạo biến thể.
+     */
     public function create($productId)
     {
         $template = 'backend.variants.add';
@@ -35,6 +39,10 @@ class ProductVariantController extends Controller
         $suggestedSku = $baseSku . '-' . $variantCount;
         return view('backend.dashboard.layout', compact('product', 'template', 'attributes', 'suggestedSku'));
     }
+
+    /**
+     * Lưu biến thể mới.
+     */
     public function store(Request $request, Product $product)
     {
         $request->validate([
@@ -89,7 +97,7 @@ class ProductVariantController extends Controller
         }
 
         return redirect()->route('variants.index', ['product' => $product->id])
-                        ->with('success', 'Biến thể đã được thêm thành công.');
+            ->with('success', 'Biến thể đã được thêm thành công.');
     }
 
     // public function show($productId, $variantId)
@@ -125,126 +133,6 @@ class ProductVariantController extends Controller
         ]);
     }
 
-    public function update(Request $request, Product $product, ProductVariant $variant)
-    {
-        // 1. Validate các trường cơ bản và mảng attributes (nếu có gửi lên)
-        $validated = $request->validate([
-            'sku'               => 'required|string|max:255|unique:product_variants,sku,' . $variant->id,
-            'price'             => 'required|numeric',
-            'price_sale'        => 'nullable|numeric',
-            'quantity'          => 'required|integer',
-            'status'            => 'required|integer',
-            'image'             => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            // Nếu gửi thông tin thuộc tính thì bắt buộc phải có key và value
-            'attributes'        => 'nullable|array',
-            'attributes.*.key'   => 'required_with:attributes',
-            'attributes.*.value' => 'required_with:attributes',
-        ]);
-
-        // 2. Nếu có dữ liệu thuộc tính (người dùng chỉnh sửa thuộc tính)
-        if (isset($validated['attributes'])) {
-            $attributesInput = $validated['attributes'];
-
-            // Kiểm tra tính duy nhất của mỗi attribute key (không cho chọn cùng một thuộc tính nhiều lần)
-            $attributeKeys = array_column($attributesInput, 'key');
-            if (count($attributeKeys) !== count(array_unique($attributeKeys))) {
-                return redirect()->back()->withInput()
-                    ->withErrors([
-                        'attributes' => 'Bạn không thể chọn cùng một thuộc tính nhiều hơn một lần.'
-                    ]);
-            }
-        }
-
-        // 3. Xử lý upload ảnh (nếu có)
-        if ($request->hasFile('image')) {
-            if ($variant->image) {
-                Storage::disk('public')->delete($variant->image);
-            }
-            $imagePath = $request->file('image')->store('variants', 'public');
-        } else {
-            $imagePath = $variant->image;
-        }
-
-        // 4. Cập nhật các trường cơ bản của biến thể
-        $variant->update([
-            'sku'        => $validated['sku'],
-            'price'      => $validated['price'],
-            'price_sale' => $validated['price_sale'] ?? null,
-            'quantity'   => $validated['quantity'],
-            'status'     => $validated['status'],
-            'image'      => $imagePath,
-        ]);
-
-        // 5. Nếu có attribute được gửi lên, cập nhật lại quan hệ cho biến thể
-        if (isset($validated['attributes'])) {
-            $attributeValueIds = collect($validated['attributes'])
-                                    ->map(function ($attr) {
-                                        return $attr['value'];
-                                    })
-                                    ->toArray();
-
-            // Dùng sync() để đồng bộ lại các attribute value trong bảng pivot
-            $variant->attributeValues()->sync($attributeValueIds);
-        }
-
-        return redirect()->route('variants.index', ['product' => $product->id])
-                         ->with('success', 'Biến thể đã được cập nhật.');
-    }
-
-
-
-
-    public function destroy(Product $product, ProductVariant $variant)
-    {
-        if ($variant->image) {
-            Storage::disk('public')->delete($variant->image);
-        }
-        $variant->delete();
-
-        return redirect()->route('variants.index', ['product' => $product->id])
-            ->with('success', 'Biến thể đã được xóa.');
-    }
-    /**
-     * Lưu biến thể mới.
-     */
-    // public function store(Request $request, Product $product)
-    // {
-    //     $request->validate([
-    //         'sku' => 'required|string|max:255|unique:product_variants',
-    //         'price' => 'required|numeric',
-    //         'price_sale' => 'nullable|numeric',
-    //         'quantity' => 'required|integer',
-    //         'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    //         'attributes' => 'required|array',
-    //     ]);
-
-    //     $thumbnailPath = $request->hasFile('image')
-    //         ? $request->file('thumbnail')->store('variants', 'public')
-    //         : null;
-
-    //     $product->variants()->create([
-    //         'sku' => $request->sku,
-    //         'name' => $request->name,
-    //         'price' => $request->price,
-    //         'price_sale' => $request->price_sale,
-    //         'quantity' => $request->quantity,
-    //         'thumbnail' => $thumbnailPath,
-    //         'attributes' => json_encode($request->attributes),
-    //     ]);
-
-    //     return redirect()->route('variants.index', ['product' => $product->id])
-    //         ->with('success', 'Biến thể đã được thêm thành công.');
-    // }
-    // public function show($productId, $variantId)
-    // {
-    //     $template = 'backend.variants.show';
-    //     $variant = ProductVariant::where('id', $variantId)
-    //         ->where('product_id', $productId)
-    //         ->firstOrFail();
-    //     $product = Product::findOrFail($productId);
-
-    //     return view('backend.dashboard.layout', compact('variant', 'template','product'));
-    // }
     // public function update(Request $request, Product $product, ProductVariant $variant)
     // {
     //     $request->validate([

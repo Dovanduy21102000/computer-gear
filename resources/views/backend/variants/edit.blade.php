@@ -1,4 +1,4 @@
-{{-- <main id="main" class="main">
+<main id="main" class="main">
     <div class="pagetitle">
         <h1>Chi tiết sản phẩm biến thể</h1>
         <nav>
