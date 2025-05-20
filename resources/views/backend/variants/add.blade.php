@@ -130,17 +130,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Dynamic Attribute Section -->
-                            <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label">Thêm thuộc tính mới</label>
-                                <div class="col-sm-10">
-                                    <div id="dynamic-attributes"></div>
-                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2"
-                                        onclick="addAttributeGroup()">
-                                        <i class="bi bi-plus-circle me-1"></i> Thêm thuộc tính
-                                    </button>
-                                </div>
-                            </div>
                             <button type="submitsubmit" class="btn btn-secondary">Thêm biến thể</button>
                     </div>
                     </form>

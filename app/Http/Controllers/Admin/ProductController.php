@@ -114,22 +114,6 @@ class ProductController extends Controller
 
         $thumbnailPath = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('products', 'public') : null;
 
-        // Handle new attributes/values from dynamic UI
-        $newAttributeValueIds = [];
-        if ($request->has('new_attributes')) {
-            foreach ($request->input('new_attributes') as $attr) {
-                $attribute = \App\Models\Attribute::firstOrCreate(['name' => $attr['name']]);
-                foreach ($attr['values'] as $value) {
-                    $attributeValue = \App\Models\AttributeValue::firstOrCreate([
-                        'attribute_id' => $attribute->id,
-                        'value' => $value
-                    ]);
-                    $newAttributeValueIds[] = $attributeValue->id;
-                }
-            }
-        }
-
-        // Tính tổng số lượng biến thể nếu có biến thể
         $totalQuantity = 0;
         if ($request->is_variant && $request->variants) {
             foreach ($request->variants as $variantData) {
@@ -170,18 +154,13 @@ class ProductController extends Controller
                     'status' => true
                 ]);
 
-                // Merge new attribute value IDs with selected ones for this variant
-                $allAttributeValueIds = $newAttributeValueIds;
                 if (isset($variantData['attributes']) && is_array($variantData['attributes'])) {
                     foreach ($variantData['attributes'] as $attributeId => $attributeValueId) {
-                        $allAttributeValueIds[] = $attributeValueId;
+                        ProductVariantAttributeValue::create([
+                            'product_variant_id' => $variant->id,
+                            'attribute_value_id' => $attributeValueId,
+                        ]);
                     }
-                }
-                foreach ($allAttributeValueIds as $attributeValueId) {
-                    ProductVariantAttributeValue::create([
-                        'product_variant_id' => $variant->id,
-                        'attribute_value_id' => $attributeValueId,
-                    ]);
                 }
             }
         }
@@ -284,7 +263,6 @@ class ProductController extends Controller
             $product->thumbnail = $thumbnailPath;
         }
 
-        // Tính tổng số lượng biến thể nếu có biến thể
         $totalQuantity = 0;
         if ($request->is_variant && $request->variants) {
             foreach ($request->variants as $variantData) {
@@ -307,7 +285,6 @@ class ProductController extends Controller
             'is_variant' => $request->is_variant,
         ]);
 
-        // Xóa tất cả biến thể cũ
         $product->variants()->delete();
 
         if ($request->is_variant && $request->variants) {

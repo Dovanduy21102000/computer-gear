@@ -58,21 +58,6 @@ class ProductVariantController extends Controller
             ? $request->file('image')->store('products', 'public')
             : null;
 
-        // Handle new attributes/values from dynamic UI
-        $newAttributeValueIds = [];
-        if ($request->has('new_attributes')) {
-            foreach ($request->input('new_attributes') as $attr) {
-                $attribute = \App\Models\Attribute::firstOrCreate(['name' => $attr['name']]);
-                foreach ($attr['values'] as $value) {
-                    $attributeValue = \App\Models\AttributeValue::firstOrCreate([
-                        'attribute_id' => $attribute->id,
-                        'value' => $value
-                    ]);
-                    $newAttributeValueIds[] = $attributeValue->id;
-                }
-            }
-        }
-
         $variant = $product->variants()->create([
             'sku' => $request->sku,
             'name' => $request->name,
@@ -83,16 +68,17 @@ class ProductVariantController extends Controller
             'attributes' => json_encode($request->input('attributes')),
         ]);
 
-        // Merge new attribute value IDs with selected ones for this variant
-        $allAttributeValueIds = $newAttributeValueIds;
+        // Sync attribute values
         $inputAttributes = $request->input('attributes', []);
-        if (is_array($inputAttributes)) {
+        if (!empty($inputAttributes)) {
+            $attributeValueIds = [];
             foreach ($inputAttributes as $attributeId => $attributeValueId) {
-                $allAttributeValueIds[] = $attributeValueId;
+                $attributeValueIds[] = $attributeValueId;
             }
+            $variant->attributeValues()->sync($attributeValueIds);
+        } else {
+            $variant->attributeValues()->detach();
         }
-        // Log::info('Attribute value IDs to sync:', ['ids' => $allAttributeValueIds]);
-        $variant->attributeValues()->sync($allAttributeValueIds);
 
         return redirect()->route('variants.index', ['product' => $product->id])
             ->with('success', 'Biến thể đã được thêm thành công.');

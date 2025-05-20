@@ -345,18 +345,6 @@
                                 </div>
                             </div>
 
-                            <!-- Dynamic Attribute Section -->
-                            <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label">Thêm thuộc tính mới</label>
-                                <div class="col-sm-10">
-                                    <div id="dynamic-attributes"></div>
-                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2"
-                                        onclick="addAttributeGroup()">
-                                        <i class="bi bi-plus-circle me-1"></i> Thêm thuộc tính
-                                    </button>
-                                </div>
-                            </div>
-
                             <!-- Nút Submit -->
                             <div class="row mb-3">
                                 <div class="col-sm-10 offset-sm-2">
@@ -587,87 +575,6 @@
             preview.style.display = 'block';
         } else {
             preview.style.display = 'none';
-        }
-    });
-
-    function addAttributeGroup() {
-        const container = document.getElementById('dynamic-attributes');
-        const groupIndex = attributeGroupCount++;
-        const groupDiv = document.createElement('div');
-        groupDiv.className = 'border rounded p-3 mb-3 bg-light';
-        groupDiv.innerHTML = `
-            <div class="mb-2 d-flex align-items-center">
-                <input type="text" class="form-control me-2" name="new_attributes[${groupIndex}][name]" placeholder="Tên thuộc tính (VD: RAM, ROM, Màu...)" required style="max-width: 250px;">
-                <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove()"><i class="bi bi-trash"></i></button>
-            </div>
-            <div id="attribute-values-${groupIndex}" class="d-flex flex-wrap gap-2 mb-2"></div>
-            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addAttributeValue(${groupIndex})">+ Thêm giá trị</button>
-        `;
-        container.appendChild(groupDiv);
-    }
-
-    function addAttributeValue(groupIndex) {
-        const valuesDiv = document.getElementById(`attribute-values-${groupIndex}`);
-        const valueIndex = valuesDiv.children.length;
-        const valueDiv = document.createElement('div');
-        valueDiv.className = 'input-group input-group-sm mb-1';
-        valueDiv.style.maxWidth = '180px';
-        valueDiv.innerHTML = `
-            <input type="text" class="form-control" name="new_attributes[${groupIndex}][values][]" placeholder="Giá trị (VD: 8GB, Đỏ...)" required>
-            <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
-        `;
-        valuesDiv.appendChild(valueDiv);
-    }
-
-    // Add this new code for attribute selection
-    document.addEventListener('DOMContentLoaded', function() {
-        const attributeSelectors = document.querySelectorAll('.attribute-selector');
-        attributeSelectors.forEach(selector => {
-            selector.addEventListener('change', function() {
-                const attributeId = this.value;
-                const attributeGroups = document.querySelectorAll(
-                    `.attribute-group[data-attribute-id="${attributeId}"]`);
-                attributeGroups.forEach(group => {
-                    group.style.display = this.checked ? 'block' : 'none';
-                    const radioInputs = group.querySelectorAll('input[type="radio"]');
-                    radioInputs.forEach(input => {
-                        input.required = this.checked;
-                    });
-                });
-            });
-        });
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('form[action*="products"]');
-        const isVariantSelect = document.getElementById('is_variant');
-        const priceInput = document.getElementById('price');
-        const priceError = document.getElementById('price-error');
-
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                // Only check if not variant
-                if (isVariantSelect && isVariantSelect.value === '0') {
-                    if (!priceInput.value || isNaN(priceInput.value) || Number(priceInput.value) <= 0) {
-                        priceError.style.display = 'block';
-                        priceInput.classList.add('is-invalid');
-                        priceInput.focus();
-                        e.preventDefault();
-                    } else {
-                        priceError.style.display = 'none';
-                        priceInput.classList.remove('is-invalid');
-                    }
-                } else {
-                    priceError.style.display = 'none';
-                    priceInput.classList.remove('is-invalid');
-                }
-            });
-
-            // Hide error on input
-            priceInput.addEventListener('input', function() {
-                priceError.style.display = 'none';
-                priceInput.classList.remove('is-invalid');
-            });
         }
     });
 
