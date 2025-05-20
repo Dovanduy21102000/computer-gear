@@ -301,7 +301,9 @@
                                                             @elseif ($order->status == 'delivered')
                                                                 <span class="badge bg-primary">Đang giao hàng</span>
                                                             @elseif ($order->status == 'completed')
-                                                                <span class="badge bg-secondary">Hoàn thành</span>
+                                                                <span class="badge bg-secondary">Đã giao hàng</span>
+                                                            @elseif ($order->status == 'success')
+                                                                <span class="badge bg-success">Hoàn thành</span>
                                                             @elseif ($order->status == 'canceled')
                                                                 <span class="badge bg-dark">Đã hủy</span>
                                                             @else
