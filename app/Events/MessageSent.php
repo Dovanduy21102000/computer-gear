@@ -23,8 +23,8 @@ class MessageSent implements ShouldBroadcast
     public function broadcastOn()
     {
         // Người nhận sẽ nhận event
-        $receiver = $this->message->receiver_id ?? $this->message->sender_guest_id;
-        return new PrivateChannel("chat.{$receiver}");
+        $userId = $this->message->receiver_id ?? $this->message->sender_guest_id;
+        return new PrivateChannel("chat.{$userId}");
     }
 
     public function broadcastWith()
@@ -34,5 +34,9 @@ class MessageSent implements ShouldBroadcast
             'sender_id' => $this->message->sender_id,
             'created_at' => $this->message->created_at->toDateTimeString()
         ];
+    }
+    public function broadcastAs()
+    {
+        return 'MessageSent';
     }
 }
