@@ -66,7 +66,7 @@ class HomeController extends Controller
             ->get();
 
         // Sản phẩm thuộc một số danh mục nổi bật
-        $topCategories = ['Chuột', 'Bàn phím', 'Bộ bàn phím và Chuột'];
+        $topCategories = ['Chuột', 'Bàn phím', 'Chuột và bàn phím'];
         $keyboardMouseProducts = Product::whereHas('category', function ($query) use ($topCategories) {
             $query->whereIn('name', $topCategories)->where('is_active', 1);
         })
@@ -196,4 +196,15 @@ class HomeController extends Controller
             'activeProducts'
         ));
     }
+
+    // public function someMethod()
+    // {
+    //     $categories = Category::where('status', 1)->get(); // lấy tất cả danh mục đang hiển thị
+    //     $template = 'fontend.component.menu';
+
+    //     return view('fontend.layout', compact(
+    //         'template',
+    //         'categories'
+    //     ));
+    // }
 }

@@ -13,6 +13,9 @@ use App\Models\ProductVariantAttributeValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use App\Helpers\SlugHelper;
+use App\Events\ProductUpdated;
 
 class ProductController extends Controller
 {
@@ -36,7 +39,7 @@ class ProductController extends Controller
         $brands = Brand::all();
 
         $products = $query->latest()->paginate(10);
-        
+
         $template = 'backend.products.index';
         return view('backend.dashboard.layout', compact('products', 'categories', 'brands', 'template'));
     }
@@ -58,7 +61,6 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-
     {
         $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -69,7 +71,7 @@ class ProductController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
-            'price' => 'required|numeric',
+            'price' => $request->is_variant ? 'nullable|numeric' : 'required|numeric',
             'price_sale' => 'nullable|numeric',
             'quantity' => $request->is_variant ? 'nullable|integer' : 'required|integer',
             'status' => 'boolean',
@@ -77,6 +79,7 @@ class ProductController extends Controller
             'variants' => $request->is_variant ? 'required|array' : 'nullable|array',
             'variants.*.sku' => $request->is_variant ? 'required|string|max:255' : 'nullable|string|max:255',
             'variants.*.price' => $request->is_variant ? 'required|numeric' : 'nullable|numeric',
+            'variants.*.price_sale' => 'nullable|numeric',
             'variants.*.quantity' => $request->is_variant ? 'required|integer' : 'nullable|integer',
             'variants.*.attributes' => $request->is_variant ? 'required|array' : 'nullable|array',
             'variants.*.attributes.*' => 'exists:attribute_values,id',
@@ -106,14 +109,12 @@ class ProductController extends Controller
             'variants.*.quantity.required' => 'Vui lòng nhập số lượng cho biến thể.',
         ]);
 
-
         if (!$request->slug) {
-            $request->merge(['slug' => Str::slug($request->name)]);
+            $request->merge(['slug' => SlugHelper::createSlug($request->name)]);
         }
 
         $thumbnailPath = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('products', 'public') : null;
 
-        // Tính tổng số lượng biến thể nếu có biến thể
         $totalQuantity = 0;
         if ($request->is_variant && $request->variants) {
             foreach ($request->variants as $variantData) {
@@ -137,18 +138,26 @@ class ProductController extends Controller
             'is_variant' => $request->is_variant,
             'views' => 0
         ]);
+        event(new ProductUpdated($product));
 
         if ($request->is_variant && $request->variants) {
-            foreach ($request->variants as $variantData) {
+            foreach ($request->variants as $i => $variantData) {
+                $imagePath = null;
+                if ($request->hasFile("variants.$i.image")) {
+                    $imagePath = $request->file("variants.$i.image")->store('variants', 'public');
+                }
                 $variant = ProductVariant::create([
                     'product_id' => $product->id,
                     'sku' => $variantData['sku'],
                     'price' => $variantData['price'],
+                    'price_sale' => $variantData['price_sale'] ?? null,
                     'quantity' => $variantData['quantity'],
+                    'image' => $imagePath,
+                    'status' => true
                 ]);
 
                 if (isset($variantData['attributes']) && is_array($variantData['attributes'])) {
-                    foreach ($variantData['attributes'] as $attributeValueId) {
+                    foreach ($variantData['attributes'] as $attributeId => $attributeValueId) {
                         ProductVariantAttributeValue::create([
                             'product_variant_id' => $variant->id,
                             'attribute_value_id' => $attributeValueId,
@@ -158,7 +167,7 @@ class ProductController extends Controller
             }
         }
 
-        return redirect()->route('products.index')->with('success', 'Sản phẩm đã được thêm thành công.');
+        return redirect()->route('products.index')->with('success', 'Sản phẩm đã được tạo thành công.');
     }
 
     /**
@@ -168,6 +177,10 @@ class ProductController extends Controller
     {
         $product = Product::with(['category', 'brand', 'variants.attributeValues.attribute'])->findOrFail($id);
         $albumImages = \App\Models\ProductImage::where('product_id', $id)->first()?->images ?: [];
+        Log::debug('SHOW PRODUCT DATA', [
+            'product' => $product->toArray(),
+            'albumImages' => $albumImages
+        ]);
         $template = 'backend.products.show';
         return view('backend.dashboard.layout', compact('product', 'template', 'albumImages'));
     }
@@ -188,20 +201,20 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
 
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
-            'sku' => 'required|string|max:255|unique:products',
+            'sku' => 'required|string|max:255|unique:products,sku,' . $id,
             'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:products',
+            'slug' => 'nullable|string|max:255|unique:products,slug,' . $id,
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
-            'price' => 'required|numeric',
+            'price' => $request->is_variant ? 'nullable|numeric' : 'required|numeric',
             'price_sale' => 'nullable|numeric',
             'quantity' => $request->is_variant ? 'nullable|integer' : 'required|integer',
             'status' => 'boolean',
@@ -209,7 +222,11 @@ class ProductController extends Controller
             'variants' => $request->is_variant ? 'required|array' : 'nullable|array',
             'variants.*.sku' => $request->is_variant ? 'required|string|max:255' : 'nullable|string|max:255',
             'variants.*.price' => $request->is_variant ? 'required|numeric' : 'nullable|numeric',
+            'variants.*.price_sale' => 'nullable|numeric',
             'variants.*.quantity' => $request->is_variant ? 'required|integer' : 'nullable|integer',
+            'variants.*.status' => 'boolean',
+            'variants.*.attributes' => $request->is_variant ? 'required|array' : 'nullable|array',
+            'variants.*.attributes.*' => 'exists:attribute_values,id',
         ], [
             'category_id.required' => 'Vui lòng chọn danh mục.',
             'category_id.exists' => 'Danh mục không hợp lệ.',
@@ -236,12 +253,23 @@ class ProductController extends Controller
             'variants.*.quantity.required' => 'Vui lòng nhập số lượng cho biến thể.',
         ]);
 
+        if (!$request->slug) {
+            $request->merge(['slug' => SlugHelper::createSlug($request->name)]);
+        }
+
         if ($request->hasFile('thumbnail')) {
             if ($product->thumbnail) {
                 Storage::disk('public')->delete($product->thumbnail);
             }
             $thumbnailPath = $request->file('thumbnail')->store('products', 'public');
             $product->thumbnail = $thumbnailPath;
+        }
+
+        $totalQuantity = 0;
+        if ($request->is_variant && $request->variants) {
+            foreach ($request->variants as $variantData) {
+                $totalQuantity += $variantData['quantity'];
+            }
         }
 
         $product->update([
@@ -253,25 +281,33 @@ class ProductController extends Controller
             'short_description' => $request->short_description,
             'description' => $request->description,
             'price' => $request->price,
-            'price_sale' => $request->price_sale,
-            'quantity' => $request->quantity,
+            'price_sale' => $request->price_sale ?? null,
+            'quantity' => $request->is_variant ? $totalQuantity : $request->quantity,
             'status' => $request->status,
             'is_variant' => $request->is_variant,
         ]);
+        event(new ProductUpdated($product));
 
         $product->variants()->delete();
 
         if ($request->is_variant && $request->variants) {
-            foreach ($request->variants as $variantData) {
+            foreach ($request->variants as $i => $variantData) {
+                $imagePath = null;
+                if ($request->hasFile("variants.$i.image")) {
+                    $imagePath = $request->file("variants.$i.image")->store('variants', 'public');
+                }
                 $variant = ProductVariant::create([
                     'product_id' => $product->id,
                     'sku' => $variantData['sku'],
                     'price' => $variantData['price'],
+                    'price_sale' => $variantData['price_sale'] ?? null,
                     'quantity' => $variantData['quantity'],
+                    'image' => $imagePath,
+                    'status' => $variantData['status'] ?? true
                 ]);
 
                 if (isset($variantData['attributes']) && is_array($variantData['attributes'])) {
-                    foreach ($variantData['attributes'] as $attributeValueId) {
+                    foreach ($variantData['attributes'] as $attributeId => $attributeValueId) {
                         ProductVariantAttributeValue::create([
                             'product_variant_id' => $variant->id,
                             'attribute_value_id' => $attributeValueId,
@@ -280,6 +316,7 @@ class ProductController extends Controller
                 }
             }
         }
+
         return redirect()->route('products.index')->with('success', 'Sản phẩm đã được cập nhật thành công.');
     }
 

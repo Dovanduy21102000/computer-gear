@@ -6,6 +6,7 @@ use App\Http\Controllers\BaseCRUDController;
 use App\Models\CategoryPost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Helpers\SlugHelper;
 
 class CategoryPostController extends BaseCRUDController
 {
@@ -42,7 +43,7 @@ class CategoryPostController extends BaseCRUDController
     public function validateStore(Request $request)
 {
     if (!$request->slug) {
-        $request->merge(['slug' => Str::slug($request->name)]);
+            $request->merge(['slug' => SlugHelper::createSlug($request->name)]);
     }
 
     // Kiểm tra parent_id có tồn tại trong bảng 'category_post' không
@@ -80,6 +81,7 @@ public function edit($id)
     $template = 'backend.category_post.edit';
     return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'category_post', 'category'));
 }
+
     public function show($id)
     {
         $category_post = CategoryPost::whereNull('parent_id')->get();
@@ -89,6 +91,4 @@ public function edit($id)
         $template = 'backend.category_post.show';
         return view('backend.dashboard.layout', compact('template', 'urlBase', 'category_post', 'category'));
     }
-
-    
 }

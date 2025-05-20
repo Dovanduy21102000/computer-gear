@@ -62,7 +62,6 @@ class Product extends Model
     {
         return $this->hasMany(Comment::class);
     }
-
     public function isInWishlist()
 {
     return auth()->check() &&
@@ -70,4 +69,5 @@ class Product extends Model
                                ->where('product_id', $this->id)
                                ->exists();
 }
+   
 }

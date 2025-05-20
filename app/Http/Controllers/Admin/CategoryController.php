@@ -6,6 +6,7 @@ use App\Http\Controllers\BaseCRUDController;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Helpers\SlugHelper;
 
 class CategoryController extends BaseCRUDController
 {
@@ -73,7 +74,7 @@ class CategoryController extends BaseCRUDController
     protected function validateStore(Request $request)
     {
         if (!$request->slug) {
-            $request->merge(['slug' => Str::slug($request->name)]);
+            $request->merge(['slug' => SlugHelper::createSlug($request->name)]);
         }
 
         return $request->validate([

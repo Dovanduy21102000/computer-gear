@@ -10,6 +10,7 @@ use Attribute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Events\VariantUpdated;
 
 class ProductVariantController extends Controller
 {
@@ -27,109 +28,95 @@ class ProductVariantController extends Controller
     {
         $template = 'backend.variants.add';
         $product = Product::findOrFail($productId);
-        $attributes = ModelsAttribute::with('attributeValues')->get();
-
-        return view('backend.dashboard.layout', compact('product', 'template', 'attributes'));
+        $attributes = \App\Models\Attribute::with('attributeValues')->get();
+        // Generate a suggested SKU
+        $baseSku = $product->sku ?? 'SKU';
+        $variantCount = $product->variants()->count() + 1;
+        $suggestedSku = $baseSku . '-' . $variantCount;
+        return view('backend.dashboard.layout', compact('product', 'template', 'attributes', 'suggestedSku'));
     }
     public function store(Request $request, Product $product)
     {
-        $validated = $request->validate([
-            'sku'               => 'required|string|max:255|unique:product_variants,sku',
-            'price'             => 'required|numeric',
-            'price_sale'        => 'nullable|numeric',
-            'quantity'          => 'required|integer',
-            'thumbnail'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'attributes'        => 'required|array',
-            'attributes.*.key'   => 'required',
-            'attributes.*.value' => 'required',
+        $request->validate([
+            'sku' => 'required|string|max:255|unique:product_variants',
+            'price' => 'required|numeric',
+            'price_sale' => 'nullable|numeric',
+            'quantity' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'attributes' => 'required|array',
+        ], [
+            'sku.required' => 'Vui lòng nhập SKU.',
+            'sku.unique' => 'SKU đã tồn tại.',
+            'price.required' => 'Vui lòng nhập giá.',
+            'price.numeric' => 'Giá phải là số.',
+            'price_sale.numeric' => 'Giá khuyến mãi phải là số.',
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'image.image' => 'Ảnh phải là hình ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng jpeg, png, jpg, gif.',
+            'image.max' => 'Ảnh không được vượt quá 2MB.',
+            'attributes.required' => 'Vui lòng chọn thuộc tính.',
+            'attributes.array' => 'Thuộc tính không hợp lệ.',
         ]);
 
-        // 2. Kiểm tra số lượng thuộc tính gửi lên (nếu sản phẩm yêu cầu số lượng cụ thể)
-        $requiredAttributesCount = 2;  // Ví dụ: sản phẩm máy tính cần 2 thuộc tính (có thể là Card màn hình và Màu sắc)
-        $attributesInput = $validated['attributes'];
-        if (count($attributesInput) != $requiredAttributesCount) {
-            return redirect()->back()->withInput()
-                ->withErrors([
-                    'attributes' => "Bạn phải chọn đầy đủ {$requiredAttributesCount} thuộc tính."
-                ]);
-        }
+        // Log::info('Attributes from request:', ['attributes' => $request->input('attributes')]);
 
-        // 3. Kiểm tra tính duy nhất của mỗi thuộc tính (không cho phép duplicate attribute key)
-        $attributeKeys = array_column($attributesInput, 'key');
-        if (count($attributeKeys) !== count(array_unique($attributeKeys))) {
-            return redirect()->back()->withInput()
-                ->withErrors([
-                    'attributes' => 'Bạn không thể chọn cùng một thuộc tính nhiều hơn một lần.'
-                ]);
-        }
-
-        // 4. Chuyển đổi dữ liệu thuộc tính thành mảng chứa các attribute value ID
-        $submittedAttrValueIds = collect($attributesInput)
-                                    ->map(function ($attr) {
-                                        return $attr['value'];
-                                    })
-                                    ->sort()
-                                    ->values()
-                                    ->all();
-
-        // 5. Kiểm tra xem có biến thể nào của sản phẩm đã có tập hợp attribute đó chưa
-        $existingVariant = $product->variants->first(function ($variant) use ($submittedAttrValueIds) {
-            $existingAttrValueIds = $variant->attributeValues->pluck('id')
-                                            ->sort()
-                                            ->values()
-                                            ->all();
-            return $existingAttrValueIds == $submittedAttrValueIds;
-        });
-
-        if ($existingVariant) {
-            return redirect()->back()->withInput()
-                ->withErrors(["attributes" => "Biến thể với tập hợp thuộc tính này đã tồn tại."]);
-        }
-
-        // 6. Xử lý upload ảnh
-        $thumbnailPath = $request->hasFile('thumbnail')
-            ? $request->file('thumbnail')->store('variants', 'public')
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('products', 'public')
             : null;
 
-        // 7. Tạo biến thể mới
         $variant = $product->variants()->create([
-            'sku'        => $validated['sku'],
-            'price'      => $validated['price'],
-            'price_sale' => $validated['price_sale'] ?? null,
-            'quantity'   => $validated['quantity'],
-            'image'      => $thumbnailPath,
-            'status'     => 1,
+            'sku' => $request->sku,
+            'name' => $request->name,
+            'price' => $request->price,
+            'price_sale' => $request->price_sale,
+            'quantity' => $request->quantity,
+            'image' => $imagePath,
+            'attributes' => json_encode($request->input('attributes')),
         ]);
+        event(new VariantUpdated($variant));
 
-        // 8. Attach các attribute value cho biến thể mới
-        $attributeValues = collect($attributesInput)
-                                ->map(function ($attr) {
-                                    return $attr['value'];
-                                })
-                                ->toArray();
-        $variant->attributeValues()->attach($attributeValues);
+        // Sync attribute values
+        $inputAttributes = $request->input('attributes', []);
+        if (!empty($inputAttributes)) {
+            $attributeValueIds = [];
+            foreach ($inputAttributes as $attributeId => $attributeValueId) {
+                $attributeValueIds[] = $attributeValueId;
+            }
+            $variant->attributeValues()->sync($attributeValueIds);
+        } else {
+            $variant->attributeValues()->detach();
+        }
 
         return redirect()->route('variants.index', ['product' => $product->id])
                         ->with('success', 'Biến thể đã được thêm thành công.');
     }
 
+    // public function show($productId, $variantId)
+    // {
+    //     $template = 'backend.variants.show';
+    //     $variant = ProductVariant::where('id', $variantId)
+    //         ->where('product_id', $productId)
+    //         ->firstOrFail();
+    //     $product = Product::findOrFail($productId);
 
-        public function show($productId, $variantId)
+    //     return view('backend.dashboard.layout', compact('variant', 'template','product'));
+    // }
+    public function show($productId, $variantId)
     {
-    $template = 'backend.variants.show';
+        $template = 'backend.variants.show';
 
-    $variant = ProductVariant::with(['product', 'attributes'])
-        ->where('id', $variantId)
-        ->where('product_id', $productId)
-        ->firstOrFail();
+        $variant = ProductVariant::with(['product', 'attributes'])
+            ->where('id', $variantId)
+            ->where('product_id', $productId)
+            ->firstOrFail();
 
-    return view('backend.dashboard.layout', compact('variant', 'template'));
+        return view('backend.dashboard.layout', compact('variant', 'template'));
     }
 
     public function edit(Product $product, ProductVariant $variant)
     {
-        $attributes = ModelsAttribute::with('attributeValues')->get();
-
+        $attributes = \App\Models\Attribute::with('attributeValues')->get();
         return view('backend.dashboard.layout', [
             'product' => $product,
             'variant' => $variant,
@@ -292,36 +279,72 @@ class ProductVariantController extends Controller
     //     return redirect()->route('variants.index', ['product' => $product->id])
     //         ->with('success', 'Biến thể đã được cập nhật.');
     // }
-        //     public function update(Request $request, Product $product, ProductVariant $variant)
-    // {
-    //     $request->validate([
-    //         'sku' => 'required|string|max:255|unique:product_variants,sku,' . $variant->id,
-    //         'price' => 'required|numeric',
-    //         'price_sale' => 'nullable|numeric',
-    //         'quantity' => 'required|integer',
-    //         'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    //     ]);
-    
-        
-    //     if ($request->hasFile('image')) {
-    //         if ($variant->image) {
-    //             Storage::disk('public')->delete($variant->image);
-    //         }
-    //         $imagePath = $request->file('image')->store('variants', 'public');
-    //     } else {
-    //         $imagePath = $variant->image; 
-    //     }
-    
-    //     $variant->update([
-    //         'sku' => $request->sku,
-    //         'price' => $request->price,
-    //         'price_sale' => $request->price_sale,
-    //         'quantity' => $request->quantity,
-    //         'image' => $imagePath, 
-    //         'status' => $request->status,
-    //     ]);
-    
-    //     return redirect()->route('variants.index', ['product' => $product->id])
-    //         ->with('success', 'Biến thể đã được cập nhật.');
-    // }
+
+    public function update(Request $request, Product $product, ProductVariant $variant)
+    {
+        $request->validate([
+            'sku' => 'required|string|max:255|unique:product_variants,sku,' . $variant->id,
+            'price' => 'required|numeric',
+            'price_sale' => 'nullable|numeric',
+            'quantity' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'sku.required' => 'Vui lòng nhập SKU.',
+            'sku.unique' => 'SKU đã tồn tại.',
+            'price.required' => 'Vui lòng nhập giá.',
+            'price.numeric' => 'Giá phải là số.',
+            'price_sale.numeric' => 'Giá khuyến mãi phải là số.',
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'image.image' => 'Ảnh phải là hình ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng jpeg, png, jpg, gif.',
+            'image.max' => 'Ảnh không được vượt quá 2MB.',
+        ]);
+
+        if ($request->hasFile('image')) {
+            if ($variant->image) {
+                Storage::disk('public')->delete($variant->image);
+            }
+            $imagePath = $request->file('image')->store('products', 'public');
+        } else {
+            $imagePath = $variant->image;
+        }
+
+        $variant->update([
+            'sku' => $request->sku,
+            'price' => $request->price,
+            'price_sale' => $request->price_sale,
+            'quantity' => $request->quantity,
+            'image' => $imagePath,
+            'status' => $request->status,
+        ]);
+        event(new VariantUpdated($variant));
+
+        // Sync attribute values
+        $inputAttributes = $request->input('attributes', []);
+        if (!empty($inputAttributes)) {
+            $attributeValueIds = [];
+            foreach ($inputAttributes as $attributeId => $attributeValueId) {
+                $attributeValueIds[] = $attributeValueId;
+            }
+            $variant->attributeValues()->sync($attributeValueIds);
+        } else {
+            $variant->attributeValues()->detach();
+        }
+
+        return redirect()->route('variants.index', ['product' => $product->id])
+            ->with('success', 'Biến thể đã được cập nhật.');
+    }
+
+
+    public function destroy(Product $product, ProductVariant $variant)
+    {
+        if ($variant->thumbnail) {
+            Storage::disk('public')->delete($variant->thumbnail);
+        }
+        $variant->delete();
+
+        return redirect()->route('variants.index', ['product' => $product->id])
+            ->with('success', 'Biến thể đã được xóa.');
+    }
 }

@@ -219,6 +219,8 @@ Route::middleware(['web'])->group(function () {
 
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+    Route::get('/bai-viet/danh-muc/{slug}', [BlogController::class, 'category'])->name('posts.byCategory');
+
 
     Route::get('/about_us', [HomeController::class, 'about_us'])->name('about_us');
     Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');

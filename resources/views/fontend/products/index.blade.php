@@ -8,33 +8,13 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-3 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visible">
                         <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
-                            <a href="{{ route('home.index') }}">Home</a>
+                            <a href="{{ route('home.index') }}">Trang chủ</a>
                         </li>
 
                         <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
                             <a href="{{ route('client.products.index') }}">Sản phẩm</a>
                         </li>
 
-                        @if (isset($category) && $category)
-                            @if ($category->parent)
-                                <!-- Nếu danh mục có danh mục cha, hiển thị danh mục cha -->
-                                <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
-                                    <a
-                                        href="{{ route('client.products.category', ['slug' => $category->parent->slug]) }}">
-                                        {{ $category->parent->name }}
-                                    </a>
-                                </li>
-                            @endif
-
-                            <!-- Hiển thị danh mục hiện tại -->
-                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">
-                                {{ $category->name }}
-                            </li>
-                        @else
-                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">
-                                Tất cả sản phẩm
-                            </li>
-                        @endif
 
                     </ol>
                 </nav>

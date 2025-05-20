@@ -65,6 +65,20 @@ class AttributeController extends BaseCRUDController
         return view('backend.dashboard.layout', compact('template', 'urlBase', 'attribute'));
     }
 
+    public function store(Request $request)
+    {
+        try {
+            $validatedData = $this->validateStore($request);
+            Attribute::create($validatedData);
+            return redirect()->route('attributes.index')->with('success', 'Thêm thuộc tính thành công!');
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                return redirect()->back()->withInput()->withErrors(['name' => 'Tên thuộc tính đã tồn tại.']);
+            }
+            return redirect()->back()->withInput()->withErrors(['error' => 'Lỗi khi thêm thuộc tính: ' . $e->getMessage()]);
+        }
+    }
+
     protected function validateStore(Request $request)
     {
 
@@ -77,7 +91,7 @@ class AttributeController extends BaseCRUDController
     }
 
     protected function validateUpdate(Request $request, $id)
-    {   
+    {
 
         return $request->validate([
             'name' => 'required|string|max:255',

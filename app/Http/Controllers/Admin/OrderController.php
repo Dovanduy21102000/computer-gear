@@ -168,6 +168,7 @@ class OrderController extends Controller
             // Chỉ cho phép cập nhật trạng thái nếu hợp lệ
             try {
                 $order->update(['status' => $newStatus]);
+                event(new \App\Events\OrderStatusUpdated($order));
                 return redirect()->route('orders.index')->with('success', 'Cập nhật trạng thái đơn hàng thành công.');
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', 'Đã xảy ra lỗi. Vui lòng thử lại.')->withInput();

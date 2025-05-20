@@ -983,6 +983,13 @@
         $("#addToCartBtn, #buyNowBtn").click(function(event) {
             event.preventDefault();
 
+            // Check if user is authenticated for buy now action
+            if ($(this).attr('id') === 'buyNowBtn' && !{{ auth()->check() ? 'true' : 'false' }}) {
+                alert('Vui lòng đăng nhập để tiếp tục mua hàng!');
+                window.location.href = "{{ route('login') }}";
+                return;
+            }
+
             let selectedAttributes = checkVariants();
             let quantity = parseInt($("#quantityInput").val(), 10) || 1;
             let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
