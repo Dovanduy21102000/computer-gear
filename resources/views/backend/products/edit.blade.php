@@ -221,8 +221,7 @@
                                         </option>
                                     </select>
                                     @if (!$product->is_variant)
-                                        <small class="text-muted">Không thể chuyển đổi sản phẩm thường thành sản phẩm
-                                            có biến thể. Vui lòng tạo sản phẩm mới nếu cần.</small>
+                                        <input type="hidden" name="is_variant" value="0">
                                     @endif
                                 </div>
                             </div>
