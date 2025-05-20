@@ -373,18 +373,22 @@
             const variantSKU = `${baseSKU}-1`;
             variantSKUInput.value = variantSKU;
         }
-    });
-    document.getElementById('name').addEventListener('input', function() {
-        const baseSKU = generateSKU(this.value);
-        const skuInput = document.getElementById('sku');
-        skuInput.value = baseSKU;
 
-        // Cập nhật SKU cho biến thể đầu tiên
-        const variantSKUInput = document.querySelector('input[name="variants[0][sku]"]');
-        if (variantSKUInput) {
-            const variantSKU = `${baseSKU}-1`;
-            variantSKUInput.value = variantSKU;
-        }
+        // Attribute type checkbox logic
+        document.querySelectorAll('.attribute-selector').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const attributeId = this.value;
+                document.querySelectorAll(
+                    `.attribute-group[data-attribute-id='${attributeId}']`).forEach(
+                    group => {
+                        group.style.display = this.checked ? 'block' : 'none';
+                        // Set required for radios in this group
+                        group.querySelectorAll('input[type="radio"]').forEach(radio => {
+                            radio.required = this.checked;
+                        });
+                    });
+            });
+        });
     });
 
     function toggleVariants(select) {
@@ -399,23 +403,19 @@
             variantsSection.style.display = 'block';
             quantitySection.style.display = 'none';
             priceSection.style.display = 'none';
-            // Remove required attribute for non-variant fields
             priceInput.removeAttribute('required');
             priceSaleInput.removeAttribute('required');
             quantityInput.removeAttribute('required');
-            // Don't clear values to preserve old input
         } else {
             variantsSection.style.display = 'none';
             quantitySection.style.display = 'block';
             priceSection.style.display = 'block';
-            // Add required attribute for non-variant fields
             priceInput.setAttribute('required', 'required');
             priceSaleInput.removeAttribute('required');
             quantityInput.setAttribute('required', 'required');
         }
     }
 
-    // Call toggleVariants on page load to set initial state
     document.addEventListener('DOMContentLoaded', function() {
         const variantSelect = document.getElementById('is_variant');
         if (variantSelect) {
@@ -429,7 +429,6 @@
                 const checkbox = document.querySelector(`#attr_type_${attributeId}`);
                 if (checkbox) {
                     checkbox.checked = true;
-                    // Trigger change event to show the attribute group
                     checkbox.dispatchEvent(new Event('change'));
                 }
             });
@@ -461,8 +460,7 @@
 
     function generateVariantSKU(baseSKU, attributes) {
         const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-        const attributePart = attributes.map(attr => attr.toUpperCase().substring(0, 11)).join(
-            '-');
+        const attributePart = attributes.map(attr => attr.toUpperCase().substring(0, 11)).join('-');
         return `${baseSKU}-${attributePart}-${randomSuffix}`;
     }
 
