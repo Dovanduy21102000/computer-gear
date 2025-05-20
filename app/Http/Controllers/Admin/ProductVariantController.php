@@ -9,6 +9,7 @@ use Attribute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Events\VariantUpdated;
 
 class ProductVariantController extends Controller
 {
@@ -50,6 +51,19 @@ class ProductVariantController extends Controller
             'quantity' => 'required|integer',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'attributes' => 'required|array',
+        ], [
+            'sku.required' => 'Vui lòng nhập SKU.',
+            'sku.unique' => 'SKU đã tồn tại.',
+            'price.required' => 'Vui lòng nhập giá.',
+            'price.numeric' => 'Giá phải là số.',
+            'price_sale.numeric' => 'Giá khuyến mãi phải là số.',
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'image.image' => 'Ảnh phải là hình ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng jpeg, png, jpg, gif.',
+            'image.max' => 'Ảnh không được vượt quá 2MB.',
+            'attributes.required' => 'Vui lòng chọn thuộc tính.',
+            'attributes.array' => 'Thuộc tính không hợp lệ.',
         ]);
 
         // Log::info('Attributes from request:', ['attributes' => $request->input('attributes')]);
@@ -67,6 +81,7 @@ class ProductVariantController extends Controller
             'image' => $imagePath,
             'attributes' => json_encode($request->input('attributes')),
         ]);
+        event(new VariantUpdated($variant));
 
         // Sync attribute values
         $inputAttributes = $request->input('attributes', []);
@@ -160,6 +175,17 @@ class ProductVariantController extends Controller
             'price_sale' => 'nullable|numeric',
             'quantity' => 'required|integer',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'sku.required' => 'Vui lòng nhập SKU.',
+            'sku.unique' => 'SKU đã tồn tại.',
+            'price.required' => 'Vui lòng nhập giá.',
+            'price.numeric' => 'Giá phải là số.',
+            'price_sale.numeric' => 'Giá khuyến mãi phải là số.',
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'image.image' => 'Ảnh phải là hình ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng jpeg, png, jpg, gif.',
+            'image.max' => 'Ảnh không được vượt quá 2MB.',
         ]);
 
         if ($request->hasFile('image')) {
@@ -179,6 +205,7 @@ class ProductVariantController extends Controller
             'image' => $imagePath,
             'status' => $request->status,
         ]);
+        event(new VariantUpdated($variant));
 
         // Sync attribute values
         $inputAttributes = $request->input('attributes', []);

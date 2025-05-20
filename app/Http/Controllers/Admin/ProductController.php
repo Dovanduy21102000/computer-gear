@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\SlugHelper;
+use App\Events\ProductUpdated;
 
 class ProductController extends Controller
 {
@@ -137,6 +138,7 @@ class ProductController extends Controller
             'is_variant' => $request->is_variant,
             'views' => 0
         ]);
+        event(new ProductUpdated($product));
 
         if ($request->is_variant && $request->variants) {
             foreach ($request->variants as $i => $variantData) {
@@ -284,6 +286,7 @@ class ProductController extends Controller
             'status' => $request->status,
             'is_variant' => $request->is_variant,
         ]);
+        event(new ProductUpdated($product));
 
         $product->variants()->delete();
 

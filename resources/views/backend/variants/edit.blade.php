@@ -35,6 +35,12 @@
                     value="{{ old('quantity', $variant->quantity) }}" required>
             </div>
 
+            <div class="form-group">
+                <label for="price_sale">Giá khuyến mãi</label>
+                <input type="number" class="form-control" id="price_sale" name="price_sale"
+                    value="{{ old('price_sale', $variant->price_sale) }}" step="0.01">
+            </div>
+
             <div class="mb-3">
                 <label class="form-label">Trạng thái</label>
                 <select class="form-control" name="status">
@@ -85,7 +91,7 @@
                                 $selectedValue = old('attributes.' . $attribute->id);
 
                                 // If no old input, get from pivot table
-                                if ($selectedValue === null) {
+                                if ($selectedValue === null && isset($variant)) {
                                     $selectedValue = $variant
                                         ->attributeValues()
                                         ->where('attribute_id', $attribute->id)

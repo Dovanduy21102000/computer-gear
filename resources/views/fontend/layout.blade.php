@@ -33,6 +33,51 @@
     <!-- ========== END FOOTER ========== -->
 
     @include('fontend.component.script')
+    <script src="{{ asset('js/app.js') }}"></script>
+    <script>
+        // Initialize Laravel Echo
+        window.Echo.channel('products')
+            .listen('ProductUpdated', (e) => {
+                console.log('Product updated:', e);
+                // Update product details on the page
+                const productElement = document.querySelector(`[data-product-id="${e.id}"]`);
+                if (productElement) {
+                    // Update product name
+                    const nameElement = productElement.querySelector('.product-name');
+                    if (nameElement) nameElement.textContent = e.name;
+                    // Update product price
+                    const priceElement = productElement.querySelector('.product-price');
+                    if (priceElement) priceElement.textContent = e.price;
+                    // Update product sale price if available
+                    const salePriceElement = productElement.querySelector('.product-sale-price');
+                    if (salePriceElement && e.price_sale) salePriceElement.textContent = e.price_sale;
+                    // Update product quantity
+                    const quantityElement = productElement.querySelector('.product-quantity');
+                    if (quantityElement) quantityElement.textContent = e.quantity;
+                }
+            });
+
+        window.Echo.channel('variants')
+            .listen('VariantUpdated', (e) => {
+                console.log('Variant updated:', e);
+                // Update variant details on the page
+                const variantElement = document.querySelector(`[data-variant-id="${e.id}"]`);
+                if (variantElement) {
+                    // Update variant SKU
+                    const skuElement = variantElement.querySelector('.variant-sku');
+                    if (skuElement) skuElement.textContent = e.sku;
+                    // Update variant price
+                    const priceElement = variantElement.querySelector('.variant-price');
+                    if (priceElement) priceElement.textContent = e.price;
+                    // Update variant sale price if available
+                    const salePriceElement = variantElement.querySelector('.variant-sale-price');
+                    if (salePriceElement && e.price_sale) salePriceElement.textContent = e.price_sale;
+                    // Update variant quantity
+                    const quantityElement = variantElement.querySelector('.variant-quantity');
+                    if (quantityElement) quantityElement.textContent = e.quantity;
+                }
+            });
+    </script>
 </body>
 
 <!-- Mirrored from transvelo.github.io/electro-html/2.0/html/home/home-v2.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 28 Feb 2025 19:17:55 GMT -->

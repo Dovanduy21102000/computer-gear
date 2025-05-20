@@ -214,10 +214,16 @@
                                 <label for="is_variant" class="col-sm-2 col-form-label">Có biến thể</label>
                                 <div class="col-sm-10">
                                     <select class="form-select" id="is_variant" name="is_variant" required
-                                        onchange="toggleVariants(this)">
-                                        <option value="1">Có</option>
-                                        <option value="0" selected>Không</option>
+                                        onchange="toggleVariants(this)" {{ !$product->is_variant ? 'disabled' : '' }}>
+                                        <option value="1" {{ $product->is_variant ? 'selected' : '' }}>Có
+                                        </option>
+                                        <option value="0" {{ !$product->is_variant ? 'selected' : '' }}>Không
+                                        </option>
                                     </select>
+                                    @if (!$product->is_variant)
+                                        <small class="text-muted">Không thể chuyển đổi sản phẩm thường thành sản phẩm
+                                            có biến thể. Vui lòng tạo sản phẩm mới nếu cần.</small>
+                                    @endif
                                 </div>
                             </div>
 
@@ -286,10 +292,20 @@
                                                     class="col-sm-2 col-form-label">Thuộc tính</label>
                                                 <div class="col-sm-10">
                                                     @php
-                                                        echo 'Debug - Attribute ID: ' . $attribute->id . '<br>';
-                                                        echo 'Debug - Selected Value: ';
-                                                        var_dump($selectedValue);
-                                                        echo '<br>';
+                                                        // Get the selected value from the pivot table
+                                                        $selectedValue = old('attributes.' . $attribute->id);
+
+                                                        // If no old input, get from pivot table
+                                                        if ($selectedValue === null && isset($variant)) {
+                                                            $selectedValue = $variant
+                                                                ->attributeValues()
+                                                                ->where('attribute_id', $attribute->id)
+                                                                ->value('attribute_value_id');
+                                                        }
+
+                                                        // Ensure we have a string
+                                                        $selectedValue =
+                                                            $selectedValue !== null ? (string) $selectedValue : '';
                                                     @endphp
                                                     @foreach ($attribute->attributeValues as $value)
                                                         <div class="mb-2">
@@ -418,10 +434,16 @@
                             <strong>{{ $attribute->name }}</strong>
                             <div>
                                 @php
-                                    echo 'Debug - Attribute ID: ' . $attribute->id . '<br>';
-                                    echo 'Debug - Selected Value: ';
-                                    var_dump($selectedValue);
-                                    echo '<br>';
+                                    // Get the selected value from the pivot table
+                                    $selectedValue = old('attributes.' . $attribute->id);
+
+                                    // If no old input, get from pivot table
+                                    if ($selectedValue === null && isset($variant)) {
+                                        $selectedValue = $variant->attributeValues()->where('attribute_id', $attribute->id)->value('attribute_value_id');
+                                    }
+
+                                    // Ensure we have a string
+                                    $selectedValue = $selectedValue !== null ? (string) $selectedValue : '';
                                 @endphp
                                 @foreach ($attribute->attributeValues as $value)
                                     <div class="form-check form-check-inline">
