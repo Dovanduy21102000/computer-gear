@@ -4,7 +4,7 @@
         <h1>Quản lý danh mục sản phẩm</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{route('dashboard.index')}}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
                 <li class="breadcrumb-item">Quản lý danh mục sản phẩm</li>
                 <li class="breadcrumb-item active">Thêm mới danh mục sản phẩm</li>
             </ol>
@@ -27,7 +27,8 @@
                                 <label for="name" class="col-sm-2 col-form-label">Tên danh mục</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                        id="name" name="name" value="{{ old('name') }}" required>
+                                        id="name" name="name" value="{{ old('name') }}" required
+                                        data-slug-generator>
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -39,7 +40,8 @@
                                 <label for="slug" class="col-sm-2 col-form-label">Slug</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control @error('slug') is-invalid @enderror"
-                                        id="slug" name="slug" value="{{ old('slug') }}">
+                                        id="slug" name="slug" value="{{ old('slug') }}"
+                                        data-slug-target="#slug">
                                     @error('slug')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

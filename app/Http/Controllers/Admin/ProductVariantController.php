@@ -30,8 +30,12 @@ class ProductVariantController extends Controller
     {
         $template = 'backend.variants.add';
         $product = Product::findOrFail($productId);
-
-        return view('backend.dashboard.layout', compact('product', 'template'));
+        $attributes = \App\Models\Attribute::with('attributeValues')->get();
+        // Generate a suggested SKU
+        $baseSku = $product->sku ?? 'SKU';
+        $variantCount = $product->variants()->count() + 1;
+        $suggestedSku = $baseSku . '-' . $variantCount;
+        return view('backend.dashboard.layout', compact('product', 'template', 'attributes', 'suggestedSku'));
     }
 
     /**
@@ -44,23 +48,51 @@ class ProductVariantController extends Controller
             'price' => 'required|numeric',
             'price_sale' => 'nullable|numeric',
             'quantity' => 'required|integer',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'attributes' => 'required|array',
         ]);
 
-        $thumbnailPath = $request->hasFile('image')
-            ? $request->file('thumbnail')->store('variants', 'public')
+        // Log::info('Attributes from request:', ['attributes' => $request->input('attributes')]);
+
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('products', 'public')
             : null;
 
-        $product->variants()->create([
+        // Handle new attributes/values from dynamic UI
+        $newAttributeValueIds = [];
+        if ($request->has('new_attributes')) {
+            foreach ($request->input('new_attributes') as $attr) {
+                $attribute = \App\Models\Attribute::firstOrCreate(['name' => $attr['name']]);
+                foreach ($attr['values'] as $value) {
+                    $attributeValue = \App\Models\AttributeValue::firstOrCreate([
+                        'attribute_id' => $attribute->id,
+                        'value' => $value
+                    ]);
+                    $newAttributeValueIds[] = $attributeValue->id;
+                }
+            }
+        }
+
+        $variant = $product->variants()->create([
             'sku' => $request->sku,
             'name' => $request->name,
             'price' => $request->price,
             'price_sale' => $request->price_sale,
             'quantity' => $request->quantity,
-            'thumbnail' => $thumbnailPath,
-            'attributes' => json_encode($request->attributes),
+            'image' => $imagePath,
+            'attributes' => json_encode($request->input('attributes')),
         ]);
+
+        // Merge new attribute value IDs with selected ones for this variant
+        $allAttributeValueIds = $newAttributeValueIds;
+        $inputAttributes = $request->input('attributes', []);
+        if (is_array($inputAttributes)) {
+            foreach ($inputAttributes as $attributeId => $attributeValueId) {
+                $allAttributeValueIds[] = $attributeValueId;
+            }
+        }
+        // Log::info('Attribute value IDs to sync:', ['ids' => $allAttributeValueIds]);
+        $variant->attributeValues()->sync($allAttributeValueIds);
 
         return redirect()->route('variants.index', ['product' => $product->id])
             ->with('success', 'Biến thể đã được thêm thành công.');
@@ -77,22 +109,24 @@ class ProductVariantController extends Controller
     //     return view('backend.dashboard.layout', compact('variant', 'template','product'));
     // }
     public function show($productId, $variantId)
-{
-    $template = 'backend.variants.show';
+    {
+        $template = 'backend.variants.show';
 
-    $variant = ProductVariant::with(['product', 'attributes'])
-        ->where('id', $variantId)
-        ->where('product_id', $productId)
-        ->firstOrFail();
+        $variant = ProductVariant::with(['product', 'attributes'])
+            ->where('id', $variantId)
+            ->where('product_id', $productId)
+            ->firstOrFail();
 
-    return view('backend.dashboard.layout', compact('variant', 'template'));
-}
+        return view('backend.dashboard.layout', compact('variant', 'template'));
+    }
 
     public function edit(Product $product, ProductVariant $variant)
     {
+        $attributes = \App\Models\Attribute::with('attributeValues')->get();
         return view('backend.dashboard.layout', [
             'product' => $product,
             'variant' => $variant,
+            'attributes' => $attributes,
             'template' => 'backend.variants.edit'
         ]);
     }
@@ -141,26 +175,37 @@ class ProductVariantController extends Controller
             'quantity' => 'required|integer',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-    
-        
+
         if ($request->hasFile('image')) {
             if ($variant->image) {
                 Storage::disk('public')->delete($variant->image);
             }
-            $imagePath = $request->file('image')->store('variants', 'public');
+            $imagePath = $request->file('image')->store('products', 'public');
         } else {
-            $imagePath = $variant->image; 
+            $imagePath = $variant->image;
         }
-    
+
         $variant->update([
             'sku' => $request->sku,
             'price' => $request->price,
             'price_sale' => $request->price_sale,
             'quantity' => $request->quantity,
-            'image' => $imagePath, 
+            'image' => $imagePath,
             'status' => $request->status,
         ]);
-    
+
+        // Sync attribute values
+        $inputAttributes = $request->input('attributes', []);
+        if (!empty($inputAttributes)) {
+            $attributeValueIds = [];
+            foreach ($inputAttributes as $attributeId => $attributeValueId) {
+                $attributeValueIds[] = $attributeValueId;
+            }
+            $variant->attributeValues()->sync($attributeValueIds);
+        } else {
+            $variant->attributeValues()->detach();
+        }
+
         return redirect()->route('variants.index', ['product' => $product->id])
             ->with('success', 'Biến thể đã được cập nhật.');
     }

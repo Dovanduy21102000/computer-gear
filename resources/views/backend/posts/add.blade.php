@@ -27,7 +27,8 @@
                                 <label for="title" class="col-sm-2 col-form-label">Tiêu đề</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control @error('title') is-invalid @enderror"
-                                        id="title" name="title" value="{{ old('title') }}" required>
+                                        id="title" name="title" value="{{ old('title') }}" required
+                                        data-slug-generator>
                                     @error('title')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -39,7 +40,8 @@
                                 <label for="slug" class="col-sm-2 col-form-label">Slug</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control @error('slug') is-invalid @enderror"
-                                        id="slug" name="slug" value="{{ old('slug') }}">
+                                        id="slug" name="slug" value="{{ old('slug') }}"
+                                        data-slug-target="#slug">
                                     @error('slug')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

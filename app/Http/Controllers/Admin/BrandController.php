@@ -7,6 +7,7 @@ use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Helpers\SlugHelper;
 
 class BrandController extends BaseCRUDController
 {
@@ -74,7 +75,7 @@ class BrandController extends BaseCRUDController
     protected function validateStore(Request $request)
     {
         if (!$request->slug) {
-            $request->merge(['slug' => Str::slug($request->name)]);
+            $request->merge(['slug' => SlugHelper::createSlug($request->name)]);
         }
 
         return parent::validateStore($request) + $request->validate([
@@ -95,7 +96,7 @@ class BrandController extends BaseCRUDController
     protected function validateUpdate(Request $request, $id)
     {
         if (!$request->slug) {
-            $request->merge(['slug' => Str::slug($request->name)]);
+            $request->merge(['slug' => SlugHelper::createSlug($request->name)]);
         }
 
         return $request->validate([
