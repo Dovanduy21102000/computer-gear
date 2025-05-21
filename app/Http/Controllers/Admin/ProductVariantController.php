@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attribute as ModelsAttribute;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Attribute;
