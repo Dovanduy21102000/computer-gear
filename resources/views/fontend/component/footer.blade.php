@@ -5,7 +5,7 @@
              align-items: stretch;
          }
      </style>
-     <div class="container d-none d-lg-block mb-3">
+     {{-- <div class="container d-none d-lg-block mb-3">
          <div class="row">
              <div class="col-wd-3 col-lg-4">
                  <div class="widget-column">
@@ -156,7 +156,8 @@
                          src="fontend/assets/img/330X360/img1.jpg" alt="Image Description"></a>
              </div>
          </div>
-     </div>
+     </div> --}}
+    @include('fontend.component.footer-products')
      <!-- Footer-newsletter -->
      <div class="bg-primary py-3">
          <div class="container">
