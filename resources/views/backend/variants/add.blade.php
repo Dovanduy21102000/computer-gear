@@ -24,7 +24,7 @@
                 @endif
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">ewqeqw</h5>
+                        <h5 class="card-title">Thêm biến thể mới của {{ $product->name }}</h5>
                         <form action="{{ route('variants.store', ['product' => $product->id]) }}" method="POST"
                             enctype="multipart/form-data">
                             @csrf
