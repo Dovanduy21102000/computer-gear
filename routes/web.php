@@ -183,9 +183,9 @@ Route::middleware(['web'])->group(function () {
 
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
-    Route::get('/show_user', [\App\Http\Controllers\Client\UserController::class, 'show'])->name('user.show');
-    Route::post('/save_user', [\App\Http\Controllers\Client\UserController::class, 'save'])->name('user.save');
-    Route::post('/change_password', [\App\Http\Controllers\Client\UserController::class, 'changePassword'])->name('user.change-password');
+    Route::get('/profile', [\App\Http\Controllers\Client\UserController::class, 'show'])->name('user.show');
+    Route::post('/save-user', [\App\Http\Controllers\Client\UserController::class, 'save'])->name('user.save');
+    Route::post('/change-password', [\App\Http\Controllers\Client\UserController::class, 'changePassword'])->name('user.change-password');
 
 
 
@@ -222,7 +222,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/bai-viet/danh-muc/{slug}', [BlogController::class, 'category'])->name('posts.byCategory');
 
 
-    Route::get('/about_us', [HomeController::class, 'about_us'])->name('about_us');
+    Route::get('/about-us', [HomeController::class, 'about_us'])->name('about-us');
     Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
     Route::get('/track-order', [CheckoutController::class, 'trackOrderView'])->name('order.track');
     Route::match(['get', 'post'], '/track-order/check', [CheckoutController::class, 'trackOrder'])->name('order.trackOrder');

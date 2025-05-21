@@ -80,7 +80,7 @@
                                                  </a>
                                              </li>
 
-                                             
+
                                              <!-- SẢN PHẨM -->
                                              <li class="u-has-submenu">
                                                  <a class="u-header-collapse__nav-link d-flex align-items-center collapsed"
@@ -122,7 +122,7 @@
                                                          <li>
                                                              <a class="u-header-collapse__nav-link font-weight-bold"
                                                                  href="{{ route('blog.index') }}">
-                                                                  Tất cả bài viết
+                                                                 Tất cả bài viết
                                                              </a>
                                                          </li>
                                                          @foreach ($categories_post as $categoryPost)
@@ -144,7 +144,7 @@
                                              <!-- Item -->
                                              <li class="u-has-submenu">
                                                  <a class="u-header-collapse__nav-link d-flex align-items-center"
-                                                     href="{{ route('about_us') }}">
+                                                     href="{{ route('about-us') }}">
                                                      <i class="fas fa-users mr-2"></i> Về chúng tôi
                                                  </a>
                                              </li>
@@ -194,7 +194,8 @@
                          <ul class="navbar-nav u-header__navbar-nav">
                              <!-- Home -->
                              <li class="nav-item hs-has-sub-menu u-header__nav-item">
-                                 <a class="nav-link u-header__nav-link" href="{{ route('home.index') }}">Trang chủ</a>
+                                 <a class="nav-link u-header__nav-link" href="{{ route('home.index') }}">Trang
+                                     chủ</a>
                              </li>
                              <!-- End Home -->
 
@@ -216,7 +217,7 @@
                              </li>
                              <!-- End Blog -->
                              <li class="nav-item u-header__nav-item">
-                                 <a class="nav-link u-header__nav-link" href="{{ route('about_us') }}">Về chúng
+                                 <a class="nav-link u-header__nav-link" href="{{ route('about-us') }}">Về chúng
                                      tôi</a>
                              </li>
 
