@@ -128,7 +128,7 @@
                                                          @foreach ($categories_post as $categoryPost)
                                                              <li>
                                                                  <a class="u-header-collapse__nav-link"
-                                                                     href="{{ route('posts.byCategory', $categoryPost->slug) }}">
+                                                                     href="{{ route('blog.index', $categoryPost->slug) }}">
                                                                      {{ $categoryPost->name }}
                                                                  </a>
                                                              </li>
