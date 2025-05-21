@@ -105,7 +105,8 @@
                                 style="display: none;">
                                 <div class="p-2 border rounded bg-light">
                                     <div class="fw-bold mb-2">{{ $attribute->name }}</div>
-                                    <div class="d-flex flex-wrap gap-2">
+                                    <div class="d-flex flex-wrap gap-2 attribute-values-scroll"
+                                        style="min-height: 80px; max-height: 650px; overflow-y: auto;">
                                         @foreach ($attribute->attributeValues as $value)
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="radio"

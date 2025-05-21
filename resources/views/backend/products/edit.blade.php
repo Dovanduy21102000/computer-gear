@@ -215,7 +215,7 @@
                                 <div class="col-sm-10">
                                     <select class="form-select" id="is_variant" name="is_variant" required
                                         onchange="toggleVariants(this)" {{ !$product->is_variant ? 'disabled' : '' }}>
-                                        <option value="1" {{ $product->is_variant ? 'selected' : '' }}>Có
+                                        a <option value="1" {{ $product->is_variant ? 'selected' : '' }}>Có
                                         </option>
                                         <option value="0" {{ !$product->is_variant ? 'selected' : '' }}>Không
                                         </option>
@@ -229,137 +229,98 @@
                             <div id="variants-section"
                                 style="{{ $product->variants->isNotEmpty() ? '' : 'display: none;' }}">
                                 <h5 class="card-title">Thông tin biến thể</h5>
-                                <div id="variants">
-                                    @foreach ($product->variants as $index => $variant)
-                                        <div class="variant mb-4 bg-white shadow-sm p-3 rounded">
-                                            <div class="row mb-3">
-                                                <label for="variants[{{ $index }}][sku]"
-                                                    class="col-sm-2 col-form-label">SKU Biến thể</label>
-                                                <div class="col-sm-10">
-                                                    <input type="text" class="form-control"
-                                                        name="variants[{{ $index }}][sku]"
-                                                        value="{{ old("variants.$index.sku", $variant->sku) }}"
-                                                        required>
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <label for="variants[{{ $index }}][price]"
-                                                    class="col-sm-2 col-form-label">Giá Biến thể</label>
-                                                <div class="col-sm-10">
-                                                    <input type="number" class="form-control"
-                                                        name="variants[{{ $index }}][price]"
-                                                        value="{{ old("variants.$index.price", $variant->price) }}"
-                                                        required>
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <label for="variants[{{ $index }}][price_sale]"
-                                                    class="col-sm-2 col-form-label">Giá khuyến mãi</label>
-                                                <div class="col-sm-10">
-                                                    <input type="number" class="form-control"
-                                                        name="variants[{{ $index }}][price_sale]"
-                                                        value="{{ old("variants.$index.price_sale", $variant->price_sale) }}">
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <label for="variants[{{ $index }}][quantity]"
-                                                    class="col-sm-2 col-form-label">Số lượng Biến thể</label>
-                                                <div class="col-sm-10">
-                                                    <input type="number" class="form-control"
-                                                        name="variants[{{ $index }}][quantity]"
-                                                        value="{{ old("variants.$index.quantity", $variant->quantity) }}"
-                                                        required>
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <label for="variants[{{ $index }}][status]"
-                                                    class="col-sm-2 col-form-label">Trạng thái</label>
-                                                <div class="col-sm-10">
-                                                    <select class="form-select"
-                                                        name="variants[{{ $index }}][status]">
-                                                        <option value="1"
-                                                            {{ old("variants.$index.status", $variant->status) ? 'selected' : '' }}>
-                                                            Hoạt động</option>
-                                                        <option value="0"
-                                                            {{ !old("variants.$index.status", $variant->status) ? 'selected' : '' }}>
-                                                            Không hoạt động</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <label for="variants[{{ $index }}][attributes]"
-                                                    class="col-sm-2 col-form-label">Thuộc tính</label>
-                                                <div class="col-sm-10">
+                                <a href="{{ route('variants.create', $product->id) }}" class="btn btn-primary mb-3">
+                                    <i class="bi bi-plus-circle me-1"></i> Thêm biến thể
+                                </a>
+                                <table class="table table-bordered align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Giá</th>
+                                            <th>Giá KM</th>
+                                            <th>Số lượng</th>
+                                            <th>Trạng thái</th>
+                                            <th>Ảnh</th>
+                                            <th>Thuộc tính</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($product->variants as $variant)
+                                            <tr>
+                                                <td>{{ $variant->sku }}</td>
+                                                <td>{{ number_format($variant->price, 0, ',', '.') }}đ</td>
+                                                <td>{{ number_format($variant->price_sale, 0, ',', '.') }}đ</td>
+                                                <td>{{ $variant->quantity }}</td>
+                                                <td>
+                                                    @if ($variant->status)
+                                                        <span class="badge bg-success">Hoạt động</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">Không hoạt động</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($variant->image)
+                                                        <img src="{{ Storage::url($variant->image) }}"
+                                                            style="max-width:80px;" />
+                                                    @endif
+                                                </td>
+                                                <td>
                                                     @php
-                                                        // Get the selected value from the pivot table
-                                                        $selectedValue = old('attributes.' . $attribute->id);
-
-                                                        // If no old input, get from pivot table
-                                                        if ($selectedValue === null && isset($variant)) {
-                                                            $selectedValue = $variant
-                                                                ->attributeValues()
-                                                                ->where('attribute_id', $attribute->id)
-                                                                ->value('attribute_value_id');
-                                                        }
-
-                                                        // Ensure we have a string
-                                                        $selectedValue =
-                                                            $selectedValue !== null ? (string) $selectedValue : '';
+                                                        // Get unique attributes for this variant
+                                                        $variantAttributes = $variant->attributeValues
+                                                            ->pluck('attribute')
+                                                            ->unique('id');
                                                     @endphp
-                                                    @foreach ($attribute->attributeValues as $value)
-                                                        <div class="mb-2">
-                                                            <strong>{{ $value->value }}</strong>
-                                                            <div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        id="attribute_{{ $attribute->id }}_{{ $value->id }}_{{ $index }}"
-                                                                        name="variants[{{ $index }}][attributes][{{ $attribute->id }}]"
-                                                                        value="{{ $value->id }}"
-                                                                        @if (in_array($value->id, old("variants.$index.attributes", $variant->attributeValues->pluck('id')->toArray()))) checked @endif>
-                                                                    <label class="form-check-label"
-                                                                        for="attribute_{{ $attribute->id }}_{{ $value->id }}_{{ $index }}">
-                                                                        {{ $value->value }}
-                                                                    </label>
-                                                                </div>
-                                                            </div>
+                                                    @foreach ($variantAttributes as $attribute)
+                                                        <div>
+                                                            <strong>{{ $attribute->name }}:</strong>
+                                                            @php
+                                                                $values = $variant->attributeValues
+                                                                    ->where('attribute_id', $attribute->id)
+                                                                    ->pluck('value')
+                                                                    ->toArray();
+                                                            @endphp
+                                                            {{ implode(', ', $values) }}
                                                         </div>
                                                     @endforeach
-                                                </div>
-                                            </div>
-                                            <div class="text-end">
-                                                <button type="button" class="btn btn-danger btn-sm"
-                                                    onclick="this.parentElement.parentElement.remove()">
-                                                    <i class="bi bi-trash me-1"></i> Xóa biến thể
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <div class="text-end mb-3">
-                                    <button type="button" class="btn btn-primary" onclick="addVariant()">
-                                        <i class="bi bi-plus-circle me-1"></i> Thêm biến thể
-                                    </button>
-                                </div>
+                                                </td>
+                                                <td width="1px" class="text-nowrap">
+                                                    <div class="d-flex gap-2">
+                                                        <a href="{{ route('variants.show', ['product' => $product->id, 'variant' => $variant->id]) }}"
+                                                            class="btn btn-secondary btn-sm">Xem</a>
+                                                        <a href="{{ route('variants.edit', ['product' => $product->id, 'variant' => $variant->id]) }}"
+                                                            class="btn btn-info btn-sm">Sửa</a>
+                                                        <form
+                                                            action="{{ route('variants.destroy', ['product' => $product->id, 'variant' => $variant->id]) }}"
+                                                            method="POST" style="display:inline;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                                onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
-
-
-                            <!-- Nút Submit -->
-                            <div class="row mb-3">
-                                <div class="col-sm-10 offset-sm-2">
-                                    <button type="submit" class="btn btn-warning">Cập nhật</button>
-                                    <a href="{{ route('products.index') }}" class="btn btn-secondary">Quay lại</a>
-                                </div>
-                            </div>
-                        </form><!-- End Form Thêm Mới Sản Phẩm -->
+                    </div> <!-- end of card-body -->
+                </div> <!-- end of card -->
+                <div class="row mb-3 mt-3">
+                    <div class="col-sm-10 offset-sm-2">
+                        <button type="submit" class="btn btn-warning">Cập nhật</button>
+                        <a href="{{ route('products.index') }}" class="btn btn-secondary">Quay lại</a>
                     </div>
                 </div>
+                </form><!-- End Form Thêm Mới Sản Phẩm -->
             </div>
-        </div>
     </section>
 </main>
 
 <script>
-    let variantCount = {{ count($product->variants) }};
+    let variantIndex = {{ count($product->variants) }};
 
     function toggleVariants(select) {
         const variantsSection = document.getElementById('variants-section');
@@ -383,91 +344,59 @@
         }
     }
 
-    function addVariant() {
-        const variantsDiv = document.getElementById('variants');
-        const baseSKU = document.getElementById('sku').value;
-        const newVariant = document.createElement('div');
-        newVariant.classList.add('variant', 'mb-4', 'bg-white', 'shadow-sm', 'p-3', 'rounded');
-
-        const variantSKU = `${baseSKU}-${variantCount+1}`;
-
-        newVariant.innerHTML = `
-            <div class="row mb-3">
-                <label for="variants[${variantCount}][sku]" class="col-sm-2 col-form-label">SKU Biến thể</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" name="variants[${variantCount}][sku]" value="${variantSKU}" required>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="variants[${variantCount}][price]" class="col-sm-2 col-form-label">Giá Biến thể</label>
-                <div class="col-sm-10">
-                    <input type="number" class="form-control" name="variants[${variantCount}][price]" required>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="variants[${variantCount}][price_sale]" class="col-sm-2 col-form-label">Giá khuyến mãi</label>
-                <div class="col-sm-10">
-                    <input type="number" class="form-control" name="variants[${variantCount}][price_sale]">
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="variants[${variantCount}][quantity]" class="col-sm-2 col-form-label">Số lượng Biến thể</label>
-                <div class="col-sm-10">
-                    <input type="number" class="form-control" name="variants[${variantCount}][quantity]" required>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="variants[${variantCount}][status]" class="col-sm-2 col-form-label">Trạng thái</label>
-                <div class="col-sm-10">
-                    <select class="form-select" name="variants[${variantCount}][status]">
-                        <option value="1" selected>Hoạt động</option>
-                        <option value="0">Không hoạt động</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="variants[${variantCount}][attributes]" class="col-sm-2 col-form-label">Thuộc tính</label>
-                <div class="col-sm-10">
-                    @foreach ($attributes as $attribute)
-                        <div class="mb-2">
-                            <strong>{{ $attribute->name }}</strong>
-                            <div>
-                                @php
-                                    // Get the selected value from the pivot table
-                                    $selectedValue = old('attributes.' . $attribute->id);
-
-                                    // If no old input, get from pivot table
-                                    if ($selectedValue === null && isset($variant)) {
-                                        $selectedValue = $variant->attributeValues()->where('attribute_id', $attribute->id)->value('attribute_value_id');
-                                    }
-
-                                    // Ensure we have a string
-                                    $selectedValue = $selectedValue !== null ? (string) $selectedValue : '';
-                                @endphp
-                                @foreach ($attribute->attributeValues as $value)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox"
-                                            id="attribute_{{ $attribute->id }}_{{ $value->id }}_${variantCount}"
-                                            name="variants[${variantCount}][attributes][{{ $attribute->id }}]"
-                                            value="{{ $value->id }}">
-                                        <label class="form-check-label" for="attribute_{{ $attribute->id }}_{{ $value->id }}_${variantCount}">
-                                            {{ $value->value }}
-                                        </label>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-            <div class="text-end">
-                <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove()">
-                    <i class="bi bi-trash me-1"></i> Xóa biến thể
-                </button>
-            </div>
+    function addVariantRow() {
+        const tbody = document.getElementById('variants-table-body');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="text" name="variants[${variantIndex}][sku]" class="form-control" required></td>
+            <td><input type="number" name="variants[${variantIndex}][price]" class="form-control" required></td>
+            <td><input type="number" name="variants[${variantIndex}][price_sale]" class="form-control"></td>
+            <td><input type="number" name="variants[${variantIndex}][quantity]" class="form-control" required></td>
+            <td>
+                <select name="variants[${variantIndex}][status]" class="form-select">
+                    <option value="1" selected>Hoạt động</option>
+                    <option value="0">Không hoạt động</option>
+                </select>
+            </td>
+            <td>
+                <input type="file" name="variants[${variantIndex}][image]" class="form-control" accept="image/*" onchange="previewVariantImage(event, ${variantIndex})">
+                <img id="variant-image-preview-${variantIndex}" style="max-width:80px; margin-top:5px; display:none;" />
+            </td>
+            <td>
+                @foreach ($attributes as $attribute)
+                    <div>
+                        <strong>{{ $attribute->name }}:</strong>
+                        @foreach ($attribute->attributeValues as $value)
+                            <label class="me-2">
+                                <input type="checkbox"
+                                    name="variants[${variantIndex}][attributes][{{ $attribute->id }}][]"
+                                    value="{{ $value->id }}">
+                                {{ $value->value }}
+                            </label>
+                        @endforeach
+                    </div>
+                @endforeach
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeVariantRow(this)">Xóa</button>
+            </td>
         `;
+        tbody.appendChild(row);
+        variantIndex++;
+    }
 
-        variantsDiv.appendChild(newVariant);
-        variantCount++;
+    function removeVariantRow(btn) {
+        btn.closest('tr').remove();
+    }
+
+    function previewVariantImage(event, variantIndex) {
+        const input = event.target;
+        const preview = document.getElementById(`variant-image-preview-${variantIndex}`);
+        if (input.files && input.files[0]) {
+            preview.src = URL.createObjectURL(input.files[0]);
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
     }
 </script>
