@@ -71,5 +71,6 @@ class Kernel extends HttpKernel
         'login' => \App\Http\Middleware\LoginMiddleware::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'clear.coupon' => \App\Http\Middleware\ClearCouponOnNavigation::class,
+        'admin.session.cookie' => \App\Http\Middleware\AdminSessionCookie::class,
     ];
 }
