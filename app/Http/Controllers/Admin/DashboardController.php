@@ -15,97 +15,107 @@ class DashboardController extends Controller
 {
     public function __construct() {}
 
-    public function index()
+    public function index(Request $request)
     {
         $totalUsers = DB::table('users')->count();
 
-        $filter = request()->get('filter', 'month');
-        $today = Carbon::today();
-        $yesterday = Carbon::yesterday();
+        // Lấy thông tin lọc từ request
+        $filterType = $request->get('filterType', 'month'); // Mặc định lọc theo tháng
+        $startDate = null;
+        $endDate = null;
 
-        // Đếm số lượng đơn hàng theo filter
-        switch ($filter) {
-            case 'month':
-                // Đếm đơn hàng trong tháng này
-                $orders = Order::whereMonth('created_at', Carbon::now()->month)
-                    ->whereYear('created_at', Carbon::now()->year)
-                    ->count();
+        // Xử lý lọc theo ngày cụ thể nếu có
+        if ($request->has('startDate') && $request->has('endDate')) {
+            $startDate = Carbon::parse($request->startDate)->startOfDay();
+            $endDate = Carbon::parse($request->endDate)->endOfDay();
+            $filterType = 'custom';
+        } else {
+            // Xử lý lọc theo loại (ngày/tháng/năm)
+            $now = Carbon::now();
 
-                // Đếm số lượng đơn hàng tháng trước
-                $lastMonth = Carbon::now()->subMonth()->month;
-                $lastMonthOrders = Order::whereMonth('created_at', $lastMonth)
-                    ->whereYear('created_at', Carbon::now()->year)
-                    ->count();
+            switch ($filterType) {
+                case 'today':
+                    $startDate = $now->copy()->startOfDay();
+                    $endDate = $now->copy()->endOfDay();
 
-                // Tính phần trăm tăng trưởng so với tháng trước
-                $growthPercentageOrders = $lastMonthOrders > 0
-                    ? (($orders - $lastMonthOrders) / $lastMonthOrders) * 100
-                    : ($orders > 0 ? 100 : 0);
-                break;
+                    // Khoảng thời gian trước đó để so sánh
+                    $previousStartDate = $now->copy()->subDay()->startOfDay();
+                    $previousEndDate = $now->copy()->subDay()->endOfDay();
+                    break;
 
-            case 'year':
-                // Đếm đơn hàng trong năm nay
-                $orders = Order::whereYear('created_at', Carbon::now()->year)
-                    ->count();
+                case 'month':
+                    $startDate = $now->copy()->startOfMonth();
+                    $endDate = $now->copy()->endOfMonth();
 
-                // Đếm số lượng đơn hàng năm trước
-                $lastYear = Carbon::now()->subYear()->year;
-                $lastYearOrders = Order::whereYear('created_at', $lastYear)
-                    ->count();
+                    // Khoảng thời gian trước đó để so sánh
+                    $previousStartDate = $now->copy()->subMonth()->startOfMonth();
+                    $previousEndDate = $now->copy()->subMonth()->endOfMonth();
+                    break;
 
-                // Tính phần trăm tăng trưởng so với năm trước
-                $growthPercentageOrders = $lastYearOrders > 0
-                    ? (($orders - $lastYearOrders) / $lastYearOrders) * 100
-                    : ($orders > 0 ? 100 : 0);
-                break;
+                case 'year':
+                    $startDate = $now->copy()->startOfYear();
+                    $endDate = $now->copy()->endOfYear();
 
-            case 'today':
-            default:
-                // Đếm đơn hàng hôm nay
-                $orders = Order::whereDate('created_at', $today)
-                    ->count();
+                    // Khoảng thời gian trước đó để so sánh
+                    $previousStartDate = $now->copy()->subYear()->startOfYear();
+                    $previousEndDate = $now->copy()->subYear()->endOfYear();
+                    break;
 
-                // Đếm số lượng đơn hàng hôm qua
-                $yesterdayOrders = Order::whereDate('created_at', $yesterday)->count();
+                default:
+                    $startDate = $now->copy()->startOfMonth();
+                    $endDate = $now->copy()->endOfMonth();
 
-                // Tính phần trăm tăng trưởng so với hôm qua
-                $growthPercentageOrders = $yesterdayOrders > 0
-                    ? (($orders - $yesterdayOrders) / $yesterdayOrders) * 100
-                    : ($orders > 0 ? 100 : 0);
-                break;
+                    // Khoảng thời gian trước đó để so sánh
+                    $previousStartDate = $now->copy()->subMonth()->startOfMonth();
+                    $previousEndDate = $now->copy()->subMonth()->endOfMonth();
+                    break;
+            }
         }
 
-        // Doanh thu tháng này
-        $currentMonth = Carbon::now()->startOfMonth();
-        $revenueThisMonth = Order::where('status', 'completed')->whereBetween('created_at', [$currentMonth, Carbon::now()])
+        // Nếu là lọc tùy chỉnh, tự động tính khoảng thời gian trước đó để so sánh
+        if ($filterType === 'custom') {
+            $dateDiff = $endDate->diffInDays($startDate);
+            $previousStartDate = $startDate->copy()->subDays($dateDiff + 1);
+            $previousEndDate = $startDate->copy()->subDay();
+        }
+
+        // 1. Thống kê đơn hàng
+        $orders = Order::whereBetween('created_at', [$startDate, $endDate])->count();
+        $previousOrders = Order::whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
+
+        // Tính phần trăm tăng trưởng đơn hàng
+        $growthPercentageOrders = $previousOrders > 0
+            ? (($orders - $previousOrders) / $previousOrders) * 100
+            : ($orders > 0 ? 100 : 0);
+
+        // 2. Thống kê doanh thu
+        $revenue1 = Order::where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('total_price');
 
-        // Doanh thu tháng trước
-        $lastMonth = Carbon::now()->subMonth()->startOfMonth();
-        $endLastMonth = Carbon::now()->subMonth()->endOfMonth();
-        $revenueLastMonth = Order::where('status', 'completed')->whereBetween('created_at', [$lastMonth, $endLastMonth])
+        $previousRevenue = Order::where('status', 'completed')
+            ->whereBetween('created_at', [$previousStartDate, $previousEndDate])
             ->sum('total_price');
 
-        // Tính phần trăm thay đổi
-        $percentageIncrease = $revenueLastMonth > 0
-            ? (($revenueThisMonth - $revenueLastMonth) / $revenueLastMonth) * 100
-            : 100; // Nếu tháng trước không có đơn hàng, mặc định tăng 100%
+        // Tính phần trăm tăng trưởng doanh thu
+        $percentageIncreaseRevenue = $previousRevenue > 0
+            ? (($revenue1 - $previousRevenue) / $previousRevenue) * 100
+            : ($revenue1 > 0 ? 100 : 0);
 
-        // Lấy số lượng khách hàng mới trong năm nay
-        $startOfYear = Carbon::now()->startOfYear();
-        $customersThisYear = User::where('created_at', '>=', $startOfYear)->count();
+        // 3. Thống kê khách hàng
+        $customers1 = User::whereBetween('created_at', [$startDate, $endDate])->count();
+        $previousCustomers = User::whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
 
-        // Lấy số lượng khách hàng mới trong năm trước
-        $startOfLastYear = Carbon::now()->subYear()->startOfYear();
-        $endOfLastYear = Carbon::now()->subYear()->endOfYear();
-        $customersLastYear = User::whereBetween('created_at', [$startOfLastYear, $endOfLastYear])->count();
+        // Tính phần trăm tăng trưởng khách hàng
+        $percentageChangeCustomers = $previousCustomers > 0
+            ? (($customers1 - $previousCustomers) / $previousCustomers) * 100
+            : ($customers1 > 0 ? 100 : 0);
 
-        // Tính phần trăm thay đổi so với năm trước
-        $percentageChange = $customersLastYear > 0
-            ? (($customersThisYear - $customersLastYear) / $customersLastYear) * 100
-            : 100; // Nếu năm trước không có khách hàng, mặc định tăng 100%
+        // Định dạng hiển thị khoảng thời gian
+        $filterDisplay = $this->getFilterDisplay($filterType, $startDate, $endDate);
 
 
+        //
         $year = Carbon::now()->year; // Lấy năm hiện tại
         $months = range(1, 12);
 
@@ -208,13 +218,18 @@ class DashboardController extends Controller
 
         return view('backend.dashboard.layout', compact(
             'template',
-            'filter',
+            'totalUsers',
             'orders',
             'growthPercentageOrders',
-            'revenueThisMonth',
-            'percentageIncrease',
-            'customersThisYear',
-            'percentageChange',
+            'revenue1',
+            'percentageIncreaseRevenue',
+            'customers1',
+            'percentageChangeCustomers',
+            'filterType',
+            'startDate',
+            'endDate',
+            'filterDisplay',
+            //
             'sales',
             'revenue',
             'customers',
@@ -223,5 +238,20 @@ class DashboardController extends Controller
             'recentActivities',
             'latestPosts'
         ));
+    }
+    private function getFilterDisplay($filterType, $startDate, $endDate)
+    {
+        switch ($filterType) {
+            case 'today':
+                return 'Hôm nay';
+            case 'month':
+                return 'Tháng này';
+            case 'year':
+                return 'Năm nay';
+            case 'custom':
+                return $startDate->format('d/m/Y') . ' - ' . $endDate->format('d/m/Y');
+            default:
+                return 'Tháng này';
+        }
     }
 }

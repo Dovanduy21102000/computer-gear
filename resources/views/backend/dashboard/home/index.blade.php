@@ -15,8 +15,124 @@
             <!-- Left side columns -->
             <div class="col-lg-8">
                 <div class="row">
+                    <div class="card-body">
+                        <h5 class="card-title">Bộ lọc thống kê</h5>
 
+                        <div class="row g-3">
+                            <div class="col-md-auto">
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('dashboard.index', ['filterType' => 'today']) }}"
+                                        class="btn {{ $filterType == 'today' ? 'btn-primary' : 'btn-outline-primary' }}">
+                                        Hôm nay
+                                    </a>
+                                    <a href="{{ route('dashboard.index', ['filterType' => 'month']) }}"
+                                        class="btn {{ $filterType == 'month' ? 'btn-primary' : 'btn-outline-primary' }}">
+                                        Tháng này
+                                    </a>
+                                    <a href="{{ route('dashboard.index', ['filterType' => 'year']) }}"
+                                        class="btn {{ $filterType == 'year' ? 'btn-primary' : 'btn-outline-primary' }}">
+                                        Năm nay
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="col-md-auto">
+                                <form method="GET" action="{{ route('dashboard.index') }}" class="d-flex gap-2">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Từ</span>
+                                        <input type="date" class="form-control" name="startDate"
+                                            value="{{ request('startDate', $startDate ? $startDate->format('Y-m-d') : '') }}">
+                                    </div>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text">Đến</span>
+                                        <input type="date" class="form-control" name="endDate"
+                                            value="{{ request('endDate', $endDate ? $endDate->format('Y-m-d') : '') }}">
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Lọc</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Sales Card -->
+                    <div class="col-xxl-4 col-md-6">
+                        <div class="card info-card sales-card">
+                            <div class="card-body">
+                                <h5 class="card-title">Đơn hàng <span>| {{ $filterDisplay }}</span></h5>
+
+                                <div class="d-flex align-items-center">
+                                    <div
+                                        class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-cart"></i>
+                                    </div>
+                                    <div class="ps-3">
+                                        <h6>{{ $orders ?? 0 }}</h6>
+                                        <span
+                                            class="{{ $growthPercentageOrders >= 0 ? 'text-success' : 'text-danger' }} small pt-1 fw-bold">
+                                            {{ number_format((float) $growthPercentageOrders, 1) }}%
+                                        </span>
+                                        <span class="text-muted small pt-2 ps-1">
+                                            {{ ((float) $growthPercentageOrders ?? 0) >= 0 ? 'Tăng' : 'Giảm' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- End Sales Card -->
+
+                    <!-- Revenue Card -->
+                    <div class="col-xxl-4 col-md-6">
+                        <div class="card info-card revenue-card">
+                            <div class="card-body">
+                                <h5 class="card-title">Doanh thu <span>| {{ $filterDisplay }}</span></h5>
+
+                                <div class="d-flex align-items-center">
+                                    <div
+                                        class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </div>
+                                    <div class="ps-3">
+                                        <h6>{{ number_format($revenue1) }} đ</h6>
+                                        <span
+                                            class="{{ $percentageIncreaseRevenue >= 0 ? 'text-success' : 'text-danger' }} small pt-1 fw-bold">
+                                            {{ number_format($percentageIncreaseRevenue, 1) }}%
+                                        </span>
+                                        <span class="text-muted small pt-2 ps-1">
+                                            {{ $percentageIncreaseRevenue >= 0 ? 'Tăng' : 'Giảm' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- End Revenue Card -->
+
+                    <!-- Customers Card -->
+                    <div class="col-xxl-4 col-xl-12">
+                        <div class="card info-card customers-card">
+                            <div class="card-body">
+                                <h5 class="card-title">Khách hàng <span>| {{ $filterDisplay }}</span></h5>
+
+                                <div class="d-flex align-items-center">
+                                    <div
+                                        class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-people"></i>
+                                    </div>
+                                    <div class="ps-3">
+                                        <h6>{{ $customers1 }}</h6>
+                                        <span
+                                            class="{{ $percentageChangeCustomers >= 0 ? 'text-success' : 'text-danger' }} small pt-1 fw-bold">
+                                            {{ number_format($percentageChangeCustomers, 1) }}%
+                                        </span>
+                                        <span class="text-muted small pt-2 ps-1">
+                                            {{ $percentageChangeCustomers >= 0 ? 'Tăng' : 'Giảm' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- End Customers Card -->
+                    {{-- <!-- Sales Card -->
                     <div class="col-xxl-4 col-md-6">
                         <div class="card info-card sales-card">
 
@@ -31,11 +147,13 @@
 
                                     <li>
                                         <a class="dropdown-item"
-                                            href="{{ route('dashboard.index', ['filter' => 'today']) }}">Hôm nay</a>
+                                            href="{{ route('dashboard.index', ['filter' => 'today']) }}">Hôm
+                                            nay</a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item"
-                                            href="{{ route('dashboard.index', ['filter' => 'month']) }}">Tháng này</a>
+                                            href="{{ route('dashboard.index', ['filter' => 'month']) }}">Tháng
+                                            này</a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item"
@@ -152,7 +270,7 @@
                             </div>
                         </div>
 
-                    </div><!-- End Customers Card -->
+                    </div><!-- End Customers Card --> --}}
 
                     <!-- Reports -->
                     <div class="col-12">
@@ -299,9 +417,11 @@
                                                             @elseif ($order->status == 'processing')
                                                                 <span class="badge bg-info">Đang xử lý</span>
                                                             @elseif ($order->status == 'delivered')
-                                                                <span class="badge bg-primary">Đang giao hàng</span>
+                                                                <span class="badge bg-primary">Đang giao
+                                                                    hàng</span>
                                                             @elseif ($order->status == 'completed')
-                                                                <span class="badge bg-secondary">Đã giao hàng</span>
+                                                                <span class="badge bg-secondary">Đã giao
+                                                                    hàng</span>
                                                             @elseif ($order->status == 'success')
                                                                 <span class="badge bg-success">Hoàn thành</span>
                                                             @elseif ($order->status == 'canceled')
@@ -482,85 +602,6 @@
                     </div>
                 </div><!-- End Budget Report -->
 
-                <!-- Website Traffic -->
-                <div class="card">
-                    <div class="filter">
-                        <a class="icon" href="#" data-bs-toggle="dropdown"><i
-                                class="bi bi-three-dots"></i></a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                            <li class="dropdown-header text-start">
-                                <h6>Filter</h6>
-                            </li>
-
-                            <li><a class="dropdown-item" href="#">Hôm nay</a></li>
-                            <li><a class="dropdown-item" href="#">Tháng này</a></li>
-                            <li><a class="dropdown-item" href="#">Năm nay</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="card-body pb-0">
-                        <h5 class="card-title">Lượng truy cập trang web <span>| Today</span></h5>
-
-                        <div id="trafficChart" style="min-height: 400px;" class="echart"></div>
-
-                        <script>
-                            document.addEventListener("DOMContentLoaded", () => {
-                                echarts.init(document.querySelector("#trafficChart")).setOption({
-                                    tooltip: {
-                                        trigger: 'item'
-                                    },
-                                    legend: {
-                                        top: '5%',
-                                        left: 'center'
-                                    },
-                                    series: [{
-                                        name: 'Access From',
-                                        type: 'pie',
-                                        radius: ['40%', '70%'],
-                                        avoidLabelOverlap: false,
-                                        label: {
-                                            show: false,
-                                            position: 'center'
-                                        },
-                                        emphasis: {
-                                            label: {
-                                                show: true,
-                                                fontSize: '18',
-                                                fontWeight: 'bold'
-                                            }
-                                        },
-                                        labelLine: {
-                                            show: false
-                                        },
-                                        data: [{
-                                                value: 1048,
-                                                name: 'Search Engine'
-                                            },
-                                            {
-                                                value: 735,
-                                                name: 'Direct'
-                                            },
-                                            {
-                                                value: 580,
-                                                name: 'Email'
-                                            },
-                                            {
-                                                value: 484,
-                                                name: 'Union Ads'
-                                            },
-                                            {
-                                                value: 300,
-                                                name: 'Video Ads'
-                                            }
-                                        ]
-                                    }]
-                                });
-                            });
-                        </script>
-
-                    </div>
-                </div><!-- End Website Traffic -->
-
                 <!-- News & Updates Traffic -->
                 <div class="card">
                     <div class="card-body pb-0">
@@ -570,7 +611,8 @@
                             @foreach ($latestPosts as $post)
                                 <div class="post-item clearfix">
                                     <img src="{{ asset('storage/' . $post->image) }}" alt="{{ $post->title }}">
-                                    <h4><a href="{{ route('posts.show', $post->id) }}">{{ $post->title }}</a></h4>
+                                    <h4><a href="{{ route('posts.show', $post->id) }}">{{ $post->title }}</a>
+                                    </h4>
                                     <p>{{ Str::limit($post->description, 100) }}</p>
                                 </div>
                             @endforeach
