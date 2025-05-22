@@ -5,7 +5,8 @@
              align-items: stretch;
          }
      </style>
-     <div class="container d-none d-lg-block mb-3">
+
+     {{-- <div class="container d-none d-lg-block mb-3">
          <div class="row">
              <div class="col-wd-3 col-lg-4">
                  <div class="widget-column">
@@ -156,7 +157,9 @@
                          src="fontend/assets/img/330X360/img1.jpg" alt="Image Description"></a>
              </div>
          </div>
-     </div>
+     </div> --}}
+    @include('fontend.component.footer-products')
+
      <!-- Footer-newsletter -->
      <div class="bg-primary py-3">
          <div class="container">
@@ -286,27 +289,23 @@
                      <div class="row align-items-stretch">
                          <!-- Tìm kiếm nhanh -->
                          <div class="col-12 col-md mb-4 mb-md-0 d-flex flex-column h-100">
-                             <h6 class="mb-3 font-weight-bold">Tìm kiếm nhanh</h6>
+                             <h6 class="mb-3 font-weight-bold text-uppercase">Sản phẩm máy tính</h6>
                              <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent">
                                  <li><a class="list-group-item list-group-item-action"
-                                         href="{{ route('client.products.index', ['category' => 'laptop']) }}">Laptop
-                                         & Máy tính</a></li>
-                                 {{-- <li><a class="list-group-item list-group-item-action" href="{{ route('client.products.index', ['category' => 'camera']) }}">Máy ảnh & Nhiếp ảnh</a></li> --}}
+                                         href="{{ route('client.products.index', ['category' => 'laptop']) }}">Laptop &
+                                         Máy tính xách tay</a></li>
                                  <li><a class="list-group-item list-group-item-action"
-                                         href="{{ route('client.products.index', ['category' => 'smartphone']) }}">Máy
-                                         tính bảng</a></li>
+                                         href="{{ route('client.products.index', ['category' => 'desktop']) }}">Máy tính
+                                         để bàn (Desktop)</a></li>
                                  <li><a class="list-group-item list-group-item-action"
-                                         href="{{ route('client.products.index', ['category' => 'gaming']) }}">Game
-                                         & Máy chơi game</a></li>
+                                         href="{{ route('client.products.index', ['category' => 'gaming']) }}">Máy tính
+                                         chơi game</a></li>
                                  <li><a class="list-group-item list-group-item-action"
-                                         href="{{ route('client.products.index', ['category' => 'tv-audio']) }}">TV
-                                         & Âm thanh</a></li>
+                                         href="{{ route('client.products.index', ['category' => 'all-in-one']) }}">Máy
+                                         tính All-in-One</a></li>
                                  <li><a class="list-group-item list-group-item-action"
-                                         href="{{ route('client.products.index', ['category' => 'smart-devices']) }}">Thiết
-                                         bị thông minh</a></li>
-                                 <li><a class="list-group-item list-group-item-action"
-                                         href="{{ route('client.products.index', ['category' => 'car-electronics']) }}">Thiết
-                                         bị xe hơi & GPS</a></li>
+                                         href="{{ route('client.products.index', ['category' => 'workstation']) }}">Máy
+                                         trạm Workstation</a></li>
                              </ul>
                          </div>
 
@@ -314,15 +313,7 @@
                          <div class="col-12 col-md mb-4 mb-md-0 d-flex flex-column h-100">
                              <h6 class="mb-3 font-weight-bold">Danh mục thiết bị - phụ kiện</h6>
                              <ul class="list-group list-group-flush list-group-borderless mb-0 list-group-transparent">
-                                 <li><a class="list-group-item list-group-item-action"
-                                         href="{{ route('client.products.index', ['category' => 'printer']) }}">Máy
-                                         in & Mực in</a></li>
-                                 <li><a class="list-group-item list-group-item-action"
-                                         href="{{ route('client.products.index', ['category' => 'software']) }}">Phần
-                                         mềm</a></li>
-                                 <li><a class="list-group-item list-group-item-action"
-                                         href="{{ route('client.products.index', ['category' => 'stationery']) }}">Văn
-                                         phòng phẩm</a></li>
+
                                  <li><a class="list-group-item list-group-item-action"
                                          href="{{ route('client.products.index', ['category' => 'components']) }}">Linh
                                          kiện máy tính</a></li>
