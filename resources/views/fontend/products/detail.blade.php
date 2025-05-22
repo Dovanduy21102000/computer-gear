@@ -226,18 +226,55 @@
                             </div>
 
                             <div class="mb-1">
+                                @php
+                                    $hasVariant = $product->is_variant && $variants->count();
+                                    $variantSalePrices = $hasVariant
+                                        ? $variants->pluck('price_sale')->filter()
+                                        : collect();
+                                    $variantBasePrices = $hasVariant ? $variants->pluck('price') : collect();
+                                    if ($variantSalePrices->count()) {
+                                        $minPrice = $variantSalePrices->min();
+                                        $maxPrice = $variantSalePrices->max();
+                                        $isSale = true;
+                                    } else {
+                                        $minPrice = $variantBasePrices->min();
+                                        $maxPrice = $variantBasePrices->max();
+                                        $isSale = false;
+                                    }
+                                @endphp
                                 <div class="font-size-24" id="productPrice">
-                                    @if ($product->price_sale)
+                                    @if ($hasVariant)
+                                        @if ($isSale)
+                                            <span class="text-danger fw-bold">
+                                                {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                    – {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                                @endif
+                                            </span>
+                                            <br>
+                                            <del class="text-muted">
+                                                {{ number_format($variantBasePrices->min(), 0, ',', '.') }}₫
+                                                @if ($variantBasePrices->min() != $variantBasePrices->max())
+                                                    – {{ number_format($variantBasePrices->max(), 0, ',', '.') }}₫
+                                                @endif
+                                            </del>
+                                        @else
+                                            <span class="text-dark fw-bold">
+                                                {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                    – {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                                @endif
+                                            </span>
+                                        @endif
+                                    @elseif ($product->price_sale)
                                         <del
                                             class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
-                                        <div class="mt-1">
-                                            <span
-                                                class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
-                                        </div>
+                                        <span
+                                            class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
                                     @else
                                         {{ number_format($product->price, 0, ',', '.') }}₫
                                     @endif
                                 </div>
+                                <small id="outOfStockWarning" class="text-danger d-none">Sản phẩm này đã hết
+                                    hàng</small>
                             </div>
 
                             <div class="mb-1">
@@ -793,22 +830,141 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Lắng nghe sự kiện thay đổi trên các ô radio
-        $(".attribute-option input[type='radio']").change(function() {
-            // Lưu trữ tất cả các ô đã chọn
-            $(".attribute-option").each(function() {
-                // Kiểm tra nếu ô radio được chọn
-                if ($(this).find('input[type="radio"]').is(":checked")) {
-                    $(this).addClass("selected"); // Thêm lớp selected để thay đổi viền
-                } else {
-                    $(this).removeClass("selected"); // Bỏ lớp selected nếu không chọn
-                }
-            });
-        });
-    });
+    @php
+        $mainProductQuantity = $product->is_variant && $variants->count() ? $variants->sum('quantity') : $product->quantity;
+    @endphp
+    var mainProductQuantity = {{ $mainProductQuantity }};
+    let allVariants = []; // Make global
     $(document).ready(function() {
         let variantCache = {}; // Bộ nhớ đệm biến thể
+
+        // Function to fetch all variants data initially
+        function fetchAllVariants() {
+            let productId = {{ $product->id }};
+            $.ajax({
+                url: '{{ route('getVariant') }}',
+                type: 'GET',
+                data: {
+                    product_id: productId,
+                    get_all: true
+                },
+                success: function(response) {
+                    allVariants = response;
+                    console.log("All variants loaded:", allVariants);
+                },
+                error: function(xhr) {
+                    console.error("Error loading variants:", xhr);
+                }
+            });
+        }
+
+        // Call this when page loads
+        fetchAllVariants();
+
+        // Function to check if an attribute combination is valid
+        function isValidCombination(selectedAttributes, attributeName, attributeValue) {
+            let testAttributes = {
+                ...selectedAttributes
+            };
+            testAttributes[attributeName] = attributeValue;
+            let found = allVariants.some(variant => {
+                return Object.entries(testAttributes).every(([key, value]) => {
+                    return variant.attributes[key] === value;
+                });
+            });
+            console.log('Checking', testAttributes, '=>', found);
+            return found;
+        }
+
+        // Helper: update the stock display
+        function updateStockDisplay(quantity) {
+            if (typeof quantity === 'number' && !isNaN(quantity)) {
+                $("#productStock").html(
+                    `<span class="font-weight-bold ${quantity > 0 ? 'text-green' : 'text-danger'}">${quantity} sản phẩm</span>`
+                );
+            } else {
+                $("#productStock").html('<span class="font-weight-bold text-secondary">—</span>');
+            }
+        }
+
+        // Helper: get sum of matching variant quantities for current selection
+        function getMatchingQuantity(selectedAttributes) {
+            // If nothing is selected, return main product quantity
+            if (Object.keys(selectedAttributes).length === 0) {
+                return mainProductQuantity;
+            }
+            // Sum quantities of all variants matching the selected attributes
+            let sum = 0;
+            allVariants.forEach(variant => {
+                let isMatch = Object.entries(selectedAttributes).every(([key, value]) => {
+                    return variant.attributes[key] === value;
+                });
+                if (isMatch) sum += variant.quantity;
+            });
+            return sum;
+        }
+
+        // Update attribute options based on current selection
+        function updateAttributeOptions() {
+            let selectedAttributes = {};
+            $(".attribute-option input[type='radio']:checked").each(function() {
+                let attributeName = $(this).attr("name");
+                let attributeValue = $(this).val();
+                selectedAttributes[attributeName] = attributeValue;
+            });
+
+            // If nothing is selected, enable all options
+            if (Object.keys(selectedAttributes).length === 0) {
+                $(".attribute-option").removeClass('disabled').css('opacity', '1');
+                $(".attribute-option input[type='radio']").prop('disabled', false);
+                updateStockDisplay(mainProductQuantity);
+                return;
+            }
+
+            // For each attribute group
+            $(".attribute-options").each(function() {
+                let attributeName = $(this).find('input[type="radio"]').first().attr("name");
+
+                // For each option in this group
+                $(this).find('.attribute-option').each(function() {
+                    let option = $(this);
+                    let input = option.find('input[type="radio"]');
+                    let value = input.val();
+
+                    // Check if this option is compatible with current selection
+                    let isCompatible = isValidCombination(selectedAttributes, attributeName,
+                        value);
+
+                    // Update visual state
+                    if (isCompatible) {
+                        option.removeClass('disabled');
+                        input.prop('disabled', false);
+                        option.css('opacity', '1');
+                    } else {
+                        option.addClass('disabled');
+                        input.prop('disabled', true);
+                        option.css('opacity', '0.5');
+                    }
+                });
+            });
+
+            // Update the stock display for partial selection
+            let matchingQuantity = getMatchingQuantity(selectedAttributes);
+            updateStockDisplay(matchingQuantity);
+        }
+
+        // Add CSS for disabled state
+        $('<style>')
+            .text(`
+                .attribute-option.disabled {
+                    cursor: not-allowed;
+                    background-color: #f5f5f5;
+                }
+                .attribute-option.disabled .attribute-box {
+                    color: #999;
+                }
+            `)
+            .appendTo('head');
 
         // Kiểm tra các thuộc tính đã chọn
         function checkVariants() {
@@ -831,25 +987,6 @@
             return selectedAttributes;
         }
 
-        // Xử lý khi thay đổi thuộc tính (Màu sắc, RAM, v.v.)
-        $(".attribute-option input[type='radio']").change(function() {
-            let selectedAttributes = checkVariants();
-            if (!selectedAttributes) return;
-
-            let cacheKey = JSON.stringify(selectedAttributes);
-            let productId = {{ $product->id }}; // ID sản phẩm
-
-            console.log("Selected Attributes:",
-                selectedAttributes); // Log để kiểm tra giá trị thuộc tính
-
-            // Kiểm tra bộ nhớ đệm
-            if (variantCache[cacheKey]) {
-                updateUI(variantCache[cacheKey]);
-            } else {
-                fetchVariantData(productId, selectedAttributes, cacheKey);
-            }
-        });
-
         // Hàm gửi request và cập nhật UI
         function fetchVariantData(productId, selectedAttributes, cacheKey) {
             // Khởi tạo queryParams với product_id
@@ -861,15 +998,12 @@
             }
 
             let url = '{{ route('getVariant') }}' + '?' + queryParams;
-            console.log("Request URL:", url); // In URL ra console để kiểm tra
+            console.log("Request URL:", url);
 
             $.ajax({
-                url: url, // Sử dụng URL đã mã hóa
+                url: url,
                 type: 'GET',
                 beforeSend: function() {
-                    // Bạn có thể cập nhật giá trị giao diện ngay tại đây để không bị hiển thị "Đang tải..."
-                    // Ví dụ: Đổi màu viền, hoặc thay đổi nút "Thêm vào giỏ" ngay lập tức.
-                    // Cập nhật giao diện ngay lập tức
                     $(".attribute-option").each(function() {
                         $(this).addClass("loading");
                     });
@@ -882,7 +1016,6 @@
                     }
                     variantCache[cacheKey] = response;
                     updateUI(response);
-                    // Loại bỏ trạng thái loading khi hoàn tất
                     $(".attribute-option").each(function() {
                         $(this).removeClass("loading");
                     });
@@ -896,7 +1029,6 @@
                         confirmButtonText: "OK"
                     });
                     disablePurchase();
-                    // Loại bỏ trạng thái loading khi có lỗi
                     $(".attribute-option").each(function() {
                         $(this).removeClass("loading");
                     });
@@ -904,32 +1036,28 @@
             });
         }
 
-        // Cập nhật giao diện UI
+        // In updateUI, only update price and out-of-stock warning, not stock display
         function updateUI(response) {
-            console.log("🏆 UI đang cập nhật...", response); // Debug log
+            console.log("🏆 UI đang cập nhật...", response);
 
             let quantity = response.quantity ?? 0;
 
             // Kiểm tra giá
             let price = response.price_sale ?
-                `<del class="text-muted">${response.price}</del> 
-                <span class="text-danger">${response.price_sale}</span>` :
+                `<del class=\"text-muted\">${response.price}</del> 
+                <span class=\"text-danger\">${response.price_sale}</span>` :
                 `${response.price}`;
 
-            // Cập nhật giá và số lượng
+            // Cập nhật giá
             $("#productPrice").html(price);
-            $("#productStock").html(
-                `<span class="font-weight-bold ${quantity > 0 ? 'text-green' : 'text-danger'}">${quantity}</span>`
-            );
 
-            // Cập nhật số lượng tối đa có thể chọn
-            $("#quantityInput").attr("max", quantity);
-
-            // Kiểm tra nếu có hàng, kích hoạt mua
+            // Show/hide out of stock warning
             if (quantity > 0) {
+                $("#outOfStockWarning").addClass("d-none");
                 $("#quantityInput").prop("disabled", false).val(1);
                 enablePurchase();
             } else {
+                $("#outOfStockWarning").removeClass("d-none");
                 $("#quantityInput").val("").prop("disabled", true);
                 disablePurchase();
             }
@@ -948,14 +1076,12 @@
             let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
 
             if (isVariantProduct) {
-                // For variant products, we need to check if attributes are selected
                 if (!selectedAttributes || quantity < 1 || stockQuantity === 0) {
                     disablePurchase();
                 } else {
                     $("#addToCartBtn, #buyNowBtn").prop("disabled", false);
                 }
             } else {
-                // For non-variant products, just check if quantity is valid
                 if (quantity < 1 || stockQuantity === 0) {
                     disablePurchase();
                 } else {
@@ -963,6 +1089,31 @@
                 }
             }
         }
+
+        // Update attribute options when any selection changes
+        $(".attribute-option input[type='radio']").change(function() {
+            // Add selected class for visual feedback
+            $(".attribute-option").each(function() {
+                if ($(this).find('input[type="radio"]').is(":checked")) {
+                    $(this).addClass("selected");
+                } else {
+                    $(this).removeClass("selected");
+                }
+            });
+
+            updateAttributeOptions();
+            let selectedAttributes = checkVariants();
+            if (!selectedAttributes) return;
+
+            let cacheKey = JSON.stringify(selectedAttributes);
+            let productId = {{ $product->id }};
+
+            if (variantCache[cacheKey]) {
+                updateUI(variantCache[cacheKey]);
+            } else {
+                fetchVariantData(productId, selectedAttributes, cacheKey);
+            }
+        });
 
         // Xử lý thay đổi số lượng
         $("#quantityInput").on("input", function() {
@@ -994,7 +1145,6 @@
             let quantity = parseInt($("#quantityInput").val(), 10) || 1;
             let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
 
-            // For variant products, we need to check if attributes are selected
             if (isVariantProduct && (!selectedAttributes || parseInt($("#quantityInput").attr("max"),
                     10) === 0)) {
                 Swal.fire({
@@ -1006,7 +1156,6 @@
                 return;
             }
 
-            // For non-variant products, just check if quantity is valid
             if (!isVariantProduct && parseInt($("#quantityInput").attr("max"), 10) === 0) {
                 Swal.fire({
                     icon: "error",
@@ -1017,22 +1166,18 @@
                 return;
             }
 
-            // Prepare the data to send
             let formData = {
                 product_id: {{ $product->id }},
                 quantity: quantity
             };
 
-            // Only add attributes if this is a variant product
             if (isVariantProduct && selectedAttributes) {
                 formData.attributes = selectedAttributes;
             }
 
-            // Determine if this is a buy now or add to cart action
             let isBuyNow = $(this).attr('id') === 'buyNowBtn';
             let url = isBuyNow ? "{{ route('checkout.buy-now') }}" : "{{ route('cart.add') }}";
 
-            // Send POST request
             $.ajax({
                 url: url,
                 type: 'POST',
@@ -1042,14 +1187,11 @@
                 },
                 success: function(response) {
                     if (isBuyNow) {
-                        // Redirect to checkout page for buy now
                         window.location.href = "{{ route('checkout.index') }}";
                     } else {
                         console.log("Cart response:", response);
 
-                        // Kiểm tra nếu có lỗi từ server (ví dụ: vượt quá tồn kho)
                         if (response.error) {
-                            // Nếu có lỗi, hiển thị thông báo lỗi
                             Swal.fire({
                                 icon: "error",
                                 title: "Lỗi!",
@@ -1058,10 +1200,8 @@
                                 confirmButtonText: "OK"
                             });
                         } else {
-                            // Nếu không có lỗi, hiển thị thông báo thành công và cập nhật giỏ hàng
                             if (response.cartCount !== undefined) {
-                                $("#cart-badge-count").text(response
-                                    .cartCount); // Cập nhật số lượng giỏ hàng
+                                $("#cart-badge-count").text(response.cartCount);
                             }
 
                             Swal.fire({
@@ -1086,7 +1226,25 @@
             });
         });
 
-        disablePurchase(); // Đảm bảo các nút bị vô hiệu hóa khi chưa chọn gì
+        // Initial update of attribute options
+        updateAttributeOptions();
+        disablePurchase();
+
+        // Universal radio deselect logic (works for label and box clicks)
+        $(document).on('mousedown', '.attribute-option', function(e) {
+            let $input = $(this).find('input[type="radio"]');
+            $input.attr('data-waschecked', $input.prop('checked'));
+        });
+        $(document).on('click', '.attribute-option', function(e) {
+            let $input = $(this).find('input[type="radio"]');
+            if ($input.attr('data-waschecked') === 'true') {
+                console.log('Deselecting via label:', $input[0]);
+                $input.prop('checked', false).trigger('change');
+                $input.attr('data-waschecked', 'false');
+                e.stopImmediatePropagation();
+                e.preventDefault();
+            }
+        });
     });
 </script>
 @auth

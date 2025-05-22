@@ -297,3 +297,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment/resume/{id}', [PaymentResumeController::class, 'resume'])->name('payment.resume.process');
     Route::get('/payment/cancel/{id}', [PaymentResumeController::class, 'cancel'])->name('payment.resume.cancel');
 });
+
+Route::get('/products/sort/{sort}', [ProductClientController::class, 'index'])->name('client.products.sort');

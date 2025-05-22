@@ -174,12 +174,42 @@
                                             @endfor
                                         </div>
                                         <div class="font-weight-bold">
-                                            @if ($product->old_price)
+                                            @php
+                                                $hasVariant = $product->is_variant && $product->variants->count();
+                                                $variantSalePrices = $hasVariant
+                                                    ? $product->variants->pluck('price_sale')->filter()
+                                                    : collect();
+                                                $variantBasePrices = $hasVariant
+                                                    ? $product->variants->pluck('price')
+                                                    : collect();
+                                                if ($variantSalePrices->count()) {
+                                                    $minPrice = $variantSalePrices->min();
+                                                    $isSale = true;
+                                                    $originalMin = $variantBasePrices->min();
+                                                } else {
+                                                    $minPrice = $variantBasePrices->min();
+                                                    $isSale = false;
+                                                    $originalMin = null;
+                                                }
+                                            @endphp
+                                            @if ($hasVariant)
+                                                <span class="text-danger fw-bold">
+                                                    {{ number_format($minPrice, 0, ',', '.') }}₫
+                                                </span>
+                                                @if ($isSale)
+                                                    <br>
+                                                    <del class="text-muted">
+                                                        {{ number_format($originalMin, 0, ',', '.') }}₫
+                                                    </del>
+                                                @endif
+                                            @elseif ($product->price_sale)
                                                 <del
-                                                    class="font-size-11 text-gray-9 d-block">{{ number_format($product->old_price) }}₫</del>
+                                                    class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
+                                                <span
+                                                    class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                            @else
+                                                {{ number_format($product->price, 0, ',', '.') }}₫
                                             @endif
-                                            <ins
-                                                class="font-size-15 text-red text-decoration-none d-block">{{ number_format($product->price) }}₫</ins>
                                         </div>
                                     </div>
                                 </div>
@@ -235,10 +265,14 @@
                         <select id="sortSelect"
                             class="js-select selectpicker dropdown-select max-width-200 max-width-160-sm right-dropdown-0 px-2 px-xl-0"
                             data-style="btn-sm bg-white font-weight-normal py-2 border text-gray-20 bg-lg-down-transparent border-lg-down-0">
-                            <option value="default" selected>Sắp xếp mặc định</option>
-                            <option value="newest">Sắp xếp theo mới nhất</option>
-                            <option value="price_asc">Sắp xếp từ thấp tới cao</option>
-                            <option value="price_desc">Sắp xếp từ cao tới thấp</option>
+                            <option value="mac-dinh" @if (($sortSlug ?? '') == 'mac-dinh' || empty($sortSlug)) selected @endif>Sắp xếp mặc định
+                            </option>
+                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo mới
+                                nhất</option>
+                            <option value="gia-thap-nhat" @if (($sortSlug ?? '') == 'gia-thap-nhat') selected @endif>Sắp xếp từ
+                                thấp tới cao</option>
+                            <option value="gia-cao-nhat" @if (($sortSlug ?? '') == 'gia-cao-nhat') selected @endif>Sắp xếp từ
+                                cao tới thấp</option>
                         </select>
 
 
@@ -257,95 +291,11 @@
                     <!-- Grid View -->
                     <div class="tab-pane fade pt-2 show active" id="pills-one-example1" role="tabpanel"
                         aria-labelledby="pills-one-example1-tab" data-target-group="groups">
-                        <ul class="row list-unstyled products-group no-gutters">
-                            @foreach ($products as $product)
-                                <li class="col-6 col-md-3 col-wd-2gdot4 product-item"
-                                    data-created-at="{{ $product->created_at }}">
-                                    <div class="product-item__outer h-100">
-                                        <div class="product-item__inner px-xl-4 p-3">
-                                            <div class="product-item__body pb-xl-2">
-                                                <div class="mb-2">
-                                                    <a href="{{ $product->category?->slug ? route('client.products.category', ['slug' => $product->category->slug]) : '#' }}"
-                                                        class="font-size-12 text-gray-5">
-                                                        {{ $product->category->name ?? 'Danh mục' }}
-                                                    </a>
-                                                </div>
-                                                <h5 class="mb-1 product-item__title">
-                                                    <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                        class="text-blue font-weight-bold">
-                                                        {{ $product->name }}
-                                                    </a>
-                                                </h5>
-                                                <div class="mb-2">
-                                                    <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                        class="d-block text-center">
-                                                        <img class="img-fluid w-100"
-                                                            style="height: 150px; object-fit: cover;"
-                                                            src="{{ asset('storage/' . $product->thumbnail) }}"
-                                                            alt="{{ $product->name }}">
-                                                    </a>
-                                                </div>
-                                                <div class="flex-center-between mb-1">
-                                                    <div class="prodcut-price">
-                                                        @if ($product->price_sale)
-                                                            <div
-                                                                class="prodcut-price d-flex align-items-center position-relative">
-                                                                <ins
-                                                                    class="font-size-20 text-red text-decoration-none">{{ number_format($product->price_sale) }}đ</ins>
-                                                                <del
-                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($product->price, 0, ',', '.') }}đ</del>
-                                                            </div>
-                                                        @else
-                                                            <div class="text-dark fw-bold fs-5">
-                                                                {{ number_format($product->price, 0, ',', '.') }}đ
-                                                            </div>
-                                                        @endif
-                                                    </div>
-
-
-                                                    <div class="d-none d-xl-block prodcut-add-cart">
-                                                        @if ($product->is_variant)
-                                                            <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                                class="btn-add-cart btn-primary transition-3d-hover">
-                                                                <i class="ec ec-add-to-cart"></i>
-                                                            </a>
-                                                        @else
-                                                            <form action="{{ route('cart.add') }}" method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="product_id"
-                                                                    value="{{ $product->id }}">
-                                                                <input type="hidden" name="quantity" value="1">
-                                                                <!-- Default to 1 -->
-                                                                <button type="submit"
-                                                                    class="btn-add-cart btn-primary transition-3d-hover">
-                                                                    <i class="ec ec-add-to-cart"></i>
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="product-item__footer">
-                                                <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                    @include('fontend.component.wishlist-button', [
-                                                        'product' => $product,
-                                                    ])
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            @endforeach
-
-
-
-
-                        </ul>
-
-
-                        <!-- Hiển thị phân trang -->
-                        <div class="pagination-container d-flex justify-content-center">
-                            {{ $products->links('pagination::bootstrap-5') }}
+                        <div id="ajaxProductList">
+                            @include('fontend.products.partials.product_list', [
+                                'products' => $products,
+                                'view' => 'grid',
+                            ])
                         </div>
                     </div>
 
@@ -354,129 +304,11 @@
                     <!-- List View -->
                     <div class="tab-pane fade pt-2" id="pills-three-example1" role="tabpanel"
                         aria-labelledby="pills-three-example1-tab" data-target-group="groups">
-                        <ul class="d-block list-unstyled products-group prodcut-list-view">
-                            @foreach ($products as $product)
-                                <li class="product-item remove-divider">
-                                    <div class="product-item__outer w-100">
-                                        <div class="product-item__inner remove-prodcut-hover py-4 row">
-                                            <div class="product-item__header col-6 col-md-4">
-                                                <div class="mb-2">
-                                                    <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                        class="d-block text-center">
-                                                        <img class="img-fluid"
-                                                            src="{{ asset('storage/' . $product->thumbnail) }}"
-                                                            alt="{{ $product->name }}">
-                                                    </a>
-                                                </div>
-                                            </div>
-                                            <div class="product-item__body col-6 col-md-5">
-                                                <div class="pr-lg-10">
-                                                    <div class="mb-2">
-                                                        <a href="#"
-                                                            class="font-size-12 text-gray-5">{{ $product->category->name ?? 'Danh mục' }}</a>
-                                                    </div>
-                                                    <h5 class="mb-2 product-item__title">
-                                                        <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                            class="text-blue font-weight-bold">
-                                                            {{ $product->name }}
-                                                        </a>
-                                                    </h5>
-                                                    <div class="prodcut-price mb-2">
-                                                        @if ($product->price_sale)
-                                                            <div class="text-danger font-weight-bold">
-                                                                {{ number_format($product->price_sale, 0, ',', '.') }}đ
-                                                            </div>
-                                                            <del
-                                                                class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
-                                                        @else
-                                                            <div class="text-gray-100 font-weight-bold">
-                                                                {{ number_format($product->price, 0, ',', '.') }}đ
-                                                            </div>
-                                                        @endif
-                                                    </div>
-
-                                                    <ul class="font-size-12 p-0 text-gray-110 mb-4 d-none d-md-block">
-                                                        <li class="line-clamp-1 mb-1 list-bullet">Chất lượng cao cấp
-                                                        </li>
-                                                        <li class="line-clamp-1 mb-1 list-bullet">Thiết kế bền bỉ,
-                                                            chống sốc</li>
-                                                        <li class="line-clamp-1 mb-1 list-bullet">Bảo hành chính hãng
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                            <div class="product-item__footer col-md-3 d-md-block">
-                                                <div class="mb-3 d-flex flex-column align-items-center text-center">
-                                                    <!-- Giá sản phẩm -->
-                                                    <div
-                                                        class="prodcut-price mb-3 d-flex flex-column align-items-start">
-                                                        @if ($product->price_sale)
-                                                            <div class="text-danger font-weight-bold">
-                                                                {{ number_format($product->price_sale, 0, ',', '.') }}đ
-                                                            </div>
-                                                            <div class="d-flex align-items-center">
-                                                                <del class="text-muted fw-semibold fs-5 me-2">
-                                                                    {{ number_format($product->price, 0, ',', '.') }}đ
-                                                                </del>
-                                                                <span class="badge bg-danger text-white fs-6 fw-bold">
-                                                                    -{{ round((1 - $product->price_sale / $product->price) * 100) }}%
-                                                                </span>
-                                                            </div>
-                                                        @else
-                                                            <div class="text-dark font-weight-bold">
-                                                                {{ number_format($product->price, 0, ',', '.') }}đ
-                                                            </div>
-                                                        @endif
-                                                    </div>
-
-
-
-
-                                                    <!-- Nút thêm vào giỏ hàng -->
-                                                    <div class="d-none d-xl-block prodcut-add-cart w-100">
-                                                        @if ($product->is_variant)
-                                                            <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                                class="btn btn-warning w-100 py-2 rounded-pill shadow-sm transition-3d-hover"
-                                                                type="submit"
-                                                                style="font-size: 1rem; font-weight: 600; background: #ffc107; border: none;">
-                                                                <i class="ec ec-add-to-cart mr-2"></i> Thêm vào giỏ
-                                                                hàng
-                                                            </a>
-                                                        @else
-                                                            <form action="{{ route('cart.add') }}" method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="product_id"
-                                                                    value="{{ $product->id }}">
-                                                                <input type="hidden" name="quantity" value="1">
-                                                                <button
-                                                                    class="btn btn-warning w-100 py-2 rounded-pill shadow-sm transition-3d-hover"
-                                                                    type="submit"
-                                                                    style="font-size: 1rem; font-weight: 600; background: #ffc107; border: none;">
-                                                                    <i class="ec ec-add-to-cart mr-2"></i> Thêm vào giỏ
-                                                                    hàng
-                                                                </button>
-
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                </div>
-
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <a href="#"
-                                                        class="text-gray-6 font-size-13 mx-wd-3 d-flex align-items-center">
-                                                        <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
-                                                    </a>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
-                        <!-- Hiển thị phân trang -->
-                        <div class="pagination-container d-flex justify-content-center">
-                            {{ $products->links('pagination::bootstrap-5') }}
+                        <div id="ajaxProductList">
+                            @include('fontend.products.partials.product_list', [
+                                'products' => $products,
+                                'view' => 'list',
+                            ])
                         </div>
                     </div>
                 </div>
@@ -491,67 +323,37 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const sortSelect = document.getElementById("sortSelect");
-        const productList = document.querySelector(".products-group");
-        const originalProducts = Array.from(productList.children);
+        var sortSelect = document.getElementById("sortSelect");
+        if (sortSelect) {
+            sortSelect.addEventListener("change", function() {
+                var sortValue = sortSelect.value;
+                var url = new URL(window.location.href);
+                var basePath = '/products';
+                if (sortValue !== 'mac-dinh') {
+                    basePath += '/sort/' + sortValue;
+                }
+                var params = url.searchParams.toString();
+                var newUrl = basePath + (params ? ('?' + params) : '');
 
-        sortSelect.addEventListener("change", function() {
-            let products = [...originalProducts];
-            let sortBy = sortSelect.value;
-
-            if (sortBy !== "default") {
-                products.sort((a, b) => {
-                    let priceA = parseInt(a.querySelector(".prodcut-price div")?.textContent
-                        .replace(/\D/g, "")) || 0;
-                    let priceB = parseInt(b.querySelector(".prodcut-price div")?.textContent
-                        .replace(/\D/g, "")) || 0;
-                    let dateA = a.dataset.createdAt ? new Date(a.dataset.createdAt) : new Date(
-                        0);
-                    let dateB = b.dataset.createdAt ? new Date(b.dataset.createdAt) : new Date(
-                        0);
-
-                    if (sortBy === "price_asc") return priceA - priceB;
-                    if (sortBy === "price_desc") return priceB - priceA;
-                    if (sortBy === "newest") return dateB - dateA;
-                    return 0;
-                });
-            }
-
-            // Xóa & thêm lại sản phẩm theo thứ tự mới
-            productList.replaceChildren(...products);
-        });
-    });
-
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const sortSelect = document.getElementById("sortSelect");
-        const productList = document.querySelector(".prodcut-list-view");
-        const originalProducts = Array.from(productList.children); // Lưu trữ danh sách gốc
-
-        sortSelect.addEventListener("change", function() {
-            let products = [...originalProducts]; // Luôn khởi tạo từ danh sách gốc
-            let sortBy = sortSelect.value;
-
-            if (sortBy !== "default") {
-                products.sort((a, b) => {
-                    let priceA = parseInt(a.querySelector(".prodcut-price div")?.textContent
-                        .replace(/\D/g, "")) || 0;
-                    let priceB = parseInt(b.querySelector(".prodcut-price div")?.textContent
-                        .replace(/\D/g, "")) || 0;
-                    let dateA = a.dataset.createdAt ? new Date(a.dataset.createdAt) : new Date(
-                        0);
-                    let dateB = b.dataset.createdAt ? new Date(b.dataset.createdAt) : new Date(
-                        0);
-
-                    if (sortBy === "price_asc") return priceA - priceB;
-                    if (sortBy === "price_desc") return priceB - priceA;
-                    if (sortBy === "newest") return dateB - dateA;
-                    return 0;
-                });
-            }
-
-            // Xóa & thêm lại sản phẩm theo thứ tự mới
-            productList.replaceChildren(...products);
-        });
+                // AJAX fetch
+                fetch(newUrl, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        var newHtml = document.createElement('div');
+                        newHtml.innerHTML = data;
+                        var newAjaxProductList = newHtml.querySelector('#ajaxProductList');
+                        if (newAjaxProductList) {
+                            document.querySelectorAll('#ajaxProductList').forEach(function(el) {
+                                el.innerHTML = newAjaxProductList.innerHTML;
+                            });
+                        }
+                        history.pushState(null, '', newUrl);
+                    });
+            });
+        }
     });
 </script>
