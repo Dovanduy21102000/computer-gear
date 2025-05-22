@@ -58,9 +58,9 @@
                                         <td class="font-weight-bold align-middle">{{ $payment->order_code }}</td>
                                         <td class="align-middle">
                                             @if ($payment->payment_method === 'momo')
-                                                <span class="badge bg-primary">MoMo</span>
+                                                <span class="badge badge-momo badge-lg">MoMo</span>
                                             @else
-                                                <span class="badge bg-success">VNPay</span>
+                                                <span class="badge badge-vnpay badge-lg">VNPay</span>
                                             @endif
                                         </td>
                                         <td class="text-danger align-middle">{{ number_format($payment->amount) }} VNĐ
@@ -72,7 +72,8 @@
                                                     <span class="badge bg-danger text-white badge-lg">Đã hết
                                                         hạn</span>
                                                 @else
-                                                    <span class="badge badge-pending text-white badge-lg">Đang chờ</span>
+                                                    <span class="badge badge-pending text-white badge-lg">Đang
+                                                        chờ</span>
                                                 @endif
                                             @elseif ($payment->status === 'cancelled')
                                                 <span class="badge bg-danger text-white badge-lg">Đã hủy</span>
@@ -121,7 +122,7 @@
 <style>
     .badge-lg {
         font-size: 0.92rem;
-        padding: 0.32em 0.9em;
+        padding: 0.52em 0.9em;
         border-radius: 0.6em;
         font-weight: 500;
         letter-spacing: 0.01em;
@@ -129,5 +130,15 @@
 
     .badge-pending {
         background: #4a90e2 !important;
+    }
+
+    .badge-vnpay {
+        background: #005baa !important;
+        color: #fff !important;
+    }
+
+    .badge-momo {
+        background: #a50064 !important;
+        color: #fff !important;
     }
 </style>
