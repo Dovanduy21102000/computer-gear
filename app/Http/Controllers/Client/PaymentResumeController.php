@@ -14,9 +14,12 @@ class PaymentResumeController extends Controller
     {
         $userId = Auth::id();
         $allPayments = PaymentAttempt::where('user_id', $userId)
-            ->where('expires_at', '>', now())
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($payment) {
+                $payment->is_expired = $payment->expires_at && $payment->expires_at->lt(now());
+                return $payment;
+            });
 
         $template = 'fontend.payment.resume';
         return view('fontend.layout', ['allPayments' => $allPayments, 'template' => $template]);

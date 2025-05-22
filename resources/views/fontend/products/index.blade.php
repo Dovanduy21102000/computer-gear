@@ -291,11 +291,17 @@
                     <!-- Grid View -->
                     <div class="tab-pane fade pt-2 show active" id="pills-one-example1" role="tabpanel"
                         aria-labelledby="pills-one-example1-tab" data-target-group="groups">
-                        <div id="ajaxProductList">
-                            @include('fontend.products.partials.product_list', [
-                                'products' => $products,
-                                'view' => 'grid',
-                            ])
+                        <div id="ajaxProductListWrapper">
+                            <div id="ajaxProductListSpinner">
+                                <div class="spinner-border text-primary" role="status"><span
+                                        class="sr-only">Loading...</span></div>
+                            </div>
+                            <div id="ajaxProductList">
+                                @include('fontend.products.partials.product_list', [
+                                    'products' => $products,
+                                    'view' => 'grid',
+                                ])
+                            </div>
                         </div>
                     </div>
 
@@ -304,11 +310,17 @@
                     <!-- List View -->
                     <div class="tab-pane fade pt-2" id="pills-three-example1" role="tabpanel"
                         aria-labelledby="pills-three-example1-tab" data-target-group="groups">
-                        <div id="ajaxProductList">
-                            @include('fontend.products.partials.product_list', [
-                                'products' => $products,
-                                'view' => 'list',
-                            ])
+                        <div id="ajaxProductListWrapper">
+                            <div id="ajaxProductListSpinner">
+                                <div class="spinner-border text-primary" role="status"><span
+                                        class="sr-only">Loading...</span></div>
+                            </div>
+                            <div id="ajaxProductList">
+                                @include('fontend.products.partials.product_list', [
+                                    'products' => $products,
+                                    'view' => 'list',
+                                ])
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -321,9 +333,34 @@
 </main>
 <!-- ========== END MAIN CONTENT ========== -->
 
+<style>
+    #ajaxProductListSpinner {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.7);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #ajaxProductListSpinner .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    #ajaxProductListWrapper {
+        position: relative;
+    }
+</style>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var sortSelect = document.getElementById("sortSelect");
+        var spinner = document.getElementById("ajaxProductListSpinner");
         if (sortSelect) {
             sortSelect.addEventListener("change", function() {
                 var sortValue = sortSelect.value;
@@ -334,8 +371,7 @@
                 }
                 var params = url.searchParams.toString();
                 var newUrl = basePath + (params ? ('?' + params) : '');
-
-                // AJAX fetch
+                if (spinner) spinner.style.display = 'flex';
                 fetch(newUrl, {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest'
@@ -352,6 +388,9 @@
                             });
                         }
                         history.pushState(null, '', newUrl);
+                    })
+                    .finally(function() {
+                        if (spinner) spinner.style.display = 'none';
                     });
             });
         }

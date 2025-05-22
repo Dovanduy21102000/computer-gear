@@ -93,7 +93,7 @@ class MOMOController extends Controller
                     'selected_items' => null,
                     'shipping_info' => session('momo_shipping_info'),
                     'coupon_info' => $coupon,
-                    'expires_at' => now()->addHours(24)
+                    'expires_at' => now()->addMinutes(15)
                 ]);
 
                 // Create payment request
@@ -133,7 +133,7 @@ class MOMOController extends Controller
                 $jsonResult = $response->json();
 
                 // Log the full response for debugging
-                \Log::info('MOMO Payment Response (Buy Now):', [
+                Log::info('MOMO Payment Response (Buy Now):', [
                     'status' => $response->status(),
                     'response' => $jsonResult,
                     'request_data' => [
@@ -152,7 +152,7 @@ class MOMOController extends Controller
                     return redirect($jsonResult['payUrl']);
                 } else {
                     $errorMessage = $jsonResult['message'] ?? 'Không thể tạo thanh toán. Vui lòng thử lại.';
-                    \Log::error('MOMO Payment Error (Buy Now):', [
+                    Log::error('MOMO Payment Error (Buy Now):', [
                         'error' => $errorMessage,
                         'response' => $jsonResult
                     ]);
@@ -253,7 +253,7 @@ class MOMOController extends Controller
                 'selected_items' => $selectedItemIds,
                 'shipping_info' => session('momo_shipping_info'),
                 'coupon_info' => $coupon,
-                'expires_at' => now()->addHours(24)
+                'expires_at' => now()->addMinutes(15)
             ]);
 
             // Create payment request

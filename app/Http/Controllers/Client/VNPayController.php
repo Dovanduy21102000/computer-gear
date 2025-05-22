@@ -193,7 +193,7 @@ class VNPayController extends Controller
                 'selected_items' => $selectedItemIds ?? null,
                 'shipping_info' => session('vnpay_shipping_info'),
                 'coupon_info' => $coupon,
-                'expires_at' => now()->addHours(24)
+                'expires_at' => now()->addMinutes(15)
             ]);
 
             // VNPay payment request
