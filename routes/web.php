@@ -49,7 +49,7 @@ use Illuminate\Support\Facades\Route;
 // Admin Routes
 Route::prefix('admin')->group(function () {
     // Đăng nhập và đăng xuất dành cho admin
-  Route::get('login', [AuthController::class, 'index'])->name('auth.admin');
+    Route::get('login', [AuthController::class, 'index'])->name('auth.admin');
     Route::post('login', [AuthController::class, 'login'])->name('auth.admin.login');
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.admin.logout');
 
@@ -274,3 +274,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/products/sort/{sort}', [ProductClientController::class, 'index'])->name('client.products.sort');
+
+Route::get('/admin', function () {
+    if (auth('admin')->check()) {
+        return redirect()->route('dashboard.index');
+    }
+    return redirect()->route('auth.admin');
+});
