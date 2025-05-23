@@ -10,12 +10,7 @@
                      <!-- Logo -->
                      <a class="order-1 order-xl-0 navbar-brand u-header__navbar-brand u-header__navbar-brand-center"
                          href="{{ route('home.index') }}" aria-label="Computer Gear">
-                         <svg version="1.1" width="350px" height="60px" viewBox="0 0 350 60"
-                             xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 0;">
-
-                             <text x="10" y="40" font-size="38" fill="#333E48" font-weight="bold"
-                                 font-family="Arial, sans-serif">COMPUTER GEAR</text>
-                         </svg>
+                         <img src="{{ asset('fontend/assets/img/logo-transparent.png') }}" alt="computergear">
                      </a>
                      <!-- End Logo -->
 

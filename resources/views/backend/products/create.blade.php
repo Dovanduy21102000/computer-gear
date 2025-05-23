@@ -400,19 +400,35 @@
         const priceSaleInput = document.getElementById('price_sale');
         const quantityInput = document.getElementById('quantity');
 
-        if (select.value === '1') {
+        // Get all input elements within the variants section
+        const variantInputs = variantsSection.querySelectorAll('input, select, textarea');
+
+        if (select.value === '1') { // '1' means "Has variants"
             variantsSection.style.display = 'block';
             quantitySection.style.display = 'none';
             priceSection.style.display = 'none';
+
+            // Enable variant inputs and remove required from non-variant inputs
+            variantInputs.forEach(input => {
+                input.removeAttribute('disabled');
+                // Re-add required based on original markup or data attributes if needed
+                // For simplicity, we assume required is set in the initial HTML for variants
+            });
             priceInput.removeAttribute('required');
             priceSaleInput.removeAttribute('required');
             quantityInput.removeAttribute('required');
-        } else {
+
+        } else { // '0' means "Does not have variants"
             variantsSection.style.display = 'none';
             quantitySection.style.display = 'block';
             priceSection.style.display = 'block';
+
+            // Disable variant inputs and set required for non-variant inputs
+            variantInputs.forEach(input => {
+                input.setAttribute('disabled', 'disabled');
+            });
             priceInput.setAttribute('required', 'required');
-            priceSaleInput.removeAttribute('required');
+            priceSaleInput.removeAttribute('required'); // price_sale is optional
             quantityInput.setAttribute('required', 'required');
         }
     }

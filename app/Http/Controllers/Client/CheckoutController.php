@@ -20,10 +20,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Events\CheckoutSessionUpdated;
 use App\Models\CheckoutSession;
-use App\Models\Address;
-use App\Models\Province;
-use App\Models\District;
-use App\Models\Ward;
 use App\Models\PaymentMethod;
 
 class CheckoutController extends Controller

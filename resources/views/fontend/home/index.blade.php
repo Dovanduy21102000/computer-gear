@@ -295,11 +295,12 @@
                                                         </div>
                                                         <h5 class="mb-4 product-item__title"><a
                                                                 href="{{ route('client.products.detail', $topViewedProduct->slug) }}"
-                                                                class="text-blue font-weight-bold">{{ $topViewedProduct->name }}</a>
+                                                                class="text-blue font-weight-bold product-name">
+                                                                {{ $topViewedProduct->name }}
+                                                            </a>
                                                         </h5>
                                                         <div class="mt-2">
                                                             <div class="prodcut-price">
-                                                                {{-- <div class="text-gray-100">$685,00</div> --}}
                                                                 @if ($topViewedProduct->price_sale)
                                                                     <div class="text-red">
                                                                         {{ number_format($topViewedProduct->price_sale, 0, ',', '.') }}
@@ -345,7 +346,8 @@
                                                         class="d-block text-center">
                                                         <img class="img-fluid"
                                                             src="{{ asset('storage/' . $post->image) }}"
-                                                            alt="{{ $post->title }}">
+                                                            alt="{{ $post->title }}"
+                                                            style="width: 270px !important; height: 180px !important; object-fit: cover;">
                                                     </a>
                                                 </div>
                                                 <div class="mb-1">
@@ -481,7 +483,8 @@
                             aria-labelledby="pills-one-example1-tab" data-target-group="groups">
                             <ul class="row list-unstyled products-group no-gutters">
                                 @foreach ($topViewedProducts as $topViewedProduct)
-                                    <li class="col-6 col-md-4 col-xl product-item">
+                                    <li class="col-6 col-md-4 col-xl product-item"
+                                        data-product-id="{{ $topViewedProduct->id }}">
                                         <div class="product-item__outer h-100">
                                             <div class="product-item__inner px-xl-4 p-3">
                                                 <div class="product-item__body pb-xl-2">
@@ -493,7 +496,7 @@
                                                     </div>
                                                     <h5 class="mb-1 product-item__title">
                                                         <a href="{{ route('client.products.detail', $topViewedProduct->slug) }}"
-                                                            class="text-blue font-weight-bold">
+                                                            class="text-blue font-weight-bold product-name">
                                                             {{ $topViewedProduct->name }}
                                                         </a>
                                                     </h5>
@@ -512,12 +515,12 @@
                                                                 <div
                                                                     class="prodcut-price d-flex align-items-center position-relative">
                                                                     <ins
-                                                                        class="font-size-20 text-red text-decoration-none">{{ number_format($topViewedProduct->price_sale) }}đ</ins>
+                                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($topViewedProduct->price_sale) }}đ</ins>
                                                                     <del
-                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($topViewedProduct->price, 0, ',', '.') }}đ</del>
+                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($topViewedProduct->price, 0, ',', '.') }}đ</del>
                                                                 </div>
                                                             @else
-                                                                <div class="text-dark fw-bold fs-5">
+                                                                <div class="text-dark fw-bold fs-5 product-price">
                                                                     {{ number_format($topViewedProduct->price, 0, ',', '.') }}đ
                                                                 </div>
                                                             @endif

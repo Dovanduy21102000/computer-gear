@@ -6,10 +6,11 @@ use App\Models\Product;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Support\Facades\Log;
 
-class ProductUpdated implements ShouldBroadcast
+class ProductUpdated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -21,6 +22,7 @@ class ProductUpdated implements ShouldBroadcast
     public function __construct(Product $product)
     {
         $this->product = $product;
+        Log::info('ProductUpdated event constructed', ['product_id' => $product->id]);
     }
 
     /**
@@ -30,19 +32,21 @@ class ProductUpdated implements ShouldBroadcast
      */
     public function broadcastOn()
     {
+        Log::info('Broadcasting on products channel', ['product_id' => $this->product->id]);
         return new Channel('products');
     }
 
     public function broadcastWith()
     {
-        return [
+        $data = [
             'id' => $this->product->id,
             'name' => $this->product->name,
             'price' => $this->product->price,
             'price_sale' => $this->product->price_sale,
             'quantity' => $this->product->quantity,
             'status' => $this->product->status,
-            // Add other fields as needed
         ];
+        Log::info('Broadcasting data', $data);
+        return $data;
     }
 }
