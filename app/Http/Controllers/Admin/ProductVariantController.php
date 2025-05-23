@@ -220,6 +220,20 @@ class ProductVariantController extends Controller
             $variant->attributeValues()->detach();
         }
 
+        // Recalculate main product's min price, min sale price, and total quantity
+        $variants = $product->variants()->get();
+        $minPrice = $variants->min('price');
+        $minSalePrice = $variants->whereNotNull('price_sale')->min('price_sale');
+        $totalQuantity = $variants->sum('quantity');
+
+        $product->price = $minPrice;
+        $product->price_sale = $minSalePrice ?: null;
+        $product->quantity = $totalQuantity;
+        $product->save();
+
+        // Broadcast ProductUpdated event
+        event(new \App\Events\ProductUpdated($product));
+
         return redirect()->route('variants.index', ['product' => $product->id])
             ->with('success', 'Biến thể đã được cập nhật.');
     }

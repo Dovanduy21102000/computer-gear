@@ -16,8 +16,8 @@
                 }
                 $sortPrice = $hasVariant ? $minPrice : ($product->price_sale ?: $product->price);
             @endphp
-            <li class="col-6 col-md-3 col-wd-2gdot4 product-item" data-created-at="{{ $product->created_at }}"
-                data-price="{{ $sortPrice }}">
+            <li class="col-6 col-md-3 col-wd-2gdot4 product-item" data-product-id="{{ $product->id }}"
+                data-created-at="{{ $product->created_at }}" data-price="{{ $sortPrice }}">
                 <div class="product-item__outer h-100">
                     <div class="product-item__inner px-xl-4 p-3">
                         <div class="product-item__body pb-xl-2">
@@ -29,7 +29,7 @@
                             </div>
                             <h5 class="mb-1 product-item__title">
                                 <a href="{{ route('client.products.detail', $product->slug) }}"
-                                    class="text-blue font-weight-bold">
+                                    class="text-blue font-weight-bold product-name">
                                     {{ $product->name }}
                                 </a>
                             </h5>
@@ -43,22 +43,23 @@
                             <div class="flex-center-between mb-1">
                                 <div class="prodcut-price">
                                     @if ($hasVariant)
-                                        <span class="text-danger fw-bold">
+                                        <span class="text-danger fw-bold product-sale-price">
                                             {{ number_format($minPrice, 0, ',', '.') }}₫
                                         </span>
                                         @if ($isSale)
                                             <br>
-                                            <del class="text-muted">
+                                            <del class="text-muted product-price">
                                                 {{ number_format($originalMin, 0, ',', '.') }}₫
                                             </del>
                                         @endif
                                     @elseif ($product->price_sale)
                                         <del
-                                            class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
+                                            class="text-muted product-price">{{ number_format($product->price, 0, ',', '.') }}₫</del>
                                         <span
-                                            class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                            class="text-danger product-sale-price">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
                                     @else
-                                        {{ number_format($product->price, 0, ',', '.') }}₫
+                                        <span
+                                            class="product-price">{{ number_format($product->price, 0, ',', '.') }}₫</span>
                                     @endif
                                 </div>
                                 <div class="d-none d-xl-block prodcut-add-cart">

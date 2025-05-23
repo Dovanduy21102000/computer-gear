@@ -1255,3 +1255,61 @@
             });
     </script>
 @endauth
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.Echo.channel('products')
+                .listen('ProductUpdated', (e) => {
+                    console.log('Product updated:', e);
+
+                    // Format price
+                    const formatPrice = (price) => new Intl.NumberFormat('vi-VN').format(price) + '₫';
+
+                    // Update price and sale price
+                    const priceContainer = document.getElementById('productPrice');
+                    if (priceContainer) {
+                        if (e.price_sale) {
+                            priceContainer.innerHTML = `
+                                <del class="text-muted">${formatPrice(e.price)}</del>
+                                <span class="text-danger">${formatPrice(e.price_sale)}</span>
+                            `;
+                        } else {
+                            priceContainer.innerHTML = `<span>${formatPrice(e.price)}</span>`;
+                        }
+                    }
+
+                    // Update quantity input max and value
+                    const quantityInput = document.getElementById('quantityInput');
+                    if (quantityInput) {
+                        quantityInput.max = e.quantity;
+                        if (parseInt(quantityInput.value) > e.quantity) {
+                            quantityInput.value = e.quantity;
+                        }
+                        quantityInput.disabled = e.quantity <= 0;
+                    }
+
+                    // Update stock display
+                    const stockDisplay = document.getElementById('productStock');
+                    if (stockDisplay) {
+                        stockDisplay.innerHTML =
+                            `<span class="font-weight-bold ${e.quantity > 0 ? 'text-green' : 'text-danger'}">${e.quantity} sản phẩm</span>`;
+                    }
+
+                    // Out of stock warning and button state
+                    const outOfStockWarning = document.getElementById('outOfStockWarning');
+                    const addToCartBtn = document.getElementById('addToCartBtn');
+                    const buyNowBtn = document.getElementById('buyNowBtn');
+                    if (e.quantity <= 0) {
+                        if (outOfStockWarning) outOfStockWarning.classList.remove('d-none');
+                        if (addToCartBtn) addToCartBtn.disabled = true;
+                        if (buyNowBtn) buyNowBtn.disabled = true;
+                    } else {
+                        if (outOfStockWarning) outOfStockWarning.classList.add('d-none');
+                        if (addToCartBtn) addToCartBtn.disabled = false;
+                        if (buyNowBtn) buyNowBtn.disabled = false;
+                    }
+                });
+        });
+    </script>
+@endpush
