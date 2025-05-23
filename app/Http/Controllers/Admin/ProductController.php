@@ -24,9 +24,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-
-        $query = Product::with(['category', 'brand', 'variants.attributeValues.attribute'])->latest('id');
-
+        $query = Product::with(['category', 'brand', 'variants.attributeValues.attribute']);
 
         if ($request->has('category') && $request->category != '') {
             $query->where('category_id', $request->category);
@@ -38,7 +36,7 @@ class ProductController extends Controller
         $categories = Category::all();
         $brands = Brand::all();
 
-        $products = $query->latest()->paginate(10);
+        $products = $query->latest('id')->paginate(10);
 
         $template = 'backend.products.index';
         return view('backend.dashboard.layout', compact('products', 'categories', 'brands', 'template'));
@@ -192,6 +190,10 @@ class ProductController extends Controller
     {
         $template = 'backend.products.edit';
         $product = Product::with(['variants.attributeValues'])->findOrFail($id);
+
+        // Explicitly reload the variants relationship to get the latest data
+        $product->load('variants.attributeValues');
+
         $categories = Category::all();
         $brands = Brand::all();
         $attributes = Attribute::with('attributeValues')->get();
@@ -219,14 +221,6 @@ class ProductController extends Controller
             'quantity' => $request->is_variant ? 'nullable|integer' : 'required|integer',
             'status' => 'boolean',
             'is_variant' => 'boolean',
-            'variants' => $request->is_variant ? 'required|array' : 'nullable|array',
-            'variants.*.sku' => $request->is_variant ? 'required|string|max:255' : 'nullable|string|max:255',
-            'variants.*.price' => $request->is_variant ? 'required|numeric' : 'nullable|numeric',
-            'variants.*.price_sale' => 'nullable|numeric',
-            'variants.*.quantity' => $request->is_variant ? 'required|integer' : 'nullable|integer',
-            'variants.*.status' => 'boolean',
-            'variants.*.attributes' => $request->is_variant ? 'required|array' : 'nullable|array',
-            'variants.*.attributes.*' => 'exists:attribute_values,id',
         ], [
             'category_id.required' => 'Vui lòng chọn danh mục.',
             'category_id.exists' => 'Danh mục không hợp lệ.',
@@ -247,10 +241,6 @@ class ProductController extends Controller
             'quantity.integer' => 'Số lượng phải là số nguyên.',
             'status.boolean' => 'Trạng thái không hợp lệ.',
             'is_variant.boolean' => 'Trường biến thể không hợp lệ.',
-            'variants.required' => 'Vui lòng nhập thông tin biến thể.',
-            'variants.*.sku.required' => 'Vui lòng nhập SKU cho biến thể.',
-            'variants.*.price.required' => 'Vui lòng nhập giá cho biến thể.',
-            'variants.*.quantity.required' => 'Vui lòng nhập số lượng cho biến thể.',
         ]);
 
         if (!$request->slug) {
@@ -265,13 +255,6 @@ class ProductController extends Controller
             $product->thumbnail = $thumbnailPath;
         }
 
-        $totalQuantity = 0;
-        if ($request->is_variant && $request->variants) {
-            foreach ($request->variants as $variantData) {
-                $totalQuantity += $variantData['quantity'];
-            }
-        }
-
         $product->update([
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
@@ -282,7 +265,7 @@ class ProductController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'price_sale' => $request->price_sale ?? null,
-            'quantity' => $request->is_variant ? $totalQuantity : $request->quantity,
+            'quantity' => $request->is_variant ? 0 : $request->quantity,
             'status' => $request->status,
             'is_variant' => $request->is_variant,
         ]);
@@ -295,35 +278,6 @@ class ProductController extends Controller
 
         event(new ProductUpdated($product));
         Log::info('ProductUpdated event dispatched', ['product_id' => $product->id]);
-
-        $product->variants()->delete();
-
-        if ($request->is_variant && $request->variants) {
-            foreach ($request->variants as $i => $variantData) {
-                $imagePath = null;
-                if ($request->hasFile("variants.$i.image")) {
-                    $imagePath = $request->file("variants.$i.image")->store('variants', 'public');
-                }
-                $variant = ProductVariant::create([
-                    'product_id' => $product->id,
-                    'sku' => $variantData['sku'],
-                    'price' => $variantData['price'],
-                    'price_sale' => $variantData['price_sale'] ?? null,
-                    'quantity' => $variantData['quantity'],
-                    'image' => $imagePath,
-                    'status' => $variantData['status'] ?? true
-                ]);
-
-                if (isset($variantData['attributes']) && is_array($variantData['attributes'])) {
-                    foreach ($variantData['attributes'] as $attributeId => $attributeValueId) {
-                        ProductVariantAttributeValue::create([
-                            'product_variant_id' => $variant->id,
-                            'attribute_value_id' => $attributeValueId,
-                        ]);
-                    }
-                }
-            }
-        }
 
         return redirect()->route('products.index')->with('success', 'Sản phẩm đã được cập nhật thành công.');
     }

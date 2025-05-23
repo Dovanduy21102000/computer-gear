@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Events\VariantUpdated;
+use Illuminate\Support\Facades\Log;
 
 class ProductVariantController extends Controller
 {
@@ -229,6 +230,15 @@ class ProductVariantController extends Controller
         $product->price = $minPrice;
         $product->price_sale = $minSalePrice ?: null;
         $product->quantity = $totalQuantity;
+
+        Log::info('Product state before save (Variant Update)', [
+            'product_id' => $product->id,
+            'attributes' => $product->getAttributes(),
+            'deleted_at' => $product->deleted_at,
+            'isDirty' => $product->isDirty(),
+            'getDirty' => $product->getDirty(),
+        ]);
+
         $product->save();
 
         // Broadcast ProductUpdated event

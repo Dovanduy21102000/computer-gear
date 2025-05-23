@@ -152,6 +152,17 @@
 </main>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const variantEditForm = document.querySelector(
+            '#main form'); // Assuming the form is within the main tag
+        if (variantEditForm) {
+            variantEditForm.addEventListener('submit', function(event) {
+                console.log('Variant edit form submitted!');
+                // You can add more logging here to inspect the event or form data
+            });
+        }
+    });
+
     function previewVariantImage(event, variantIndex) {
         const input = event.target;
         const preview = document.getElementById(`variant-image-preview-${variantIndex}`);
