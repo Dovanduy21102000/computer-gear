@@ -346,7 +346,8 @@
                                                         class="d-block text-center">
                                                         <img class="img-fluid"
                                                             src="{{ asset('storage/' . $post->image) }}"
-                                                            alt="{{ $post->title }}">
+                                                            alt="{{ $post->title }}"
+                                                            style="width: 270px !important; height: 180px !important; object-fit: cover;">
                                                     </a>
                                                 </div>
                                                 <div class="mb-1">
