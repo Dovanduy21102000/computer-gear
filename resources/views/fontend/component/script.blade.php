@@ -5,29 +5,54 @@
 </a>
 <!-- End Go to Top -->
 
-<!-- Nút mở chat -->
-<button id="chat-toggle" class="btn btn-primary rounded-circle position-fixed"
-    style="bottom: 20px; right: 20px; z-index: 1050;">
-    💬
-</button>
+<script type="text/javascript">
+    var Tawk_API = Tawk_API || {},
+        Tawk_LoadStart = new Date();
 
-<!-- Hộp chat -->
-<div id="chat-box" class="card shadow position-fixed"
-    style="width: 300px; bottom: 80px; right: 20px; display: none; z-index: 1050;">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <span>Hỗ trợ khách hàng</span>
-        <button id="close-chat" class="btn-close btn-close-white btn-sm"></button>
-    </div>
-    <div class="card-body p-2 overflow-auto" style="height: 300px;" id="chat-messages">
-        <!-- Tin nhắn sẽ được hiển thị ở đây -->
-    </div>
-    <div class="card-footer p-2">
-        <form id="chat-form" class="d-flex gap-2">
-            <input type="text" id="chat-input" class="form-control" placeholder="Nhập tin nhắn..." required>
-            <button class="btn btn-primary">Gửi</button>
-        </form>
-    </div>
-</div>
+    // Thiết lập thông tin visitor trước khi load widget
+    @if (Auth::check())
+        Tawk_API.visitor = {
+            name: "{{ Auth::user()->name }}",
+            email: "{{ Auth::user()->email }}"
+        };
+
+        // Callback khi widget load xong
+        Tawk_API.onLoad = function() {
+            Tawk_API.setAttributes({
+                'name': "{{ Auth::user()->name }}",
+                'email': "{{ Auth::user()->email }}",
+                'hash': "{{ Auth::user()->id }}"
+            });
+            console.log('Chat đã thiết lập cho user: {{ Auth::user()->name }}');
+        };
+    @else
+        Tawk_API.visitor = {
+            name: "Người dùng ẩn danh",
+            email: "anonymous@guest.com"
+        };
+
+        // Callback khi widget load xong
+        Tawk_API.onLoad = function() {
+            Tawk_API.setAttributes({
+                'name': 'Ẩn danh',
+                'email': 'anonymous@guest.com'
+            });
+            console.log('Chat đã thiết lập cho người dùng ẩn danh');
+        };
+    @endif
+
+    // Load tawk.to widget
+    (function() {
+        var s1 = document.createElement("script"),
+            s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = 'https://embed.tawk.to/68308b588169ba190d611e09/1iruq0l0h';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+    })();
+</script>
+
 
 <!-- JS Global Compulsory -->
 <script src="{{ asset('fontend/assets/vendor/jquery/dist/jquery.min.js') }}"></script>
@@ -41,7 +66,8 @@
 <script src="{{ asset('fontend/assets/vendor/jquery.countdown.min.js') }}"></script>
 <script src="{{ asset('fontend/assets/vendor/hs-megamenu/src/hs.megamenu.js') }}"></script>
 <script src="{{ asset('fontend/assets/vendor/svg-injector/dist/svg-injector.min.js') }}"></script>
-<script src="{{ asset('fontend/assets/vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js') }}">
+<script
+    src="{{ asset('fontend/assets/vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js') }}">
 </script>
 <script src="{{ asset('fontend/assets/vendor/jquery-validation/dist/jquery.validate.min.js') }}"></script>
 <script src="{{ asset('fontend/assets/vendor/fancybox/jquery.fancybox.min.js') }}"></script>
@@ -72,15 +98,16 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-bar-rating/dist/themes/fontawesome-stars.css">
 <script src="https://cdn.jsdelivr.net/npm/jquery-bar-rating/dist/jquery.barrating.min.js"></script>
 
-<!-- Pusher -->
+{{-- <!-- Pusher -->
 <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.js"></script> --}}
 
 <!-- JS Plugins Init. -->
-@php
+{{-- @php
     use App\Models\User;
     $admin = User::where('role', 'admin')->first();
-@endphp
+@endphp --}}
+
 <script>
     $(window).on('load', function() {
         // initialization of HSMegaMenu component
@@ -195,120 +222,120 @@
         });
     });
 
-    //Chat real time
-    document.addEventListener('DOMContentLoaded', () => {
-        const toggle = document.getElementById('chat-toggle');
-        const chatBox = document.getElementById('chat-box');
-        const closeBtn = document.getElementById('close-chat');
-        const chatMessages = document.getElementById('chat-messages');
-        const chatForm = document.getElementById('chat-form');
-        const chatInput = document.getElementById('chat-input');
+    // //Chat real time
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     const toggle = document.getElementById('chat-toggle');
+    //     const chatBox = document.getElementById('chat-box');
+    //     const closeBtn = document.getElementById('close-chat');
+    //     const chatMessages = document.getElementById('chat-messages');
+    //     const chatForm = document.getElementById('chat-form');
+    //     const chatInput = document.getElementById('chat-input');
 
-        const receiverId = {{ $admin?->id ?? 'null' }};
-        const userId = {{ auth()->id() ?? 'null' }};
-        let echoInstance = null;
-        let loadedChat = false;
+    //     const receiverId = {{ $admin?->id ?? 'null' }};
+    //     const userId = {{ auth()->id() ?? 'null' }};
+    //     let echoInstance = null;
+    //     let loadedChat = false;
 
-        function appendMessage(message, who = 'me') {
-            const div = document.createElement('div');
-            div.className = who === 'me' ? 'text-end mb-2' : 'text-start mb-2';
-            div.innerHTML =
-                `<span class="badge bg-${who === 'me' ? 'primary' : 'secondary'}">${message}</span>`;
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
+    //     function appendMessage(message, who = 'me') {
+    //         const div = document.createElement('div');
+    //         div.className = who === 'me' ? 'text-end mb-2' : 'text-start mb-2';
+    //         div.innerHTML =
+    //             `<span class="badge bg-${who === 'me' ? 'primary' : 'secondary'}">${message}</span>`;
+    //         chatMessages.appendChild(div);
+    //         chatMessages.scrollTop = chatMessages.scrollHeight;
+    //     }
 
-        toggle.onclick = async () => {
-            @if (!auth()->check())
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Bạn chưa đăng nhập',
-                    text: 'Vui lòng đăng nhập để sử dụng chức năng chat!',
-                    confirmButtonText: 'OK'
-                });
-                return;
-            @endif
+    //     toggle.onclick = async () => {
+    //         @if (!auth()->check())
+    //             Swal.fire({
+    //                 icon: 'warning',
+    //                 title: 'Bạn chưa đăng nhập',
+    //                 text: 'Vui lòng đăng nhập để sử dụng chức năng chat!',
+    //                 confirmButtonText: 'OK'
+    //             });
+    //             return;
+    //         @endif
 
-            chatBox.style.display = chatBox.style.display === 'none' ? 'block' : 'none';
+    //         chatBox.style.display = chatBox.style.display === 'none' ? 'block' : 'none';
 
-            if (!loadedChat) {
-                try {
-                    const res = await fetch(`/chat/messages/${receiverId}`);
-                    const messages = await res.json();
-                    messages.forEach(m => {
-                        appendMessage(m.message, m.sender_id == userId ? 'me' : 'them');
-                    });
-                    loadedChat = true;
-                } catch (error) {
-                    console.error('Lỗi tải tin nhắn:', error);
-                }
-            }
+    //         if (!loadedChat) {
+    //             try {
+    //                 const res = await fetch(`/chat/messages/${receiverId}`);
+    //                 const messages = await res.json();
+    //                 messages.forEach(m => {
+    //                     appendMessage(m.message, m.sender_id == userId ? 'me' : 'them');
+    //                 });
+    //                 loadedChat = true;
+    //             } catch (error) {
+    //                 console.error('Lỗi tải tin nhắn:', error);
+    //             }
+    //         }
 
-            if (!window.Echo && userId) {
-                try {
-                    window.Pusher = Pusher;
+    //         if (!window.Echo && userId) {
+    //             try {
+    //                 window.Pusher = Pusher;
 
-                    window.Echo = new Echo({
-                        broadcaster: 'pusher',
-                        key: '{{ env('PUSHER_APP_KEY') }}',
-                        cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
-                        forceTLS: true,
-                    });
+    //                 window.Echo = new Echo({
+    //                     broadcaster: 'pusher',
+    //                     key: '{{ env('PUSHER_APP_KEY') }}',
+    //                     cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
+    //                     forceTLS: true,
+    //                 });
 
-                    window.Echo.connector.pusher.connection.bind('connected', () => {
-                        console.log('✅ Đã kết nối thành công đến Pusher');
-                    });
+    //                 window.Echo.connector.pusher.connection.bind('connected', () => {
+    //                     console.log('✅ Đã kết nối thành công đến Pusher');
+    //                 });
 
-                    window.Echo.private(`chat.${userId}`)
-                        .listen('MessageSent', (e) => {
-                            console.log('📨 Nhận được tin nhắn:', e.message);
-                            appendMessage(e.message.message, 'them');
-                        });
+    //                 window.Echo.private(`chat.${userId}`)
+    //                     .listen('MessageSent', (e) => {
+    //                         console.log('📨 Nhận được tin nhắn:', e.message);
+    //                         appendMessage(e.message.message, 'them');
+    //                     });
 
-                } catch (err) {
-                    console.error('❌ Lỗi khi khởi tạo Echo:', err);
-                }
-            }
+    //             } catch (err) {
+    //                 console.error('❌ Lỗi khi khởi tạo Echo:', err);
+    //             }
+    //         }
 
-        };
+    //     };
 
-        closeBtn.onclick = () => chatBox.style.display = 'none';
+    //     closeBtn.onclick = () => chatBox.style.display = 'none';
 
-        chatForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const msg = chatInput.value;
-            if (!msg.trim()) return;
+    //     chatForm.onsubmit = async (e) => {
+    //         e.preventDefault();
+    //         const msg = chatInput.value;
+    //         if (!msg.trim()) return;
 
-            appendMessage(msg, 'me');
+    //         appendMessage(msg, 'me');
 
-            try {
-                const response = await fetch('/chat/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        receiver_id: receiverId,
-                        message: msg
-                    })
-                });
+    //         try {
+    //             const response = await fetch('/chat/send', {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    //                 },
+    //                 body: JSON.stringify({
+    //                     receiver_id: receiverId,
+    //                     message: msg
+    //                 })
+    //             });
 
-                const result = await response.json();
-                console.log('Server response:', result);
-                chatInput.value = '';
-            } catch (error) {
-                console.error('Lỗi khi gửi tin nhắn:', error);
-            }
-        };
-    });
+    //             const result = await response.json();
+    //             console.log('Server response:', result);
+    //             chatInput.value = '';
+    //         } catch (error) {
+    //             console.error('Lỗi khi gửi tin nhắn:', error);
+    //         }
+    //     };
+    // });
 
-    function appendMessage(message, who = 'me') {
-        const chatMessages = document.getElementById('chat-messages');
-        const div = document.createElement('div');
-        div.className = who === 'me' ? 'text-end mb-2' : 'text-start mb-2';
-        div.innerHTML = `<span class="badge bg-${who === 'me' ? 'primary' : 'secondary'}">${message}</span>`;
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+    // function appendMessage(message, who = 'me') {
+    //     const chatMessages = document.getElementById('chat-messages');
+    //     const div = document.createElement('div');
+    //     div.className = who === 'me' ? 'text-end mb-2' : 'text-start mb-2';
+    //     div.innerHTML = `<span class="badge bg-${who === 'me' ? 'primary' : 'secondary'}">${message}</span>`;
+    //     chatMessages.appendChild(div);
+    //     chatMessages.scrollTop = chatMessages.scrollHeight;
+    // }
 </script>
