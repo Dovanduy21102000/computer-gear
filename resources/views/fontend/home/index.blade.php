@@ -61,7 +61,8 @@
                                     <ul class="list-unstyled products-group mb-0 overflow-visible">
                                         @foreach ($newProducts as $key => $newProduct)
                                             @if ($key < 8)
-                                                <li class="product-item__list pb-2 mb-2 pb-md-0 mb-md-0">
+                                                <li class="product-item__list pb-2 mb-2 pb-md-0 mb-md-0"
+                                                    data-product-id="{{ $newProduct->id }}">
                                                     <div class="product-item__outer h-100">
                                                         <div
                                                             class="product-item__inner py-md-3 mx-3 border-bottom row no-gutters">
@@ -73,12 +74,12 @@
                                                             </div>
                                                             <div class="col product-item__body pl-2 pl-lg-3">
                                                                 <div class="mb-4">
-                                                                    <h5 class="product-item__title"><a
+                                                                    <h5 class="product-item__title product-name"><a
                                                                             href="{{ route('client.products.detail', $newProduct->slug) }}"
                                                                             class="text-gray-90">{{ $newProduct->name }}</a>
                                                                     </h5>
                                                                 </div>
-                                                                <div class="flex-center-between">
+                                                                <div class="flex-center-between product-price">
                                                                     <div class="prodcut-price">
                                                                         <div
                                                                             class="text-gray-100 font-size-15 font-weight-bold">
@@ -114,7 +115,8 @@
                                     <ul class="list-unstyled products-group mb-0 overflow-visible">
                                         @foreach ($newProducts as $key => $newProduct)
                                             @if ($key >= 8 && $key < 16)
-                                                <li class="product-item__list pb-2 mb-2 pb-md-0 mb-md-0">
+                                                <li class="product-item__list pb-2 mb-2 pb-md-0 mb-md-0"
+                                                    data-product-id="{{ $newProduct->id }}">
                                                     <div class="product-item__outer h-100">
                                                         <div
                                                             class="product-item__inner py-md-3 mx-3 border-bottom row no-gutters">
@@ -126,12 +128,12 @@
                                                             </div>
                                                             <div class="col product-item__body pl-2 pl-lg-3">
                                                                 <div class="mb-4">
-                                                                    <h5 class="product-item__title"><a
+                                                                    <h5 class="product-item__title product-name"><a
                                                                             href="{{ route('client.products.detail', $newProduct->slug) }}"
                                                                             class="text-gray-90">{{ $newProduct->name }}</a>
                                                                     </h5>
                                                                 </div>
-                                                                <div class="flex-center-between">
+                                                                <div class="flex-center-between product-price">
                                                                     <div class="prodcut-price">
                                                                         <div
                                                                             class="text-gray-100 font-size-15 font-weight-bold">
@@ -167,7 +169,8 @@
                                     <ul class="list-unstyled products-group mb-0 overflow-visible">
                                         @foreach ($newProducts as $key => $newProduct)
                                             @if ($key >= 16 && $key < 24)
-                                                <li class="product-item__list pb-2 mb-2 pb-md-0 mb-md-0">
+                                                <li class="product-item__list pb-2 mb-2 pb-md-0 mb-md-0"
+                                                    data-product-id="{{ $newProduct->id }}">
                                                     <div class="product-item__outer h-100">
                                                         <div
                                                             class="product-item__inner py-md-3 mx-3 border-bottom row no-gutters">
@@ -179,12 +182,12 @@
                                                             </div>
                                                             <div class="col product-item__body pl-2 pl-lg-3">
                                                                 <div class="mb-4">
-                                                                    <h5 class="product-item__title"><a
+                                                                    <h5 class="product-item__title product-name"><a
                                                                             href="{{ route('client.products.detail', $newProduct->slug) }}"
                                                                             class="text-gray-90">{{ $newProduct->name }}</a>
                                                                     </h5>
                                                                 </div>
-                                                                <div class="flex-center-between">
+                                                                <div class="flex-center-between product-price">
                                                                     <div class="prodcut-price">
                                                                         <div
                                                                             class="text-gray-100 font-size-15 font-weight-bold">
@@ -524,9 +527,9 @@
                                                             {{ $topViewedProduct->category->name ?? 'Danh mục' }}
                                                         </a>
                                                     </div>
-                                                    <h5 class="mb-1 product-item__title">
+                                                    <h5 class="mb-1 product-item__title product-name">
                                                         <a href="{{ route('client.products.detail', $topViewedProduct->slug) }}"
-                                                            class="text-blue font-weight-bold product-name">
+                                                            class="text-blue font-weight-bold">
                                                             {{ $topViewedProduct->name }}
                                                         </a>
                                                     </h5>
@@ -547,7 +550,7 @@
                                                                     <ins
                                                                         class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($topViewedProduct->price_sale) }}đ</ins>
                                                                     <del
-                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($topViewedProduct->price, 0, ',', '.') }}đ</del>
+                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($topViewedProduct->price, 0, ',', '.') }}đ</del>
                                                                 </div>
                                                             @else
                                                                 <div class="text-dark fw-bold fs-5 product-price">
@@ -598,7 +601,8 @@
                             aria-labelledby="pills-two-example1-tab" data-target-group="groups">
                             <ul class="row list-unstyled products-group no-gutters">
                                 @foreach ($discountedProducts as $discountedProduct)
-                                    <li class="col-6 col-md-4 col-xl product-item">
+                                    <li class="col-6 col-md-4 col-xl product-item"
+                                        data-product-id="{{ $discountedProduct->id }}">
                                         <div class="product-item__outer h-100">
                                             <div class="product-item__inner px-xl-4 p-3">
                                                 <div class="product-item__body pb-xl-2">
@@ -608,7 +612,7 @@
                                                             {{ $discountedProduct->category->name ?? 'Danh mục' }}
                                                         </a>
                                                     </div>
-                                                    <h5 class="mb-1 product-item__title">
+                                                    <h5 class="mb-1 product-item__title product-name">
                                                         <a href="{{ route('client.products.detail', $discountedProduct->slug) }}"
                                                             class="text-blue font-weight-bold">
                                                             {{ $discountedProduct->name }}
@@ -623,13 +627,13 @@
                                                                 alt="{{ $discountedProduct->name }}">
                                                         </a>
                                                     </div>
-                                                    <div class="flex-center-between mb-1">
+                                                    <div class="flex-center-between mb-1 product-price">
                                                         <div class="prodcut-price">
                                                             @if ($discountedProduct->price_sale)
                                                                 <div
                                                                     class="prodcut-price d-flex align-items-center position-relative">
                                                                     <ins
-                                                                        class="font-size-20 text-red text-decoration-none">{{ number_format($discountedProduct->price_sale) }}đ</ins>
+                                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($discountedProduct->price_sale) }}đ</ins>
                                                                     <del
                                                                         class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($discountedProduct->price, 0, ',', '.') }}đ</del>
                                                                 </div>
@@ -721,8 +725,8 @@
                             <ul class="row list-unstyled products-group no-gutters mb-0 overflow-visible">
                                 @foreach ($topSellingProducts as $key => $topSellingProduct)
                                     @if ($key < 3)
-                                        <li
-                                            class="col-md-4 product-item product-item__card pb-2 mb-2 pb-md-0 mb-md-0 border-bottom border-md-bottom-0">
+                                        <li class="col-md-4 product-item product-item__card pb-2 mb-2 pb-md-0 mb-md-0 border-bottom border-md-bottom-0"
+                                            data-product-id="{{ $topSellingProduct->id }}">
                                             <div class="product-item__outer h-100">
                                                 <div class="product-item__inner p-md-3 row no-gutters">
                                                     <div
@@ -739,16 +743,16 @@
                                                                     href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
                                                                     class="font-size-12 text-gray-5">{{ $topSellingProduct->brand ? $topSellingProduct->brand->name : 'Không có thương hiệu' }}</a>
                                                             </div>
-                                                            <h5 class="product-item__title"><a
+                                                            <h5 class="product-item__title product-name"><a
                                                                     href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
                                                                     class="text-blue font-weight-bold">{{ $topSellingProduct->name }}</a>
                                                             </h5>
                                                         </div>
-                                                        <div class="flex-center-between mb-3">
+                                                        <div class="flex-center-between mb-3 product-price">
                                                             <div class="prodcut-price">
                                                                 @if ($topSellingProduct->price_sale)
                                                                     <div
-                                                                        class="text-gray-100 font-size-15 font-weight-bold">
+                                                                        class="text-gray-100 font-size-15 font-weight-bold product-sale-price">
                                                                         {{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}
                                                                         đ
                                                                     </div>
@@ -806,8 +810,8 @@
                             <ul class="row list-unstyled products-group no-gutters mb-0 overflow-visible">
                                 @foreach ($topSellingProducts as $key => $topSellingProduct)
                                     @if ($key >= 3 && $key < 6)
-                                        <li
-                                            class="col-md-4 product-item product-item__card pb-2 mb-2 pb-md-0 mb-md-0 border-bottom border-md-bottom-0">
+                                        <li class="col-md-4 product-item product-item__card pb-2 mb-2 pb-md-0 mb-md-0 border-bottom border-md-bottom-0"
+                                            data-product-id="{{ $topSellingProduct->id }}">
                                             <div class="product-item__outer h-100">
                                                 <div class="product-item__inner p-md-3 row no-gutters">
                                                     <div
@@ -824,16 +828,16 @@
                                                                     href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
                                                                     class="font-size-12 text-gray-5">{{ $topSellingProduct->brand ? $topSellingProduct->brand->name : 'Không có thương hiệu' }}</a>
                                                             </div>
-                                                            <h5 class="product-item__title"><a
+                                                            <h5 class="product-item__title product-name"><a
                                                                     href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
                                                                     class="text-blue font-weight-bold">{{ $topSellingProduct->name }}</a>
                                                             </h5>
                                                         </div>
-                                                        <div class="flex-center-between mb-3">
+                                                        <div class="flex-center-between mb-3 product-price">
                                                             <div class="prodcut-price">
                                                                 @if ($topSellingProduct->price_sale)
                                                                     <div
-                                                                        class="text-gray-100 font-size-15 font-weight-bold">
+                                                                        class="text-gray-100 font-size-15 font-weight-bold product-sale-price">
                                                                         {{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}
                                                                         đ
                                                                     </div>
@@ -895,8 +899,8 @@
                             <ul class="row list-unstyled products-group no-gutters mb-0 overflow-visible">
                                 @foreach ($topSellingProducts as $key => $topSellingProduct)
                                     @if ($key >= 6 && $key < 9)
-                                        <li
-                                            class="col-md-4 product-item product-item__card pb-2 mb-2 pb-md-0 mb-md-0 border-bottom border-md-bottom-0">
+                                        <li class="col-md-4 product-item product-item__card pb-2 mb-2 pb-md-0 mb-md-0 border-bottom border-md-bottom-0"
+                                            data-product-id="{{ $topSellingProduct->id }}">
                                             <div class="product-item__outer h-100">
                                                 <div class="product-item__inner p-md-3 row no-gutters">
                                                     <div
@@ -913,16 +917,16 @@
                                                                     href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
                                                                     class="font-size-12 text-gray-5">{{ $topSellingProduct->brand ? $topSellingProduct->brand->name : 'Không có thương hiệu' }}</a>
                                                             </div>
-                                                            <h5 class="product-item__title"><a
+                                                            <h5 class="product-item__title product-name"><a
                                                                     href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
                                                                     class="text-blue font-weight-bold">{{ $topSellingProduct->name }}</a>
                                                             </h5>
                                                         </div>
-                                                        <div class="flex-center-between mb-3">
+                                                        <div class="flex-center-between mb-3 product-price">
                                                             <div class="prodcut-price">
                                                                 @if ($topSellingProduct->price_sale)
                                                                     <div
-                                                                        class="text-gray-100 font-size-15 font-weight-bold">
+                                                                        class="text-gray-100 font-size-15 font-weight-bold product-sale-price">
                                                                         {{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}
                                                                         đ
                                                                     </div>
@@ -999,7 +1003,8 @@
                         <div class="col">
                             <ul class="row list-unstyled products-group no-gutters">
                                 @foreach ($products as $product)
-                                    <li class="col-6 col-md-4 col-wd-3 product-item">
+                                    <li class="col-6 col-md-4 col-wd-3 product-item"
+                                        data-product-id="{{ $product->id }}">
                                         <div class="product-item__outer h-100">
                                             <div class="product-item__inner px-xl-4 p-3">
                                                 <div class="product-item__body pb-xl-2">
@@ -1009,7 +1014,7 @@
                                                             {{ $product->category->name ?? 'Danh mục' }}
                                                         </a>
                                                     </div>
-                                                    <h5 class="mb-1 product-item__title">
+                                                    <h5 class="mb-1 product-item__title product-name">
                                                         <a href="{{ route('client.products.detail', $product->slug) }}"
                                                             class="text-blue font-weight-bold">
                                                             {{ $product->name }}
@@ -1024,13 +1029,13 @@
                                                                 alt="{{ $product->name }}">
                                                         </a>
                                                     </div>
-                                                    <div class="flex-center-between mb-1">
+                                                    <div class="flex-center-between mb-1 product-price">
                                                         <div class="prodcut-price">
                                                             @if ($product->price_sale)
                                                                 <div
                                                                     class="prodcut-price d-flex align-items-center position-relative">
                                                                     <ins
-                                                                        class="font-size-20 text-red text-decoration-none">{{ number_format($product->price_sale) }}đ</ins>
+                                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale) }}đ</ins>
                                                                     <del
                                                                         class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($product->price, 0, ',', '.') }}đ</del>
                                                                 </div>
@@ -1138,7 +1143,8 @@
                         @foreach ($keyboardMouseProducts as $keyboardMouseProduct)
                             <div class="js-slide products-group">
                                 <div class="product-item">
-                                    <div class="product-item__outer h-100">
+                                    <div class="product-item__outer h-100"
+                                        data-product-id="{{ $keyboardMouseProduct->id }}">
                                         <div class="product-item__inner px-xl-4 p-3">
                                             <div class="product-item__body pb-xl-2">
                                                 <div class="mb-2">
@@ -1147,7 +1153,7 @@
                                                         {{ $keyboardMouseProduct->category->name ?? 'Danh mục' }}
                                                     </a>
                                                 </div>
-                                                <h5 class="mb-1 product-item__title">
+                                                <h5 class="mb-1 product-item__title product-name">
                                                     <a href="{{ route('client.products.detail', $keyboardMouseProduct->slug) }}"
                                                         class="text-blue font-weight-bold">
                                                         {{ $keyboardMouseProduct->name }}
@@ -1162,13 +1168,13 @@
                                                             alt="{{ $keyboardMouseProduct->name }}">
                                                     </a>
                                                 </div>
-                                                <div class="flex-center-between mb-1">
+                                                <div class="flex-center-between mb-1 product-price">
                                                     <div class="prodcut-price">
                                                         @if ($keyboardMouseProduct->price_sale)
                                                             <div
                                                                 class="prodcut-price d-flex align-items-center position-relative">
                                                                 <ins
-                                                                    class="font-size-20 text-red text-decoration-none">{{ number_format($keyboardMouseProduct->price_sale) }}đ</ins>
+                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($keyboardMouseProduct->price_sale) }}đ</ins>
                                                                 <del
                                                                     class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ</del>
                                                             </div>

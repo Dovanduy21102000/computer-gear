@@ -19,7 +19,7 @@
         /* Giữ nền trắng */
         color: black;
         /* Giữ màu chữ không thay đổi */
-        border-color: #ffda08;
+        border-color: #3b87de;
         /* Màu viền khi chọn */
         font-weight: normal;
         /* Đảm bảo chữ không bị in đậm */
@@ -32,13 +32,13 @@
 
     /* Thay đổi viền khi được chọn */
     .attribute-option.selected {
-        border-color: yellow;
+        border-color: #3b87de;
         /* Viền màu khi được chọn */
     }
 
     /* Định dạng khi di chuột qua ô */
     .attribute-option:hover {
-        border-color: #ebf306;
+        border-color: #3b87de;
         /* Viền đổi màu khi hover */
     }
 
@@ -84,13 +84,13 @@
     }
 
     .rating input:checked~label {
-        color: #ffbb33;
+        color: #3b87de;
         /* Yellow color for selected stars */
     }
 
     .rating label:hover,
     .rating label:hover~label {
-        color: #ffbb33;
+        color: #3b87de;
         /* Highlight on hover */
     }
 
@@ -202,11 +202,11 @@
                         </div>
 
                         <!-- Thêm thông tin bảo hành và hỗ trợ -->
-                        <div class="mb-2">
+                        {{-- <div class="mb-2">
                             <p class="mb-1 fw-bold">✔ Bảo hành chính hãng 12 tháng.</p>
                             <p class="mb-1 fw-bold">✔ Hỗ trợ đổi mới trong 7 ngày.</p>
                             <p class="mb-1 fw-bold">✔ Windows bản quyền tích hợp.</p>
-                        </div>
+                        </div> --}}
 
                         <div class="mb-1">
                             <p>{!! $product->short_description !!}</p>
