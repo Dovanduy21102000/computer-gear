@@ -10495,9 +10495,7 @@ a.close.disabled {
 }
 
 .bg-primary {
-  <<<<<<< HEAD background-color: #1fc64f !important;
-  =======background-color: #3b87de !important;
-  >>>>>>>b700d4c0c80aff55df98a85ac1b22b55a792322a
+ background-color: #3b87de !important;
 }
 
 a.bg-primary:hover,
