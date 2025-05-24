@@ -71,11 +71,17 @@ window.Echo.connector.pusher.connection.bind("connected", () => {
             window.reloadProductGrid();
         })
         .listen("ProductDeleted", (e) => {
-            console.log("ProductDeleted event received:", e);
             const el = document.querySelector(
                 `[data-product-id="${e.productId}"]`
             );
             if (el) el.remove();
+            // Also reload product grid and home lists
+            if (typeof window.reloadProductGrid === "function") {
+                window.reloadProductGrid();
+            }
+            if (typeof window.reloadHomeProductLists === "function") {
+                window.reloadHomeProductLists();
+            }
         })
         .listen("ProductStatusChanged", (e) => {
             console.log("ProductStatusChanged event received:", e);
@@ -88,6 +94,13 @@ window.Echo.connector.pusher.connection.bind("connected", () => {
                 } else {
                     el.classList.remove("disabled");
                 }
+            }
+            // Also reload product grid and home lists
+            if (typeof window.reloadProductGrid === "function") {
+                window.reloadProductGrid();
+            }
+            if (typeof window.reloadHomeProductLists === "function") {
+                window.reloadHomeProductLists();
             }
         });
 

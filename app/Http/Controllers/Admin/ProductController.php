@@ -324,6 +324,7 @@ class ProductController extends Controller
         $product->status = !$product->status;
         $product->save();
         event(new \App\Events\ProductStatusChanged($product));
+        event(new \App\Events\ProductUpdated($product));
         return response()->json(['success' => true, 'status' => $product->status]);
     }
 }

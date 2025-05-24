@@ -28,12 +28,15 @@ class ProductStatusChanged implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return \Illuminate\Broadcasting\Channel
      */
-    public function broadcastOn(): array
+    public function broadcastOn()
     {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
+        return new Channel('products');
+    }
+
+    public function broadcastAs()
+    {
+        return 'ProductStatusChanged';
     }
 }
