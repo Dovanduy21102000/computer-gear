@@ -80,21 +80,36 @@ class MOMOController extends Controller
 
                 $finalPrice = max(0, $totalPrice - $couponDiscount);
 
-                // Generate a unique order code
-                $orderCode = date('YmdHis') . rand(100, 999);
+                // Use existing order code if provided, otherwise generate new one
+                $orderCode = $request->input('order_code') ?? (date('YmdHis') . rand(100, 999));
 
-                // Store payment attempt
-                PaymentAttempt::create([
-                    'user_id' => $userId,
-                    'payment_method' => 'momo',
-                    'order_code' => $orderCode,
-                    'amount' => $finalPrice,
-                    'status' => 'pending',
-                    'selected_items' => null,
-                    'shipping_info' => session('momo_shipping_info'),
-                    'coupon_info' => $coupon,
-                    'expires_at' => now()->addMinutes(15)
-                ]);
+                // Check if payment attempt already exists
+                $paymentAttempt = PaymentAttempt::where('order_code', $orderCode)->first();
+
+                if ($paymentAttempt) {
+                    // Update existing payment attempt
+                    $paymentAttempt->update([
+                        'amount' => $finalPrice,
+                        'status' => 'pending',
+                        'selected_items' => null,
+                        'shipping_info' => session('momo_shipping_info'),
+                        'coupon_info' => $coupon,
+                        'expires_at' => now()->addMinutes(15)
+                    ]);
+                } else {
+                    // Create new payment attempt
+                    PaymentAttempt::create([
+                        'user_id' => $userId,
+                        'payment_method' => 'momo',
+                        'order_code' => $orderCode,
+                        'amount' => $finalPrice,
+                        'status' => 'pending',
+                        'selected_items' => null,
+                        'shipping_info' => session('momo_shipping_info'),
+                        'coupon_info' => $coupon,
+                        'expires_at' => now()->addMinutes(15)
+                    ]);
+                }
 
                 // Create payment request
                 $endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
@@ -240,21 +255,36 @@ class MOMOController extends Controller
                 'finalPrice' => $finalPrice
             ]);
 
-            // Generate a unique order code using structured timestamp without separators
-            $orderCode = date('YmdHis') . rand(100, 999);
+            // Use existing order code if provided, otherwise generate new one
+            $orderCode = $request->input('order_code') ?? (date('YmdHis') . rand(100, 999));
 
-            // Store payment attempt
-            PaymentAttempt::create([
-                'user_id' => $userId,
-                'payment_method' => 'momo',
-                'order_code' => $orderCode,
-                'amount' => $finalPrice,
-                'status' => 'pending',
-                'selected_items' => $selectedItemIds,
-                'shipping_info' => session('momo_shipping_info'),
-                'coupon_info' => $coupon,
-                'expires_at' => now()->addMinutes(15)
-            ]);
+            // Check if payment attempt already exists
+            $paymentAttempt = PaymentAttempt::where('order_code', $orderCode)->first();
+
+            if ($paymentAttempt) {
+                // Update existing payment attempt
+                $paymentAttempt->update([
+                    'amount' => $finalPrice,
+                    'status' => 'pending',
+                    'selected_items' => $selectedItemIds ?? null,
+                    'shipping_info' => session('momo_shipping_info'),
+                    'coupon_info' => $coupon,
+                    'expires_at' => now()->addMinutes(15)
+                ]);
+            } else {
+                // Create new payment attempt
+                PaymentAttempt::create([
+                    'user_id' => $userId,
+                    'payment_method' => 'momo',
+                    'order_code' => $orderCode,
+                    'amount' => $finalPrice,
+                    'status' => 'pending',
+                    'selected_items' => $selectedItemIds ?? null,
+                    'shipping_info' => session('momo_shipping_info'),
+                    'coupon_info' => $coupon,
+                    'expires_at' => now()->addMinutes(15)
+                ]);
+            }
 
             // Create payment request
             $endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";

@@ -46,10 +46,10 @@ class PaymentResumeController extends Controller
 
         if ($paymentAttempt->payment_method === 'momo') {
             session(['momo_selected_items' => $paymentAttempt->selected_items]);
-            return view('fontend.payment.resume_momo_post');
+            return view('fontend.payment.resume_momo_post', ['paymentAttempt' => $paymentAttempt]);
         } else if ($paymentAttempt->payment_method === 'vn_pay') {
             session(['vnpay_selected_items' => $paymentAttempt->selected_items]);
-            return view('fontend.payment.resume_vnpay_post');
+            return view('fontend.payment.resume_vnpay_post', ['paymentAttempt' => $paymentAttempt]);
         }
 
         return back()->with('error', 'Phương thức thanh toán không hợp lệ.');
