@@ -55,28 +55,31 @@ class AppServiceProvider extends ServiceProvider
                 ->shuffle(); // Trộn ngẫu nhiên
             $activeProducts = Product::where('status', '1') // hoặc status = 1 tuỳ bạn định nghĩa
 
-            ->take(10) // Lấy top 10 sản phẩm nhiều lượt xem nhất (có thể điều chỉnh)
-            ->get()
-            ->shuffle() // Trộn ngẫu nhiên
-            ->take(3);
+                ->take(10) // Lấy top 10 sản phẩm nhiều lượt xem nhất (có thể điều chỉnh)
+                ->get()
+                ->shuffle() // Trộn ngẫu nhiên
+                ->take(3);
             $categories = Category::where('is_active', 1)
-                      ->whereNull('parent_id')
-                      ->get();
-$categories_post = CategoryPost::where('is_active', 1)
-                      ->whereNull('parent_id')
-                      ->get();
+                ->whereNull('parent_id')
+                ->get();
+            $categories_post = CategoryPost::where('is_active', 1)
+                ->whereNull('parent_id')
+                ->get();
 
             $view->with([
                 'total_items' => $total_items,
                 'topViewedProducts' => $topViewedProducts,
                 'activeProducts' => $activeProducts,
-                'topRatedProducts' =>$topRatedProducts,
-                'activeProducts' =>$activeProducts,
-                'categories'=>$categories,
-                'categories_post'=>$categories_post
+                'topRatedProducts' => $topRatedProducts,
+                'activeProducts' => $activeProducts,
+                'categories' => $categories,
+                'categories_post' => $categories_post
             ]);
 
             // $view->with('total_items', $total_items);
+            // Share admin user with frontend views
+            $admin = \App\Models\User::where('role', 'admin')->first();
+            $view->with('admin', $admin);
         });
     }
 }
