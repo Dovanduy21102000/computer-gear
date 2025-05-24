@@ -94,7 +94,15 @@ window.Echo.connector.pusher.connection.bind("connected", () => {
     window.Echo.channel("product-variants")
         .listen("ProductVariantCreated", (e) => {
             console.log("ProductVariantCreated event received:", e);
-            // Optionally update variant selectors or lists
+            if (typeof window.reloadHomeProductLists === "function") {
+                window.reloadHomeProductLists();
+            }
+            if (typeof window.reloadProductGrid === "function") {
+                window.reloadProductGrid();
+            }
+            if (typeof window.reloadProductDetailsSection === "function") {
+                window.reloadProductDetailsSection();
+            }
         })
         .listen("ProductVariantDeleted", (e) => {
             console.log("ProductVariantDeleted event received:", e);
@@ -323,7 +331,8 @@ window.reloadHomeProductLists = function () {
         const spin = document.querySelector(spinner);
         if (spin) spin.style.display = "flex";
     });
-    fetch(window.location.pathname + window.location.search, {
+    fetch("/", {
+        // Always fetch the home page
         headers: { "X-Requested-With": "XMLHttpRequest" },
     })
         .then((response) => response.text())
@@ -345,4 +354,30 @@ window.reloadHomeProductLists = function () {
                 if (spin) spin.style.display = "none";
             });
         });
+};
+
+// Add reloadProductDetailsSection function (to be used on product details page)
+window.reloadProductDetailsSection = function () {
+    const section = document.querySelector(".product-details-section");
+    const spinner = document.getElementById("productDetailsSpinner");
+    if (spinner) spinner.style.display = "flex";
+    if (section) {
+        fetch(window.location.pathname + window.location.search, {
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+        })
+            .then((response) => response.text())
+            .then((html) => {
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = html;
+                const newSection = tempDiv.querySelector(
+                    ".product-details-section"
+                );
+                if (newSection) {
+                    section.innerHTML = newSection.innerHTML;
+                }
+            })
+            .finally(() => {
+                if (spinner) spinner.style.display = "none";
+            });
+    }
 };

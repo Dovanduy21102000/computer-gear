@@ -166,53 +166,61 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 col-xl-4 mb-md-6 mb-lg-0">
-                    <div class="mb-1">
-                        <a href="#" class="font-size-12 text-gray-5 mb-2 d-inline-block">
-                            {{ $product->category->name ?? 'Danh mục' }}</a>
-                        <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
-                        <div class="mb-2">
-                            <a class="d-inline-flex align-items-center small font-size-15 text-lh-1" href="#">
-                                <div class="text-warning mr-2">
-                                    <!-- Hiển thị sao dựa trên đánh giá trung bình -->
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        <small
-                                            class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
-                                    @endfor
-                                </div>
-                                <span class="text-secondary font-size-13">({{ $totalReviews }} đánh giá từ khách
-                                    hàng)</span>
-                            </a>
+                    <div class="product-details-section position-relative">
+                        <div id="productDetailsSpinner"
+                            style="display:none; position:absolute; left:0; top:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:10; justify-content:center; align-items:center;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
                         </div>
-
-
-                        <div class="d-flex align-items-center">
-                            <!-- Ảnh thương hiệu với kích thước nhỏ hơn -->
-
-
-                            <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
-                            @if ($product->brand)
-                                <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
-                                    Thương hiệu: <a href="#" class="text-dark">{{ $product->brand->name }}</a>
-                                </p>
-                            @endif
-                        </div>
-                        <div class="product-main-image mb-3">
-                            <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
-                                alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
-                        </div>
-
-                        <!-- Thêm thông tin bảo hành và hỗ trợ -->
-                        {{-- <div class="mb-2">
-                            <p class="mb-1 fw-bold">✔ Bảo hành chính hãng 12 tháng.</p>
-                            <p class="mb-1 fw-bold">✔ Hỗ trợ đổi mới trong 7 ngày.</p>
-                            <p class="mb-1 fw-bold">✔ Windows bản quyền tích hợp.</p>
-                        </div> --}}
-
                         <div class="mb-1">
-                            <p>{!! $product->short_description !!}</p>
-                        </div>
+                            <a href="#" class="font-size-12 text-gray-5 mb-2 d-inline-block">
+                                {{ $product->category->name ?? 'Danh mục' }}</a>
+                            <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
+                            <div class="mb-2">
+                                <a class="d-inline-flex align-items-center small font-size-15 text-lh-1" href="#">
+                                    <div class="text-warning mr-2">
+                                        <!-- Hiển thị sao dựa trên đánh giá trung bình -->
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <small
+                                                class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
+                                        @endfor
+                                    </div>
+                                    <span class="text-secondary font-size-13">({{ $totalReviews }} đánh giá từ khách
+                                        hàng)</span>
+                                </a>
+                            </div>
 
-                        <p><strong>SKU: </strong>{{ $product->sku }}</p>
+
+                            <div class="d-flex align-items-center">
+                                <!-- Ảnh thương hiệu với kích thước nhỏ hơn -->
+
+
+                                <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
+                                @if ($product->brand)
+                                    <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
+                                        Thương hiệu: <a href="#" class="text-dark">{{ $product->brand->name }}</a>
+                                    </p>
+                                @endif
+                            </div>
+                            <div class="product-main-image mb-3">
+                                <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
+                                    alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
+                            </div>
+
+                            <!-- Thêm thông tin bảo hành và hỗ trợ -->
+                            {{-- <div class="mb-2">
+                                <p class="mb-1 fw-bold">✔ Bảo hành chính hãng 12 tháng.</p>
+                                <p class="mb-1 fw-bold">✔ Hỗ trợ đổi mới trong 7 ngày.</p>
+                                <p class="mb-1 fw-bold">✔ Windows bản quyền tích hợp.</p>
+                            </div> --}}
+
+                            <div class="mb-1">
+                                <p>{!! $product->short_description !!}</p>
+                            </div>
+
+                            <p><strong>SKU: </strong>{{ $product->sku }}</p>
+                        </div>
                     </div>
                 </div>
                 <div class="mx-md-auto mx-lg-0 col-md-6 col-lg-4 col-xl-3">

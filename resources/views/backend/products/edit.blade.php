@@ -173,31 +173,31 @@
 
                             {{-- Add ids to price, price_sale, and quantity sections --}}
                             <div id="price-section">
-                                <!-- Giá -->
-                                <div class="row mb-3">
-                                    <label for="price" class="col-sm-2 col-form-label">Giá</label>
-                                    <div class="col-sm-10">
+                            <!-- Giá -->
+                            <div class="row mb-3">
+                                <label for="price" class="col-sm-2 col-form-label">Giá</label>
+                                <div class="col-sm-10">
                                         <input type="number" class="form-control" id="price" name="price"
-                                            value="{{ old('price', $product->price) }}">
-                                    </div>
+                                        value="{{ old('price', $product->price) }}">
                                 </div>
+                            </div>
 
-                                <!-- Giá khuyến mãi -->
-                                <div class="row mb-3">
-                                    <label for="price_sale" class="col-sm-2 col-form-label">Giá khuyến mãi</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" class="form-control" id="price_sale" name="price_sale"
-                                            value="{{ old('price_sale', $product->price_sale) }}">
+                            <!-- Giá khuyến mãi -->
+                            <div class="row mb-3">
+                                <label for="price_sale" class="col-sm-2 col-form-label">Giá khuyến mãi</label>
+                                <div class="col-sm-10">
+                                    <input type="number" class="form-control" id="price_sale" name="price_sale"
+                                        value="{{ old('price_sale', $product->price_sale) }}">
                                     </div>
                                 </div>
                             </div>
 
                             <div id="quantity-section">
-                                <!-- Số lượng -->
-                                <div class="row mb-3">
-                                    <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" class="form-control" id="quantity" name="quantity"
+                            <!-- Số lượng -->
+                            <div class="row mb-3">
+                                <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
+                                <div class="col-sm-10">
+                                    <input type="number" class="form-control" id="quantity" name="quantity"
                                             value="{{ old('quantity', $product->quantity) }}">
                                     </div>
                                 </div>
@@ -327,7 +327,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
     </section>
 </main>
 
