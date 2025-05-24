@@ -35,8 +35,11 @@ class ProductStatusChanged implements ShouldBroadcast
         return new Channel('products');
     }
 
-    public function broadcastAs()
+    public function broadcastWith()
     {
-        return 'ProductStatusChanged';
+        return [
+            'id' => $this->product->id,
+            'status' => $this->product->status,
+        ];
     }
 }

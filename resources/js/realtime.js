@@ -33,9 +33,8 @@ window.Echo.connector.pusher.connection.bind("connected", () => {
     window.Echo.channel("products")
         .listen("ProductUpdated", (e) => {
             console.log("Product updated:", e);
-            // Find the product card by data-product-id
             const productElement = document.querySelector(
-                `[data-product-id="${e.id}"]`
+                `[data-product-id=\"${e.id}\"]`
             );
             if (productElement) {
                 // Update product name
@@ -65,36 +64,21 @@ window.Echo.connector.pusher.connection.bind("connected", () => {
                     if (salePriceElement) salePriceElement.textContent = "";
                 }
             }
+            // Always reload the grid to reflect any status change
+            if (typeof window.reloadProductGrid === "function") {
+                window.reloadProductGrid();
+            }
         })
         .listen("ProductCreated", (e) => {
             console.log("ProductCreated event received:", e);
             window.reloadProductGrid();
         })
         .listen("ProductDeleted", (e) => {
+            console.log("ProductDeleted event received:", e);
             const el = document.querySelector(
                 `[data-product-id="${e.productId}"]`
             );
             if (el) el.remove();
-            // Also reload product grid and home lists
-            if (typeof window.reloadProductGrid === "function") {
-                window.reloadProductGrid();
-            }
-            if (typeof window.reloadHomeProductLists === "function") {
-                window.reloadHomeProductLists();
-            }
-        })
-        .listen("ProductStatusChanged", (e) => {
-            console.log("ProductStatusChanged event received:", e);
-            const el = document.querySelector(
-                `[data-product-id="${e.product.id}"]`
-            );
-            if (el) {
-                if (!e.product.status) {
-                    el.classList.add("disabled");
-                } else {
-                    el.classList.remove("disabled");
-                }
-            }
             // Also reload product grid and home lists
             if (typeof window.reloadProductGrid === "function") {
                 window.reloadProductGrid();
