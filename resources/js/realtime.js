@@ -100,8 +100,8 @@ window.Echo.connector.pusher.connection.bind("connected", () => {
             if (typeof window.reloadProductGrid === "function") {
                 window.reloadProductGrid();
             }
-            if (typeof window.reloadProductDetailsSection === "function") {
-                window.reloadProductDetailsSection();
+            if (typeof window.reloadProductAttributeOptions === "function") {
+                window.reloadProductAttributeOptions();
             }
         })
         .listen("ProductVariantDeleted", (e) => {
@@ -124,6 +124,13 @@ window.Echo.connector.pusher.connection.bind("connected", () => {
                 }
             }
         });
+
+    window.Echo.channel("variants").listen("VariantUpdated", (e) => {
+        console.log("VariantUpdated event received:", e);
+        if (typeof window.reloadProductAttributeOptions === "function") {
+            window.reloadProductAttributeOptions();
+        }
+    });
 });
 
 window.Echo.connector.pusher.connection.bind("error", (error) => {
@@ -358,26 +365,83 @@ window.reloadHomeProductLists = function () {
 
 // Add reloadProductDetailsSection function (to be used on product details page)
 window.reloadProductDetailsSection = function () {
-    const section = document.querySelector(".product-details-section");
     const spinner = document.getElementById("productDetailsSpinner");
     if (spinner) spinner.style.display = "flex";
-    if (section) {
-        fetch(window.location.pathname + window.location.search, {
-            headers: { "X-Requested-With": "XMLHttpRequest" },
+    fetch(window.location.href, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+        .then((response) => response.text())
+        .then((html) => {
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = html;
+            const newSection = tempDiv.querySelector(
+                ".product-details-section"
+            );
+            if (newSection) {
+                document.querySelector(".product-details-section").innerHTML =
+                    newSection.innerHTML;
+            }
         })
-            .then((response) => response.text())
-            .then((html) => {
-                const tempDiv = document.createElement("div");
-                tempDiv.innerHTML = html;
-                const newSection = tempDiv.querySelector(
-                    ".product-details-section"
-                );
-                if (newSection) {
-                    section.innerHTML = newSection.innerHTML;
-                }
-            })
-            .finally(() => {
-                if (spinner) spinner.style.display = "none";
-            });
-    }
+        .finally(() => {
+            if (spinner) spinner.style.display = "none";
+        });
 };
+
+window.reloadProductAttributeOptions = function () {
+    const spinner = document.getElementById("attributeOptionsSpinner");
+    if (spinner) spinner.style.display = "block";
+    fetch(window.location.href, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+        .then((response) => response.text())
+        .then((html) => {
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = html;
+            const newOptions = tempDiv.querySelector(
+                ".product-attribute-options"
+            );
+            if (newOptions) {
+                document.querySelector(".product-attribute-options").innerHTML =
+                    newOptions.innerHTML;
+            }
+            // Fetch all variants, then re-initialize attribute options
+            if (typeof fetchAllVariants === "function") {
+                fetchAllVariants(function () {
+                    if (typeof window.initAttributeOptions === "function") {
+                        window.initAttributeOptions();
+                    }
+                });
+            } else if (typeof window.initAttributeOptions === "function") {
+                window.initAttributeOptions();
+            }
+        })
+        .finally(() => {
+            const spinner = document.getElementById("attributeOptionsSpinner");
+            if (spinner) spinner.style.display = "none";
+        });
+};
+
+window.fetchAllVariants = function (callback) {
+    const productId =
+        document.querySelector('[name="product_id"]')?.value ||
+        window.productId;
+    if (!productId) return;
+    fetch(`/get-variant?product_id=${productId}&get_all=true`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            window.allVariants = data;
+            console.log("All variants loaded:", window.allVariants);
+            if (typeof callback === "function") callback();
+        })
+        .catch((err) => {
+            console.error("Error loading variants:", err);
+            if (typeof callback === "function") callback();
+        });
+};
+
+// On page load, fetch all variants if function exists
+if (typeof window.fetchAllVariants === "function") {
+    window.fetchAllVariants();
+}
