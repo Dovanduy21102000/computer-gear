@@ -223,13 +223,20 @@ class ProductVariantController extends Controller
 
         // Recalculate main product's min price, min sale price, and total quantity
         $variants = $product->variants()->get();
-        $minPrice = $variants->min('price');
-        $minSalePrice = $variants->whereNotNull('price_sale')->min('price_sale');
-        $totalQuantity = $variants->sum('quantity');
+        if ($variants->isNotEmpty()) {
+            $minPrice = $variants->min('price');
+            $minSalePrice = $variants->whereNotNull('price_sale')->min('price_sale');
+            $totalQuantity = $variants->sum('quantity');
 
-        $product->price = $minPrice;
-        $product->price_sale = $minSalePrice ?: null;
-        $product->quantity = $totalQuantity;
+            $product->price = $minPrice;
+            $product->price_sale = $minSalePrice ?: null;
+            $product->quantity = $totalQuantity;
+        } else {
+            // If no variants, set default values
+            $product->price = 0;
+            $product->price_sale = null;
+            $product->quantity = 0;
+        }
 
         Log::info('Product state before save (Variant Update)', [
             'product_id' => $product->id,
@@ -244,8 +251,7 @@ class ProductVariantController extends Controller
         // Broadcast ProductUpdated event
         event(new \App\Events\ProductUpdated($product));
 
-        return redirect()->route('variants.index', ['product' => $product->id])
-            ->with('success', 'Biến thể đã được cập nhật.');
+        return redirect()->back()->with('success', 'Biến thể đã được cập nhật.');
     }
 
 

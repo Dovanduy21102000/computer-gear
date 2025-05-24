@@ -270,6 +270,21 @@ class ProductController extends Controller
             'is_variant' => $request->is_variant,
         ]);
 
+        // If product has variants, recalculate main product's price and quantity
+        if ($product->is_variant) {
+            $variants = $product->variants()->get();
+            if ($variants->isNotEmpty()) {
+                $minPrice = $variants->min('price');
+                $minSalePrice = $variants->whereNotNull('price_sale')->min('price_sale');
+                $totalQuantity = $variants->sum('quantity');
+
+                $product->price = $minPrice;
+                $product->price_sale = $minSalePrice ?: null;
+                $product->quantity = $totalQuantity;
+                $product->save();
+            }
+        }
+
         Log::info('Product updated in database', [
             'product_id' => $product->id,
             'price' => $product->price,
@@ -279,7 +294,7 @@ class ProductController extends Controller
         event(new ProductUpdated($product));
         Log::info('ProductUpdated event dispatched', ['product_id' => $product->id]);
 
-        return redirect()->route('products.index')->with('success', 'Sản phẩm đã được cập nhật thành công.');
+        return redirect()->back()->with('success', 'Sản phẩm đã được cập nhật thành công.');
     }
 
     /**

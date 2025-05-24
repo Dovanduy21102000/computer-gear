@@ -82,12 +82,22 @@
                                                                     <div class="prodcut-price">
                                                                         <div
                                                                             class="text-gray-100 font-size-15 font-weight-bold">
-                                                                            @if ($newProduct->price_sale && $newProduct->price_sale > 0)
-                                                                                {{ number_format($newProduct->price_sale, 0, ',', '.') }}
-                                                                                đ
+                                                                            @if ($newProduct->is_variant && $newProduct->variants->isNotEmpty())
+                                                                                @php
+                                                                                    $lowestPrice = $newProduct->variants->min(
+                                                                                        function ($variant) {
+                                                                                            return $variant->price_sale ??
+                                                                                                $variant->price;
+                                                                                        },
+                                                                                    );
+                                                                                @endphp
+                                                                                {{ number_format($lowestPrice, 0, ',', '.') }}đ
                                                                             @else
-                                                                                {{ number_format($newProduct->price, 0, ',', '.') }}
-                                                                                đ
+                                                                                @if ($newProduct->price_sale && $newProduct->price_sale > 0)
+                                                                                    {{ number_format($newProduct->price_sale, 0, ',', '.') }}đ
+                                                                                @else
+                                                                                    {{ number_format($newProduct->price, 0, ',', '.') }}đ
+                                                                                @endif
                                                                             @endif
                                                                         </div>
                                                                     </div>
@@ -125,12 +135,22 @@
                                                                     <div class="prodcut-price">
                                                                         <div
                                                                             class="text-gray-100 font-size-15 font-weight-bold">
-                                                                            @if ($newProduct->price_sale && $newProduct->price_sale > 0)
-                                                                                {{ number_format($newProduct->price_sale, 0, ',', '.') }}
-                                                                                đ
+                                                                            @if ($newProduct->is_variant && $newProduct->variants->isNotEmpty())
+                                                                                @php
+                                                                                    $lowestPrice = $newProduct->variants->min(
+                                                                                        function ($variant) {
+                                                                                            return $variant->price_sale ??
+                                                                                                $variant->price;
+                                                                                        },
+                                                                                    );
+                                                                                @endphp
+                                                                                {{ number_format($lowestPrice, 0, ',', '.') }}đ
                                                                             @else
-                                                                                {{ number_format($newProduct->price, 0, ',', '.') }}
-                                                                                đ
+                                                                                @if ($newProduct->price_sale && $newProduct->price_sale > 0)
+                                                                                    {{ number_format($newProduct->price_sale, 0, ',', '.') }}đ
+                                                                                @else
+                                                                                    {{ number_format($newProduct->price, 0, ',', '.') }}đ
+                                                                                @endif
                                                                             @endif
                                                                         </div>
                                                                     </div>
@@ -168,12 +188,22 @@
                                                                     <div class="prodcut-price">
                                                                         <div
                                                                             class="text-gray-100 font-size-15 font-weight-bold">
-                                                                            @if ($newProduct->price_sale && $newProduct->price_sale > 0)
-                                                                                {{ number_format($newProduct->price_sale, 0, ',', '.') }}
-                                                                                đ
+                                                                            @if ($newProduct->is_variant && $newProduct->variants->isNotEmpty())
+                                                                                @php
+                                                                                    $lowestPrice = $newProduct->variants->min(
+                                                                                        function ($variant) {
+                                                                                            return $variant->price_sale ??
+                                                                                                $variant->price;
+                                                                                        },
+                                                                                    );
+                                                                                @endphp
+                                                                                {{ number_format($lowestPrice, 0, ',', '.') }}đ
                                                                             @else
-                                                                                {{ number_format($newProduct->price, 0, ',', '.') }}
-                                                                                đ
+                                                                                @if ($newProduct->price_sale && $newProduct->price_sale > 0)
+                                                                                    {{ number_format($newProduct->price_sale, 0, ',', '.') }}đ
+                                                                                @else
+                                                                                    {{ number_format($newProduct->price, 0, ',', '.') }}đ
+                                                                                @endif
                                                                             @endif
                                                                         </div>
                                                                     </div>
