@@ -1061,6 +1061,7 @@
                 $("#quantityInput").val("").prop("disabled", true);
                 disablePurchase();
             }
+            updateStockDisplay(quantity);
         }
 
         // Vô hiệu hóa các nút "Thêm vào giỏ" và "Mua ngay"
