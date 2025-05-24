@@ -1,4 +1,15 @@
 <!-- ========== MAIN CONTENT ========== -->
+<style>
+    .new-product-title,
+    .new-product-title a {
+        display: block !important;
+        max-width: 120px !important;
+        /* Adjust as needed for your layout */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+</style>
 <main id="content" role="main">
     <!-- breadcrumb -->
     <div class="bg-gray-13 bg-md-transparent">
@@ -153,7 +164,7 @@
                     <ul class="list-unstyled">
                         @foreach ($newProduct as $product)
                             <li class="mb-4">
-                                <div class="row">
+                                <div class="row align-items-center">
                                     <div class="col-auto">
                                         <a href="{{ route('client.products.detail', $product->slug) }}"
                                             class="d-block width-75">
@@ -162,9 +173,10 @@
                                         </a>
                                     </div>
                                     <div class="col">
-                                        <h3 class="text-lh-1dot2 font-size-14 mb-0">
-                                            <a href="{{ route('client.products.detail', $product->slug) }}">
-                                                {{ $product->name }}
+                                        <h3 class="text-lh-1dot2 font-size-14 mb-0 new-product-title">
+                                            <a href="{{ route('client.products.detail', $product->slug) }}"
+                                                title="{{ $product->name }}">
+                                                {{ Str::limit($product->name, 22) }}
                                             </a>
                                         </h3>
                                         <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
@@ -297,10 +309,11 @@
                                         class="sr-only">Loading...</span></div>
                             </div>
                             <div id="ajaxProductList">
-                                @include('fontend.products.partials.product_list', [
-                                    'products' => $products,
-                                    'view' => 'grid',
-                                ])
+                                <ul class="row product-list">
+                                    @include('fontend.products.partials.product_list', [
+                                        'products' => $products,
+                                    ])
+                                </ul>
                             </div>
                         </div>
                     </div>

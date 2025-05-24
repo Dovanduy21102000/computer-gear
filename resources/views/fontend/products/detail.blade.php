@@ -166,53 +166,61 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 col-xl-4 mb-md-6 mb-lg-0">
-                    <div class="mb-1">
-                        <a href="#" class="font-size-12 text-gray-5 mb-2 d-inline-block">
-                            {{ $product->category->name ?? 'Danh mục' }}</a>
-                        <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
-                        <div class="mb-2">
-                            <a class="d-inline-flex align-items-center small font-size-15 text-lh-1" href="#">
-                                <div class="text-warning mr-2">
-                                    <!-- Hiển thị sao dựa trên đánh giá trung bình -->
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        <small
-                                            class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
-                                    @endfor
-                                </div>
-                                <span class="text-secondary font-size-13">({{ $totalReviews }} đánh giá từ khách
-                                    hàng)</span>
-                            </a>
+                    <div class="product-details-section position-relative">
+                        <div id="productDetailsSpinner"
+                            style="display:none; position:absolute; left:0; top:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:10; justify-content:center; align-items:center;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
                         </div>
-
-
-                        <div class="d-flex align-items-center">
-                            <!-- Ảnh thương hiệu với kích thước nhỏ hơn -->
-
-
-                            <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
-                            @if ($product->brand)
-                                <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
-                                    Thương hiệu: <a href="#" class="text-dark">{{ $product->brand->name }}</a>
-                                </p>
-                            @endif
-                        </div>
-                        <div class="product-main-image mb-3">
-                            <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
-                                alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
-                        </div>
-
-                        <!-- Thêm thông tin bảo hành và hỗ trợ -->
-                        {{-- <div class="mb-2">
-                            <p class="mb-1 fw-bold">✔ Bảo hành chính hãng 12 tháng.</p>
-                            <p class="mb-1 fw-bold">✔ Hỗ trợ đổi mới trong 7 ngày.</p>
-                            <p class="mb-1 fw-bold">✔ Windows bản quyền tích hợp.</p>
-                        </div> --}}
-
                         <div class="mb-1">
-                            <p>{!! $product->short_description !!}</p>
-                        </div>
+                            <a href="#" class="font-size-12 text-gray-5 mb-2 d-inline-block">
+                                {{ $product->category->name ?? 'Danh mục' }}</a>
+                            <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
+                            <div class="mb-2">
+                                <a class="d-inline-flex align-items-center small font-size-15 text-lh-1" href="#">
+                                    <div class="text-warning mr-2">
+                                        <!-- Hiển thị sao dựa trên đánh giá trung bình -->
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <small
+                                                class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
+                                        @endfor
+                                    </div>
+                                    <span class="text-secondary font-size-13">({{ $totalReviews }} đánh giá từ khách
+                                        hàng)</span>
+                                </a>
+                            </div>
 
-                        <p><strong>SKU: </strong>{{ $product->sku }}</p>
+
+                            <div class="d-flex align-items-center">
+                                <!-- Ảnh thương hiệu với kích thước nhỏ hơn -->
+
+
+                                <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
+                                @if ($product->brand)
+                                    <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
+                                        Thương hiệu: <a href="#" class="text-dark">{{ $product->brand->name }}</a>
+                                    </p>
+                                @endif
+                            </div>
+                            <div class="product-main-image mb-3">
+                                <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
+                                    alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
+                            </div>
+
+                            <!-- Thêm thông tin bảo hành và hỗ trợ -->
+                            {{-- <div class="mb-2">
+                                <p class="mb-1 fw-bold">✔ Bảo hành chính hãng 12 tháng.</p>
+                                <p class="mb-1 fw-bold">✔ Hỗ trợ đổi mới trong 7 ngày.</p>
+                                <p class="mb-1 fw-bold">✔ Windows bản quyền tích hợp.</p>
+                            </div> --}}
+
+                            <div class="mb-1">
+                                <p>{!! $product->short_description !!}</p>
+                            </div>
+
+                            <p><strong>SKU: </strong>{{ $product->sku }}</p>
+                        </div>
                     </div>
                 </div>
                 <div class="mx-md-auto mx-lg-0 col-md-6 col-lg-4 col-xl-3">
@@ -299,52 +307,40 @@
                             <!-- End Quantity -->
                             @php
                                 $attributes = [];
-
                                 foreach ($variants as $variant) {
                                     foreach ($variant->attributeValues as $attributeValue) {
                                         if (isset($attributeValue->attribute)) {
                                             $attributeName = trim($attributeValue->attribute->name);
                                             $attributeValueText = trim($attributeValue->value);
-
-                                            // Lưu các giá trị vào nhóm thuộc tính
                                             $attributes[$attributeName][$attributeValueText] = $attributeValueText;
                                         }
                                     }
                                 }
                             @endphp
 
-                            @php
-                                $attributes = [];
-
-                                foreach ($variants as $variant) {
-                                    foreach ($variant->attributeValues as $attributeValue) {
-                                        if (isset($attributeValue->attribute)) {
-                                            $attributeName = trim($attributeValue->attribute->name);
-                                            $attributeValueText = trim($attributeValue->value);
-
-                                            // Lưu các giá trị vào nhóm thuộc tính
-                                            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
-                                        }
-                                    }
-                                }
-                            @endphp
-
-
-                            @foreach ($attributes as $attributeName => $values)
-                                <div class="mb-1">
-                                    <h6 class="font-size-14">Chọn {{ ucfirst($attributeName) }}</h6>
-                                    <div class="attribute-options">
-                                        @foreach ($values as $value)
-                                            <label class="attribute-option">
-                                                <input type="radio"
-                                                    name="{{ strtolower(string: str_replace(' ', '_', $attributeName)) }}"
-                                                    value="{{ $value }}" class="d-none">
-                                                <span class="attribute-box">{{ $value }}</span>
-                                            </label>
-                                        @endforeach
+                            <div class="product-attribute-options">
+                                <div id="attributeOptionsSpinner"
+                                    style="display:none; text-align:center; padding:10px;">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
                                     </div>
                                 </div>
-                            @endforeach
+                                @foreach ($attributes as $attributeName => $values)
+                                    <div class="mb-1">
+                                        <h6 class="font-size-14">Chọn {{ ucfirst($attributeName) }}</h6>
+                                        <div class="attribute-options">
+                                            @foreach ($values as $value)
+                                                <label class="attribute-option">
+                                                    <input type="radio"
+                                                        name="{{ strtolower(str_replace(' ', '_', $attributeName)) }}"
+                                                        value="{{ $value }}" class="d-none">
+                                                    <span class="attribute-box">{{ $value }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
 
 
 
@@ -1314,3 +1310,120 @@
         });
     </script>
 @endpush
+
+<script>
+    window.initAttributeOptions = function() {
+        // Function to check if an attribute combination is valid
+        function isValidCombination(selectedAttributes, attributeName, attributeValue) {
+            let testAttributes = {
+                ...selectedAttributes
+            };
+            testAttributes[attributeName] = attributeValue;
+            let found = allVariants.some(variant => {
+                return Object.entries(testAttributes).every(([key, value]) => {
+                    return variant.attributes[key] === value;
+                });
+            });
+            console.log('Checking', testAttributes, '=>', found);
+            return found;
+        }
+
+        // Update attribute options based on current selection
+        function updateAttributeOptions() {
+            let selectedAttributes = {};
+            $(".attribute-option input[type='radio']:checked").each(function() {
+                let attributeName = $(this).attr("name");
+                let attributeValue = $(this).val();
+                selectedAttributes[attributeName] = attributeValue;
+            });
+
+            // If nothing is selected, enable all options
+            if (Object.keys(selectedAttributes).length === 0) {
+                $(".attribute-option").removeClass('disabled').css('opacity', '1');
+                $(".attribute-option input[type='radio']").prop('disabled', false);
+                return;
+            }
+
+            // For each attribute group
+            $(".attribute-options").each(function() {
+                let attributeName = $(this).find('input[type="radio"]').first().attr("name");
+
+                // For each option in this group
+                $(this).find('.attribute-option').each(function() {
+                    let option = $(this);
+                    let input = option.find('input[type="radio"]');
+                    let value = input.val();
+
+                    // Check if this option is compatible with current selection
+                    let isCompatible = isValidCombination(selectedAttributes, attributeName, value);
+
+                    // Update visual state
+                    if (isCompatible) {
+                        option.removeClass('disabled');
+                        input.prop('disabled', false);
+                        option.css('opacity', '1');
+                    } else {
+                        option.addClass('disabled');
+                        input.prop('disabled', true);
+                        option.css('opacity', '0.5');
+                    }
+                });
+            });
+        }
+
+        // Add CSS for disabled state
+        if (!document.getElementById('attribute-option-disabled-style')) {
+            $('<style id="attribute-option-disabled-style">')
+                .text(`
+                    .attribute-option.disabled {
+                        cursor: not-allowed;
+                        background-color: #f5f5f5;
+                    }
+                    .attribute-option.disabled .attribute-box {
+                        color: #999;
+                    }
+                `)
+                .appendTo('head');
+        }
+
+        // Update attribute options when any selection changes
+        $(".attribute-option input[type='radio']").off('change').on('change', function() {
+            // Add selected class for visual feedback
+            $(".attribute-option").each(function() {
+                if ($(this).find('input[type="radio"]').is(":checked")) {
+                    $(this).addClass("selected");
+                } else {
+                    $(this).removeClass("selected");
+                }
+            });
+            updateAttributeOptions();
+        });
+
+        // Universal radio deselect logic (works for label and box clicks)
+        $(document).off('mousedown.attributeOption').on('mousedown.attributeOption', '.attribute-option', function(
+            e) {
+            let $input = $(this).find('input[type="radio"]');
+            $input.attr('data-waschecked', $input.prop('checked'));
+        });
+        $(document).off('click.attributeOption').on('click.attributeOption', '.attribute-option', function(e) {
+            let $input = $(this).find('input[type="radio"]');
+            if ($input.attr('data-waschecked') === 'true') {
+                console.log('Deselecting via label:', $input[0]);
+                $input.prop('checked', false).trigger('change');
+                $input.attr('data-waschecked', 'false');
+                e.stopImmediatePropagation();
+                e.preventDefault();
+            }
+        });
+
+        // Initial update
+        updateAttributeOptions();
+    };
+
+    // Call on page load
+    $(document).ready(function() {
+        if (typeof window.initAttributeOptions === "function") {
+            window.initAttributeOptions();
+        }
+    });
+</script>

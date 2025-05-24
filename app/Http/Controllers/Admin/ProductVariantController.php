@@ -83,6 +83,7 @@ class ProductVariantController extends Controller
             'image' => $imagePath,
             'attributes' => json_encode($request->input('attributes')),
         ]);
+        event(new \App\Events\ProductVariantCreated($variant));
         event(new VariantUpdated($variant));
 
         // Sync attribute values
@@ -199,6 +200,7 @@ class ProductVariantController extends Controller
             $imagePath = $variant->image;
         }
 
+        $oldStatus = $variant->status;
         $variant->update([
             'sku' => $request->sku,
             'price' => $request->price,
@@ -207,6 +209,9 @@ class ProductVariantController extends Controller
             'image' => $imagePath,
             'status' => $request->status,
         ]);
+        if ($oldStatus != $request->status) {
+            event(new \App\Events\ProductVariantStatusChanged($variant));
+        }
         event(new VariantUpdated($variant));
 
         // Sync attribute values
@@ -261,8 +266,17 @@ class ProductVariantController extends Controller
             Storage::disk('public')->delete($variant->thumbnail);
         }
         $variant->delete();
-
+        event(new \App\Events\ProductVariantDeleted($variant->id));
         return redirect()->route('variants.index', ['product' => $product->id])
             ->with('success', 'Biến thể đã được xóa.');
+    }
+
+    public function toggleStatus($variantId)
+    {
+        $variant = ProductVariant::findOrFail($variantId);
+        $variant->status = !$variant->status;
+        $variant->save();
+        event(new \App\Events\ProductVariantStatusChanged($variant));
+        return response()->json(['success' => true, 'status' => $variant->status]);
     }
 }

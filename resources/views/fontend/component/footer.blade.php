@@ -82,12 +82,19 @@
                     style="font-size: 16px; font-weight: 700; color: #212529; margin-bottom: 15px; text-transform: uppercase;">
                     Thiết bị - Phụ kiện</h5>
                 <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px;">
-                    <li><a href="{{ route('client.products.index', ['category' => 'components']) }}"
-                            style="color: #212529; text-decoration: none;">Linh kiện máy tính</a></li>
-                    <li><a href="{{ route('client.products.index', ['category' => 'accessories']) }}"
-                            style="color: #212529; text-decoration: none;">Phụ kiện</a></li>
+                    <li><a href="{{ route('client.products.index', ['category' => 'keyboards']) }}"
+                            style="color: #212529; text-decoration: none;">Bàn phím</a></li>
+                    <li><a href="{{ route('client.products.index', ['category' => 'mice']) }}"
+                            style="color: #212529; text-decoration: none;">Chuột</a></li>
+                    <li><a href="{{ route('client.products.index', ['category' => 'headsets']) }}"
+                            style="color: #212529; text-decoration: none;">Tai nghe</a></li>
+                    <li><a href="{{ route('client.products.index', ['category' => 'monitors']) }}"
+                            style="color: #212529; text-decoration: none;">Màn hình</a></li>
+                    <li><a href="{{ route('client.products.index', ['category' => 'external-storage']) }}"
+                            style="color: #212529; text-decoration: none;">Thiết bị lưu trữ ngoài</a></li>
                 </ul>
             </div>
+
 
             <!-- Chăm sóc khách hàng -->
             <div>
@@ -97,7 +104,8 @@
                 <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px;">
                     <li><a href="{{ route('user.show') }}" style="color: #212529; text-decoration: none;">Tài khoản của
                             tôi</a></li>
-                    <li><a href="{{ route('order.track') }}" style="color: #212529; text-decoration: none;">Theo dõi đơn
+                    <li><a href="{{ route('order.track') }}" style="color: #212529; text-decoration: none;">Theo dõi
+                            đơn
                             hàng</a></li>
                     <li><a href="{{ route('client.contacts.index') }}"
                             style="color: #212529; text-decoration: none;">Liên hệ & Hỗ trợ</a></li>
@@ -112,7 +120,8 @@
         <div
             style="margin-top: 40px; border-top: 1px solid #dee2e6; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
             <p style="margin: 0; color: #6c757d; font-size: 14px;">&copy; <span href="#"
-                    style="color: #212529; font-weight: 700; text-decoration: none;">Electro</span> - All rights reserved.
+                    style="color: #212529; font-weight: 700; text-decoration: none;">Electro</span> - All rights
+                reserved.
             </p>
             <div>
                 <img src="{{ asset('fontend/assets/img/100X60/img1.jpg') }}" alt="Payment 1"
