@@ -113,11 +113,11 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
-                                                    @if ($product->status == 1)
-                                                        <span class="badge bg-success">Kích hoạt</span>
-                                                    @else
-                                                        <span class="badge bg-danger">Vô hiệu hóa</span>
-                                                    @endif
+                                                    <span
+                                                        class="badge status-toggle {{ $product->status == 1 ? 'bg-success' : 'bg-danger' }}"
+                                                        data-id="{{ $product->id }}" style="cursor:pointer">
+                                                        {{ $product->status == 1 ? 'Kích hoạt' : 'Vô hiệu hóa' }}
+                                                    </span>
                                                 </td>
                                                 <td class="text-center">
                                                     <a href="{{ route('products.show', $product->id) }}"
@@ -130,7 +130,7 @@
                                                     </a>
                                                     <a href="{{ route('backend.product_images.index', ['product_id' => $product->id]) }}"
                                                         class="btn btn-primary btn-sm">
-                                                        <i class="bi bi-image"></i> 
+                                                        <i class="bi bi-image"></i>
                                                     </a>
                                                     <!-- Nút xem thông số sản phẩm -->
                                                     <a href="{{ route('admin.specifications.index', ['product_id' => $product->id]) }}"
@@ -160,3 +160,45 @@
         </div>
     </section>
 </main>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle status
+            document.querySelectorAll('.status-toggle').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-id');
+                    fetch(`/admin/products/${productId}/toggle-status`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert('Không thể thay đổi trạng thái!');
+                            }
+                        });
+                });
+            });
+
+            // Echo listeners for real-time updates
+            if (window.Echo) {
+                window.Echo.channel('products')
+                    .listen('ProductCreated', (e) => {
+                        location.reload();
+                    })
+                    .listen('ProductDeleted', (e) => {
+                        location.reload();
+                    })
+                    .listen('ProductStatusChanged', (e) => {
+                        location.reload();
+                    });
+            }
+        });
+    </script>
+@endpush

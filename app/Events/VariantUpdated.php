@@ -35,7 +35,6 @@ class VariantUpdated implements ShouldBroadcast
             'price_sale' => $this->variant->price_sale,
             'quantity' => $this->variant->quantity,
             'status' => $this->variant->status,
-            // Add other fields as needed
         ];
     }
 }

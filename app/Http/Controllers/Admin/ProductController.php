@@ -136,6 +136,7 @@ class ProductController extends Controller
             'is_variant' => $request->is_variant,
             'views' => 0
         ]);
+        event(new \App\Events\ProductCreated($product));
         event(new ProductUpdated($product));
 
         if ($request->is_variant && $request->variants) {
@@ -255,6 +256,7 @@ class ProductController extends Controller
             $product->thumbnail = $thumbnailPath;
         }
 
+        $oldStatus = $product->status;
         $product->update([
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
@@ -269,6 +271,9 @@ class ProductController extends Controller
             'status' => $request->status,
             'is_variant' => $request->is_variant,
         ]);
+        if ($oldStatus != $request->status) {
+            event(new \App\Events\ProductStatusChanged($product));
+        }
 
         // If product has variants, recalculate main product's price and quantity
         if ($product->is_variant) {
@@ -309,7 +314,16 @@ class ProductController extends Controller
         }
 
         $product->delete();
-
+        event(new \App\Events\ProductDeleted($product->id));
         return redirect()->route('products.index')->with('success', 'Sản phẩm đã được xóa thành công.');
+    }
+
+    public function toggleStatus($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->status = !$product->status;
+        $product->save();
+        event(new \App\Events\ProductStatusChanged($product));
+        return response()->json(['success' => true, 'status' => $product->status]);
     }
 }
