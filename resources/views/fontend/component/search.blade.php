@@ -2,28 +2,7 @@
     <div class="container">
         <div class="row align-items-stretch min-height-50">
             <!-- Vertical Menu -->
-            <div class="col-md-auto d-none d-xl-flex align-items-end">
-                <div class="max-width-270 min-width-270">
-                    <!-- Basics Accordion -->
-                    <div id="basicsAccordion">
-                        <!-- Card -->
-                        <div class="card border-0 rounded-0">
-                            <div class="card-header bg-primary rounded-0 card-collapse border-0" id="basicsHeadingOne">
-                                <button type="button"
-                                    class="btn-link btn-remove-focus btn-block d-flex card-btn py-3 text-lh-1 px-4 shadow-none btn-primary rounded-top-lg border-0 font-weight-bold text-gray-90"
-                                    data-toggle="collapse" data-target="#basicsCollapseOne" aria-expanded="true"
-                                    aria-controls="basicsCollapseOne">
-                                    <span class="pl-1 text-gray-90">Mua sắm theo cách của bạn</span>
-
-                                </button>
-                            </div>
-
-                        </div>
-                        <!-- End Card -->
-                    </div>
-                    <!-- End Basics Accordion -->
-                </div>
-            </div>
+            
             <!-- End Vertical Menu -->
             <!-- Search bar -->
             <div class="col align-self-center">
