@@ -1088,7 +1088,8 @@
         }
 
         // Update attribute options when any selection changes
-        $(".attribute-option input[type='radio']").change(function() {
+        $(document).on('change', ".attribute-option input[type='radio']", function() {
+            console.log("Radio changed");
             // Add selected class for visual feedback
             $(".attribute-option").each(function() {
                 if ($(this).find('input[type="radio"]').is(":checked")) {
@@ -1099,8 +1100,15 @@
             });
 
             updateAttributeOptions();
-            let selectedAttributes = checkVariants();
-            if (!selectedAttributes) return;
+            let selectedAttributes = {};
+            $(".attribute-option input[type='radio']:checked").each(function() {
+                let attributeName = $(this).attr("name");
+                let attributeValue = $(this).val();
+                selectedAttributes[attributeName] = attributeValue;
+            });
+            console.log("Selected attributes:", selectedAttributes);
+            let result = checkVariants();
+            if (!result) return;
 
             let cacheKey = JSON.stringify(selectedAttributes);
             let productId = {{ $product->id }};
@@ -1324,7 +1332,7 @@
                     return variant.attributes[key] === value;
                 });
             });
-            console.log('Checking', testAttributes, '=>', found);
+            // console.log('Checking', testAttributes, '=>', found);
             return found;
         }
 
@@ -1387,7 +1395,7 @@
         }
 
         // Update attribute options when any selection changes
-        $(".attribute-option input[type='radio']").off('change').on('change', function() {
+        $(document).on('change', ".attribute-option input[type='radio']", function() {
             // Add selected class for visual feedback
             $(".attribute-option").each(function() {
                 if ($(this).find('input[type="radio"]').is(":checked")) {

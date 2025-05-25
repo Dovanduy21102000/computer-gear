@@ -310,9 +310,9 @@
                             </div>
                             <div id="ajaxProductList">
                                 <ul class="row product-list">
-                                    @include('fontend.products.partials.product_list', [
-                                        'products' => $products,
-                                    ])
+                                @include('fontend.products.partials.product_list', [
+                                    'products' => $products,
+                                ])
                                 </ul>
                             </div>
                         </div>

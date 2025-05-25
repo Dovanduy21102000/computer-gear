@@ -33,8 +33,100 @@ window.Echo.connector.pusher.connection.bind("connected", () => {
     window.Echo.channel("products")
         .listen("ProductUpdated", (e) => {
             console.log("Product updated:", e);
+
+            // Handle product detail page updates
+            const productDetail = document.querySelector(
+                ".product-details-section"
+            );
+            if (productDetail) {
+                // Update product name
+                const nameElement =
+                    productDetail.querySelector(".product-name");
+                if (nameElement) nameElement.textContent = e.name;
+
+                // Format price
+                const formatPrice = (price) =>
+                    new Intl.NumberFormat("vi-VN").format(price) + "đ";
+
+                // Update price and sale price
+                const priceElement =
+                    productDetail.querySelector(".product-price");
+                const salePriceElement = productDetail.querySelector(
+                    ".product-sale-price"
+                );
+
+                if (e.price_sale && salePriceElement) {
+                    // If sale price exists, update both
+                    salePriceElement.textContent = formatPrice(e.price_sale);
+                    if (priceElement)
+                        priceElement.textContent = formatPrice(e.price);
+                } else if (priceElement) {
+                    // If no sale price, just update price
+                    priceElement.textContent = formatPrice(e.price);
+                    if (salePriceElement) salePriceElement.textContent = "";
+                }
+
+                // Update variant prices if they exist
+                const variantPrices =
+                    productDetail.querySelectorAll(".variant-price");
+                variantPrices.forEach((variantPrice) => {
+                    const variantId =
+                        variantPrice.getAttribute("data-variant-id");
+                    if (variantId && e.variants) {
+                        const variant = e.variants.find(
+                            (v) => v.id == variantId
+                        );
+                        if (variant) {
+                            if (variant.price_sale) {
+                                variantPrice.innerHTML = `
+                                    <span class="text-danger fw-bold">${formatPrice(
+                                        variant.price_sale
+                                    )}</span>
+                                    <del class="text-muted">${formatPrice(
+                                        variant.price
+                                    )}</del>
+                                `;
+                            } else {
+                                variantPrice.textContent = formatPrice(
+                                    variant.price
+                                );
+                            }
+                        }
+                    }
+                });
+
+                // Update stock information
+                const stockElement =
+                    productDetail.querySelector(".product-stock");
+                if (stockElement) {
+                    stockElement.textContent =
+                        e.quantity > 0
+                            ? `Còn ${e.quantity} sản phẩm`
+                            : "Hết hàng";
+                    stockElement.className = `product-stock ${
+                        e.quantity > 0 ? "text-success" : "text-danger"
+                    }`;
+                }
+
+                // Update add to cart button state
+                const addToCartBtn =
+                    productDetail.querySelector(".btn-add-to-cart");
+                if (addToCartBtn) {
+                    if (e.quantity <= 0) {
+                        addToCartBtn.disabled = true;
+                        addToCartBtn.classList.add("disabled");
+                        addToCartBtn.textContent = "Hết hàng";
+                    } else {
+                        addToCartBtn.disabled = false;
+                        addToCartBtn.classList.remove("disabled");
+                        addToCartBtn.textContent = "Thêm vào giỏ hàng";
+                    }
+                }
+            }
+
+            // Handle product grid/list updates (existing code)
             const productElement = document.querySelector(
-                `[data-product-id=\"${e.id}\"]`
+                `[data-product-id="${e.id}"]`
             );
             if (productElement) {
                 // Update product name
@@ -441,4 +533,37 @@ window.fetchAllVariants = function (callback) {
 // On page load, fetch all variants if function exists
 if (typeof window.fetchAllVariants === "function") {
     window.fetchAllVariants();
+}
+
+// Listen for cart updates
+if (window.Echo) {
+    const userId = document
+        .querySelector('meta[name="user-id"]')
+        ?.getAttribute("content");
+    if (userId) {
+        window.Echo.private(`cart.${userId}`).listen("CartUpdated", (e) => {
+            // Update cart badge count
+            const badge = document.getElementById("cart-badge-count");
+            if (badge) {
+                badge.textContent = e.count;
+            }
+
+            // Update cart items if on cart page
+            const cartTable = document.querySelector(".cart-table tbody");
+            if (cartTable) {
+                // Make an AJAX request to get updated cart items
+                fetch("/cart")
+                    .then((response) => response.text())
+                    .then((html) => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, "text/html");
+                        const newCartTable =
+                            doc.querySelector(".cart-table tbody");
+                        if (newCartTable) {
+                            cartTable.innerHTML = newCartTable.innerHTML;
+                        }
+                    });
+            }
+        });
+    }
 }
