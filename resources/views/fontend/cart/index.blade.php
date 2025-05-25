@@ -173,7 +173,7 @@
                         </div>
                         <table class="table" cellspacing="0">
                             <thead>
-                                <tr>
+                                <tr >
                                     <th class="text-center"><input type="checkbox" id="select-all"></th>
                                     <!-- Select All Checkbox -->
                                     <th class="product-remove">&nbsp;</th>
