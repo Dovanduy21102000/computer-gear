@@ -759,7 +759,7 @@
                                         </a>
                                     </div>
                                     <div class="flex-center-between mb-1">
-                                        <div class="prodcut-price">
+                                        <div class="prodcut-price mt-4">
                                             @if ($related->price_sale)
                                                 <div class="prodcut-price d-flex align-items-center position-relative">
                                                     <ins
