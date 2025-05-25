@@ -89,13 +89,19 @@
                                                                         style="width: 70px !important; height: 70px !important; object-fit: cover;">
                                                             </div>
                                                             <div class="col product-item__body pl-2 pl-lg-3">
-                                                                <div class="mb-4">
+                                                                <div class="">
                                                                     <h5 class="product-item__title truncate-title">
                                                                         <a href="{{ route('client.products.detail', $newProduct->slug) }}"
                                                                             class="text-gray-90">{{ Str::limit($newProduct->name, 22) }}</a>
                                                                     </h5>
                                                                 </div>
-                                                                <div class="flex-center-between product-price mt-4">
+                                                                <div class="text-warning text-ls-n2 font-size-16" style="width: 80px;">
+                                                                    @for ($i = 1; $i <= 5; $i++)
+                                                                        <small
+                                                                            class="{{ $i <= $newProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $newProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                    @endfor
+                                                                </div>
+                                                                <div class="flex-center-between product-price">
                                                                     <div class="prodcut-price mt-3">
                                                                         @if ($newProduct->is_variant && $newProduct->variants->count())
                                                                             @php
@@ -167,7 +173,7 @@
                                                                             class="text-gray-90">{{ Str::limit($newProduct->name, 22) }}</a>
                                                                     </h5>
                                                                 </div>
-                                                                <div class="flex-center-between product-price mt-4">
+                                                                <div class="flex-center-between product-price">
                                                                     <div class="prodcut-price mt-3">
                                                                         @if ($newProduct->is_variant && $newProduct->variants->count())
                                                                             @php
@@ -239,7 +245,7 @@
                                                                             class="text-gray-90">{{ Str::limit($newProduct->name, 22) }}</a>
                                                                     </h5>
                                                                 </div>
-                                                                <div class="flex-center-between product-price mt-4">
+                                                                <div class="flex-center-between product-price">
                                                                     <div class="prodcut-price mt-3">
                                                                         @if ($newProduct->is_variant && $newProduct->variants->count())
                                                                             @php
@@ -795,7 +801,7 @@
                                                                     class="{{ $i <= $discountedProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $discountedProduct->rating ? 'text-muted' : '' }}"></small>
                                                             @endfor
                                                         </div>
-                                                        <div class="flex-center-between mb-1 product-price mt-4">
+                                                        <div class="flex-center-between mb-1 product-price">
                                                             <div class="prodcut-price mt-3">
                                                                 @if ($discountedProduct->is_variant && $discountedProduct->variants->count())
                                                                     @php
@@ -949,15 +955,16 @@
                                                                     <a href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
                                                                         class="text-blue font-weight-bold">{{ Str::limit($topSellingProduct->name, 22) }}</a>
                                                                 </h5>
-                                                                <div class="text-warning text-ls-n2 font-size-16 mb-1"
+                                                                
+                                                            </div>
+                                                            <div class="text-warning text-ls-n2 font-size-16 mb-1"
                                                                     style="width: 80px;">
                                                                     @for ($i = 1; $i <= 5; $i++)
                                                                         <small
                                                                             class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
                                                                     @endfor
                                                                 </div>
-                                                            </div>
-                                                            <div class="flex-center-between mb-3 product-price mt-4">
+                                                            <div class="flex-center-between mb-3 product-price">
                                                                 <div class="prodcut-price mt-3">
                                                                     @if ($topSellingProduct->is_variant && $topSellingProduct->variants->count())
                                                                         @php
@@ -1071,7 +1078,7 @@
                                                                         class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
-                                                            <div class="flex-center-between mb-3 product-price mt-4">
+                                                            <div class="flex-center-between mb-3 product-price">
                                                                 <div class="prodcut-price mt-3">
                                                                     @if ($topSellingProduct->price_sale)
                                                                         <div
@@ -1169,7 +1176,7 @@
                                                                         class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
-                                                            <div class="flex-center-between mb-3 product-price mt-4">
+                                                            <div class="flex-center-between mb-3 product-price">
                                                                 <div class="prodcut-price mt-3">
                                                                     @if ($topSellingProduct->price_sale)
                                                                         <div
@@ -1460,7 +1467,7 @@
                                                             class="{{ $i <= $keyboardMouseProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $keyboardMouseProduct->rating ? 'text-muted' : '' }}"></small>
                                                     @endfor
                                                 </div>
-                                                <div class="flex-center-between mb-1 product-price mt-4">
+                                                <div class="flex-center-between mb-1 product-price">
                                                     <div class="prodcut-price mt-3">
                                                         @if ($keyboardMouseProduct->price_sale)
                                                             <div
