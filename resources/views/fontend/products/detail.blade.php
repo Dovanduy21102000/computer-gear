@@ -758,19 +758,71 @@
                                                 alt="{{ $related->name }}">
                                         </a>
                                     </div>
+                                    <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <small
+                                                class="{{ $i <= $related->rating ? 'fas' : 'far' }} fa-star {{ $i > $related->rating ? 'text-muted' : '' }}"></small>
+                                        @endfor
+                                    </div>
                                     <div class="flex-center-between mb-1">
                                         <div class="prodcut-price mt-4">
-                                            @if ($related->price_sale)
+                                            @php
+                                                $hasVariant = $related->is_variant && $related->variants->count();
+                                                $variantSalePrices = $hasVariant
+                                                    ? $related->variants
+                                                        ->pluck('price_sale')
+                                                        ->filter(function ($price) {
+                                                            return is_numeric($price) && $price > 0;
+                                                        })
+                                                    : collect();
+                                                $variantBasePrices = $hasVariant
+                                                    ? $related->variants->pluck('price')->filter(function ($price) {
+                                                        return is_numeric($price) && $price > 0;
+                                                    })
+                                                    : collect();
+                                                if ($variantSalePrices->count()) {
+                                                    $minPrice = $variantSalePrices->min();
+                                                    $maxPrice = $variantSalePrices->max();
+                                                    $isSale = true;
+                                                    $originalMin = $variantBasePrices->min();
+                                                    $originalMax = $variantBasePrices->max();
+                                                } else {
+                                                    $minPrice = $variantBasePrices->min();
+                                                    $maxPrice = $variantBasePrices->max();
+                                                    $isSale = false;
+                                                    $originalMin = null;
+                                                    $originalMax = null;
+                                                }
+                                            @endphp
+                                            @if ($hasVariant && $minPrice)
+                                                <span class="text-danger fw-bold">
+                                                    {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                       
+                                                    @endif
+                                                </span>
+                                                @if ($isSale && $originalMin)
+                                                    <br>
+                                                    <del class="text-muted">
+                                                        {{ number_format($originalMin, 0, ',', '.') }}₫@if ($originalMin != $originalMax)
+                                                            
+                                                        @endif
+                                                    </del>
+                                                @endif
+                                            @elseif ($hasVariant)
+                                                <span class="text-danger fw-bold">Liên hệ</span>
+                                            @elseif ($related->price_sale)
                                                 <div class="prodcut-price d-flex align-items-center position-relative">
                                                     <ins
                                                         class="font-size-20 text-red text-decoration-none">{{ number_format($related->price_sale) }}đ</ins>
                                                     <del
                                                         class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($related->price, 0, ',', '.') }}đ</del>
                                                 </div>
-                                            @else
+                                            @elseif ($related->price > 0)
                                                 <div class="text-dark fw-bold fs-5">
                                                     {{ number_format($related->price, 0, ',', '.') }}đ
                                                 </div>
+                                            @else
+                                                <span class="text-danger fw-bold">Liên hệ</span>
                                             @endif
                                         </div>
                                         <div class="d-none d-xl-block prodcut-add-cart">

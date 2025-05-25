@@ -68,6 +68,7 @@
                                         {{ $product->name }}
                                     </a>
                                 </h5>
+
                                 <div class="mb-2">
                                     <a href="{{ route('client.products.detail', $product->slug) }}"
                                         class="d-block text-center">
@@ -76,28 +77,35 @@
                                             alt="{{ $product->name }}">
                                     </a>
                                 </div>
+                                <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <small
+                                            class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                    @endfor
+                                </div>
                                 <div class="flex-center-between mb-1 mt-4">
                                     <div class="prodcut-price">
                                         @if ($hasVariant && $minPrice)
-                                            <span class="text-danger fw-bold">
-                                                {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
-                                                    
-                                                @endif
-                                            </span>
                                             @if ($isSale && $originalMin)
-                                                <br>
-                                                <del class="text-muted">
-                                                    {{ number_format($originalMin, 0, ',', '.') }}₫@if ($originalMin != $originalMax)
-                                                
+                                                <div class="prodcut-price d-flex align-items-center position-relative">
+                                                    <ins
+                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                    <del
+                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                </div>
+                                            @else
+                                                <span class="text-dark fw-bold">
+                                                    {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                        – {{ number_format($maxPrice, 0, ',', '.') }}₫
                                                     @endif
-                                                </del>
+                                                </span>
                                             @endif
                                         @elseif ($hasVariant)
                                             <span class="text-danger fw-bold">Liên hệ</span>
                                         @elseif ($product->price_sale)
                                             <div class="prodcut-price d-flex align-items-center position-relative">
                                                 <ins
-                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale) }}đ</ins>
+                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale, 0, ',', '.') }}đ</ins>
                                                 <del
                                                     class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($product->price, 0, ',', '.') }}đ</del>
                                             </div>
@@ -197,23 +205,34 @@
                                         {{ $product->name }}
                                     </a>
                                 </h5>
+                                <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <small
+                                            class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                    @endfor
+                                </div>
                                 <div class="prodcut-price mb-2">
                                     @if ($hasVariant && $minPrice)
-                                        <span class="text-danger fw-bold">
-                                            {{ number_format($minPrice, 0, ',', '.') }}₫
-                                        </span>
                                         @if ($isSale && $originalMin)
-                                            <br>
-                                            <del class="text-muted">
-                                                {{ number_format($originalMin, 0, ',', '.') }}₫
-                                            </del>
+                                            <div class="prodcut-price d-flex align-items-center position-relative">
+                                                <ins
+                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                <del
+                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                            </div>
+                                        @else
+                                            <span class="text-dark fw-bold">
+                                                {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                    – {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                                @endif
+                                            </span>
                                         @endif
                                     @elseif ($hasVariant)
                                         <span class="text-danger fw-bold">Liên hệ</span>
                                     @elseif ($product->price_sale)
                                         <div class="prodcut-price d-flex align-items-center position-relative">
                                             <ins
-                                                class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale) }}đ</ins>
+                                                class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale, 0, ',', '.') }}đ</ins>
                                             <del
                                                 class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($product->price, 0, ',', '.') }}đ</del>
                                         </div>
@@ -236,18 +255,19 @@
                             <div class="mb-3 d-flex flex-column align-items-center text-center">
                                 <div class="prodcut-price mb-3 d-flex flex-column align-items-start">
                                     @if ($hasVariant && $minPrice)
-                                        <span class="text-danger fw-bold">
-                                            {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
-                                                – {{ number_format($maxPrice, 0, ',', '.') }}₫
-                                            @endif
-                                        </span>
                                         @if ($isSale && $originalMin)
-                                            <br>
-                                            <del class="text-muted">
-                                                {{ number_format($originalMin, 0, ',', '.') }}₫@if ($originalMin != $originalMax)
-                                                    – {{ number_format($originalMax, 0, ',', '.') }}₫
+                                            <div class="prodcut-price d-flex align-items-center position-relative">
+                                                <ins
+                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                <del
+                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                            </div>
+                                        @else
+                                            <span class="text-dark fw-bold">
+                                                {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                    – {{ number_format($maxPrice, 0, ',', '.') }}₫
                                                 @endif
-                                            </del>
+                                            </span>
                                         @endif
                                     @elseif ($hasVariant)
                                         <span class="text-danger fw-bold">Liên hệ</span>
