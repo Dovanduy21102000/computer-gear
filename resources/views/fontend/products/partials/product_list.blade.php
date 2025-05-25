@@ -26,16 +26,28 @@
             @foreach ($products as $product)
                 @php
                     $hasVariant = $product->is_variant && $product->variants->count();
-                    $variantSalePrices = $hasVariant ? $product->variants->pluck('price_sale')->filter() : collect();
-                    $variantBasePrices = $hasVariant ? $product->variants->pluck('price') : collect();
+                    $variantSalePrices = $hasVariant
+                        ? $product->variants->pluck('price_sale')->filter(function ($price) {
+                            return is_numeric($price) && $price > 0;
+                        })
+                        : collect();
+                    $variantBasePrices = $hasVariant
+                        ? $product->variants->pluck('price')->filter(function ($price) {
+                            return is_numeric($price) && $price > 0;
+                        })
+                        : collect();
                     if ($variantSalePrices->count()) {
                         $minPrice = $variantSalePrices->min();
+                        $maxPrice = $variantSalePrices->max();
                         $isSale = true;
                         $originalMin = $variantBasePrices->min();
+                        $originalMax = $variantBasePrices->max();
                     } else {
                         $minPrice = $variantBasePrices->min();
+                        $maxPrice = $variantBasePrices->max();
                         $isSale = false;
                         $originalMin = null;
+                        $originalMax = null;
                     }
                     $sortPrice = $hasVariant ? $minPrice : ($product->price_sale ?: $product->price);
                 @endphp
@@ -66,17 +78,35 @@
                                 </div>
                                 <div class="flex-center-between mb-1 mt-4">
                                     <div class="prodcut-price">
-                                        @if ($product->price_sale)
+                                        @if ($hasVariant && $minPrice)
+                                            <span class="text-danger fw-bold">
+                                                {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                    
+                                                @endif
+                                            </span>
+                                            @if ($isSale && $originalMin)
+                                                <br>
+                                                <del class="text-muted">
+                                                    {{ number_format($originalMin, 0, ',', '.') }}₫@if ($originalMin != $originalMax)
+                                                
+                                                    @endif
+                                                </del>
+                                            @endif
+                                        @elseif ($hasVariant)
+                                            <span class="text-danger fw-bold">Liên hệ</span>
+                                        @elseif ($product->price_sale)
                                             <div class="prodcut-price d-flex align-items-center position-relative">
                                                 <ins
                                                     class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale) }}đ</ins>
                                                 <del
                                                     class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($product->price, 0, ',', '.') }}đ</del>
                                             </div>
-                                        @else
+                                        @elseif ($product->price > 0)
                                             <div class="text-dark fw-bold fs-5 product-price">
                                                 {{ number_format($product->price, 0, ',', '.') }}đ
                                             </div>
+                                        @else
+                                            <span class="text-danger fw-bold">Liên hệ</span>
                                         @endif
                                     </div>
                                     <div class="d-none d-xl-block prodcut-add-cart">
@@ -118,16 +148,28 @@
         @foreach ($products as $product)
             @php
                 $hasVariant = $product->is_variant && $product->variants->count();
-                $variantSalePrices = $hasVariant ? $product->variants->pluck('price_sale')->filter() : collect();
-                $variantBasePrices = $hasVariant ? $product->variants->pluck('price') : collect();
+                $variantSalePrices = $hasVariant
+                    ? $product->variants->pluck('price_sale')->filter(function ($price) {
+                        return is_numeric($price) && $price > 0;
+                    })
+                    : collect();
+                $variantBasePrices = $hasVariant
+                    ? $product->variants->pluck('price')->filter(function ($price) {
+                        return is_numeric($price) && $price > 0;
+                    })
+                    : collect();
                 if ($variantSalePrices->count()) {
                     $minPrice = $variantSalePrices->min();
+                    $maxPrice = $variantSalePrices->max();
                     $isSale = true;
                     $originalMin = $variantBasePrices->min();
+                    $originalMax = $variantBasePrices->max();
                 } else {
                     $minPrice = $variantBasePrices->min();
+                    $maxPrice = $variantBasePrices->max();
                     $isSale = false;
                     $originalMin = null;
+                    $originalMax = null;
                 }
                 $sortPrice = $hasVariant ? $minPrice : ($product->price_sale ?: $product->price);
             @endphp
@@ -156,17 +198,31 @@
                                     </a>
                                 </h5>
                                 <div class="prodcut-price mb-2">
-                                    @if ($product->price_sale)
+                                    @if ($hasVariant && $minPrice)
+                                        <span class="text-danger fw-bold">
+                                            {{ number_format($minPrice, 0, ',', '.') }}₫
+                                        </span>
+                                        @if ($isSale && $originalMin)
+                                            <br>
+                                            <del class="text-muted">
+                                                {{ number_format($originalMin, 0, ',', '.') }}₫
+                                            </del>
+                                        @endif
+                                    @elseif ($hasVariant)
+                                        <span class="text-danger fw-bold">Liên hệ</span>
+                                    @elseif ($product->price_sale)
                                         <div class="prodcut-price d-flex align-items-center position-relative">
                                             <ins
                                                 class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale) }}đ</ins>
                                             <del
                                                 class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($product->price, 0, ',', '.') }}đ</del>
                                         </div>
-                                    @else
+                                    @elseif ($product->price > 0)
                                         <div class="text-dark fw-bold fs-5 product-price">
                                             {{ number_format($product->price, 0, ',', '.') }}đ
                                         </div>
+                                    @else
+                                        <span class="text-danger fw-bold">Liên hệ</span>
                                     @endif
                                 </div>
                                 <ul class="font-size-12 p-0 text-gray-110 mb-4 d-none d-md-block">
@@ -179,16 +235,22 @@
                         <div class="product-item__footer col-md-3 d-md-block">
                             <div class="mb-3 d-flex flex-column align-items-center text-center">
                                 <div class="prodcut-price mb-3 d-flex flex-column align-items-start">
-                                    @if ($hasVariant)
+                                    @if ($hasVariant && $minPrice)
                                         <span class="text-danger fw-bold">
-                                            {{ number_format($minPrice, 0, ',', '.') }}₫
+                                            {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                – {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                            @endif
                                         </span>
-                                        @if ($isSale)
+                                        @if ($isSale && $originalMin)
                                             <br>
                                             <del class="text-muted">
-                                                {{ number_format($originalMin, 0, ',', '.') }}₫
+                                                {{ number_format($originalMin, 0, ',', '.') }}₫@if ($originalMin != $originalMax)
+                                                    – {{ number_format($originalMax, 0, ',', '.') }}₫
+                                                @endif
                                             </del>
                                         @endif
+                                    @elseif ($hasVariant)
+                                        <span class="text-danger fw-bold">Liên hệ</span>
                                     @elseif ($product->price_sale)
                                         <div class="text-danger font-weight-bold">
                                             {{ number_format($product->price_sale, 0, ',', '.') }}đ
@@ -201,10 +263,12 @@
                                                 -{{ round((1 - $product->price_sale / $product->price) * 100) }}%
                                             </span>
                                         </div>
-                                    @else
+                                    @elseif ($product->price > 0)
                                         <div class="text-dark font-weight-bold">
                                             {{ number_format($product->price, 0, ',', '.') }}đ
                                         </div>
+                                    @else
+                                        <span class="text-danger fw-bold">Liên hệ</span>
                                     @endif
                                 </div>
                                 <div class="d-none d-xl-block prodcut-add-cart w-100">

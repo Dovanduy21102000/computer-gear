@@ -189,38 +189,53 @@
                                             @php
                                                 $hasVariant = $product->is_variant && $product->variants->count();
                                                 $variantSalePrices = $hasVariant
-                                                    ? $product->variants->pluck('price_sale')->filter()
+                                                    ? $product->variants
+                                                        ->pluck('price_sale')
+                                                        ->filter(function ($price) {
+                                                            return is_numeric($price) && $price > 0;
+                                                        })
                                                     : collect();
                                                 $variantBasePrices = $hasVariant
-                                                    ? $product->variants->pluck('price')
+                                                    ? $product->variants->pluck('price')->filter(function ($price) {
+                                                        return is_numeric($price) && $price > 0;
+                                                    })
                                                     : collect();
                                                 if ($variantSalePrices->count()) {
                                                     $minPrice = $variantSalePrices->min();
+                                                    $maxPrice = $variantSalePrices->max();
                                                     $isSale = true;
                                                     $originalMin = $variantBasePrices->min();
+                                                    $originalMax = $variantBasePrices->max();
                                                 } else {
                                                     $minPrice = $variantBasePrices->min();
+                                                    $maxPrice = $variantBasePrices->max();
                                                     $isSale = false;
                                                     $originalMin = null;
+                                                    $originalMax = null;
                                                 }
                                             @endphp
-                                            @if ($hasVariant)
+                                            @if ($hasVariant && $minPrice)
                                                 <span class="text-danger fw-bold">
                                                     {{ number_format($minPrice, 0, ',', '.') }}₫
                                                 </span>
-                                                @if ($isSale)
+                                                @if ($isSale && $originalMin)
                                                     <br>
                                                     <del class="text-muted">
                                                         {{ number_format($originalMin, 0, ',', '.') }}₫
                                                     </del>
                                                 @endif
+                                            @elseif ($hasVariant)
+                                                <span class="text-danger fw-bold">Liên hệ</span>
                                             @elseif ($product->price_sale)
-                                                <del
-                                                    class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
                                                 <span
                                                     class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
-                                            @else
+                                                <br>
+                                                <del
+                                                    class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
+                                            @elseif ($product->price > 0)
                                                 {{ number_format($product->price, 0, ',', '.') }}₫
+                                            @else
+                                                <span class="text-danger fw-bold">Liên hệ</span>
                                             @endif
                                         </div>
                                     </div>
@@ -279,7 +294,8 @@
                             data-style="btn-sm bg-white font-weight-normal py-2 border text-gray-20 bg-lg-down-transparent border-lg-down-0">
                             <option value="mac-dinh" @if (($sortSlug ?? '') == 'mac-dinh' || empty($sortSlug)) selected @endif>Sắp xếp mặc định
                             </option>
-                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo mới
+                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo
+                                mới
                                 nhất</option>
                             <option value="gia-thap-nhat" @if (($sortSlug ?? '') == 'gia-thap-nhat') selected @endif>Sắp xếp từ
                                 thấp tới cao</option>
@@ -310,9 +326,9 @@
                             </div>
                             <div id="ajaxProductList">
                                 <ul class="row product-list">
-                                @include('fontend.products.partials.product_list', [
-                                    'products' => $products,
-                                ])
+                                    @include('fontend.products.partials.product_list', [
+                                        'products' => $products,
+                                    ])
                                 </ul>
                             </div>
                         </div>
