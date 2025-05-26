@@ -110,22 +110,31 @@
                             <tbody>
                                 @foreach ($orderItems as $item)
                                     <tr>
-                                        <td>{{ $item->product->name }}</td>
+                                        <td>{{ $item->getProductName() }}</td>
                                         <td class="text-center">
-                                            <img src="{{ asset('storage/' . $item->product->thumbnail) }}"
-                                                alt="{{ $item->product->name }}" class="img-fluid"
-                                                style="max-width: 100px;">
+                                            @if ($item->getDisplayImage())
+                                                <img src="{{ asset('storage/' . $item->getDisplayImage()) }}"
+                                                    alt="{{ $item->getProductName() }}" class="img-fluid"
+                                                    style="max-width: 100px;">
+                                            @else
+                                                <span class="text-muted">Image not available</span>
+                                            @endif
                                         </td>
                                         <td>
-                                            @if ($item->productVariant)
-                                                <strong>{{ $item->productVariant->sku }}</strong> <br>
+                                            @if ($item->getProductVariantInfo())
+                                                <strong>{{ $item->getProductVariantInfo()['sku'] ?? 'N/A' }}</strong>
+                                                <br>
                                                 <span class="text-muted">
-                                                    @foreach ($item->productVariant->attributeValues as $attr)
-                                                        {{ $attr->name }}{{ !$loop->last ? ', ' : '' }}
-                                                    @endforeach
+                                                    @if ($item->productVariant && $item->productVariant->exists)
+                                                        @foreach ($item->productVariant->attributeValues as $attr)
+                                                            {{ $attr->name }}{{ !$loop->last ? ', ' : '' }}
+                                                        @endforeach
+                                                    @else
+                                                        {{ $item->getProductVariantInfo()['attributes'] ?? 'N/A' }}
+                                                    @endif
                                                 </span>
                                             @else
-                                                {{ $item->product->name }}
+                                                {{ $item->getProductName() }}
                                             @endif
                                         </td>
                                         <td class="text-center">{{ $item->quantity }}</td>

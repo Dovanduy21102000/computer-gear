@@ -6,10 +6,12 @@ use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\CategoryPost;
 use App\Models\Product;
+use App\Models\OrderItem;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use App\Observers\OrderItemObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -81,5 +83,7 @@ class AppServiceProvider extends ServiceProvider
             $admin = \App\Models\User::where('role', 'admin')->first();
             $view->with('admin', $admin);
         });
+
+        OrderItem::observe(OrderItemObserver::class);
     }
 }
