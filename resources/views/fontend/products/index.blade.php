@@ -52,58 +52,46 @@
                             <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                 <ul id="sidebarNav" class="list-unstyled mb-0">
                                     <li class="nav-item">
-                                        <a class="dropdown-toggle text-uppercase font-weight-bold d-block p-3 bg-light rounded"
+                                        {{-- <a class="dropdown-toggle text-uppercase font-weight-bold d-block p-3 bg-light rounded"
                                             href="javascript:;" role="button" data-toggle="collapse"
                                             aria-expanded="false" aria-controls="sidebarNav1Collapse"
                                             data-target="#sidebarNav1Collapse">
                                             <i class="bi bi-list"></i> Tất cả danh mục
-                                        </a>
+                                        </a> --}}
 
                                         <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                             <ul id="sidebarNav1" class="list-unstyled pl-3">
-                                                <!-- Danh mục -->
-                                                @foreach ($categories as $category)
-                                                    <li class="nav-item">
-                                                        @php
-                                                            $query = request()->all();
-                                                            $query['category'] = $category->slug;
-                                                        @endphp
-                                                        <a class="dropdown-item d-flex justify-content-between align-items-center"
-                                                            href="{{ route('client.products.filter', $query) }}">
-                                                            <span>{{ $category->name }}</span>
-                                                            <span class="badge badge-pill badge-secondary">
-                                                                @php
-                                                                    $totalProducts = $category->products()->count();
-                                                                    foreach ($category->children as $child) {
-                                                                        $totalProducts += $child->products()->count();
-                                                                    }
-                                                                @endphp
-                                                                {{ $totalProducts }}
-                                                            </span>
-                                                        </a>
-
-                                                        @if ($category->children->count())
-                                                            <ul class="list-unstyled pl-3">
-                                                                @foreach ($category->children as $child)
-                                                                    @php
-                                                                        $query = request()->all();
-                                                                        $query['category'] = $child->slug;
-                                                                    @endphp
-                                                                    <li class="nav-item">
-                                                                        <a class="dropdown-item d-flex justify-content-between align-items-center"
-                                                                            href="{{ route('client.products.filter', $query) }}">
-                                                                            <span>{{ $child->name }}</span>
-                                                                            <span
-                                                                                class="badge badge-pill badge-secondary">
-                                                                                {{ $child->products()->count() }}
-                                                                            </span>
-                                                                        </a>
-                                                                    </li>
-                                                                @endforeach
-                                                            </ul>
-                                                        @endif
-                                                    </li>
-                                                @endforeach
+                                                @php
+                                                    if (!function_exists('renderCategorySidebar')) {
+                                                        function renderCategorySidebar($categories)
+                                                        {
+                                                            foreach ($categories as $category) {
+                                                                echo '<li class="nav-item">';
+                                                                $query = request()->all();
+                                                                $query['category'] = $category->slug;
+                                                                $totalProducts = $category->products->count();
+                                                                foreach ($category->children as $child) {
+                                                                    $totalProducts += $child->products->count();
+                                                                }
+                                                                echo '<a class="dropdown-item d-flex justify-content-between align-items-center" href="' .
+                                                                    route('client.products.filter', $query) .
+                                                                    '">';
+                                                                echo '<span>' . $category->name . '</span>';
+                                                                echo '<span class="badge badge-pill badge-secondary">' .
+                                                                    $totalProducts .
+                                                                    '</span>';
+                                                                echo '</a>';
+                                                                if ($category->children->count()) {
+                                                                    echo '<ul class="list-unstyled pl-3">';
+                                                                    renderCategorySidebar($category->children);
+                                                                    echo '</ul>';
+                                                                }
+                                                                echo '</li>';
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+                                                @php renderCategorySidebar($categories); @endphp
                                             </ul>
                                         </div>
                                     </li>
@@ -264,8 +252,8 @@
                     <div class="d-xl-none">
                         <!-- Account Sidebar Toggle Button -->
                         <a id="sidebarNavToggler1" class="btn btn-sm py-1 font-weight-normal" href="javascript:;"
-                            role="button" aria-controls="sidebarContent1" aria-haspopup="true"
-                            aria-expanded="false" data-unfold-event="click" data-unfold-hide-on-scroll="false"
+                            role="button" aria-controls="sidebarContent1" aria-haspopup="true" aria-expanded="false"
+                            data-unfold-event="click" data-unfold-hide-on-scroll="false"
                             data-unfold-target="#sidebarContent1" data-unfold-type="css-animation"
                             data-unfold-animation-in="fadeInLeft" data-unfold-animation-out="fadeOutLeft"
                             data-unfold-duration="500">
