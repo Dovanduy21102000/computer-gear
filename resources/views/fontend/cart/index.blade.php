@@ -151,7 +151,7 @@
                                             </a>
                                         </td>
                                         <td>
-                                            <a href="#" class="text-gray-90">{{ $item->product->name }}</a>
+                                            <a href="#" class="text-black">{{ $item->product->name }}</a>
                                             @if ($item->productVariant)
                                                 <div class="variant-attributes">
                                                     @php

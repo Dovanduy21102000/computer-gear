@@ -10,7 +10,7 @@
                      <!-- Logo -->
                      <a class="order-1 order-xl-0 navbar-brand u-header__navbar-brand u-header__navbar-brand-center"
                          href="{{ route('home.index') }}" aria-label="Computer Gear">
-                         <img src="{{ asset('fontend/assets/img/logo-transparent.png') }}" alt="computergear">
+                         <img src="{{ asset('fontend/assets/img/computergearlogo.png') }}" alt="computergear">
                      </a>
                      <!-- End Logo -->
 
@@ -240,12 +240,12 @@
                      <i class="ec ec-support font-size-50 text-primary"></i>
                      <div class="ml-2">
                          <div class="phone">
-                             <strong>Hỗ trợ</strong> <a href="tel:800856800604" class="text-gray-90">(+800) 856 800
+                             <strong>Hỗ trợ:</strong> <a href="tel:800856800604" class="" style="text-decoration: ">(+800) 856 800
                                  604</a>
                          </div>
                          <div class="email">
                              E-mail: <a href="mailto:info@electro.com?subject=Help Need"
-                                 class="text-gray-90">DoDuy123@gmail.com</a>
+                                 class="" style="text-decoration: none">computergear@gmail.com</a>
                          </div>
                      </div>
                  </div>
