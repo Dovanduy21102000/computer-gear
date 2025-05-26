@@ -70,6 +70,8 @@ class ProductClientController extends Controller
         ];
         $sortSlug = $sort ?? $request->route('sort');
         $sortParam = $sortMap[$sortSlug] ?? null;
+        Log::info('Sort Slug: ' . $sortSlug);
+        Log::info('Sort Param: ' . $sortParam);
         if ($sortParam) {
             switch ($sortParam) {
                 case 'price_asc':

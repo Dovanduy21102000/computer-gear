@@ -173,7 +173,7 @@
                                                     class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
                                             @endfor
                                         </div>
-                                        <div class="font-weight-bold">
+                                        <div class="">
                                             @php
                                                 $hasVariant = $product->is_variant && $product->variants->count();
                                                 $variantSalePrices = $hasVariant
@@ -212,14 +212,14 @@
                                                             class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
                                                     </div>
                                                 @else
-                                                    <span class="text-dark fw-bold">
+                                                    <span class="text-dark">
                                                         {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
                                                             – {{ number_format($maxPrice, 0, ',', '.') }}₫
                                                         @endif
                                                     </span>
                                                 @endif
                                             @elseif ($hasVariant)
-                                                <span class="text-danger fw-bold">Liên hệ</span>
+                                                <span class="text-danger">Liên hệ</span>
                                             @elseif ($product->price_sale)
                                                 <div class="prodcut-price d-flex align-items-center position-relative">
                                                     <ins
@@ -228,7 +228,7 @@
                                                         class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($product->price, 0, ',', '.') }}đ</del>
                                                 </div>
                                             @elseif ($product->price > 0)
-                                                <div class="text-dark fw-bold fs-5 product-price">
+                                                <div class="text-d fs-5 product-price">
                                                     {{ number_format($product->price, 0, ',', '.') }}đ
                                                 </div>
                                             @else
@@ -291,8 +291,7 @@
                             data-style="btn-sm bg-white font-weight-normal py-2 border text-gray-20 bg-lg-down-transparent border-lg-down-0">
                             <option value="mac-dinh" @if (($sortSlug ?? '') == 'mac-dinh' || empty($sortSlug)) selected @endif>Sắp xếp mặc định
                             </option>
-                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo
-                                mới
+                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo mới
                                 nhất</option>
                             <option value="gia-thap-nhat" @if (($sortSlug ?? '') == 'gia-thap-nhat') selected @endif>Sắp xếp từ
                                 thấp tới cao</option>
@@ -322,11 +321,11 @@
                                         class="sr-only">Loading...</span></div>
                             </div>
                             <div id="ajaxProductList">
-                                <ul class="row product-list">
+                                
                                     @include('fontend.products.partials.product_list', [
                                         'products' => $products,
                                     ])
-                                </ul>
+                                
                                 <div class="pagination-container d-flex justify-content-center mt-5 position-static">
                                     @if ($products->hasMorePages())
                                         <button id="showMoreBtn" class="btn btn-primary"
@@ -433,7 +432,7 @@
     });
 
     let currentPage = 1;
-    const perPage = 20; // Set this to your pagination limit
+    const perPage = {{ $products->perPage() }};
 
     function handleShowMoreClick(e) {
         if (e.target && e.target.id === 'showMoreBtn') {
@@ -492,4 +491,36 @@
     }
     document.removeEventListener('click', handleShowMoreClick);
     document.addEventListener('click', handleShowMoreClick);
+
+    function padProductGrid() {
+        const productList = document.querySelector('.product-list');
+        if (!productList) return;
+        // Remove old invisible items
+        productList.querySelectorAll('.product-item.invisible-padding').forEach(el => el.remove());
+        const items = productList.querySelectorAll('.product-item:not(.invisible-padding)');
+        const columns = 4;
+        const remainder = items.length % columns;
+        if (items.length > 0 && remainder !== 0) {
+            const toAdd = columns - remainder;
+            for (let i = 0; i < toAdd; i++) {
+                const li = document.createElement('li');
+                li.className = 'col-6 col-md-3 product-item invisible-padding';
+                li.style.visibility = 'hidden';
+                productList.appendChild(li);
+            }
+        }
+    }
+    document.addEventListener('DOMContentLoaded', padProductGrid);
+    // Call after AJAX updates
+    function triggerPadAfterAjax() {
+        padProductGrid();
+    }
+    // Patch into AJAX product update logic
+    const origFetch = window.fetch;
+    window.fetch = function() {
+        return origFetch.apply(this, arguments).then(res => {
+            setTimeout(padProductGrid, 100); // Wait for DOM update
+            return res;
+        });
+    };
 </script>

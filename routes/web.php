@@ -49,7 +49,7 @@ use Illuminate\Support\Facades\Route;
 // Admin Routes
 Route::prefix('admin')->group(function () {
     // Đăng nhập và đăng xuất dành cho admin
-  Route::get('login', [AuthController::class, 'index'])->name('auth.admin');
+    Route::get('login', [AuthController::class, 'index'])->name('auth.admin');
     Route::post('login', [AuthController::class, 'login'])->name('auth.admin.login');
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.admin.logout');
 
@@ -181,6 +181,7 @@ Route::middleware(['web'])->group(function () {
 
 
     Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
+    Route::get('/products/sort/{sort}', [ProductClientController::class, 'index'])->name('client.products.sort');
     Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
 
     Route::get('/products/brand/{brandSlug}', [ProductClientController::class, 'showByBrand'])->name('client.products.brand');
@@ -275,8 +276,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment/resume/{id}', [PaymentResumeController::class, 'resume'])->name('payment.resume.process');
     Route::get('/payment/cancel/{id}', [PaymentResumeController::class, 'cancel'])->name('payment.resume.cancel');
 });
-
-Route::get('/products/sort/{sort}', [ProductClientController::class, 'index'])->name('client.products.sort');
 
 Route::get('/admin', function () {
     if (auth('admin')->check()) {
