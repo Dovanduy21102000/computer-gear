@@ -72,7 +72,7 @@
                                 <div class="mb-2">
                                     <a href="{{ route('client.products.detail', $product->slug) }}"
                                         class="d-block text-center">
-                                        <img class="img-fluid w-100" style="height: 150px; object-fit: cover;"
+                                        <img class="img-fluid" style="height: 150px; width: 225px; object-fit: cover;"
                                             src="{{ asset('storage/' . $product->thumbnail) }}"
                                             alt="{{ $product->name }}">
                                     </a>
