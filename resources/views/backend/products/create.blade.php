@@ -38,13 +38,41 @@
                             <div class="row mb-3">
                                 <label for="category_id" class="col-sm-2 col-form-label">Danh mục</label>
                                 <div class="col-sm-10">
-                                    <select class="form-select" id="category_id" name="category_id" required>
+                                    <select id="category_id" name="category_id" class="form-select" required>
                                         <option value="">Chọn danh mục</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}"
-                                                {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                                {{ $category->name }}</option>
-                                        @endforeach
+                                        @php
+                                            function renderCategoryOptions(
+                                                $categories,
+                                                $parentId = null,
+                                                $parentName = null,
+                                            ) {
+                                                foreach ($categories as $category) {
+                                                    if ($category['parent_id'] == $parentId) {
+                                                        $hasChildren =
+                                                            collect($categories)
+                                                                ->where('parent_id', $category['id'])
+                                                                ->count() > 0;
+                                                        // Only show parent label if this is a child and has children
+                                                        $displayName =
+                                                            $parentName && $hasChildren
+                                                                ? "{$category['name']} ({$parentName})"
+                                                                : $category['name'];
+                                                        if ($hasChildren) {
+                                                            echo "<optgroup label=\"{$displayName}\">";
+                                                            renderCategoryOptions(
+                                                                $categories,
+                                                                $category['id'],
+                                                                $category['name'],
+                                                            );
+                                                            echo '</optgroup>';
+                                                        } else {
+                                                            echo "<option value=\"{$category['id']}\">{$displayName}</option>";
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        @endphp
+                                        @php renderCategoryOptions($allCategories); @endphp
                                     </select>
                                 </div>
                             </div>
@@ -400,19 +428,35 @@
         const priceSaleInput = document.getElementById('price_sale');
         const quantityInput = document.getElementById('quantity');
 
-        if (select.value === '1') {
+        // Get all input elements within the variants section
+        const variantInputs = variantsSection.querySelectorAll('input, select, textarea');
+
+        if (select.value === '1') { // '1' means "Has variants"
             variantsSection.style.display = 'block';
             quantitySection.style.display = 'none';
             priceSection.style.display = 'none';
+
+            // Enable variant inputs and remove required from non-variant inputs
+            variantInputs.forEach(input => {
+                input.removeAttribute('disabled');
+                // Re-add required based on original markup or data attributes if needed
+                // For simplicity, we assume required is set in the initial HTML for variants
+            });
             priceInput.removeAttribute('required');
             priceSaleInput.removeAttribute('required');
             quantityInput.removeAttribute('required');
-        } else {
+
+        } else { // '0' means "Does not have variants"
             variantsSection.style.display = 'none';
             quantitySection.style.display = 'block';
             priceSection.style.display = 'block';
+
+            // Disable variant inputs and set required for non-variant inputs
+            variantInputs.forEach(input => {
+                input.setAttribute('disabled', 'disabled');
+            });
             priceInput.setAttribute('required', 'required');
-            priceSaleInput.removeAttribute('required');
+            priceSaleInput.removeAttribute('required'); // price_sale is optional
             quantityInput.setAttribute('required', 'required');
         }
     }
@@ -588,3 +632,22 @@
         }
     }
 </script>
+
+@push('styles')
+    <style>
+        .select2-results__option {
+            font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('#category_id').treeselect({
+                search: true,
+                placeholder: 'Chọn danh mục',
+            });
+        });
+    </script>
+@endpush

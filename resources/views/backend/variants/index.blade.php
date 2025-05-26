@@ -16,7 +16,8 @@
                     <div class="card-body">
                         <h5 class="card-title text-dark">Quản lý sản phẩm biến thể của {{ $product->name }}</h5>
                         <div class="d-flex justify-content-between mb-3">
-                            <a class="btn btn-success" href="{{ route('variants.create', ['product' => $product->id]) }}">
+                            <a class="btn btn-success"
+                                href="{{ route('variants.create', ['product' => $product->id]) }}">
                                 Thêm mới
                             </a>
                             <input class="form-control w-25" placeholder="Tìm kiếm..." type="search" name="search">
@@ -39,9 +40,8 @@
                                         <tr>
                                             <td class="text-center">
                                                 @if ($variant->image)
-                                                    <img src="{{ Storage::url($variant->image) }}" 
-                                                         width="50" height="50" style="border-radius: 5px;" 
-                                                         alt="Ảnh sản phẩm">
+                                                    <img src="{{ Storage::url($variant->image) }}" width="50"
+                                                        height="50" style="border-radius: 5px;" alt="Ảnh sản phẩm">
                                                 @else
                                                     <span>Không có ảnh</span>
                                                 @endif
@@ -51,7 +51,7 @@
                                                 @if ($variant->attributeValues && $variant->attributeValues->count())
                                                     @foreach ($variant->attributeValues as $attrValue)
                                                         <span>
-                                                            @if(isset($attrValue->attribute))
+                                                            @if (isset($attrValue->attribute))
                                                                 {{ $attrValue->attribute->name }}:
                                                             @endif
                                                             {{ $attrValue->value }}
@@ -67,27 +67,28 @@
                                             </td>
                                             <td class="text-center">{{ $variant->quantity }}</td>
                                             <td class="text-center">
-                                                @if ($variant->status == 1)
-                                                    <span class="badge bg-success">Kích hoạt</span>
-                                                @else
-                                                    <span class="badge bg-danger">Vô hiệu hóa</span>
-                                                @endif
+                                                <span
+                                                    class="badge status-toggle {{ $variant->status == 1 ? 'bg-success' : 'bg-danger' }}"
+                                                    data-id="{{ $variant->id }}" style="cursor:pointer">
+                                                    {{ $variant->status == 1 ? 'Kích hoạt' : 'Vô hiệu hóa' }}
+                                                </span>
                                             </td>
                                             <td class="text-center">
-                                                <a href="{{ route('variants.show', ['product' => $product->id, 'variant' => $variant->id]) }}" 
-                                                   class="btn btn-outline-primary btn-sm">
-                                                   <i class="fas fa-eye"></i>
+                                                <a href="{{ route('variants.show', ['product' => $product->id, 'variant' => $variant->id]) }}"
+                                                    class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('variants.edit', ['product' => $product->id, 'variant' => $variant->id]) }}" 
-                                                   class="btn btn-outline-warning btn-sm">
-                                                   <i class="fas fa-edit"></i>
+                                                <a href="{{ route('variants.edit', ['product' => $product->id, 'variant' => $variant->id]) }}"
+                                                    class="btn btn-outline-warning btn-sm">
+                                                    <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route('variants.destroy', ['product' => $product->id, 'variant' => $variant->id]) }}" 
-                                                      method="POST" class="d-inline">
+                                                <form
+                                                    action="{{ route('variants.destroy', ['product' => $product->id, 'variant' => $variant->id]) }}"
+                                                    method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger btn-sm" 
-                                                            onclick="return confirm('Bạn có chắc muốn xóa?')">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                        onclick="return confirm('Bạn có chắc muốn xóa?')">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -97,7 +98,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                     </div><!-- End card-body -->
                 </div><!-- End card -->
             </div>

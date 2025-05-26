@@ -18,7 +18,7 @@ class ProductClientController extends Controller
 {
     public function __construct() {}
 
-    public function index(Request $request)
+    public function index(Request $request, $sort = null)
     {
         $query = Product::where('status', true);
         $category = null;
@@ -61,7 +61,37 @@ class ProductClientController extends Controller
             }
         }
 
-        $products = $query->paginate(20);
+        // SEO-friendly sort from route (pretty slugs)
+        $sortMap = [
+            'gia-cao-nhat' => 'price_desc',
+            'gia-thap-nhat' => 'price_asc',
+            'moi-nhat' => 'newest',
+            'mac-dinh' => 'default',
+        ];
+        $sortSlug = $sort ?? $request->route('sort');
+        $sortParam = $sortMap[$sortSlug] ?? null;
+        Log::info('Sort Slug: ' . $sortSlug);
+        Log::info('Sort Param: ' . $sortParam);
+        if ($sortParam) {
+            switch ($sortParam) {
+                case 'price_asc':
+                    $query->orderByRaw('COALESCE(price_sale, price) ASC');
+                    break;
+                case 'price_desc':
+                    $query->orderByRaw('COALESCE(price_sale, price) DESC');
+                    break;
+                case 'newest':
+                    $query->orderByDesc('created_at');
+                    break;
+                default:
+                    $query->orderByDesc('created_at');
+                    break;
+            }
+        } else {
+            $query->orderByDesc('created_at');
+        }
+
+        $products = $query->paginate(20)->appends(request()->query());
 
         // Danh mục cấp cha
         $categories = Category::where('is_active', true)
@@ -79,10 +109,15 @@ class ProductClientController extends Controller
         $brands = $brandsQuery->get();
         $newProduct = $this->getNewProduct();
 
+        if ($request->ajax()) {
+            return view('fontend.products.partials.product_list', [
+                'products' => $products,
+                'view' => $view ?? 'grid',
+            ]);
+        }
+
         $template = 'fontend.products.index';
-
-
-        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category', 'newProduct'));
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category', 'newProduct', 'sortParam', 'sortSlug'));
     }
 
     public function getNewProduct()
@@ -100,9 +135,6 @@ class ProductClientController extends Controller
             ->take(5)
             ->get();
     }
-
-
-
 
     public function show($slug)
     {
@@ -152,6 +184,31 @@ class ProductClientController extends Controller
 
     public function getVariant(Request $request)
     {
+        // If get_all is set, return all variants for the product with their attributes
+        if ($request->get('get_all')) {
+            $variants = ProductVariant::where('product_id', $request->product_id)
+                ->with(['attributeValues.attribute'])
+                ->get();
+            $result = [];
+            foreach ($variants as $variant) {
+                $attributes = [];
+                foreach ($variant->attributeValues as $attrVal) {
+                    if ($attrVal->attribute) {
+                        // Use the same key format as in the frontend (lowercase, underscores)
+                        $key = strtolower(str_replace(' ', '_', $attrVal->attribute->name));
+                        $attributes[$key] = $attrVal->value;
+                    }
+                }
+                $result[] = [
+                    'attributes' => $attributes,
+                    'price' => $variant->price,
+                    'price_sale' => $variant->price_sale,
+                    'quantity' => $variant->quantity,
+                ];
+            }
+            return response()->json($result);
+        }
+
         // Log để kiểm tra request
         Log::info('Received request:', $request->all());
 
@@ -186,9 +243,10 @@ class ProductClientController extends Controller
 
         // Trả về thông tin biến thể
         return response()->json([
-            'price' => number_format($variant->price, 0, ',', '.') . '₫',
-            'price_sale' => $variant->price_sale ? number_format($variant->price_sale, 0, ',', '.') . '₫' : null,
-            'quantity' => $variant->quantity ?? 0,
+            'price' => number_format($variant->price, 0, ',', '.'),
+            'price_sale' => $variant->price_sale ? number_format($variant->price_sale, 0, ',', '.') : null,
+            'quantity' => $variant->quantity,
+            'image' => $variant->image,
         ]);
     }
     private function getAllCategoryIds($category)
@@ -218,7 +276,7 @@ class ProductClientController extends Controller
             $productsQuery->whereIn('brand_id', $brandIds);
         }
 
-        $products = $productsQuery->paginate(20);
+        $products = $productsQuery->paginate(20)->appends(request()->query());
 
         // Dữ liệu khác
         $brands = Brand::where('is_active', 1)->get();
@@ -247,7 +305,8 @@ class ProductClientController extends Controller
 
         $products = Product::where('brand_id', $brand->id)
             ->where('status', true)
-            ->paginate(20);
+            ->paginate(20)
+            ->appends(request()->query());
 
         $categories = Category::where('is_active', true)->whereNull('parent_id')->with('children')->get();
 
@@ -304,7 +363,14 @@ class ProductClientController extends Controller
             $productsQuery->whereIn('brand_id', $brandIds);
         }
 
-        $products = $productsQuery->paginate(20);
+        $products = $productsQuery->paginate(20)->appends(request()->query());
+
+        if ($request->ajax()) {
+            return view('fontend.products.partials.product_list', [
+                'products' => $products,
+                'view' => $view ?? 'grid',
+            ]);
+        }
 
         $categories = Category::where('is_active', true)
             ->whereNull('parent_id')

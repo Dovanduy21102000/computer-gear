@@ -167,45 +167,28 @@
             </li> --}}
 
             <li class="nav-item dropdown pe-3">
-                <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                    <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : asset('backend/img/profile-img.jpg') }}" 
+                @if (auth('admin')->check())
+                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#"
+                        data-bs-toggle="dropdown">
+                        <img src="{{ auth('admin')->user()->avatar ? asset('storage/' . auth('admin')->user()->avatar) : asset('backend/img/profile-img.jpg') }}"
                          alt="Profile" class="rounded-circle">
-                    <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->name }}</span>
+                        <span class="d-none d-md-block dropdown-toggle ps-2">{{ auth('admin')->user()->name }}</span>
                 </a><!-- End Profile Image Icon -->
             
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                     <li class="dropdown-header">
-                        <h6>{{ Auth::user()->name }}</h6>
-                        <span>{{ Auth::user()->email }}</span>
+                            <h6>{{ auth('admin')->user()->name }}</h6>
+                            <span>{{ auth('admin')->user()->email }}</span>
                     </li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>
             
                     <li>
-                        <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.profile.show') }}">
+                            <a class="dropdown-item d-flex align-items-center"
+                                href="{{ route('backend.profile.show') }}">
                             <i class="bi bi-person"></i>
                             <span>My Profile</span>
-                        </a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-            
-                    {{-- <li>
-                        <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.profile.edit') }}">
-                            <i class="bi bi-gear"></i>
-                            <span>Account Settings</span>
-                        </a>
-                    </li> --}}
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-            
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="#">
-                            <i class="bi bi-question-circle"></i>
-                            <span>Need Help?</span>
                         </a>
                     </li>
                     <li>
@@ -218,7 +201,11 @@
                             <span>Sign Out</span>
                         </a>
                     </li>
-                </ul><!-- End Profile Dropdown Items -->
+                    @else
+                        <script>
+                            window.location.href = "{{ route('auth.admin.login') }}";
+                        </script>
+                @endif
             </li><!-- End Profile Nav -->
             
 

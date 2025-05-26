@@ -29,7 +29,11 @@ class HomeController extends Controller
         };
 
         // Sản phẩm mới nhất
-        $newProducts = Product::whereHas('category', $activeCategoryBrand)
+        $newProducts = Product::with(['variants' => function ($query) {
+            $query->select('id', 'product_id', 'price', 'price_sale')
+                ->orderByRaw('COALESCE(price_sale, price) ASC');
+        }])
+            ->whereHas('category', $activeCategoryBrand)
             ->whereHas('brand', $activeCategoryBrand)
             ->latest()
             ->take(24)

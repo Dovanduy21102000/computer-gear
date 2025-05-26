@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Events\VariantUpdated;
+use Illuminate\Support\Facades\Log;
 
 class ProductVariantController extends Controller
 {
@@ -82,6 +83,7 @@ class ProductVariantController extends Controller
             'image' => $imagePath,
             'attributes' => json_encode($request->input('attributes')),
         ]);
+        event(new \App\Events\ProductVariantCreated($variant));
         event(new VariantUpdated($variant));
 
         // Sync attribute values
@@ -198,6 +200,7 @@ class ProductVariantController extends Controller
             $imagePath = $variant->image;
         }
 
+        $oldStatus = $variant->status;
         $variant->update([
             'sku' => $request->sku,
             'price' => $request->price,
@@ -206,6 +209,9 @@ class ProductVariantController extends Controller
             'image' => $imagePath,
             'status' => $request->status,
         ]);
+        if ($oldStatus != $request->status) {
+            event(new \App\Events\ProductVariantStatusChanged($variant));
+        }
         event(new VariantUpdated($variant));
 
         // Sync attribute values
@@ -220,8 +226,37 @@ class ProductVariantController extends Controller
             $variant->attributeValues()->detach();
         }
 
-        return redirect()->route('variants.index', ['product' => $product->id])
-            ->with('success', 'Biến thể đã được cập nhật.');
+        // Recalculate main product's min price, min sale price, and total quantity
+        $variants = $product->variants()->get();
+        if ($variants->isNotEmpty()) {
+            $minPrice = $variants->min('price');
+            $minSalePrice = $variants->whereNotNull('price_sale')->min('price_sale');
+            $totalQuantity = $variants->sum('quantity');
+
+            $product->price = $minPrice;
+            $product->price_sale = $minSalePrice ?: null;
+            $product->quantity = $totalQuantity;
+        } else {
+            // If no variants, set default values
+            $product->price = 0;
+            $product->price_sale = null;
+            $product->quantity = 0;
+        }
+
+        Log::info('Product state before save (Variant Update)', [
+            'product_id' => $product->id,
+            'attributes' => $product->getAttributes(),
+            'deleted_at' => $product->deleted_at,
+            'isDirty' => $product->isDirty(),
+            'getDirty' => $product->getDirty(),
+        ]);
+
+        $product->save();
+
+        // Broadcast ProductUpdated event
+        event(new \App\Events\ProductUpdated($product));
+
+        return redirect()->back()->with('success', 'Biến thể đã được cập nhật.');
     }
 
 
@@ -231,8 +266,17 @@ class ProductVariantController extends Controller
             Storage::disk('public')->delete($variant->thumbnail);
         }
         $variant->delete();
-
+        event(new \App\Events\ProductVariantDeleted($variant->id));
         return redirect()->route('variants.index', ['product' => $product->id])
             ->with('success', 'Biến thể đã được xóa.');
+    }
+
+    public function toggleStatus($variantId)
+    {
+        $variant = ProductVariant::findOrFail($variantId);
+        $variant->status = !$variant->status;
+        $variant->save();
+        event(new \App\Events\ProductVariantStatusChanged($variant));
+        return response()->json(['success' => true, 'status' => $variant->status]);
     }
 }

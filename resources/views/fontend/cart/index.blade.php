@@ -16,26 +16,27 @@
             </div>
             <style>
                 .table {
-                    background-color: #FFF6DC;
-                    /* Soft Golden Cream */
-                    border: 1.2px solid #D9B867;
-                    /* Balanced Gold Borders */
+                    background-color: #F0F7FF;
+                    /* Light Blue Background */
+                    border: 1.2px solid #2C5282;
+                    /* Deep Blue Border */
                     border-radius: 6px;
                 }
 
                 .table th {
-                    background-color: #F8D472;
-                    /* Warm Gold */
-                    color: #3D3D3D;
-                    /* Clear but Soft Dark Gray */
-                    border-bottom: 1.2px solid #D9B867;
+                    background-color: #2B6CB0;
+                    /* Rich Blue */
+                    color: #FFFFFF;
+                    /* White Text */
+                    border-bottom: 1.2px solid #2C5282;
                     padding: 12px;
                 }
 
                 .table td {
-                    border-top: 1px solid #D9B867;
-                    /* Defined but Not Harsh */
-                    color: #3D3D3D;
+                    border-top: 1px solid #4299E1;
+                    /* Medium Blue */
+                    color: #2D3748;
+                    /* Dark Gray Text */
                     padding: 10px;
                 }
 
@@ -50,11 +51,17 @@
                 }
 
                 .btn-primary-dark-w {
-                    background-color: #F8D472;
-                    /* Rich Warm Gold */
-                    color: #3D3D3D;
+                    background-color: #3182CE;
+                    /* Bright Blue */
+                    color: #FFFFFF;
                     border: none;
                     border-radius: 5px;
+                    transition: background-color 0.3s ease;
+                }
+
+                .btn-primary-dark-w:hover {
+                    background-color: #2C5282;
+                    /* Darker Blue on Hover */
                 }
 
                 /* Custom checkbox styles */
@@ -63,7 +70,8 @@
                     -webkit-appearance: none;
                     width: 20px;
                     height: 20px;
-                    border: 2px solid #D9B867;
+                    border: 2px solid #4299E1;
+                    /* Medium Blue */
                     border-radius: 4px;
                     background-color: #fff;
                     cursor: pointer;
@@ -73,13 +81,15 @@
 
                 input[type="checkbox"]:checked {
                     background-color: #fff;
-                    border-color: #F8D472;
+                    border-color: #3182CE;
+                    /* Bright Blue */
                 }
 
                 input[type="checkbox"]:checked::after {
                     content: '✓';
                     position: absolute;
-                    color: #F8D472;
+                    color: #3182CE;
+                    /* Bright Blue */
                     font-size: 14px;
                     top: 50%;
                     left: 50%;
@@ -87,13 +97,64 @@
                 }
 
                 input[type="checkbox"]:hover {
-                    border-color: #F8D472;
-                    box-shadow: 0 0 3px rgba(248, 212, 114, 0.2);
+                    border-color: #3182CE;
+                    /* Bright Blue */
+                    box-shadow: 0 0 3px rgba(49, 130, 206, 0.2);
+                    /* Blue Shadow */
                 }
 
                 input[type="checkbox"]:focus {
                     outline: none;
-                    box-shadow: 0 0 3px rgba(248, 212, 114, 0.3);
+                    box-shadow: 0 0 3px rgba(49, 130, 206, 0.3);
+                    /* Blue Focus Shadow */
+                }
+
+                /* Additional tech-style elements */
+                .cart-page {
+                    background-color: #F7FAFC;
+                    /* Very Light Blue Background */
+                }
+
+                .btn-soft-secondary {
+                    background-color: #EBF8FF;
+                    /* Very Light Blue */
+                    color: #2B6CB0;
+                    /* Rich Blue */
+                    border: 1px solid #BEE3F8;
+                    /* Light Blue Border */
+                    transition: all 0.3s ease;
+                }
+
+                .btn-soft-secondary:hover {
+                    background-color: #BEE3F8;
+                    /* Light Blue */
+                    color: #2C5282;
+                    /* Deep Blue */
+                }
+
+                .alert {
+                    border-left: 4px solid #3182CE;
+                    /* Blue Alert Border */
+                }
+
+                .alert-warning {
+                    background-color: #EBF8FF;
+                    /* Light Blue Background */
+                    border-color: #BEE3F8;
+                    /* Light Blue Border */
+                    color: #2B6CB0;
+                    /* Rich Blue Text */
+                }
+
+                .alert-link {
+                    color: #2C5282;
+                    /* Deep Blue Links */
+                    text-decoration: underline;
+                }
+
+                .alert-link:hover {
+                    color: #1A365D;
+                    /* Darker Blue on Hover */
                 }
             </style>
             <div class="container">
@@ -112,7 +173,7 @@
                         </div>
                         <table class="table" cellspacing="0">
                             <thead>
-                                <tr>
+                                <tr >
                                     <th class="text-center"><input type="checkbox" id="select-all"></th>
                                     <!-- Select All Checkbox -->
                                     <th class="product-remove">&nbsp;</th>

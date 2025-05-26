@@ -15,6 +15,10 @@
     <!-- Custom JS -->
     <script src="{{ asset('js/slug-generator.js') }}"></script>
 
+    @stack('scripts')
+
+    @stack('variant_delete_forms')
+
 </body>
 
 </html>

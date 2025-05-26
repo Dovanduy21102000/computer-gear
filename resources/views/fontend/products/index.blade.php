@@ -1,4 +1,15 @@
 <!-- ========== MAIN CONTENT ========== -->
+<style>
+    .new-product-title,
+    .new-product-title a {
+        display: block !important;
+        max-width: 120px !important;
+        /* Adjust as needed for your layout */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+</style>
 <main id="content" role="main">
     <!-- breadcrumb -->
     <div class="bg-gray-13 bg-md-transparent">
@@ -41,58 +52,46 @@
                             <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                 <ul id="sidebarNav" class="list-unstyled mb-0">
                                     <li class="nav-item">
-                                        <a class="dropdown-toggle text-uppercase font-weight-bold d-block p-3 bg-light rounded"
+                                        {{-- <a class="dropdown-toggle text-uppercase font-weight-bold d-block p-3 bg-light rounded"
                                             href="javascript:;" role="button" data-toggle="collapse"
                                             aria-expanded="false" aria-controls="sidebarNav1Collapse"
                                             data-target="#sidebarNav1Collapse">
                                             <i class="bi bi-list"></i> Tất cả danh mục
-                                        </a>
+                                        </a> --}}
 
                                         <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                             <ul id="sidebarNav1" class="list-unstyled pl-3">
-                                                <!-- Danh mục -->
-                                                @foreach ($categories as $category)
-                                                    <li class="nav-item">
-                                                        @php
-                                                            $query = request()->all();
-                                                            $query['category'] = $category->slug;
-                                                        @endphp
-                                                        <a class="dropdown-item d-flex justify-content-between align-items-center"
-                                                            href="{{ route('client.products.filter', $query) }}">
-                                                            <span>{{ $category->name }}</span>
-                                                            <span class="badge badge-pill badge-secondary">
-                                                                @php
-                                                                    $totalProducts = $category->products()->count();
-                                                                    foreach ($category->children as $child) {
-                                                                        $totalProducts += $child->products()->count();
-                                                                    }
-                                                                @endphp
-                                                                {{ $totalProducts }}
-                                                            </span>
-                                                        </a>
-
-                                                        @if ($category->children->count())
-                                                            <ul class="list-unstyled pl-3">
-                                                                @foreach ($category->children as $child)
-                                                                    @php
-                                                                        $query = request()->all();
-                                                                        $query['category'] = $child->slug;
-                                                                    @endphp
-                                                                    <li class="nav-item">
-                                                                        <a class="dropdown-item d-flex justify-content-between align-items-center"
-                                                                            href="{{ route('client.products.filter', $query) }}">
-                                                                            <span>{{ $child->name }}</span>
-                                                                            <span
-                                                                                class="badge badge-pill badge-secondary">
-                                                                                {{ $child->products()->count() }}
-                                                                            </span>
-                                                                        </a>
-                                                                    </li>
-                                                                @endforeach
-                                                            </ul>
-                                                        @endif
-                                                    </li>
-                                                @endforeach
+                                                @php
+                                                    if (!function_exists('renderCategorySidebar')) {
+                                                        function renderCategorySidebar($categories)
+                                                        {
+                                                            foreach ($categories as $category) {
+                                                                echo '<li class="nav-item">';
+                                                                $query = request()->all();
+                                                                $query['category'] = $category->slug;
+                                                                $totalProducts = $category->products->count();
+                                                                foreach ($category->children as $child) {
+                                                                    $totalProducts += $child->products->count();
+                                                                }
+                                                                echo '<a class="dropdown-item d-flex justify-content-between align-items-center" href="' .
+                                                                    route('client.products.filter', $query) .
+                                                                    '">';
+                                                                echo '<span>' . $category->name . '</span>';
+                                                                echo '<span class="badge badge-pill badge-secondary">' .
+                                                                    $totalProducts .
+                                                                    '</span>';
+                                                                echo '</a>';
+                                                                if ($category->children->count()) {
+                                                                    echo '<ul class="list-unstyled pl-3">';
+                                                                    renderCategorySidebar($category->children);
+                                                                    echo '</ul>';
+                                                                }
+                                                                echo '</li>';
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+                                                @php renderCategorySidebar($categories); @endphp
                                             </ul>
                                         </div>
                                     </li>
@@ -153,7 +152,7 @@
                     <ul class="list-unstyled">
                         @foreach ($newProduct as $product)
                             <li class="mb-4">
-                                <div class="row">
+                                <div class="row align-items-center">
                                     <div class="col-auto">
                                         <a href="{{ route('client.products.detail', $product->slug) }}"
                                             class="d-block width-75">
@@ -162,9 +161,10 @@
                                         </a>
                                     </div>
                                     <div class="col">
-                                        <h3 class="text-lh-1dot2 font-size-14 mb-0">
-                                            <a href="{{ route('client.products.detail', $product->slug) }}">
-                                                {{ $product->name }}
+                                        <h3 class="text-lh-1dot2 font-size-14 mb-0 new-product-title">
+                                            <a href="{{ route('client.products.detail', $product->slug) }}"
+                                                title="{{ $product->name }}">
+                                                {{ Str::limit($product->name, 22) }}
                                             </a>
                                         </h3>
                                         <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
@@ -173,13 +173,67 @@
                                                     class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
                                             @endfor
                                         </div>
-                                        <div class="font-weight-bold">
-                                            @if ($product->old_price)
-                                                <del
-                                                    class="font-size-11 text-gray-9 d-block">{{ number_format($product->old_price) }}₫</del>
+                                        <div class="">
+                                            @php
+                                                $hasVariant = $product->is_variant && $product->variants->count();
+                                                $variantSalePrices = $hasVariant
+                                                    ? $product->variants
+                                                        ->pluck('price_sale')
+                                                        ->filter(function ($price) {
+                                                            return is_numeric($price) && $price > 0;
+                                                        })
+                                                    : collect();
+                                                $variantBasePrices = $hasVariant
+                                                    ? $product->variants->pluck('price')->filter(function ($price) {
+                                                        return is_numeric($price) && $price > 0;
+                                                    })
+                                                    : collect();
+                                                if ($variantSalePrices->count()) {
+                                                    $minPrice = $variantSalePrices->min();
+                                                    $maxPrice = $variantSalePrices->max();
+                                                    $isSale = true;
+                                                    $originalMin = $variantBasePrices->min();
+                                                    $originalMax = $variantBasePrices->max();
+                                                } else {
+                                                    $minPrice = $variantBasePrices->min();
+                                                    $maxPrice = $variantBasePrices->max();
+                                                    $isSale = false;
+                                                    $originalMin = null;
+                                                    $originalMax = null;
+                                                }
+                                            @endphp
+                                            @if ($hasVariant && $minPrice)
+                                                @if ($isSale && $originalMin)
+                                                    <div
+                                                        class="prodcut-price d-flex align-items-center position-relative">
+                                                        <ins
+                                                            class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                        <del
+                                                            class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                    </div>
+                                                @else
+                                                    <span class="text-dark">
+                                                        {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                            – {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                                        @endif
+                                                    </span>
+                                                @endif
+                                            @elseif ($hasVariant)
+                                                <span class="text-danger">Liên hệ</span>
+                                            @elseif ($product->price_sale)
+                                                <div class="prodcut-price d-flex align-items-center position-relative">
+                                                    <ins
+                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale, 0, ',', '.') }}đ</ins>
+                                                    <del
+                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                                </div>
+                                            @elseif ($product->price > 0)
+                                                <div class="text-d fs-5 product-price">
+                                                    {{ number_format($product->price, 0, ',', '.') }}đ
+                                                </div>
+                                            @else
+                                                <span class="text-danger fw-bold">Liên hệ</span>
                                             @endif
-                                            <ins
-                                                class="font-size-15 text-red text-decoration-none d-block">{{ number_format($product->price) }}₫</ins>
                                         </div>
                                     </div>
                                 </div>
@@ -198,8 +252,8 @@
                     <div class="d-xl-none">
                         <!-- Account Sidebar Toggle Button -->
                         <a id="sidebarNavToggler1" class="btn btn-sm py-1 font-weight-normal" href="javascript:;"
-                            role="button" aria-controls="sidebarContent1" aria-haspopup="true"
-                            aria-expanded="false" data-unfold-event="click" data-unfold-hide-on-scroll="false"
+                            role="button" aria-controls="sidebarContent1" aria-haspopup="true" aria-expanded="false"
+                            data-unfold-event="click" data-unfold-hide-on-scroll="false"
                             data-unfold-target="#sidebarContent1" data-unfold-type="css-animation"
                             data-unfold-animation-in="fadeInLeft" data-unfold-animation-out="fadeOutLeft"
                             data-unfold-duration="500">
@@ -235,10 +289,14 @@
                         <select id="sortSelect"
                             class="js-select selectpicker dropdown-select max-width-200 max-width-160-sm right-dropdown-0 px-2 px-xl-0"
                             data-style="btn-sm bg-white font-weight-normal py-2 border text-gray-20 bg-lg-down-transparent border-lg-down-0">
-                            <option value="default" selected>Sắp xếp mặc định</option>
-                            <option value="newest">Sắp xếp theo mới nhất</option>
-                            <option value="price_asc">Sắp xếp từ thấp tới cao</option>
-                            <option value="price_desc">Sắp xếp từ cao tới thấp</option>
+                            <option value="mac-dinh" @if (($sortSlug ?? '') == 'mac-dinh' || empty($sortSlug)) selected @endif>Sắp xếp mặc định
+                            </option>
+                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo mới
+                                nhất</option>
+                            <option value="gia-thap-nhat" @if (($sortSlug ?? '') == 'gia-thap-nhat') selected @endif>Sắp xếp từ
+                                thấp tới cao</option>
+                            <option value="gia-cao-nhat" @if (($sortSlug ?? '') == 'gia-cao-nhat') selected @endif>Sắp xếp từ
+                                cao tới thấp</option>
                         </select>
 
 
@@ -257,95 +315,28 @@
                     <!-- Grid View -->
                     <div class="tab-pane fade pt-2 show active" id="pills-one-example1" role="tabpanel"
                         aria-labelledby="pills-one-example1-tab" data-target-group="groups">
-                        <ul class="row list-unstyled products-group no-gutters">
-                            @foreach ($products as $product)
-                                <li class="col-6 col-md-3 col-wd-2gdot4 product-item"
-                                    data-created-at="{{ $product->created_at }}">
-                                    <div class="product-item__outer h-100">
-                                        <div class="product-item__inner px-xl-4 p-3">
-                                            <div class="product-item__body pb-xl-2">
-                                                <div class="mb-2">
-                                                    <a href="{{ $product->category?->slug ? route('client.products.category', ['slug' => $product->category->slug]) : '#' }}"
-                                                        class="font-size-12 text-gray-5">
-                                                        {{ $product->category->name ?? 'Danh mục' }}
-                                                    </a>
-                                                </div>
-                                                <h5 class="mb-1 product-item__title">
-                                                    <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                        class="text-blue font-weight-bold">
-                                                        {{ $product->name }}
-                                                    </a>
-                                                </h5>
-                                                <div class="mb-2">
-                                                    <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                        class="d-block text-center">
-                                                        <img class="img-fluid w-100"
-                                                            style="height: 150px; object-fit: cover;"
-                                                            src="{{ asset('storage/' . $product->thumbnail) }}"
-                                                            alt="{{ $product->name }}">
-                                                    </a>
-                                                </div>
-                                                <div class="flex-center-between mb-1">
-                                                    <div class="prodcut-price">
-                                                        @if ($product->price_sale)
-                                                            <div
-                                                                class="prodcut-price d-flex align-items-center position-relative">
-                                                                <ins
-                                                                    class="font-size-20 text-red text-decoration-none">{{ number_format($product->price_sale) }}đ</ins>
-                                                                <del
-                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($product->price, 0, ',', '.') }}đ</del>
-                                                            </div>
-                                                        @else
-                                                            <div class="text-dark fw-bold fs-5">
-                                                                {{ number_format($product->price, 0, ',', '.') }}đ
-                                                            </div>
-                                                        @endif
-                                                    </div>
-
-
-                                                    <div class="d-none d-xl-block prodcut-add-cart">
-                                                        @if ($product->is_variant)
-                                                            <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                                class="btn-add-cart btn-primary transition-3d-hover">
-                                                                <i class="ec ec-add-to-cart"></i>
-                                                            </a>
-                                                        @else
-                                                            <form action="{{ route('cart.add') }}" method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="product_id"
-                                                                    value="{{ $product->id }}">
-                                                                <input type="hidden" name="quantity" value="1">
-                                                                <!-- Default to 1 -->
-                                                                <button type="submit"
-                                                                    class="btn-add-cart btn-primary transition-3d-hover">
-                                                                    <i class="ec ec-add-to-cart"></i>
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="product-item__footer">
-                                                <div class="border-top pt-2 flex-center-between flex-wrap">
-                                                    @include('fontend.component.wishlist-button', [
-                                                        'product' => $product,
-                                                    ])
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            @endforeach
-
-
-
-
-                        </ul>
-
-
-                        <!-- Hiển thị phân trang -->
-                        <div class="pagination-container d-flex justify-content-center">
-                            {{ $products->links('pagination::bootstrap-5') }}
+                        <div id="ajaxProductListWrapper">
+                            <div id="ajaxProductListSpinner">
+                                <div class="spinner-border text-primary" role="status"><span
+                                        class="sr-only">Loading...</span></div>
+                            </div>
+                            <div id="ajaxProductList">
+                                
+                                    @include('fontend.products.partials.product_list', [
+                                        'products' => $products,
+                                    ])
+                                
+                                <div class="pagination-container d-flex justify-content-center mt-5 position-static">
+                                    @if ($products->hasMorePages())
+                                        <button id="showMoreBtn" class="btn btn-primary"
+                                            data-next-page="{{ $products->currentPage() + 1 }}">
+                                            Hiển thị thêm
+                                        </button>
+                                    @else
+                                        <span class="text-muted">Đã tải hết sản phẩm.</span>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -354,129 +345,17 @@
                     <!-- List View -->
                     <div class="tab-pane fade pt-2" id="pills-three-example1" role="tabpanel"
                         aria-labelledby="pills-three-example1-tab" data-target-group="groups">
-                        <ul class="d-block list-unstyled products-group prodcut-list-view">
-                            @foreach ($products as $product)
-                                <li class="product-item remove-divider">
-                                    <div class="product-item__outer w-100">
-                                        <div class="product-item__inner remove-prodcut-hover py-4 row">
-                                            <div class="product-item__header col-6 col-md-4">
-                                                <div class="mb-2">
-                                                    <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                        class="d-block text-center">
-                                                        <img class="img-fluid"
-                                                            src="{{ asset('storage/' . $product->thumbnail) }}"
-                                                            alt="{{ $product->name }}">
-                                                    </a>
-                                                </div>
-                                            </div>
-                                            <div class="product-item__body col-6 col-md-5">
-                                                <div class="pr-lg-10">
-                                                    <div class="mb-2">
-                                                        <a href="#"
-                                                            class="font-size-12 text-gray-5">{{ $product->category->name ?? 'Danh mục' }}</a>
-                                                    </div>
-                                                    <h5 class="mb-2 product-item__title">
-                                                        <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                            class="text-blue font-weight-bold">
-                                                            {{ $product->name }}
-                                                        </a>
-                                                    </h5>
-                                                    <div class="prodcut-price mb-2">
-                                                        @if ($product->price_sale)
-                                                            <div class="text-danger font-weight-bold">
-                                                                {{ number_format($product->price_sale, 0, ',', '.') }}đ
-                                                            </div>
-                                                            <del
-                                                                class="text-muted">{{ number_format($product->price, 0, ',', '.') }}đ</del>
-                                                        @else
-                                                            <div class="text-gray-100 font-weight-bold">
-                                                                {{ number_format($product->price, 0, ',', '.') }}đ
-                                                            </div>
-                                                        @endif
-                                                    </div>
-
-                                                    <ul class="font-size-12 p-0 text-gray-110 mb-4 d-none d-md-block">
-                                                        <li class="line-clamp-1 mb-1 list-bullet">Chất lượng cao cấp
-                                                        </li>
-                                                        <li class="line-clamp-1 mb-1 list-bullet">Thiết kế bền bỉ,
-                                                            chống sốc</li>
-                                                        <li class="line-clamp-1 mb-1 list-bullet">Bảo hành chính hãng
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                            <div class="product-item__footer col-md-3 d-md-block">
-                                                <div class="mb-3 d-flex flex-column align-items-center text-center">
-                                                    <!-- Giá sản phẩm -->
-                                                    <div
-                                                        class="prodcut-price mb-3 d-flex flex-column align-items-start">
-                                                        @if ($product->price_sale)
-                                                            <div class="text-danger font-weight-bold">
-                                                                {{ number_format($product->price_sale, 0, ',', '.') }}đ
-                                                            </div>
-                                                            <div class="d-flex align-items-center">
-                                                                <del class="text-muted fw-semibold fs-5 me-2">
-                                                                    {{ number_format($product->price, 0, ',', '.') }}đ
-                                                                </del>
-                                                                <span class="badge bg-danger text-white fs-6 fw-bold">
-                                                                    -{{ round((1 - $product->price_sale / $product->price) * 100) }}%
-                                                                </span>
-                                                            </div>
-                                                        @else
-                                                            <div class="text-dark font-weight-bold">
-                                                                {{ number_format($product->price, 0, ',', '.') }}đ
-                                                            </div>
-                                                        @endif
-                                                    </div>
-
-
-
-
-                                                    <!-- Nút thêm vào giỏ hàng -->
-                                                    <div class="d-none d-xl-block prodcut-add-cart w-100">
-                                                        @if ($product->is_variant)
-                                                            <a href="{{ route('client.products.detail', $product->slug) }}"
-                                                                class="btn btn-warning w-100 py-2 rounded-pill shadow-sm transition-3d-hover"
-                                                                type="submit"
-                                                                style="font-size: 1rem; font-weight: 600; background: #ffc107; border: none;">
-                                                                <i class="ec ec-add-to-cart mr-2"></i> Thêm vào giỏ
-                                                                hàng
-                                                            </a>
-                                                        @else
-                                                            <form action="{{ route('cart.add') }}" method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="product_id"
-                                                                    value="{{ $product->id }}">
-                                                                <input type="hidden" name="quantity" value="1">
-                                                                <button
-                                                                    class="btn btn-warning w-100 py-2 rounded-pill shadow-sm transition-3d-hover"
-                                                                    type="submit"
-                                                                    style="font-size: 1rem; font-weight: 600; background: #ffc107; border: none;">
-                                                                    <i class="ec ec-add-to-cart mr-2"></i> Thêm vào giỏ
-                                                                    hàng
-                                                                </button>
-
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                </div>
-
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <a href="#"
-                                                        class="text-gray-6 font-size-13 mx-wd-3 d-flex align-items-center">
-                                                        <i class="ec ec-favorites mr-1 font-size-15"></i> Yêu thích
-                                                    </a>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
-                        <!-- Hiển thị phân trang -->
-                        <div class="pagination-container d-flex justify-content-center">
-                            {{ $products->links('pagination::bootstrap-5') }}
+                        <div id="ajaxProductListWrapper">
+                            <div id="ajaxProductListSpinner">
+                                <div class="spinner-border text-primary" role="status"><span
+                                        class="sr-only">Loading...</span></div>
+                            </div>
+                            <div id="ajaxProductList">
+                                @include('fontend.products.partials.product_list', [
+                                    'products' => $products,
+                                    'view' => 'list',
+                                ])
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -489,69 +368,159 @@
 </main>
 <!-- ========== END MAIN CONTENT ========== -->
 
+<style>
+    #ajaxProductListSpinner {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.7);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #ajaxProductListSpinner .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    #ajaxProductListWrapper {
+        position: relative;
+    }
+</style>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const sortSelect = document.getElementById("sortSelect");
-        const productList = document.querySelector(".products-group");
-        const originalProducts = Array.from(productList.children);
-
-        sortSelect.addEventListener("change", function() {
-            let products = [...originalProducts];
-            let sortBy = sortSelect.value;
-
-            if (sortBy !== "default") {
-                products.sort((a, b) => {
-                    let priceA = parseInt(a.querySelector(".prodcut-price div")?.textContent
-                        .replace(/\D/g, "")) || 0;
-                    let priceB = parseInt(b.querySelector(".prodcut-price div")?.textContent
-                        .replace(/\D/g, "")) || 0;
-                    let dateA = a.dataset.createdAt ? new Date(a.dataset.createdAt) : new Date(
-                        0);
-                    let dateB = b.dataset.createdAt ? new Date(b.dataset.createdAt) : new Date(
-                        0);
-
-                    if (sortBy === "price_asc") return priceA - priceB;
-                    if (sortBy === "price_desc") return priceB - priceA;
-                    if (sortBy === "newest") return dateB - dateA;
-                    return 0;
-                });
-            }
-
-            // Xóa & thêm lại sản phẩm theo thứ tự mới
-            productList.replaceChildren(...products);
-        });
+        var sortSelect = document.getElementById("sortSelect");
+        var spinner = document.getElementById("ajaxProductListSpinner");
+        if (sortSelect) {
+            sortSelect.addEventListener("change", function() {
+                var sortValue = sortSelect.value;
+                var url = new URL(window.location.href);
+                var basePath = '/products';
+                if (sortValue !== 'mac-dinh') {
+                    basePath += '/sort/' + sortValue;
+                }
+                var params = url.searchParams.toString();
+                var newUrl = basePath + (params ? ('?' + params) : '');
+                if (spinner) spinner.style.display = 'flex';
+                fetch(newUrl, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        var newHtml = document.createElement('div');
+                        newHtml.innerHTML = data;
+                        var newAjaxProductList = newHtml.querySelector('#ajaxProductList');
+                        if (newAjaxProductList) {
+                            document.querySelectorAll('#ajaxProductList').forEach(function(el) {
+                                el.innerHTML = newAjaxProductList.innerHTML;
+                            });
+                        }
+                        history.pushState(null, '', newUrl);
+                    })
+                    .finally(function() {
+                        if (spinner) spinner.style.display = 'none';
+                    });
+            });
+        }
     });
 
+    let currentPage = 1;
+    const perPage = {{ $products->perPage() }};
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const sortSelect = document.getElementById("sortSelect");
-        const productList = document.querySelector(".prodcut-list-view");
-        const originalProducts = Array.from(productList.children); // Lưu trữ danh sách gốc
-
-        sortSelect.addEventListener("change", function() {
-            let products = [...originalProducts]; // Luôn khởi tạo từ danh sách gốc
-            let sortBy = sortSelect.value;
-
-            if (sortBy !== "default") {
-                products.sort((a, b) => {
-                    let priceA = parseInt(a.querySelector(".prodcut-price div")?.textContent
-                        .replace(/\D/g, "")) || 0;
-                    let priceB = parseInt(b.querySelector(".prodcut-price div")?.textContent
-                        .replace(/\D/g, "")) || 0;
-                    let dateA = a.dataset.createdAt ? new Date(a.dataset.createdAt) : new Date(
-                        0);
-                    let dateB = b.dataset.createdAt ? new Date(b.dataset.createdAt) : new Date(
-                        0);
-
-                    if (sortBy === "price_asc") return priceA - priceB;
-                    if (sortBy === "price_desc") return priceB - priceA;
-                    if (sortBy === "newest") return dateB - dateA;
-                    return 0;
+    function handleShowMoreClick(e) {
+        if (e.target && e.target.id === 'showMoreBtn') {
+            e.preventDefault();
+            const showMoreBtn = e.target;
+            currentPage++;
+            const nextPage = currentPage;
+            // console.log('Show More clicked');
+            // console.log('Next page to fetch:', nextPage);
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', nextPage);
+            showMoreBtn.disabled = true;
+            showMoreBtn.textContent = 'Đang tải...';
+            fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const newGridProducts = tempDiv.querySelectorAll('.product-list > li');
+                    const newListProducts = tempDiv.querySelectorAll('.prodcut-list-view > li');
+                    const productList = document.querySelector('.product-list');
+                    const productListView = document.querySelector('.prodcut-list-view');
+                    let appendedCount = 0;
+                    if (productList && newGridProducts.length) {
+                        newGridProducts.forEach(item => {
+                            if (item.tagName === 'LI') {
+                                productList.appendChild(item);
+                                appendedCount++;
+                            }
+                        });
+                    } else if (productListView && newListProducts.length) {
+                        newListProducts.forEach(item => {
+                            if (item.tagName === 'LI') {
+                                productListView.appendChild(item);
+                                appendedCount++;
+                            }
+                        });
+                    }
+                    const paginationContainer = document.querySelector('.pagination-container');
+                    if (appendedCount < perPage) {
+                        paginationContainer.innerHTML = '<span class="text-muted">Đã tải hết sản phẩm.</span>';
+                    } else {
+                        showMoreBtn.disabled = false;
+                        showMoreBtn.textContent = 'Hiển thị thêm';
+                    }
+                })
+                .catch(() => {
+                    showMoreBtn.disabled = false;
+                    showMoreBtn.textContent = 'Hiển thị thêm';
                 });
-            }
+        }
+    }
+    document.removeEventListener('click', handleShowMoreClick);
+    document.addEventListener('click', handleShowMoreClick);
 
-            // Xóa & thêm lại sản phẩm theo thứ tự mới
-            productList.replaceChildren(...products);
+    function padProductGrid() {
+        const productList = document.querySelector('.product-list');
+        if (!productList) return;
+        // Remove old invisible items
+        productList.querySelectorAll('.product-item.invisible-padding').forEach(el => el.remove());
+        const items = productList.querySelectorAll('.product-item:not(.invisible-padding)');
+        const columns = 4;
+        const remainder = items.length % columns;
+        if (items.length > 0 && remainder !== 0) {
+            const toAdd = columns - remainder;
+            for (let i = 0; i < toAdd; i++) {
+                const li = document.createElement('li');
+                li.className = 'col-6 col-md-3 product-item invisible-padding';
+                li.style.visibility = 'hidden';
+                productList.appendChild(li);
+            }
+        }
+    }
+    document.addEventListener('DOMContentLoaded', padProductGrid);
+    // Call after AJAX updates
+    function triggerPadAfterAjax() {
+        padProductGrid();
+    }
+    // Patch into AJAX product update logic
+    const origFetch = window.fetch;
+    window.fetch = function() {
+        return origFetch.apply(this, arguments).then(res => {
+            setTimeout(padProductGrid, 100); // Wait for DOM update
+            return res;
         });
-    });
+    };
 </script>

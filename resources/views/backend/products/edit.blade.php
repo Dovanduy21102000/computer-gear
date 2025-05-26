@@ -37,14 +37,47 @@
                             <div class="row mb-3">
                                 <label for="category_id" class="col-sm-2 col-form-label">Danh mục</label>
                                 <div class="col-sm-10">
+                                    @php
+                                        if (!function_exists('renderCategoryOptionsEdit')) {
+                                            function renderCategoryOptionsEdit(
+                                                $categories,
+                                                $parentId = null,
+                                                $parentName = null,
+                                                $selectedId = null,
+                                            ) {
+                                                foreach ($categories as $category) {
+                                                    if ($category['parent_id'] == $parentId) {
+                                                        $hasChildren =
+                                                            collect($categories)
+                                                                ->where('parent_id', $category['id'])
+                                                                ->count() > 0;
+                                                        // Only show parent label if this is a child and has children
+                                                        $displayName =
+                                                            $parentName && $hasChildren
+                                                                ? "{$category['name']} ({$parentName})"
+                                                                : $category['name'];
+                                                        if ($hasChildren) {
+                                                            echo "<optgroup label=\"{$displayName}\">";
+                                                            renderCategoryOptionsEdit(
+                                                                $categories,
+                                                                $category['id'],
+                                                                $category['name'],
+                                                                $selectedId,
+                                                            );
+                                                            echo '</optgroup>';
+                                                        } else {
+                                                            $selected =
+                                                                $selectedId == $category['id'] ? 'selected' : '';
+                                                            echo "<option value=\"{$category['id']}\" $selected>{$displayName}</option>";
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    @endphp
                                     <select class="form-select" id="category_id" name="category_id" required>
                                         <option value="">Chọn danh mục</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}"
-                                                {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                                                {{ $category->name }}
-                                            </option>
-                                        @endforeach
+                                        @php renderCategoryOptionsEdit($allCategories, null, null, old('category_id', $product->category_id)); @endphp
                                     </select>
                                 </div>
                             </div>
@@ -171,30 +204,35 @@
 
 
 
-                            <!-- Giá -->
-                            <div class="row mb-3">
-                                <label for="price" class="col-sm-2 col-form-label">Giá</label>
-                                <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="price" name="price" required
-                                        value="{{ old('price', $product->price) }}">
+                            {{-- Add ids to price, price_sale, and quantity sections --}}
+                            <div id="price-section">
+                                <!-- Giá -->
+                                <div class="row mb-3">
+                                    <label for="price" class="col-sm-2 col-form-label">Giá</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" class="form-control" id="price" name="price"
+                                            value="{{ old('price', $product->price) }}">
+                                    </div>
+                                </div>
+
+                                <!-- Giá khuyến mãi -->
+                                <div class="row mb-3">
+                                    <label for="price_sale" class="col-sm-2 col-form-label">Giá khuyến mãi</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" class="form-control" id="price_sale" name="price_sale"
+                                            value="{{ old('price_sale', $product->price_sale) }}">
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Giá khuyến mãi -->
-                            <div class="row mb-3">
-                                <label for="price_sale" class="col-sm-2 col-form-label">Giá khuyến mãi</label>
-                                <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="price_sale" name="price_sale"
-                                        value="{{ old('price_sale', $product->price_sale) }}">
-                                </div>
-                            </div>
-
-                            <!-- Số lượng -->
-                            <div class="row mb-3">
-                                <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
-                                <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="quantity" name="quantity"
-                                        required value="{{ old('quantity', $product->quantity) }}">
+                            <div id="quantity-section">
+                                <!-- Số lượng -->
+                                <div class="row mb-3">
+                                    <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" class="form-control" id="quantity" name="quantity"
+                                            value="{{ old('quantity', $product->quantity) }}">
+                                    </div>
                                 </div>
                             </div>
 
@@ -215,7 +253,7 @@
                                 <div class="col-sm-10">
                                     <select class="form-select" id="is_variant" name="is_variant" required
                                         onchange="toggleVariants(this)" {{ !$product->is_variant ? 'disabled' : '' }}>
-                                        a <option value="1" {{ $product->is_variant ? 'selected' : '' }}>Có
+                                        <option value="1" {{ $product->is_variant ? 'selected' : '' }}>Có
                                         </option>
                                         <option value="0" {{ !$product->is_variant ? 'selected' : '' }}>Không
                                         </option>
@@ -286,117 +324,167 @@
                                                     @endforeach
                                                 </td>
                                                 <td width="1px" class="text-nowrap">
-                                                    <div class="d-flex gap-2">
+                                                    <div class="d-flex gap-2 align-items-center">
                                                         <a href="{{ route('variants.show', ['product' => $product->id, 'variant' => $variant->id]) }}"
                                                             class="btn btn-secondary btn-sm">Xem</a>
                                                         <a href="{{ route('variants.edit', ['product' => $product->id, 'variant' => $variant->id]) }}"
                                                             class="btn btn-info btn-sm">Sửa</a>
-                                                        <form
-                                                            action="{{ route('variants.destroy', ['product' => $product->id, 'variant' => $variant->id]) }}"
-                                                            method="POST" style="display:inline;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm"
-                                                                onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</button>
-                                                        </form>
+                                                        <button type="button"
+                                                            class="btn btn-danger btn-sm delete-variant-button"
+                                                            data-variant-id="{{ $variant->id }}">Xóa</button>
                                                     </div>
                                                 </td>
                                             </tr>
+                                            @push('variant_delete_forms')
+                                                <form id="variant-delete-form-{{ $variant->id }}"
+                                                    action="{{ route('variants.destroy', ['product' => $product->id, 'variant' => $variant->id]) }}"
+                                                    method="POST" style="display:none;" class="variant-action-form">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+                                            @endpush
                                         @endforeach
                                     </tbody>
                                 </table>
                             </div>
-                    </div> <!-- end of card-body -->
-                </div> <!-- end of card -->
+                        </form>
+
+                    </div> {{-- end of card-body --}}
+                </div> {{-- end of card --}}
+
+                {{-- Move the Update and Back buttons outside the main form --}}
                 <div class="row mb-3 mt-3">
-                    <div class="col-sm-10 offset-sm-2">
-                        <button type="submit" class="btn btn-warning">Cập nhật</button>
+                    <div class="text-center">
+                        <button type="submit" form="product-edit-form" class="btn btn-warning">Cập nhật</button>
                         <a href="{{ route('products.index') }}" class="btn btn-secondary">Quay lại</a>
                     </div>
                 </div>
-                </form><!-- End Form Thêm Mới Sản Phẩm -->
             </div>
+        </div>
     </section>
 </main>
 
 <script>
-    let variantIndex = {{ count($product->variants) }};
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set initial state based on is_variant value
+        const isVariantSelect = document.getElementById('is_variant');
+        toggleVariants(isVariantSelect);
+
+        // Add event listener for changes
+        isVariantSelect.addEventListener('change', function() {
+            toggleVariants(this);
+        });
+
+        const mainForm = document.querySelector('form[action="{{ route('products.update', $product->id) }}"]');
+        if (mainForm) {
+            mainForm.id = 'product-edit-form';
+        }
+
+        // Add event listener for variant delete buttons
+        document.querySelectorAll('.delete-variant-button').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                if (confirm('Bạn có chắc muốn xóa?')) {
+                    const variantId = this.getAttribute('data-variant-id');
+                    const form = document.getElementById(`variant-delete-form-${variantId}`);
+                    if (form) {
+                        form.submit();
+                    }
+                }
+            });
+        });
+
+        // Add an event listener to the main product form for submission
+        const mainProductEditForm = document.getElementById('product-edit-form');
+        if (mainProductEditForm) {
+            mainProductEditForm.addEventListener('submit', function(event) {
+                const isVariantSelect = document.getElementById('is_variant');
+                // Only add variant data if the product is marked as having variants
+                if (isVariantSelect.value === '1') {
+                    const variantRows = document.querySelectorAll('#variants-section tbody tr');
+                    const variantsData = [];
+
+                    variantRows.forEach(row => {
+                        const variantId = row.querySelector('.delete-variant-button')
+                            .getAttribute('data-variant-id');
+                        const inputs = row.querySelectorAll(
+                            'input, select'); // Select relevant input types
+                        const variantData = {
+                            id: variantId
+                        };
+
+                        inputs.forEach(input => {
+                            // Collect data from inputs that are not disabled
+                            if (!input.disabled) {
+                                variantData[input.name] = input.value;
+                            }
+                        });
+                        variantsData.push(variantData);
+                    });
+
+                    // Create a hidden input to hold the JSON string of variant data
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'variants_data_json'; // Use a unique name
+                    hiddenInput.value = JSON.stringify(variantsData);
+                    mainProductEditForm.appendChild(hiddenInput);
+
+                    console.log('Variant data added to form:', variantsData);
+                }
+            });
+        }
+    });
 
     function toggleVariants(select) {
         const variantsSection = document.getElementById('variants-section');
         const quantitySection = document.getElementById('quantity-section');
+        const priceSection = document.getElementById('price-section');
         const priceInput = document.getElementById('price');
         const priceSaleInput = document.getElementById('price_sale');
         const quantityInput = document.getElementById('quantity');
 
-        if (select.value === '1') {
+        // Get all input elements within the main product sections (price, price_sale, quantity)
+        const mainProductInputs = Array.from(priceSection.querySelectorAll('input, select, textarea')).concat(
+            Array.from(quantitySection.querySelectorAll('input, select, textarea'))
+        );
+
+        // Get all input elements within the variants section
+        const variantInputs = variantsSection.querySelectorAll('input, select, textarea');
+
+        if (select.value === '1') { // '1' means "Has variants"
             variantsSection.style.display = 'block';
             quantitySection.style.display = 'none';
-            priceInput.required = false;
-            priceSaleInput.required = false;
-            quantityInput.required = false;
-        } else {
+            priceSection.style.display = 'none';
+
+            // Disable main product inputs and enable variant inputs
+            mainProductInputs.forEach(input => {
+                input.setAttribute('disabled', 'disabled');
+                input.required = false; // Explicitly set required to false
+            });
+            variantInputs.forEach(input => {
+                input.removeAttribute('disabled');
+                // Note: Required for variant inputs should be handled in their HTML structure
+            });
+
+        } else { // '0' means "Does not have variants"
             variantsSection.style.display = 'none';
             quantitySection.style.display = 'block';
-            priceInput.required = true;
-            priceSaleInput.required = false;
-            quantityInput.required = true;
+            priceSection.style.display = 'block';
+
+            // Enable main product inputs and disable variant inputs
+            mainProductInputs.forEach(input => {
+                input.removeAttribute('disabled');
+                // Note: Required for main product inputs should be handled in their HTML structure
+            });
+            variantInputs.forEach(input => {
+                input.setAttribute('disabled', 'disabled');
+            });
+
+            // Manually set required for main price and quantity if they are not disabled
+            priceInput.required = true; // Explicitly set required to true
+            quantityInput.required = true; // Explicitly set required to true
         }
     }
 
-    function addVariantRow() {
-        const tbody = document.getElementById('variants-table-body');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><input type="text" name="variants[${variantIndex}][sku]" class="form-control" required></td>
-            <td><input type="number" name="variants[${variantIndex}][price]" class="form-control" required></td>
-            <td><input type="number" name="variants[${variantIndex}][price_sale]" class="form-control"></td>
-            <td><input type="number" name="variants[${variantIndex}][quantity]" class="form-control" required></td>
-            <td>
-                <select name="variants[${variantIndex}][status]" class="form-select">
-                    <option value="1" selected>Hoạt động</option>
-                    <option value="0">Không hoạt động</option>
-                </select>
-            </td>
-            <td>
-                <input type="file" name="variants[${variantIndex}][image]" class="form-control" accept="image/*" onchange="previewVariantImage(event, ${variantIndex})">
-                <img id="variant-image-preview-${variantIndex}" style="max-width:80px; margin-top:5px; display:none;" />
-            </td>
-            <td>
-                @foreach ($attributes as $attribute)
-                    <div>
-                        <strong>{{ $attribute->name }}:</strong>
-                        @foreach ($attribute->attributeValues as $value)
-                            <label class="me-2">
-                                <input type="checkbox"
-                                    name="variants[${variantIndex}][attributes][{{ $attribute->id }}][]"
-                                    value="{{ $value->id }}">
-                                {{ $value->value }}
-                            </label>
-                        @endforeach
-                    </div>
-                @endforeach
-            </td>
-            <td>
-                <button type="button" class="btn btn-danger btn-sm" onclick="removeVariantRow(this)">Xóa</button>
-            </td>
-        `;
-        tbody.appendChild(row);
-        variantIndex++;
-    }
-
-    function removeVariantRow(btn) {
-        btn.closest('tr').remove();
-    }
-
-    function previewVariantImage(event, variantIndex) {
-        const input = event.target;
-        const preview = document.getElementById(`variant-image-preview-${variantIndex}`);
-        if (input.files && input.files[0]) {
-            preview.src = URL.createObjectURL(input.files[0]);
-            preview.style.display = 'block';
-        } else {
-            preview.style.display = 'none';
-        }
-    }
+    // Existing functions (addVariantRow, removeVariantRow, previewVariantImage)
 </script>

@@ -24,9 +24,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-
-        $query = Product::with(['category', 'brand', 'variants.attributeValues.attribute'])->latest('id');
-
+        $query = Product::with(['category', 'brand', 'variants.attributeValues.attribute']);
 
         if ($request->has('category') && $request->category != '') {
             $query->where('category_id', $request->category);
@@ -35,13 +33,18 @@ class ProductController extends Controller
             $query->where('brand_id', $request->brand);
         }
 
-        $categories = Category::all();
+        $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
         $brands = Brand::all();
 
-        $products = $query->latest()->paginate(10);
+        $products = $query->latest('id')->paginate(10);
 
         $template = 'backend.products.index';
-        return view('backend.dashboard.layout', compact('products', 'categories', 'brands', 'template'));
+        return view('backend.dashboard.layout', [
+            'products' => $products,
+            'allCategories' => $allCategories,
+            'brands' => $brands,
+            'template' => $template,
+        ]);
     }
 
     /**
@@ -50,11 +53,16 @@ class ProductController extends Controller
     public function create()
     {
         $template = 'backend.products.create';
-        $categories = Category::all();
+        $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
         $brands = Brand::all();
         $attributes = Attribute::with('attributevalues')->get();
 
-        return view('backend.dashboard.layout', compact('template', 'categories', 'brands', 'attributes'));
+        return view('backend.dashboard.layout', [
+            'template' => $template,
+            'allCategories' => $allCategories,
+            'brands' => $brands,
+            'attributes' => $attributes,
+        ]);
     }
 
     /**
@@ -138,6 +146,7 @@ class ProductController extends Controller
             'is_variant' => $request->is_variant,
             'views' => 0
         ]);
+        event(new \App\Events\ProductCreated($product));
         event(new ProductUpdated($product));
 
         if ($request->is_variant && $request->variants) {
@@ -190,12 +199,19 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $template = 'backend.products.edit';
         $product = Product::with(['variants.attributeValues'])->findOrFail($id);
-        $categories = Category::all();
+        $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
         $brands = Brand::all();
-        $attributes = Attribute::with('attributeValues')->get();
-        return view('backend.dashboard.layout', compact('template', 'categories', 'brands', 'product', 'attributes'));
+        $attributes = Attribute::with('attributevalues')->get();
+
+        $template = 'backend.products.edit';
+        return view('backend.dashboard.layout', [
+            'template' => $template,
+            'product' => $product,
+            'allCategories' => $allCategories,
+            'brands' => $brands,
+            'attributes' => $attributes,
+        ]);
     }
 
     /**
@@ -219,14 +235,6 @@ class ProductController extends Controller
             'quantity' => $request->is_variant ? 'nullable|integer' : 'required|integer',
             'status' => 'boolean',
             'is_variant' => 'boolean',
-            'variants' => $request->is_variant ? 'required|array' : 'nullable|array',
-            'variants.*.sku' => $request->is_variant ? 'required|string|max:255' : 'nullable|string|max:255',
-            'variants.*.price' => $request->is_variant ? 'required|numeric' : 'nullable|numeric',
-            'variants.*.price_sale' => 'nullable|numeric',
-            'variants.*.quantity' => $request->is_variant ? 'required|integer' : 'nullable|integer',
-            'variants.*.status' => 'boolean',
-            'variants.*.attributes' => $request->is_variant ? 'required|array' : 'nullable|array',
-            'variants.*.attributes.*' => 'exists:attribute_values,id',
         ], [
             'category_id.required' => 'Vui lòng chọn danh mục.',
             'category_id.exists' => 'Danh mục không hợp lệ.',
@@ -247,10 +255,6 @@ class ProductController extends Controller
             'quantity.integer' => 'Số lượng phải là số nguyên.',
             'status.boolean' => 'Trạng thái không hợp lệ.',
             'is_variant.boolean' => 'Trường biến thể không hợp lệ.',
-            'variants.required' => 'Vui lòng nhập thông tin biến thể.',
-            'variants.*.sku.required' => 'Vui lòng nhập SKU cho biến thể.',
-            'variants.*.price.required' => 'Vui lòng nhập giá cho biến thể.',
-            'variants.*.quantity.required' => 'Vui lòng nhập số lượng cho biến thể.',
         ]);
 
         if (!$request->slug) {
@@ -265,13 +269,7 @@ class ProductController extends Controller
             $product->thumbnail = $thumbnailPath;
         }
 
-        $totalQuantity = 0;
-        if ($request->is_variant && $request->variants) {
-            foreach ($request->variants as $variantData) {
-                $totalQuantity += $variantData['quantity'];
-            }
-        }
-
+        $oldStatus = $product->status;
         $product->update([
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
@@ -282,42 +280,39 @@ class ProductController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'price_sale' => $request->price_sale ?? null,
-            'quantity' => $request->is_variant ? $totalQuantity : $request->quantity,
+            'quantity' => $request->is_variant ? 0 : $request->quantity,
             'status' => $request->status,
             'is_variant' => $request->is_variant,
         ]);
-        event(new ProductUpdated($product));
+        if ($oldStatus != $request->status) {
+            event(new \App\Events\ProductStatusChanged($product));
+        }
 
-        $product->variants()->delete();
+        // If product has variants, recalculate main product's price and quantity
+        if ($product->is_variant) {
+            $variants = $product->variants()->get();
+            if ($variants->isNotEmpty()) {
+                $minPrice = $variants->min('price');
+                $minSalePrice = $variants->whereNotNull('price_sale')->min('price_sale');
+                $totalQuantity = $variants->sum('quantity');
 
-        if ($request->is_variant && $request->variants) {
-            foreach ($request->variants as $i => $variantData) {
-                $imagePath = null;
-                if ($request->hasFile("variants.$i.image")) {
-                    $imagePath = $request->file("variants.$i.image")->store('variants', 'public');
-                }
-                $variant = ProductVariant::create([
-                    'product_id' => $product->id,
-                    'sku' => $variantData['sku'],
-                    'price' => $variantData['price'],
-                    'price_sale' => $variantData['price_sale'] ?? null,
-                    'quantity' => $variantData['quantity'],
-                    'image' => $imagePath,
-                    'status' => $variantData['status'] ?? true
-                ]);
-
-                if (isset($variantData['attributes']) && is_array($variantData['attributes'])) {
-                    foreach ($variantData['attributes'] as $attributeId => $attributeValueId) {
-                        ProductVariantAttributeValue::create([
-                            'product_variant_id' => $variant->id,
-                            'attribute_value_id' => $attributeValueId,
-                        ]);
-                    }
-                }
+                $product->price = $minPrice;
+                $product->price_sale = $minSalePrice ?: null;
+                $product->quantity = $totalQuantity;
+                $product->save();
             }
         }
 
-        return redirect()->route('products.index')->with('success', 'Sản phẩm đã được cập nhật thành công.');
+        Log::info('Product updated in database', [
+            'product_id' => $product->id,
+            'price' => $product->price,
+            'quantity' => $product->quantity
+        ]);
+
+        event(new ProductUpdated($product));
+        Log::info('ProductUpdated event dispatched', ['product_id' => $product->id]);
+
+        return redirect()->back()->with('success', 'Sản phẩm đã được cập nhật thành công.');
     }
 
     /**
@@ -332,7 +327,38 @@ class ProductController extends Controller
         }
 
         $product->delete();
-
+        event(new \App\Events\ProductDeleted($product->id));
         return redirect()->route('products.index')->with('success', 'Sản phẩm đã được xóa thành công.');
+    }
+
+    public function toggleStatus($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->status = !$product->status;
+        $product->save();
+        event(new \App\Events\ProductStatusChanged($product));
+        event(new \App\Events\ProductUpdated($product));
+        return response()->json(['success' => true, 'status' => $product->status]);
+    }
+
+    /**
+     * Helper function to get all categories and their subcategories recursively with indentation.
+     */
+    private function getCategoryOptions($parentId = null, $prefix = '')
+    {
+        if (is_null($parentId)) {
+            $categories = \App\Models\Category::whereNull('parent_id')->orderBy('id')->get();
+        } else {
+            $categories = \App\Models\Category::where('parent_id', (int)$parentId)->orderBy('id')->get();
+        }
+        $result = [];
+        foreach ($categories as $category) {
+            $result[] = [
+                'id' => $category->id,
+                'name' => $prefix . $category->name
+            ];
+            $result = array_merge($result, $this->getCategoryOptions($category->id, $prefix . '-- '));
+        }
+        return $result;
     }
 }

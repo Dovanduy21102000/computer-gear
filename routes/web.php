@@ -49,7 +49,7 @@ use Illuminate\Support\Facades\Route;
 // Admin Routes
 Route::prefix('admin')->group(function () {
     // Đăng nhập và đăng xuất dành cho admin
-  Route::get('login', [AuthController::class, 'index'])->name('auth.admin');
+    Route::get('login', [AuthController::class, 'index'])->name('auth.admin');
     Route::post('login', [AuthController::class, 'login'])->name('auth.admin.login');
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.admin.logout');
 
@@ -120,6 +120,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/chat/users', [AdminChatController::class, 'getUsers']);
         Route::get('/chat/messages/{userId}', [AdminChatController::class, 'getMessages']);
         Route::post('/chat/send', [AdminChatController::class, 'sendMessage']);
+
+        Route::post('products/{id}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggleStatus');
     });
 
     // Biến thể sản phẩm
@@ -131,6 +133,7 @@ Route::prefix('admin')->group(function () {
         Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
         Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
         Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
+        Route::post('variants/{variant}/toggle-status', [ProductVariantController::class, 'toggleStatus'])->name('variants.toggleStatus');
     });
 
     // Coupon Distribution Routes
@@ -178,6 +181,7 @@ Route::middleware(['web'])->group(function () {
 
 
     Route::get('/products', [ProductClientController::class, 'index'])->name('client.products.index');
+    Route::get('/products/sort/{sort}', [ProductClientController::class, 'index'])->name('client.products.sort');
     Route::get('/product/{slug}', [ProductClientController::class, 'show'])->name('client.products.detail');
 
     Route::get('/products/brand/{brandSlug}', [ProductClientController::class, 'showByBrand'])->name('client.products.brand');
@@ -271,4 +275,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment/resume', [PaymentResumeController::class, 'index'])->name('payment.resume.index');
     Route::get('/payment/resume/{id}', [PaymentResumeController::class, 'resume'])->name('payment.resume.process');
     Route::get('/payment/cancel/{id}', [PaymentResumeController::class, 'cancel'])->name('payment.resume.cancel');
+});
+
+Route::get('/admin', function () {
+    if (auth('admin')->check()) {
+        return redirect()->route('dashboard.index');
+    }
+    return redirect()->route('auth.admin');
 });
