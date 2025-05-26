@@ -17,3 +17,4 @@ yarn-error.log
 /.vscode
 /app/Events/OrderStatusUpdated.php
 .webpack.mix.js
+/storage

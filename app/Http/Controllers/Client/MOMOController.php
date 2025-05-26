@@ -81,27 +81,31 @@ class MOMOController extends Controller
                 $finalPrice = max(0, $totalPrice - $couponDiscount);
 
                 // Use existing order code if provided, otherwise generate new one
-                $orderCode = $request->input('order_code') ?? (date('YmdHis') . rand(100, 999));
+                $originalOrderCode = $request->input('order_code') ?? (date('YmdHis') . rand(100, 999));
+
+                // Generate a new order ID for this payment attempt
+                $orderId = $originalOrderCode . '_' . time();
 
                 // Check if payment attempt already exists
-                $paymentAttempt = PaymentAttempt::where('order_code', $orderCode)->first();
+                $paymentAttempt = PaymentAttempt::where('order_code', $originalOrderCode)->first();
 
                 if ($paymentAttempt) {
-                    // Update existing payment attempt
+                    // Update existing payment attempt with new order ID
                     $paymentAttempt->update([
                         'amount' => $finalPrice,
                         'status' => 'pending',
                         'selected_items' => null,
                         'shipping_info' => session('momo_shipping_info'),
                         'coupon_info' => $coupon,
-                        'expires_at' => now()->addMinutes(15)
+                        'expires_at' => now()->addMinutes(15),
+                        'order_code' => $orderId // Update with new order ID
                     ]);
                 } else {
                     // Create new payment attempt
                     PaymentAttempt::create([
                         'user_id' => $userId,
                         'payment_method' => 'momo',
-                        'order_code' => $orderCode,
+                        'order_code' => $orderId, // Use new order ID for new attempts
                         'amount' => $finalPrice,
                         'status' => 'pending',
                         'selected_items' => null,
@@ -118,10 +122,13 @@ class MOMOController extends Controller
                 $secretKey = 'at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa';
                 $orderInfo = "Thanh toán qua MoMo";
                 $amount = $finalPrice;
-                $orderId = $orderCode;
                 $redirectUrl = route('momo.return');
                 $ipnUrl = route('momo.ipn');
-                $extraData = json_encode(['buy_now' => true]);
+                $extraData = json_encode([
+                    'selected_items' => null,
+                    'original_order_code' => $originalOrderCode,
+                    'payment_attempt_id' => $paymentAttempt ? $paymentAttempt->id : null
+                ]);
 
                 $requestId = time() . "";
                 $requestType = "payWithCC";
@@ -256,27 +263,31 @@ class MOMOController extends Controller
             ]);
 
             // Use existing order code if provided, otherwise generate new one
-            $orderCode = $request->input('order_code') ?? (date('YmdHis') . rand(100, 999));
+            $originalOrderCode = $request->input('order_code') ?? (date('YmdHis') . rand(100, 999));
+
+            // Generate a new order ID for this payment attempt
+            $orderId = $originalOrderCode . '_' . time();
 
             // Check if payment attempt already exists
-            $paymentAttempt = PaymentAttempt::where('order_code', $orderCode)->first();
+            $paymentAttempt = PaymentAttempt::where('order_code', $originalOrderCode)->first();
 
             if ($paymentAttempt) {
-                // Update existing payment attempt
+                // Update existing payment attempt with new order ID
                 $paymentAttempt->update([
                     'amount' => $finalPrice,
                     'status' => 'pending',
                     'selected_items' => $selectedItemIds ?? null,
                     'shipping_info' => session('momo_shipping_info'),
                     'coupon_info' => $coupon,
-                    'expires_at' => now()->addMinutes(15)
+                    'expires_at' => now()->addMinutes(15),
+                    'order_code' => $orderId // Update with new order ID
                 ]);
             } else {
                 // Create new payment attempt
                 PaymentAttempt::create([
                     'user_id' => $userId,
                     'payment_method' => 'momo',
-                    'order_code' => $orderCode,
+                    'order_code' => $orderId, // Use new order ID for new attempts
                     'amount' => $finalPrice,
                     'status' => 'pending',
                     'selected_items' => $selectedItemIds ?? null,
@@ -293,10 +304,13 @@ class MOMOController extends Controller
             $secretKey = 'at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa';
             $orderInfo = "Thanh toán qua MoMo";
             $amount = $finalPrice;
-            $orderId = $orderCode;
             $redirectUrl = route('momo.return');
             $ipnUrl = route('momo.ipn');
-            $extraData = json_encode(['selected_items' => $selectedItemIds]);
+            $extraData = json_encode([
+                'selected_items' => $selectedItemIds,
+                'original_order_code' => $originalOrderCode,
+                'payment_attempt_id' => $paymentAttempt ? $paymentAttempt->id : null
+            ]);
 
             $requestId = time() . "";
             $requestType = "payWithCC";
@@ -378,8 +392,26 @@ class MOMOController extends Controller
                     ->with('error', 'Thanh toán thất bại: ' . ($request->message ?? 'Vui lòng thử lại sau.'));
             }
 
+            // Get payment attempt ID from extraData
+            $extraData = json_decode($request->extraData, true);
+            $paymentAttemptId = $extraData['payment_attempt_id'] ?? null;
+            $originalOrderCode = $extraData['original_order_code'] ?? null;
+
+            // If we have a payment attempt ID, get the payment attempt
+            $paymentAttempt = null;
+            if ($paymentAttemptId) {
+                $paymentAttempt = PaymentAttempt::find($paymentAttemptId);
+            }
+
+            // If we have an original order code but no payment attempt, try to find it
+            if (!$paymentAttempt && $originalOrderCode) {
+                $paymentAttempt = PaymentAttempt::where('order_code', 'like', $originalOrderCode . '%')
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+            }
+
             // Check if order already exists to prevent duplicate processing
-            $existingOrder = Order::where('code', $request->orderId)->first();
+            $existingOrder = Order::where('code', $originalOrderCode)->first();
             if ($existingOrder) {
                 Log::info('Order already processed:', ['order_id' => $existingOrder->id]);
                 return redirect()->route('checkout.success', ['order_id' => $existingOrder->id])
@@ -393,14 +425,11 @@ class MOMOController extends Controller
                 return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
             }
 
-            $cart = Cart::where('user_id', $userId)->first();
-            if (!$cart) {
-                return redirect()->route('cart.index')->with('error', 'Giỏ hàng không tồn tại.');
-            }
-
-            // Get selected items from extraData or session
+            // Get selected items from payment attempt or session
             $selectedItemIds = [];
-            if ($request->extraData) {
+            if ($paymentAttempt && $paymentAttempt->selected_items) {
+                $selectedItemIds = $paymentAttempt->selected_items;
+            } elseif ($request->extraData) {
                 $extraData = json_decode($request->extraData, true);
                 $selectedItemIds = $extraData['selected_items'] ?? [];
             }
@@ -409,8 +438,9 @@ class MOMOController extends Controller
                 $selectedItemIds = session('momo_selected_items', []);
             }
 
-            if (empty($selectedItemIds)) {
-                return redirect()->route('cart.index')->with('error', 'Vui lòng chọn sản phẩm để thanh toán.');
+            $cart = Cart::where('user_id', $userId)->first();
+            if (!$cart) {
+                return redirect()->route('cart.index')->with('error', 'Giỏ hàng không tồn tại.');
             }
 
             $cartItems = CartItem::with(['product', 'productVariant'])
@@ -491,7 +521,7 @@ class MOMOController extends Controller
 
             // Create Order
             $order = Order::create([
-                'code' => $request->orderId,
+                'code' => $originalOrderCode,
                 'user_id' => $userId,
                 'shipping_user_name' => session('momo_shipping_info.shipping_user_name'),
                 'shipping_email' => session('momo_shipping_info.shipping_email'),
@@ -577,7 +607,26 @@ class MOMOController extends Controller
     {
         Log::info('MoMo IPN Data: ', $request->all());
 
-        $order = Order::where('code', $request->input('orderId'))->first();
+        // Get payment attempt ID and original order code from extraData
+        $extraData = json_decode($request->input('extraData'), true);
+        $paymentAttemptId = $extraData['payment_attempt_id'] ?? null;
+        $originalOrderCode = $extraData['original_order_code'] ?? null;
+
+        // If we have a payment attempt ID, get the payment attempt
+        $paymentAttempt = null;
+        if ($paymentAttemptId) {
+            $paymentAttempt = PaymentAttempt::find($paymentAttemptId);
+        }
+
+        // If we have an original order code but no payment attempt, try to find it
+        if (!$paymentAttempt && $originalOrderCode) {
+            $paymentAttempt = PaymentAttempt::where('order_code', 'like', $originalOrderCode . '%')
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
+
+        // Find the order using the original order code
+        $order = Order::where('code', $originalOrderCode)->first();
 
         if (!$order) {
             return response()->json(['error' => 'Order not found'], 404);
@@ -589,9 +638,20 @@ class MOMOController extends Controller
                 'status' => 'pending'
             ]);
 
+            // Update payment attempt status if exists
+            if ($paymentAttempt) {
+                $paymentAttempt->update(['status' => 'completed']);
+            }
+
             return response()->json(['message' => 'Order confirmed'], 200);
         } else {
             $order->update(['payment_status' => 0]);
+
+            // Update payment attempt status if exists
+            if ($paymentAttempt) {
+                $paymentAttempt->update(['status' => 'failed']);
+            }
+
             return response()->json(['message' => 'Payment failed'], 400);
         }
     }
