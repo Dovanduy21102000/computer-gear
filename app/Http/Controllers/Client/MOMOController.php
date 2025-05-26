@@ -373,6 +373,7 @@ class MOMOController extends Controller
                 // Clear any existing sessions that might cause loops
                 session()->forget('momo_selected_items');
                 session()->forget('coupon');
+                session()->forget('buy_now_item');
 
                 return redirect('/')
                     ->with('error', 'Thanh toán thất bại: ' . ($request->message ?? 'Vui lòng thử lại sau.'));
@@ -393,6 +394,118 @@ class MOMOController extends Controller
                 return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
             }
 
+            // Check for buy now item first
+            $buyNowItem = session('buy_now_item');
+            if ($buyNowItem) {
+                // Calculate total price for buy now item
+                $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
+
+                // Apply coupon if exists
+                $coupon = session('coupon');
+                $couponDiscount = 0;
+                $couponId = null;
+
+                if ($coupon && is_array($coupon)) {
+                    if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
+                        if ($coupon['type'] === 'percent') {
+                            $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount'] ?? $totalPrice);
+                        } else {
+                            $couponDiscount = min($coupon['price'], $totalPrice);
+                        }
+                        $couponId = $coupon['id'];
+                    }
+                }
+
+                $finalPrice = max(0, $totalPrice - $couponDiscount);
+
+                // Verify the amount matches
+                if ($request->amount != $finalPrice) {
+                    Log::error('MOMO Amount Mismatch:', [
+                        'expected' => $finalPrice,
+                        'received' => $request->amount
+                    ]);
+                    throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
+                }
+
+                $shippingInfo = session('momo_shipping_info');
+                if (
+                    empty($shippingInfo['shipping_user_name']) ||
+                    empty($shippingInfo['shipping_phone']) ||
+                    empty($shippingInfo['shipping_address'])
+                ) {
+                    Log::error('Missing shipping info in session for MoMo order creation', [
+                        'orderId' => $request->orderId,
+                        'userId' => $userId,
+                        'shippingInfo' => $shippingInfo
+                    ]);
+                    return redirect()->route('cart.index')->with('error', 'Thông tin giao hàng không hợp lệ. Vui lòng thử lại.');
+                }
+
+                // Create Order
+                $order = Order::create([
+                    'code' => preg_replace('/_\d+$/', '', $request->orderId),
+                    'user_id' => $userId,
+                    'shipping_user_name' => session('momo_shipping_info.shipping_user_name'),
+                    'shipping_email' => session('momo_shipping_info.shipping_email'),
+                    'shipping_phone' => session('momo_shipping_info.shipping_phone'),
+                    'shipping_address' => session('momo_shipping_info.shipping_address'),
+                    'province_id' => session('momo_shipping_info.province_id'),
+                    'district_id' => session('momo_shipping_info.district_id'),
+                    'coupon_code' => $coupon['code'] ?? null,
+                    'coupon_discount' => $couponDiscount,
+                    'total_price' => $totalPrice,
+                    'final_price' => $finalPrice,
+                    'payment_status' => 1,
+                    'status' => 'pending',
+                    'payment_method' => 'momo',
+                    'notes' => session('momo_shipping_info.notes'),
+                ]);
+
+                // Mark payment attempt as completed
+                \App\Models\PaymentAttempt::where('order_code', $order->code)
+                    ->update(['status' => 'completed']);
+
+                // Record coupon usage
+                if ($couponId) {
+                    CouponUser::create([
+                        'user_id' => $userId,
+                        'coupon_id' => $couponId,
+                        'order_id' => $order->id
+                    ]);
+                }
+
+                // Create order item for buy now item
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $buyNowItem->product->id,
+                    'product_variant_id' => $buyNowItem->productVariant ? $buyNowItem->productVariant->id : null,
+                    'price' => $buyNowItem->price,
+                    'quantity' => $buyNowItem->quantity,
+                    'product_info' => json_encode([
+                        'product' => $buyNowItem->product->toArray(),
+                        'variant' => $buyNowItem->productVariant ? $buyNowItem->productVariant->toArray() : null
+                    ]),
+                ]);
+
+                // Update stock
+                if ($buyNowItem->productVariant) {
+                    $buyNowItem->productVariant->decrement('quantity', $buyNowItem->quantity);
+                } else {
+                    $buyNowItem->product->decrement('quantity', $buyNowItem->quantity);
+                }
+
+                // Clear sessions
+                session()->forget('coupon');
+                session()->forget('momo_shipping_info');
+                session()->forget('buy_now_item');
+
+                DB::commit();
+
+                return redirect()->route('checkout.success', ['order_id' => $order->id])
+                    ->with('success', 'Đặt hàng thành công!');
+            }
+
+            // Handle cart items payment
             $cart = Cart::where('user_id', $userId)->first();
             if (!$cart) {
                 return redirect()->route('cart.index')->with('error', 'Giỏ hàng không tồn tại.');
@@ -491,7 +604,7 @@ class MOMOController extends Controller
 
             // Create Order
             $order = Order::create([
-                'code' => $request->orderId,
+                'code' => preg_replace('/_\d+$/', '', $request->orderId),
                 'user_id' => $userId,
                 'shipping_user_name' => session('momo_shipping_info.shipping_user_name'),
                 'shipping_email' => session('momo_shipping_info.shipping_email'),
