@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CategoryPost extends Model
 {
     use HasFactory, SoftDeletes;
-    
+
     protected $table = 'category_post';
     protected $fillable = [
         'name',
@@ -27,7 +27,7 @@ class CategoryPost extends Model
 
     public function posts()
     {
-        return $this->hasMany(Post::class, 'category_post_id');
+        return $this->hasMany(Post::class, 'category_id');
     }
 
     public function children()

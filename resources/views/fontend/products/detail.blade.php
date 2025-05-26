@@ -19,7 +19,7 @@
         /* Giữ nền trắng */
         color: black;
         /* Giữ màu chữ không thay đổi */
-        border-color: #ffda08;
+        border-color: #3b87de;
         /* Màu viền khi chọn */
         font-weight: normal;
         /* Đảm bảo chữ không bị in đậm */
@@ -32,13 +32,13 @@
 
     /* Thay đổi viền khi được chọn */
     .attribute-option.selected {
-        border-color: yellow;
+        border-color: #3b87de;
         /* Viền màu khi được chọn */
     }
 
     /* Định dạng khi di chuột qua ô */
     .attribute-option:hover {
-        border-color: #ebf306;
+        border-color: #3b87de;
         /* Viền đổi màu khi hover */
     }
 
@@ -84,13 +84,13 @@
     }
 
     .rating input:checked~label {
-        color: #ffbb33;
+        color: #3b87de;
         /* Yellow color for selected stars */
     }
 
     .rating label:hover,
     .rating label:hover~label {
-        color: #ffbb33;
+        color: #3b87de;
         /* Highlight on hover */
     }
 
@@ -166,53 +166,61 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 col-xl-4 mb-md-6 mb-lg-0">
-                    <div class="mb-1">
-                        <a href="#" class="font-size-12 text-gray-5 mb-2 d-inline-block">
-                            {{ $product->category->name ?? 'Danh mục' }}</a>
-                        <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
-                        <div class="mb-2">
-                            <a class="d-inline-flex align-items-center small font-size-15 text-lh-1" href="#">
-                                <div class="text-warning mr-2">
-                                    <!-- Hiển thị sao dựa trên đánh giá trung bình -->
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        <small
-                                            class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
-                                    @endfor
-                                </div>
-                                <span class="text-secondary font-size-13">({{ $totalReviews }} đánh giá từ khách
-                                    hàng)</span>
-                            </a>
+                    <div class="product-details-section position-relative">
+                        <div id="productDetailsSpinner"
+                            style="display:none; position:absolute; left:0; top:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:10; justify-content:center; align-items:center;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
                         </div>
-
-
-                        <div class="d-flex align-items-center">
-                            <!-- Ảnh thương hiệu với kích thước nhỏ hơn -->
-
-
-                            <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
-                            @if ($product->brand)
-                                <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
-                                    Thương hiệu: <a href="#" class="text-dark">{{ $product->brand->name }}</a>
-                                </p>
-                            @endif
-                        </div>
-                        <div class="product-main-image mb-3">
-                            <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
-                                alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
-                        </div>
-
-                        <!-- Thêm thông tin bảo hành và hỗ trợ -->
-                        <div class="mb-2">
-                            <p class="mb-1 fw-bold">✔ Bảo hành chính hãng 12 tháng.</p>
-                            <p class="mb-1 fw-bold">✔ Hỗ trợ đổi mới trong 7 ngày.</p>
-                            <p class="mb-1 fw-bold">✔ Windows bản quyền tích hợp.</p>
-                        </div>
-
                         <div class="mb-1">
-                            <p>{!! $product->short_description !!}</p>
-                        </div>
+                            <a href="#" class="font-size-12 text-gray-5 mb-2 d-inline-block">
+                                {{ $product->category->name ?? 'Danh mục' }}</a>
+                            <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
+                            <div class="mb-2">
+                                <a class="d-inline-flex align-items-center small font-size-15 text-lh-1" href="#">
+                                    <div class="text-warning mr-2">
+                                        <!-- Hiển thị sao dựa trên đánh giá trung bình -->
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <small
+                                                class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
+                                        @endfor
+                                    </div>
+                                    <span class="text-secondary font-size-13">({{ $totalReviews }} đánh giá từ khách
+                                        hàng)</span>
+                                </a>
+                            </div>
 
-                        <p><strong>SKU: </strong>{{ $product->sku }}</p>
+
+                            <div class="d-flex align-items-center">
+                                <!-- Ảnh thương hiệu với kích thước nhỏ hơn -->
+
+
+                                <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
+                                @if ($product->brand)
+                                    <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
+                                        Thương hiệu: <a href="#" class="text-dark">{{ $product->brand->name }}</a>
+                                    </p>
+                                @endif
+                            </div>
+                            <div class="product-main-image mb-3">
+                                <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
+                                    alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
+                            </div>
+
+                            <!-- Thêm thông tin bảo hành và hỗ trợ -->
+                            {{-- <div class="mb-2">
+                                <p class="mb-1 fw-bold">✔ Bảo hành chính hãng 12 tháng.</p>
+                                <p class="mb-1 fw-bold">✔ Hỗ trợ đổi mới trong 7 ngày.</p>
+                                <p class="mb-1 fw-bold">✔ Windows bản quyền tích hợp.</p>
+                            </div> --}}
+
+                            <div class="mb-1">
+                                <p>{!! $product->short_description !!}</p>
+                            </div>
+
+                            <p><strong>SKU: </strong>{{ $product->sku }}</p>
+                        </div>
                     </div>
                 </div>
                 <div class="mx-md-auto mx-lg-0 col-md-6 col-lg-4 col-xl-3">
@@ -299,52 +307,40 @@
                             <!-- End Quantity -->
                             @php
                                 $attributes = [];
-
                                 foreach ($variants as $variant) {
                                     foreach ($variant->attributeValues as $attributeValue) {
                                         if (isset($attributeValue->attribute)) {
                                             $attributeName = trim($attributeValue->attribute->name);
                                             $attributeValueText = trim($attributeValue->value);
-
-                                            // Lưu các giá trị vào nhóm thuộc tính
                                             $attributes[$attributeName][$attributeValueText] = $attributeValueText;
                                         }
                                     }
                                 }
                             @endphp
 
-                            @php
-                                $attributes = [];
-
-                                foreach ($variants as $variant) {
-                                    foreach ($variant->attributeValues as $attributeValue) {
-                                        if (isset($attributeValue->attribute)) {
-                                            $attributeName = trim($attributeValue->attribute->name);
-                                            $attributeValueText = trim($attributeValue->value);
-
-                                            // Lưu các giá trị vào nhóm thuộc tính
-                                            $attributes[$attributeName][$attributeValueText] = $attributeValueText;
-                                        }
-                                    }
-                                }
-                            @endphp
-
-
-                            @foreach ($attributes as $attributeName => $values)
-                                <div class="mb-1">
-                                    <h6 class="font-size-14">Chọn {{ ucfirst($attributeName) }}</h6>
-                                    <div class="attribute-options">
-                                        @foreach ($values as $value)
-                                            <label class="attribute-option">
-                                                <input type="radio"
-                                                    name="{{ strtolower(string: str_replace(' ', '_', $attributeName)) }}"
-                                                    value="{{ $value }}" class="d-none">
-                                                <span class="attribute-box">{{ $value }}</span>
-                                            </label>
-                                        @endforeach
+                            <div class="product-attribute-options">
+                                <div id="attributeOptionsSpinner"
+                                    style="display:none; text-align:center; padding:10px;">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
                                     </div>
                                 </div>
-                            @endforeach
+                                @foreach ($attributes as $attributeName => $values)
+                                    <div class="mb-1">
+                                        <h6 class="font-size-14">Chọn {{ ucfirst($attributeName) }}</h6>
+                                        <div class="attribute-options">
+                                            @foreach ($values as $value)
+                                                <label class="attribute-option">
+                                                    <input type="radio"
+                                                        name="{{ strtolower(str_replace(' ', '_', $attributeName)) }}"
+                                                        value="{{ $value }}" class="d-none">
+                                                    <span class="attribute-box">{{ $value }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
 
 
 
@@ -762,19 +758,69 @@
                                                 alt="{{ $related->name }}">
                                         </a>
                                     </div>
+                                    <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <small
+                                                class="{{ $i <= $related->rating ? 'fas' : 'far' }} fa-star {{ $i > $related->rating ? 'text-muted' : '' }}"></small>
+                                        @endfor
+                                    </div>
                                     <div class="flex-center-between mb-1">
-                                        <div class="prodcut-price">
-                                            @if ($related->price_sale)
+                                        <div class="prodcut-price mt-4">
+                                            @php
+                                                $hasVariant = $related->is_variant && $related->variants->count();
+                                                $variantSalePrices = $hasVariant
+                                                    ? $related->variants
+                                                        ->pluck('price_sale')
+                                                        ->filter(function ($price) {
+                                                            return is_numeric($price) && $price > 0;
+                                                        })
+                                                    : collect();
+                                                $variantBasePrices = $hasVariant
+                                                    ? $related->variants->pluck('price')->filter(function ($price) {
+                                                        return is_numeric($price) && $price > 0;
+                                                    })
+                                                    : collect();
+                                                if ($variantSalePrices->count()) {
+                                                    $minPrice = $variantSalePrices->min();
+                                                    $maxPrice = $variantSalePrices->max();
+                                                    $isSale = true;
+                                                    $originalMin = $variantBasePrices->min();
+                                                    $originalMax = $variantBasePrices->max();
+                                                } else {
+                                                    $minPrice = $variantBasePrices->min();
+                                                    $maxPrice = $variantBasePrices->max();
+                                                    $isSale = false;
+                                                    $originalMin = null;
+                                                    $originalMax = null;
+                                                }
+                                            @endphp
+                                            @if ($hasVariant && $minPrice)
+                                                <span class="text-danger fw-bold">
+                                                    {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                    @endif
+                                                </span>
+                                                @if ($isSale && $originalMin)
+                                                    <br>
+                                                    <del class="text-muted">
+                                                        {{ number_format($originalMin, 0, ',', '.') }}₫@if ($originalMin != $originalMax)
+                                                        @endif
+                                                    </del>
+                                                @endif
+                                            @elseif ($hasVariant)
+                                                <span class="text-danger fw-bold">Liên hệ</span>
+                                            @elseif ($related->price_sale)
                                                 <div class="prodcut-price d-flex align-items-center position-relative">
                                                     <ins
                                                         class="font-size-20 text-red text-decoration-none">{{ number_format($related->price_sale) }}đ</ins>
                                                     <del
                                                         class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($related->price, 0, ',', '.') }}đ</del>
                                                 </div>
-                                            @else
+                                            @elseif ($related->price > 0)
                                                 <div class="text-dark fw-bold fs-5">
                                                     {{ number_format($related->price, 0, ',', '.') }}đ
                                                 </div>
+                                            @else
+                                                <span class="text-danger fw-bold">Liên hệ</span>
                                             @endif
                                         </div>
                                         <div class="d-none d-xl-block prodcut-add-cart">
@@ -1041,6 +1087,53 @@
             console.log("🏆 UI đang cập nhật...", response);
 
             let quantity = response.quantity ?? 0;
+            let variantImage = response.image; // Get the image path from the response
+
+            // Update the main product image display
+            if (variantImage) {
+                // Assuming the main slider container is #sliderSyncingNav
+                let $mainSlider = $('#sliderSyncingNav');
+
+                // Destroy the current slider instance
+                if ($mainSlider.hasClass('slick-initialized')) {
+                    $mainSlider.slick('unslick');
+                }
+
+                // Clear existing content and add the new variant image
+                $mainSlider.empty().append(
+                    '<div class="js-slide"><img class="img-fluid" src="' + window.storageBaseUrl +
+                    variantImage + '" alt="Variant Image"></div>'
+                );
+
+                // Re-initialize the slider (adjust options if needed)
+                $mainSlider.slick({
+                    infinite: true,
+                    arrows: true, // You might want to re-enable arrows
+                    // Add other original slider options here
+                    dots: true, // Example: add dots if they were there originally
+                    // Make sure to include all relevant data- attributes from the original #sliderSyncingNav
+                    // This is a placeholder, you should copy the exact data- attributes/options from the HTML
+                    dataArrowsClasses: "d-none d-lg-inline-block u-slick__arrow-classic u-slick__arrow-centered--y rounded-circle",
+                    dataArrowLeftClasses: "fas fa-arrow-left u-slick__arrow-classic-inner u-slick__arrow-classic-inner--left ml-lg-2 ml-xl-4",
+                    dataArrowRightClasses: "fas fa-arrow-right u-slick__arrow-classic-inner u-slick__arrow-classic-inner--right mr-lg-2 mr-xl-4",
+                    dataNavFor: "#sliderSyncingThumb"
+                });
+
+                // If you have a thumbnail slider linked, update it too
+                let $thumbSlider = $('#sliderSyncingThumb');
+                if ($thumbSlider.hasClass('slick-initialized')) {
+                    $thumbSlider.slick('unslick');
+                }
+                // For simplicity, let's just clear thumbnails if only one variant image is shown
+                $thumbSlider.empty(); // Clear thumbnail slider
+
+            } else {
+                // If no variant image, maybe revert to the main product thumbnail or a placeholder
+                // This part depends on your desired behavior when a variant has no specific image
+                console.warn("No variant image found in response.");
+                // You might want to load the default product images again here
+            }
+
 
             // Kiểm tra giá
             let price = response.price_sale ?
@@ -1061,6 +1154,7 @@
                 $("#quantityInput").val("").prop("disabled", true);
                 disablePurchase();
             }
+            updateStockDisplay(quantity);
         }
 
         // Vô hiệu hóa các nút "Thêm vào giỏ" và "Mua ngay"
@@ -1091,7 +1185,8 @@
         }
 
         // Update attribute options when any selection changes
-        $(".attribute-option input[type='radio']").change(function() {
+        $(document).on('change', ".attribute-option input[type='radio']", function() {
+            console.log("Radio changed");
             // Add selected class for visual feedback
             $(".attribute-option").each(function() {
                 if ($(this).find('input[type="radio"]').is(":checked")) {
@@ -1102,8 +1197,15 @@
             });
 
             updateAttributeOptions();
-            let selectedAttributes = checkVariants();
-            if (!selectedAttributes) return;
+            let selectedAttributes = {};
+            $(".attribute-option input[type='radio']:checked").each(function() {
+                let attributeName = $(this).attr("name");
+                let attributeValue = $(this).val();
+                selectedAttributes[attributeName] = attributeValue;
+            });
+            console.log("Selected attributes:", selectedAttributes);
+            let result = checkVariants();
+            if (!result) return;
 
             let cacheKey = JSON.stringify(selectedAttributes);
             let productId = {{ $product->id }};
@@ -1313,3 +1415,120 @@
         });
     </script>
 @endpush
+
+<script>
+    window.initAttributeOptions = function() {
+        // Function to check if an attribute combination is valid
+        function isValidCombination(selectedAttributes, attributeName, attributeValue) {
+            let testAttributes = {
+                ...selectedAttributes
+            };
+            testAttributes[attributeName] = attributeValue;
+            let found = allVariants.some(variant => {
+                return Object.entries(testAttributes).every(([key, value]) => {
+                    return variant.attributes[key] === value;
+                });
+            });
+            // console.log('Checking', testAttributes, '=>', found);
+            return found;
+        }
+
+        // Update attribute options based on current selection
+        function updateAttributeOptions() {
+            let selectedAttributes = {};
+            $(".attribute-option input[type='radio']:checked").each(function() {
+                let attributeName = $(this).attr("name");
+                let attributeValue = $(this).val();
+                selectedAttributes[attributeName] = attributeValue;
+            });
+
+            // If nothing is selected, enable all options
+            if (Object.keys(selectedAttributes).length === 0) {
+                $(".attribute-option").removeClass('disabled').css('opacity', '1');
+                $(".attribute-option input[type='radio']").prop('disabled', false);
+                return;
+            }
+
+            // For each attribute group
+            $(".attribute-options").each(function() {
+                let attributeName = $(this).find('input[type="radio"]').first().attr("name");
+
+                // For each option in this group
+                $(this).find('.attribute-option').each(function() {
+                    let option = $(this);
+                    let input = option.find('input[type="radio"]');
+                    let value = input.val();
+
+                    // Check if this option is compatible with current selection
+                    let isCompatible = isValidCombination(selectedAttributes, attributeName, value);
+
+                    // Update visual state
+                    if (isCompatible) {
+                        option.removeClass('disabled');
+                        input.prop('disabled', false);
+                        option.css('opacity', '1');
+                    } else {
+                        option.addClass('disabled');
+                        input.prop('disabled', true);
+                        option.css('opacity', '0.5');
+                    }
+                });
+            });
+        }
+
+        // Add CSS for disabled state
+        if (!document.getElementById('attribute-option-disabled-style')) {
+            $('<style id="attribute-option-disabled-style">')
+                .text(`
+                    .attribute-option.disabled {
+                        cursor: not-allowed;
+                        background-color: #f5f5f5;
+                    }
+                    .attribute-option.disabled .attribute-box {
+                        color: #999;
+                    }
+                `)
+                .appendTo('head');
+        }
+
+        // Update attribute options when any selection changes
+        $(document).on('change', ".attribute-option input[type='radio']", function() {
+            // Add selected class for visual feedback
+            $(".attribute-option").each(function() {
+                if ($(this).find('input[type="radio"]').is(":checked")) {
+                    $(this).addClass("selected");
+                } else {
+                    $(this).removeClass("selected");
+                }
+            });
+            updateAttributeOptions();
+        });
+
+        // Universal radio deselect logic (works for label and box clicks)
+        $(document).off('mousedown.attributeOption').on('mousedown.attributeOption', '.attribute-option', function(
+            e) {
+            let $input = $(this).find('input[type="radio"]');
+            $input.attr('data-waschecked', $input.prop('checked'));
+        });
+        $(document).off('click.attributeOption').on('click.attributeOption', '.attribute-option', function(e) {
+            let $input = $(this).find('input[type="radio"]');
+            if ($input.attr('data-waschecked') === 'true') {
+                console.log('Deselecting via label:', $input[0]);
+                $input.prop('checked', false).trigger('change');
+                $input.attr('data-waschecked', 'false');
+                e.stopImmediatePropagation();
+                e.preventDefault();
+            }
+        });
+
+        // Initial update
+        updateAttributeOptions();
+    };
+
+    // Call on page load
+    $(document).ready(function() {
+        if (typeof window.initAttributeOptions === "function") {
+            window.initAttributeOptions();
+        }
+    });
+</script>

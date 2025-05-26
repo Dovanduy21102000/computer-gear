@@ -100,3 +100,23 @@
         </div>
     </section>
 </main>
+
+<script>
+    function generateSlug(str) {
+        debugger; // Add a debugger statement here
+        return 'simplified-slug'; // Return a fixed value
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var nameInput = document.getElementById('name');
+        var slugInput = document.getElementById('slug');
+        if (nameInput && slugInput) {
+            console.log('Name and slug inputs found. Attaching event listener.');
+            nameInput.addEventListener('input', function() {
+                slugInput.value = generateSlug(this.value);
+            });
+        } else {
+            console.error('Name or slug input not found!');
+        }
+    });
+</script>

@@ -1,4 +1,15 @@
 <!-- ========== MAIN CONTENT ========== -->
+<style>
+    .new-product-title,
+    .new-product-title a {
+        display: block !important;
+        max-width: 120px !important;
+        /* Adjust as needed for your layout */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+</style>
 <main id="content" role="main">
     <!-- breadcrumb -->
     <div class="bg-gray-13 bg-md-transparent">
@@ -41,58 +52,46 @@
                             <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                 <ul id="sidebarNav" class="list-unstyled mb-0">
                                     <li class="nav-item">
-                                        <a class="dropdown-toggle text-uppercase font-weight-bold d-block p-3 bg-light rounded"
+                                        {{-- <a class="dropdown-toggle text-uppercase font-weight-bold d-block p-3 bg-light rounded"
                                             href="javascript:;" role="button" data-toggle="collapse"
                                             aria-expanded="false" aria-controls="sidebarNav1Collapse"
                                             data-target="#sidebarNav1Collapse">
                                             <i class="bi bi-list"></i> Tất cả danh mục
-                                        </a>
+                                        </a> --}}
 
                                         <div id="sidebarNav1Collapse" class="collapse" data-parent="#sidebarNav">
                                             <ul id="sidebarNav1" class="list-unstyled pl-3">
-                                                <!-- Danh mục -->
-                                                @foreach ($categories as $category)
-                                                    <li class="nav-item">
-                                                        @php
-                                                            $query = request()->all();
-                                                            $query['category'] = $category->slug;
-                                                        @endphp
-                                                        <a class="dropdown-item d-flex justify-content-between align-items-center"
-                                                            href="{{ route('client.products.filter', $query) }}">
-                                                            <span>{{ $category->name }}</span>
-                                                            <span class="badge badge-pill badge-secondary">
-                                                                @php
-                                                                    $totalProducts = $category->products()->count();
-                                                                    foreach ($category->children as $child) {
-                                                                        $totalProducts += $child->products()->count();
-                                                                    }
-                                                                @endphp
-                                                                {{ $totalProducts }}
-                                                            </span>
-                                                        </a>
-
-                                                        @if ($category->children->count())
-                                                            <ul class="list-unstyled pl-3">
-                                                                @foreach ($category->children as $child)
-                                                                    @php
-                                                                        $query = request()->all();
-                                                                        $query['category'] = $child->slug;
-                                                                    @endphp
-                                                                    <li class="nav-item">
-                                                                        <a class="dropdown-item d-flex justify-content-between align-items-center"
-                                                                            href="{{ route('client.products.filter', $query) }}">
-                                                                            <span>{{ $child->name }}</span>
-                                                                            <span
-                                                                                class="badge badge-pill badge-secondary">
-                                                                                {{ $child->products()->count() }}
-                                                                            </span>
-                                                                        </a>
-                                                                    </li>
-                                                                @endforeach
-                                                            </ul>
-                                                        @endif
-                                                    </li>
-                                                @endforeach
+                                                @php
+                                                    if (!function_exists('renderCategorySidebar')) {
+                                                        function renderCategorySidebar($categories)
+                                                        {
+                                                            foreach ($categories as $category) {
+                                                                echo '<li class="nav-item">';
+                                                                $query = request()->all();
+                                                                $query['category'] = $category->slug;
+                                                                $totalProducts = $category->products->count();
+                                                                foreach ($category->children as $child) {
+                                                                    $totalProducts += $child->products->count();
+                                                                }
+                                                                echo '<a class="dropdown-item d-flex justify-content-between align-items-center" href="' .
+                                                                    route('client.products.filter', $query) .
+                                                                    '">';
+                                                                echo '<span>' . $category->name . '</span>';
+                                                                echo '<span class="badge badge-pill badge-secondary">' .
+                                                                    $totalProducts .
+                                                                    '</span>';
+                                                                echo '</a>';
+                                                                if ($category->children->count()) {
+                                                                    echo '<ul class="list-unstyled pl-3">';
+                                                                    renderCategorySidebar($category->children);
+                                                                    echo '</ul>';
+                                                                }
+                                                                echo '</li>';
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+                                                @php renderCategorySidebar($categories); @endphp
                                             </ul>
                                         </div>
                                     </li>
@@ -153,7 +152,7 @@
                     <ul class="list-unstyled">
                         @foreach ($newProduct as $product)
                             <li class="mb-4">
-                                <div class="row">
+                                <div class="row align-items-center">
                                     <div class="col-auto">
                                         <a href="{{ route('client.products.detail', $product->slug) }}"
                                             class="d-block width-75">
@@ -162,9 +161,10 @@
                                         </a>
                                     </div>
                                     <div class="col">
-                                        <h3 class="text-lh-1dot2 font-size-14 mb-0">
-                                            <a href="{{ route('client.products.detail', $product->slug) }}">
-                                                {{ $product->name }}
+                                        <h3 class="text-lh-1dot2 font-size-14 mb-0 new-product-title">
+                                            <a href="{{ route('client.products.detail', $product->slug) }}"
+                                                title="{{ $product->name }}">
+                                                {{ Str::limit($product->name, 22) }}
                                             </a>
                                         </h3>
                                         <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
@@ -177,38 +177,62 @@
                                             @php
                                                 $hasVariant = $product->is_variant && $product->variants->count();
                                                 $variantSalePrices = $hasVariant
-                                                    ? $product->variants->pluck('price_sale')->filter()
+                                                    ? $product->variants
+                                                        ->pluck('price_sale')
+                                                        ->filter(function ($price) {
+                                                            return is_numeric($price) && $price > 0;
+                                                        })
                                                     : collect();
                                                 $variantBasePrices = $hasVariant
-                                                    ? $product->variants->pluck('price')
+                                                    ? $product->variants->pluck('price')->filter(function ($price) {
+                                                        return is_numeric($price) && $price > 0;
+                                                    })
                                                     : collect();
                                                 if ($variantSalePrices->count()) {
                                                     $minPrice = $variantSalePrices->min();
+                                                    $maxPrice = $variantSalePrices->max();
                                                     $isSale = true;
                                                     $originalMin = $variantBasePrices->min();
+                                                    $originalMax = $variantBasePrices->max();
                                                 } else {
                                                     $minPrice = $variantBasePrices->min();
+                                                    $maxPrice = $variantBasePrices->max();
                                                     $isSale = false;
                                                     $originalMin = null;
+                                                    $originalMax = null;
                                                 }
                                             @endphp
-                                            @if ($hasVariant)
-                                                <span class="text-danger fw-bold">
-                                                    {{ number_format($minPrice, 0, ',', '.') }}₫
-                                                </span>
-                                                @if ($isSale)
-                                                    <br>
-                                                    <del class="text-muted">
-                                                        {{ number_format($originalMin, 0, ',', '.') }}₫
-                                                    </del>
+                                            @if ($hasVariant && $minPrice)
+                                                @if ($isSale && $originalMin)
+                                                    <div
+                                                        class="prodcut-price d-flex align-items-center position-relative">
+                                                        <ins
+                                                            class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                        <del
+                                                            class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                    </div>
+                                                @else
+                                                    <span class="text-dark fw-bold">
+                                                        {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                            – {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                                        @endif
+                                                    </span>
                                                 @endif
+                                            @elseif ($hasVariant)
+                                                <span class="text-danger fw-bold">Liên hệ</span>
                                             @elseif ($product->price_sale)
-                                                <del
-                                                    class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
-                                                <span
-                                                    class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                                <div class="prodcut-price d-flex align-items-center position-relative">
+                                                    <ins
+                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale, 0, ',', '.') }}đ</ins>
+                                                    <del
+                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                                </div>
+                                            @elseif ($product->price > 0)
+                                                <div class="text-dark fw-bold fs-5 product-price">
+                                                    {{ number_format($product->price, 0, ',', '.') }}đ
+                                                </div>
                                             @else
-                                                {{ number_format($product->price, 0, ',', '.') }}₫
+                                                <span class="text-danger fw-bold">Liên hệ</span>
                                             @endif
                                         </div>
                                     </div>
@@ -228,8 +252,8 @@
                     <div class="d-xl-none">
                         <!-- Account Sidebar Toggle Button -->
                         <a id="sidebarNavToggler1" class="btn btn-sm py-1 font-weight-normal" href="javascript:;"
-                            role="button" aria-controls="sidebarContent1" aria-haspopup="true"
-                            aria-expanded="false" data-unfold-event="click" data-unfold-hide-on-scroll="false"
+                            role="button" aria-controls="sidebarContent1" aria-haspopup="true" aria-expanded="false"
+                            data-unfold-event="click" data-unfold-hide-on-scroll="false"
                             data-unfold-target="#sidebarContent1" data-unfold-type="css-animation"
                             data-unfold-animation-in="fadeInLeft" data-unfold-animation-out="fadeOutLeft"
                             data-unfold-duration="500">
@@ -267,7 +291,8 @@
                             data-style="btn-sm bg-white font-weight-normal py-2 border text-gray-20 bg-lg-down-transparent border-lg-down-0">
                             <option value="mac-dinh" @if (($sortSlug ?? '') == 'mac-dinh' || empty($sortSlug)) selected @endif>Sắp xếp mặc định
                             </option>
-                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo mới
+                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo
+                                mới
                                 nhất</option>
                             <option value="gia-thap-nhat" @if (($sortSlug ?? '') == 'gia-thap-nhat') selected @endif>Sắp xếp từ
                                 thấp tới cao</option>
@@ -297,10 +322,21 @@
                                         class="sr-only">Loading...</span></div>
                             </div>
                             <div id="ajaxProductList">
-                                @include('fontend.products.partials.product_list', [
-                                    'products' => $products,
-                                    'view' => 'grid',
-                                ])
+                                <ul class="row product-list">
+                                    @include('fontend.products.partials.product_list', [
+                                        'products' => $products,
+                                    ])
+                                </ul>
+                                <div class="pagination-container d-flex justify-content-center mt-5 position-static">
+                                    @if ($products->hasMorePages())
+                                        <button id="showMoreBtn" class="btn btn-primary"
+                                            data-next-page="{{ $products->currentPage() + 1 }}">
+                                            Hiển thị thêm
+                                        </button>
+                                    @else
+                                        <span class="text-muted">Đã tải hết sản phẩm.</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -395,4 +431,65 @@
             });
         }
     });
+
+    let currentPage = 1;
+    const perPage = 20; // Set this to your pagination limit
+
+    function handleShowMoreClick(e) {
+        if (e.target && e.target.id === 'showMoreBtn') {
+            e.preventDefault();
+            const showMoreBtn = e.target;
+            currentPage++;
+            const nextPage = currentPage;
+            // console.log('Show More clicked');
+            // console.log('Next page to fetch:', nextPage);
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', nextPage);
+            showMoreBtn.disabled = true;
+            showMoreBtn.textContent = 'Đang tải...';
+            fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const newGridProducts = tempDiv.querySelectorAll('.product-list > li');
+                    const newListProducts = tempDiv.querySelectorAll('.prodcut-list-view > li');
+                    const productList = document.querySelector('.product-list');
+                    const productListView = document.querySelector('.prodcut-list-view');
+                    let appendedCount = 0;
+                    if (productList && newGridProducts.length) {
+                        newGridProducts.forEach(item => {
+                            if (item.tagName === 'LI') {
+                                productList.appendChild(item);
+                                appendedCount++;
+                            }
+                        });
+                    } else if (productListView && newListProducts.length) {
+                        newListProducts.forEach(item => {
+                            if (item.tagName === 'LI') {
+                                productListView.appendChild(item);
+                                appendedCount++;
+                            }
+                        });
+                    }
+                    const paginationContainer = document.querySelector('.pagination-container');
+                    if (appendedCount < perPage) {
+                        paginationContainer.innerHTML = '<span class="text-muted">Đã tải hết sản phẩm.</span>';
+                    } else {
+                        showMoreBtn.disabled = false;
+                        showMoreBtn.textContent = 'Hiển thị thêm';
+                    }
+                })
+                .catch(() => {
+                    showMoreBtn.disabled = false;
+                    showMoreBtn.textContent = 'Hiển thị thêm';
+                });
+        }
+    }
+    document.removeEventListener('click', handleShowMoreClick);
+    document.addEventListener('click', handleShowMoreClick);
 </script>

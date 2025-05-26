@@ -21,7 +21,7 @@ class BlogController extends Controller
 
         // Lọc theo danh mục nếu có
         if ($request->has('category_post_id') && !empty($request->category_post_id)) {
-            $query->where('category_post_id', $request->category_post_id);
+            $query->where('category_id', $request->category_post_id);
         }
 
         // Lọc theo từ khóa tìm kiếm nếu có
@@ -49,7 +49,7 @@ class BlogController extends Controller
         if ($categoryId) {
             $filteredPosts = Post::where('status', 1)
                 ->whereHas('category_post', function ($query) use ($categoryId) {
-                    $query->where('categories.id', $categoryId);
+                    $query->where('category_post.id', $categoryId);
                 })
                 ->latest()
                 ->get();

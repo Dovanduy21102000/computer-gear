@@ -23,6 +23,23 @@
             margin-top: 5px;
         }
 
+        .order {
+            color: #fff;
+        }
+
+        .order:hover {
+            background-color: #3273be;
+            color: #fff;
+        }
+
+        .apply-coupon:hover {
+            color: #fff;
+        }
+
+        .input-group-append .btn:hover {
+            color: #fff;
+        }
+
         .variant-attributes small {
             display: inline-block;
             background-color: #f8f9fa;
@@ -41,7 +58,7 @@
 
         .coupon-list-container {
             scrollbar-width: thin;
-            scrollbar-color: #D9B867 #FFF6DC;
+            scrollbar-color: #3b87de #FFF6DC;
             border: 1px solid #e9ecef;
             border-radius: 4px;
             padding: 1rem;
@@ -56,7 +73,7 @@
         }
 
         .coupon-list-container::-webkit-scrollbar-thumb {
-            background-color: #D9B867;
+            background-color: #3b87de;
             border-radius: 4px;
         }
 
@@ -88,11 +105,11 @@
         .empty-coupon-state i {
             font-size: 3rem;
             margin-bottom: 1rem;
-            color: #D9B867;
+            color: #3b87de;
         }
 
         .empty-coupon-state small {
-            color: #bfa14a;
+            color: #3b87de;
             font-size: 1em;
             display: flex;
             align-items: center;
@@ -104,11 +121,11 @@
             font-size: 1.1em !important;
             margin-bottom: 0;
             margin-right: 6px;
-            color: #bfa14a;
+            color: #3b87de;
         }
 
         .coupon-icon {
-            color: #D9B867;
+            color: #3b87de;
             font-size: 1.2em;
             vertical-align: middle;
         }
@@ -260,6 +277,27 @@
                                             </tr>
                                         @endforeach
                                     </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Tổng cộng</th>
+                                            <td class="text-right font-medium">
+                                                {{ number_format($subtotal, 0, ',', '.') }}₫</td>
+                                        </tr>
+                                        @if ($appliedCoupon)
+                                            <tr class="discount-row">
+                                                <td colspan="2" class="text-right text-danger"
+                                                    style="font-size: 0.95em; border: none;">
+                                                    Giảm giá: -{{ number_format($discount, 0, ',', '.') }}₫
+                                                </td>
+                                            </tr>
+                                        @endif
+                                        <tr>
+                                            <th>Thành tiền</th>
+                                            <td class="text-right font-medium">
+                                                <strong>{{ number_format($total, 0, ',', '.') }}₫</strong>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
 
                                 <!-- Coupon Section -->
@@ -300,14 +338,20 @@
                                                 </div>
                                             </div>
                                         @else
-                                            <div class="text-muted">
+                                            <div class="text-dark">
                                                 <i class="fas fa-info-circle mr-1"></i>
                                                 Chọn mã giảm giá để nhận ưu đãi
                                             </div>
                                         @endif
                                     </div>
                                 </div>
-
+                                <style>
+                                    .custom-control-input:focus {
+                                        box-shadow: none !important;
+                                        outline: none !important;
+                                        background-color: #3b87de;
+                                    }
+                                </style>
                                 <!-- Payment Methods -->
                                 <div class="border-top border-width-3 border-color-1 pt-3 mb-3">
                                     <div id="basicsAccordion1">
@@ -338,7 +382,8 @@
                                                 <div class="custom-control custom-radio">
                                                     <input type="radio" class="custom-control-input" id="cash"
                                                         name="payment_method" value="cash">
-                                                    <label class="custom-control-label form-label" for="cash">Thanh
+                                                    <label class="custom-control-label form-label"
+                                                        for="cash">Thanh
                                                         toán trực tiếp</label>
                                                 </div>
                                             </div>
@@ -347,7 +392,7 @@
                                 </div>
 
                                 <button type="submit"
-                                    class="btn btn-primary-dark-w btn-block btn-pill font-size-20 mb-3 py-3">Đặt
+                                    class="btn btn-primary-dark-w btn-block btn-pill font-size-20 mb-3 py-3 order">Đặt
                                     hàng</button>
                             </div>
                         </div>
@@ -467,25 +512,6 @@
             </div>
         </form>
 
-        <tfoot>
-            <tr>
-                <th>Tổng cộng</th>
-                <td class="text-right font-medium">{{ number_format($subtotal, 0, ',', '.') }}₫</td>
-            </tr>
-            @if ($appliedCoupon)
-                <tr class="discount-row">
-                    <td colspan="2" class="text-right text-danger" style="font-size: 0.95em; border: none;">
-                        Giảm giá: -{{ number_format($discount, 0, ',', '.') }}₫
-                    </td>
-                </tr>
-            @endif
-            <tr>
-                <th>Thành tiền</th>
-                <td class="text-right font-medium">
-                    <strong>{{ number_format($total, 0, ',', '.') }}₫</strong>
-                </td>
-            </tr>
-        </tfoot>
         <input type="hidden" name="total_price" value="{{ (int) $total }}">
 
         <script>
@@ -679,7 +705,7 @@
                                             const newDiscountRow = document.createElement('tr');
                                             newDiscountRow.classList.add('discount-row');
                                             newDiscountRow.innerHTML =
-                                                `<td colspan="2" class="text-right text-danger" style="font-size: 0.95em; border: none;">Giảm giá: -${data.discount.toLocaleString('vi-VN')}₫</td>`;
+                                                `<td colspan="2" class="text-right text-danger" style="font-size: 0.95em; border: none;">Giảm giá: -${Number(data.discount).toLocaleString('vi-VN')}₫</td>`;
                                             tongCongRow.parentNode.insertBefore(newDiscountRow, tongCongRow
                                                 .nextSibling);
                                         }
@@ -759,7 +785,7 @@
                                         </button>
                                     </div>
                                 </div>
-                                <small class="text-muted mt-2 d-block">
+                                <small class="text-secondary mt-2 d-block">
                                     <i class="fas fa-info-circle mr-1"></i>
                                     Nhập mã giảm giá nếu bạn đã có
                                 </small>
@@ -892,7 +918,7 @@
                     let maxAmountText = '';
                     if (coupon.type === 'percent' && coupon.maximum_amount && coupon.maximum_amount > 0) {
                         maxAmountText =
-                            ` <span class="text-muted ml-2">Giảm tối đa: ${new Intl.NumberFormat('vi-VN').format(coupon.maximum_amount)}₫</span>`;
+                            ` <span class="text-success">- Giảm tối đa ${new Intl.NumberFormat('vi-VN').format(coupon.maximum_amount)}₫</span>`;
                     }
 
                     const isDisabled = coupon.min_order_total > {{ $total }};
@@ -903,8 +929,8 @@
                                 <div class="card-body">
                                     <h5 class="card-title">${coupon.code}</h5>
                                     <p class="card-text">
-                                        <span class="badge badge-primary">Giảm ${discountText}</span>
-                                        <small class="d-block text-muted mt-2">${minOrderText}${maxAmountText}</small>
+                                        <span class="badge badge-primary text-white">Giảm ${discountText}</span>
+                                        <small class="d-block text-success mt-2">${minOrderText} ${maxAmountText}</small>
                                     </p>
                                     <button class="btn btn-outline-primary btn-sm apply-coupon" 
                                             data-code="${coupon.code}"
@@ -988,7 +1014,7 @@
                                 const newDiscountRow = document.createElement('tr');
                                 newDiscountRow.classList.add('discount-row');
                                 newDiscountRow.innerHTML =
-                                    `<td colspan="2" class="text-right text-danger" style="font-size: 0.95em; border: none;">Giảm giá: -${data.discount.toLocaleString('vi-VN')}₫</td>`;
+                                    `<td colspan="2" class="text-right text-danger" style="font-size: 0.95em; border: none;">Giảm giá: -${Number(data.discount).toLocaleString('vi-VN')}₫</td>`;
                                 tongCongRow.parentNode.insertBefore(newDiscountRow, tongCongRow.nextSibling);
                             }
                             // Update subtotal

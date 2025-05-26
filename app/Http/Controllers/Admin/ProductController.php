@@ -33,13 +33,18 @@ class ProductController extends Controller
             $query->where('brand_id', $request->brand);
         }
 
-        $categories = Category::all();
+        $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
         $brands = Brand::all();
 
         $products = $query->latest('id')->paginate(10);
 
         $template = 'backend.products.index';
-        return view('backend.dashboard.layout', compact('products', 'categories', 'brands', 'template'));
+        return view('backend.dashboard.layout', [
+            'products' => $products,
+            'allCategories' => $allCategories,
+            'brands' => $brands,
+            'template' => $template,
+        ]);
     }
 
     /**
@@ -48,11 +53,16 @@ class ProductController extends Controller
     public function create()
     {
         $template = 'backend.products.create';
-        $categories = Category::all();
+        $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
         $brands = Brand::all();
         $attributes = Attribute::with('attributevalues')->get();
 
-        return view('backend.dashboard.layout', compact('template', 'categories', 'brands', 'attributes'));
+        return view('backend.dashboard.layout', [
+            'template' => $template,
+            'allCategories' => $allCategories,
+            'brands' => $brands,
+            'attributes' => $attributes,
+        ]);
     }
 
     /**
@@ -136,6 +146,7 @@ class ProductController extends Controller
             'is_variant' => $request->is_variant,
             'views' => 0
         ]);
+        event(new \App\Events\ProductCreated($product));
         event(new ProductUpdated($product));
 
         if ($request->is_variant && $request->variants) {
@@ -188,16 +199,19 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $template = 'backend.products.edit';
         $product = Product::with(['variants.attributeValues'])->findOrFail($id);
-
-        // Explicitly reload the variants relationship to get the latest data
-        $product->load('variants.attributeValues');
-
-        $categories = Category::all();
+        $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
         $brands = Brand::all();
-        $attributes = Attribute::with('attributeValues')->get();
-        return view('backend.dashboard.layout', compact('template', 'categories', 'brands', 'product', 'attributes'));
+        $attributes = Attribute::with('attributevalues')->get();
+
+        $template = 'backend.products.edit';
+        return view('backend.dashboard.layout', [
+            'template' => $template,
+            'product' => $product,
+            'allCategories' => $allCategories,
+            'brands' => $brands,
+            'attributes' => $attributes,
+        ]);
     }
 
     /**
@@ -255,6 +269,7 @@ class ProductController extends Controller
             $product->thumbnail = $thumbnailPath;
         }
 
+        $oldStatus = $product->status;
         $product->update([
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
@@ -269,6 +284,9 @@ class ProductController extends Controller
             'status' => $request->status,
             'is_variant' => $request->is_variant,
         ]);
+        if ($oldStatus != $request->status) {
+            event(new \App\Events\ProductStatusChanged($product));
+        }
 
         // If product has variants, recalculate main product's price and quantity
         if ($product->is_variant) {
@@ -309,7 +327,38 @@ class ProductController extends Controller
         }
 
         $product->delete();
-
+        event(new \App\Events\ProductDeleted($product->id));
         return redirect()->route('products.index')->with('success', 'Sản phẩm đã được xóa thành công.');
+    }
+
+    public function toggleStatus($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->status = !$product->status;
+        $product->save();
+        event(new \App\Events\ProductStatusChanged($product));
+        event(new \App\Events\ProductUpdated($product));
+        return response()->json(['success' => true, 'status' => $product->status]);
+    }
+
+    /**
+     * Helper function to get all categories and their subcategories recursively with indentation.
+     */
+    private function getCategoryOptions($parentId = null, $prefix = '')
+    {
+        if (is_null($parentId)) {
+            $categories = \App\Models\Category::whereNull('parent_id')->orderBy('id')->get();
+        } else {
+            $categories = \App\Models\Category::where('parent_id', (int)$parentId)->orderBy('id')->get();
+        }
+        $result = [];
+        foreach ($categories as $category) {
+            $result[] = [
+                'id' => $category->id,
+                'name' => $prefix . $category->name
+            ];
+            $result = array_merge($result, $this->getCategoryOptions($category->id, $prefix . '-- '));
+        }
+        return $result;
     }
 }

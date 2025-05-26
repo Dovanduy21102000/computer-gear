@@ -38620,7 +38620,7 @@ blockquote:not(.blockquote) p {
 
 @media (min-width: 1200px) {
   .product-item:hover .product-item__inner:not(.remove-prodcut-hover) {
-    position: absolute;
+    /* position: absolute; */
     width: 100%;
     height: auto;
     min-height: 100%;
@@ -39136,12 +39136,12 @@ blockquote:not(.blockquote) p {
 .cart-table .table thead th,
 .wishlist-table .table thead th {
   border-bottom-width: 1px;
-  color: #747474;
+  color: #fff;
 }
 
 .cart-table table th,
 .wishlist-table table th {
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .cart-table .table,

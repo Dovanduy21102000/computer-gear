@@ -107,8 +107,14 @@ class ProductClientController extends Controller
         $brands = $brandsQuery->get();
         $newProduct = $this->getNewProduct();
 
-        $template = 'fontend.products.index';
+        if ($request->ajax()) {
+            return view('fontend.products.partials.product_list', [
+                'products' => $products,
+                'view' => $view ?? 'grid',
+            ]);
+        }
 
+        $template = 'fontend.products.index';
         return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category', 'newProduct', 'sortParam', 'sortSlug'));
     }
 
@@ -235,9 +241,10 @@ class ProductClientController extends Controller
 
         // Trả về thông tin biến thể
         return response()->json([
-            'price' => number_format($variant->price, 0, ',', '.') . '₫',
-            'price_sale' => $variant->price_sale ? number_format($variant->price_sale, 0, ',', '.') . '₫' : null,
-            'quantity' => $variant->quantity ?? 0,
+            'price' => number_format($variant->price, 0, ',', '.'),
+            'price_sale' => $variant->price_sale ? number_format($variant->price_sale, 0, ',', '.') : null,
+            'quantity' => $variant->quantity,
+            'image' => $variant->image,
         ]);
     }
     private function getAllCategoryIds($category)
@@ -355,6 +362,13 @@ class ProductClientController extends Controller
         }
 
         $products = $productsQuery->paginate(20)->appends(request()->query());
+
+        if ($request->ajax()) {
+            return view('fontend.products.partials.product_list', [
+                'products' => $products,
+                'view' => $view ?? 'grid',
+            ]);
+        }
 
         $categories = Category::where('is_active', true)
             ->whereNull('parent_id')

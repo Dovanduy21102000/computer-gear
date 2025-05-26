@@ -1,114 +1,194 @@
+<style>
+    .product-name {
+        display: block !important;
+        max-width: 160px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .product-item {
+        margin-bottom: 24px !important;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+</style>
+@php
+    $view = $view ?? 'grid';
+@endphp
 @if ($view == 'grid')
-    <ul class="row list-unstyled products-group no-gutters">
-        @foreach ($products as $product)
-            @php
-                $hasVariant = $product->is_variant && $product->variants->count();
-                $variantSalePrices = $hasVariant ? $product->variants->pluck('price_sale')->filter() : collect();
-                $variantBasePrices = $hasVariant ? $product->variants->pluck('price') : collect();
-                if ($variantSalePrices->count()) {
-                    $minPrice = $variantSalePrices->min();
-                    $isSale = true;
-                    $originalMin = $variantBasePrices->min();
-                } else {
-                    $minPrice = $variantBasePrices->min();
-                    $isSale = false;
-                    $originalMin = null;
-                }
-                $sortPrice = $hasVariant ? $minPrice : ($product->price_sale ?: $product->price);
-            @endphp
-            <li class="col-6 col-md-3 col-wd-2gdot4 product-item" data-product-id="{{ $product->id }}"
-                data-created-at="{{ $product->created_at }}" data-price="{{ $sortPrice }}">
-                <div class="product-item__outer h-100">
-                    <div class="product-item__inner px-xl-4 p-3">
-                        <div class="product-item__body pb-xl-2">
-                            <div class="mb-2">
-                                <a href="{{ $product->category?->slug ? route('client.products.category', ['slug' => $product->category->slug]) : '#' }}"
-                                    class="font-size-12 text-gray-5">
-                                    {{ $product->category->name ?? 'Danh mục' }}
-                                </a>
-                            </div>
-                            <h5 class="mb-1 product-item__title">
-                                <a href="{{ route('client.products.detail', $product->slug) }}"
-                                    class="text-blue font-weight-bold product-name">
-                                    {{ $product->name }}
-                                </a>
-                            </h5>
-                            <div class="mb-2">
-                                <a href="{{ route('client.products.detail', $product->slug) }}"
-                                    class="d-block text-center">
-                                    <img class="img-fluid w-100" style="height: 150px; object-fit: cover;"
-                                        src="{{ asset('storage/' . $product->thumbnail) }}" alt="{{ $product->name }}">
-                                </a>
-                            </div>
-                            <div class="flex-center-between mb-1">
-                                <div class="prodcut-price">
-                                    @if ($hasVariant)
-                                        <span class="text-danger fw-bold product-sale-price">
-                                            {{ number_format($minPrice, 0, ',', '.') }}₫
-                                        </span>
-                                        @if ($isSale)
-                                            <br>
-                                            <del class="text-muted product-price">
-                                                {{ number_format($originalMin, 0, ',', '.') }}₫
-                                            </del>
+    <div style="position: relative;">
+        <div id="productGridSpinner"
+            style="display:none; position:absolute; left:0; top:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:10; justify-content:center; align-items:center;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <ul class="row list-unstyled products-group no-gutters product-list">
+            @foreach ($products as $product)
+                @php
+                    $hasVariant = $product->is_variant && $product->variants->count();
+                    $variantSalePrices = $hasVariant
+                        ? $product->variants->pluck('price_sale')->filter(function ($price) {
+                            return is_numeric($price) && $price > 0;
+                        })
+                        : collect();
+                    $variantBasePrices = $hasVariant
+                        ? $product->variants->pluck('price')->filter(function ($price) {
+                            return is_numeric($price) && $price > 0;
+                        })
+                        : collect();
+                    if ($variantSalePrices->count()) {
+                        $minPrice = $variantSalePrices->min();
+                        $maxPrice = $variantSalePrices->max();
+                        $isSale = true;
+                        $originalMin = $variantBasePrices->min();
+                        $originalMax = $variantBasePrices->max();
+                    } else {
+                        $minPrice = $variantBasePrices->min();
+                        $maxPrice = $variantBasePrices->max();
+                        $isSale = false;
+                        $originalMin = null;
+                        $originalMax = null;
+                    }
+                    $sortPrice = $hasVariant ? $minPrice : ($product->price_sale ?: $product->price);
+                @endphp
+                <li class="col-6 col-md-3 product-item" data-product-id="{{ $product->id }}"
+                    data-created-at="{{ $product->created_at }}" data-price="{{ $sortPrice }}">
+                    <div class="product-item__outer h-100">
+                        <div class="product-item__inner px-xl-4 p-3">
+                            <div class="product-item__body pb-xl-2">
+                                <div class="mb-2">
+                                    <a href="{{ $product->category?->slug ? route('client.products.category', ['slug' => $product->category->slug]) : '#' }}"
+                                        class="font-size-12 text-gray-5">
+                                        {{ $product->category->name ?? 'Danh mục' }}
+                                    </a>
+                                </div>
+                                <h5 class="mb-1 product-item__title">
+                                    <a href="{{ route('client.products.detail', $product->slug) }}"
+                                        class="text-blue font-weight-bold product-name">
+                                        {{ $product->name }}
+                                    </a>
+                                </h5>
+
+                                <div class="mb-2">
+                                    <a href="{{ route('client.products.detail', $product->slug) }}"
+                                        class="d-block text-center">
+                                        <img class="img-fluid"
+                                            style="min-height: 150px; min-width: 225px; max-height: 150px; max-width: 225px; object-fit: cover;"
+                                            src="{{ asset('storage/' . $product->thumbnail) }}"
+                                            alt="{{ $product->name }}">
+                                    </a>
+                                </div>
+                                <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <small
+                                            class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                    @endfor
+                                </div>
+                                <div class="flex-center-between mb-1 mt-4">
+                                    <div class="prodcut-price">
+                                        @if ($hasVariant && $minPrice)
+                                            @if ($isSale && $originalMin)
+                                                <div class="prodcut-price d-flex align-items-center position-relative">
+                                                    <ins
+                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                    <del
+                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                </div>
+                                            @else
+                                                <span class="text-dark fw-bold">
+                                                    {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                        – {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                                    @endif
+                                                </span>
+                                            @endif
+                                        @elseif ($hasVariant)
+                                            <span class="text-danger fw-bold">Liên hệ</span>
+                                        @elseif ($product->price_sale)
+                                            <div class="prodcut-price d-flex align-items-center position-relative">
+                                                <ins
+                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale, 0, ',', '.') }}đ</ins>
+                                                <del
+                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                            </div>
+                                        @elseif ($product->price > 0)
+                                            <div class="text-dark fw-bold fs-5 product-price">
+                                                {{ number_format($product->price, 0, ',', '.') }}đ
+                                            </div>
+                                        @else
+                                            <span class="text-danger fw-bold">Liên hệ</span>
                                         @endif
-                                    @elseif ($product->price_sale)
-                                        <del
-                                            class="text-muted product-price">{{ number_format($product->price, 0, ',', '.') }}₫</del>
-                                        <span
-                                            class="text-danger product-sale-price">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
-                                    @else
-                                        <span
-                                            class="product-price">{{ number_format($product->price, 0, ',', '.') }}₫</span>
-                                    @endif
-                                </div>
-                                <div class="d-none d-xl-block prodcut-add-cart">
-                                    @if ($product->is_variant)
-                                        <a href="{{ route('client.products.detail', $product->slug) }}"
-                                            class="btn-add-cart btn-primary transition-3d-hover">
-                                            <i class="ec ec-add-to-cart"></i>
-                                        </a>
-                                    @else
-                                        <form action="{{ route('cart.add') }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                            <input type="hidden" name="quantity" value="1">
-                                            <button type="submit" class="btn-add-cart btn-primary transition-3d-hover">
+                                    </div>
+                                    <div class="d-none d-xl-block prodcut-add-cart">
+                                        @if ($product->is_variant)
+                                            <a href="{{ route('client.products.detail', $product->slug) }}"
+                                                class="btn-add-cart btn-primary transition-3d-hover">
                                                 <i class="ec ec-add-to-cart"></i>
-                                            </button>
-                                        </form>
-                                    @endif
+                                            </a>
+                                        @else
+                                            <form action="{{ route('cart.add') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                                <input type="hidden" name="quantity" value="1">
+                                                <button type="submit"
+                                                    class="btn-add-cart btn-primary transition-3d-hover">
+                                                    <i class="ec ec-add-to-cart"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="product-item__footer">
-                            <div class="border-top pt-2 flex-center-between flex-wrap">
-                                @include('fontend.component.wishlist-button', ['product' => $product])
+                            <div class="product-item__footer">
+                                <div class="border-top pt-2 flex-center-between flex-wrap">
+                                    @include('fontend.component.wishlist-button', ['product' => $product])
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </li>
-        @endforeach
-    </ul>
-    <div class="pagination-container d-flex justify-content-center">
-        {{ $products->links('pagination::bootstrap-5') }}
+                </li>
+            @endforeach
+        </ul>
     </div>
+    {{-- <div class="pagination-container d-flex justify-content-center mt-5 position-static">
+        @if ($products->hasMorePages())
+            <button id="showMoreBtn" class="btn btn-primary" data-next-page="{{ $products->currentPage() + 1 }}">
+                Hiển thị thêm
+            </button>
+        @endif
+    </div> --}}
 @elseif ($view == 'list')
     <ul class="d-block list-unstyled products-group prodcut-list-view">
         @foreach ($products as $product)
             @php
                 $hasVariant = $product->is_variant && $product->variants->count();
-                $variantSalePrices = $hasVariant ? $product->variants->pluck('price_sale')->filter() : collect();
-                $variantBasePrices = $hasVariant ? $product->variants->pluck('price') : collect();
+                $variantSalePrices = $hasVariant
+                    ? $product->variants->pluck('price_sale')->filter(function ($price) {
+                        return is_numeric($price) && $price > 0;
+                    })
+                    : collect();
+                $variantBasePrices = $hasVariant
+                    ? $product->variants->pluck('price')->filter(function ($price) {
+                        return is_numeric($price) && $price > 0;
+                    })
+                    : collect();
                 if ($variantSalePrices->count()) {
                     $minPrice = $variantSalePrices->min();
+                    $maxPrice = $variantSalePrices->max();
                     $isSale = true;
                     $originalMin = $variantBasePrices->min();
+                    $originalMax = $variantBasePrices->max();
                 } else {
                     $minPrice = $variantBasePrices->min();
+                    $maxPrice = $variantBasePrices->max();
                     $isSale = false;
                     $originalMin = null;
+                    $originalMax = null;
                 }
                 $sortPrice = $hasVariant ? $minPrice : ($product->price_sale ?: $product->price);
             @endphp
@@ -136,24 +216,43 @@
                                         {{ $product->name }}
                                     </a>
                                 </h5>
+                                <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <small
+                                            class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                    @endfor
+                                </div>
                                 <div class="prodcut-price mb-2">
-                                    @if ($hasVariant)
-                                        <span class="text-danger fw-bold">
-                                            {{ number_format($minPrice, 0, ',', '.') }}₫
-                                        </span>
-                                        @if ($isSale)
-                                            <br>
-                                            <del class="text-muted">
-                                                {{ number_format($originalMin, 0, ',', '.') }}₫
-                                            </del>
+                                    @if ($hasVariant && $minPrice)
+                                        @if ($isSale && $originalMin)
+                                            <div class="prodcut-price d-flex align-items-center position-relative">
+                                                <ins
+                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                <del
+                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                            </div>
+                                        @else
+                                            <span class="text-dark fw-bold">
+                                                {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                    – {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                                @endif
+                                            </span>
                                         @endif
+                                    @elseif ($hasVariant)
+                                        <span class="text-danger fw-bold">Liên hệ</span>
                                     @elseif ($product->price_sale)
-                                        <del
-                                            class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
-                                        <span
-                                            class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                        <div class="prodcut-price d-flex align-items-center position-relative">
+                                            <ins
+                                                class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($product->price_sale, 0, ',', '.') }}đ</ins>
+                                            <del
+                                                class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($product->price, 0, ',', '.') }}đ</del>
+                                        </div>
+                                    @elseif ($product->price > 0)
+                                        <div class="text-dark fw-bold fs-5 product-price">
+                                            {{ number_format($product->price, 0, ',', '.') }}đ
+                                        </div>
                                     @else
-                                        {{ number_format($product->price, 0, ',', '.') }}₫
+                                        <span class="text-danger fw-bold">Liên hệ</span>
                                     @endif
                                 </div>
                                 <ul class="font-size-12 p-0 text-gray-110 mb-4 d-none d-md-block">
@@ -166,16 +265,23 @@
                         <div class="product-item__footer col-md-3 d-md-block">
                             <div class="mb-3 d-flex flex-column align-items-center text-center">
                                 <div class="prodcut-price mb-3 d-flex flex-column align-items-start">
-                                    @if ($hasVariant)
-                                        <span class="text-danger fw-bold">
-                                            {{ number_format($minPrice, 0, ',', '.') }}₫
-                                        </span>
-                                        @if ($isSale)
-                                            <br>
-                                            <del class="text-muted">
-                                                {{ number_format($originalMin, 0, ',', '.') }}₫
-                                            </del>
+                                    @if ($hasVariant && $minPrice)
+                                        @if ($isSale && $originalMin)
+                                            <div class="prodcut-price d-flex align-items-center position-relative">
+                                                <ins
+                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                <del
+                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100 product-price">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                            </div>
+                                        @else
+                                            <span class="text-dark fw-bold">
+                                                {{ number_format($minPrice, 0, ',', '.') }}₫@if ($minPrice != $maxPrice)
+                                                    – {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                                @endif
+                                            </span>
                                         @endif
+                                    @elseif ($hasVariant)
+                                        <span class="text-danger fw-bold">Liên hệ</span>
                                     @elseif ($product->price_sale)
                                         <div class="text-danger font-weight-bold">
                                             {{ number_format($product->price_sale, 0, ',', '.') }}đ
@@ -188,10 +294,12 @@
                                                 -{{ round((1 - $product->price_sale / $product->price) * 100) }}%
                                             </span>
                                         </div>
-                                    @else
+                                    @elseif ($product->price > 0)
                                         <div class="text-dark font-weight-bold">
                                             {{ number_format($product->price, 0, ',', '.') }}đ
                                         </div>
+                                    @else
+                                        <span class="text-danger fw-bold">Liên hệ</span>
                                     @endif
                                 </div>
                                 <div class="d-none d-xl-block prodcut-add-cart w-100">
@@ -228,7 +336,11 @@
             </li>
         @endforeach
     </ul>
-    <div class="pagination-container d-flex justify-content-center">
-        {{ $products->links('pagination::bootstrap-5') }}
-    </div>
+    {{-- <div class="pagination-container d-flex justify-content-center mt-5 position-static">
+        @if ($products->hasMorePages())
+            <button id="showMoreBtn" class="btn btn-primary" data-next-page="{{ $products->currentPage() + 1 }}">
+                Hiển thị thêm
+            </button>
+        @endif
+    </div> --}}
 @endif

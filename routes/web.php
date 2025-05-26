@@ -49,7 +49,7 @@ use Illuminate\Support\Facades\Route;
 // Admin Routes
 Route::prefix('admin')->group(function () {
     // Đăng nhập và đăng xuất dành cho admin
-    Route::get('login', [AuthController::class, 'index'])->name('auth.admin');
+  Route::get('login', [AuthController::class, 'index'])->name('auth.admin');
     Route::post('login', [AuthController::class, 'login'])->name('auth.admin.login');
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.admin.logout');
 
@@ -120,6 +120,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/chat/users', [AdminChatController::class, 'getUsers']);
         Route::get('/chat/messages/{userId}', [AdminChatController::class, 'getMessages']);
         Route::post('/chat/send', [AdminChatController::class, 'sendMessage']);
+
+        Route::post('products/{id}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggleStatus');
     });
 
     // Biến thể sản phẩm
@@ -131,6 +133,7 @@ Route::prefix('admin')->group(function () {
         Route::put('/{variant}/update', [ProductVariantController::class, 'update'])->name('variants.update');
         Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
         Route::get('/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
+        Route::post('variants/{variant}/toggle-status', [ProductVariantController::class, 'toggleStatus'])->name('variants.toggleStatus');
     });
 
     // Coupon Distribution Routes
