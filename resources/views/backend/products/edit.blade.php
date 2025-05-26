@@ -37,14 +37,47 @@
                             <div class="row mb-3">
                                 <label for="category_id" class="col-sm-2 col-form-label">Danh mục</label>
                                 <div class="col-sm-10">
+                                    @php
+                                        if (!function_exists('renderCategoryOptionsEdit')) {
+                                            function renderCategoryOptionsEdit(
+                                                $categories,
+                                                $parentId = null,
+                                                $parentName = null,
+                                                $selectedId = null,
+                                            ) {
+                                                foreach ($categories as $category) {
+                                                    if ($category['parent_id'] == $parentId) {
+                                                        $hasChildren =
+                                                            collect($categories)
+                                                                ->where('parent_id', $category['id'])
+                                                                ->count() > 0;
+                                                        // Only show parent label if this is a child and has children
+                                                        $displayName =
+                                                            $parentName && $hasChildren
+                                                                ? "{$category['name']} ({$parentName})"
+                                                                : $category['name'];
+                                                        if ($hasChildren) {
+                                                            echo "<optgroup label=\"{$displayName}\">";
+                                                            renderCategoryOptionsEdit(
+                                                                $categories,
+                                                                $category['id'],
+                                                                $category['name'],
+                                                                $selectedId,
+                                                            );
+                                                            echo '</optgroup>';
+                                                        } else {
+                                                            $selected =
+                                                                $selectedId == $category['id'] ? 'selected' : '';
+                                                            echo "<option value=\"{$category['id']}\" $selected>{$displayName}</option>";
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    @endphp
                                     <select class="form-select" id="category_id" name="category_id" required>
                                         <option value="">Chọn danh mục</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}"
-                                                {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                                                {{ $category->name }}
-                                            </option>
-                                        @endforeach
+                                        @php renderCategoryOptionsEdit($allCategories, null, null, old('category_id', $product->category_id)); @endphp
                                     </select>
                                 </div>
                             </div>
@@ -173,31 +206,31 @@
 
                             {{-- Add ids to price, price_sale, and quantity sections --}}
                             <div id="price-section">
-                            <!-- Giá -->
-                            <div class="row mb-3">
-                                <label for="price" class="col-sm-2 col-form-label">Giá</label>
-                                <div class="col-sm-10">
+                                <!-- Giá -->
+                                <div class="row mb-3">
+                                    <label for="price" class="col-sm-2 col-form-label">Giá</label>
+                                    <div class="col-sm-10">
                                         <input type="number" class="form-control" id="price" name="price"
-                                        value="{{ old('price', $product->price) }}">
+                                            value="{{ old('price', $product->price) }}">
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Giá khuyến mãi -->
-                            <div class="row mb-3">
-                                <label for="price_sale" class="col-sm-2 col-form-label">Giá khuyến mãi</label>
-                                <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="price_sale" name="price_sale"
-                                        value="{{ old('price_sale', $product->price_sale) }}">
+                                <!-- Giá khuyến mãi -->
+                                <div class="row mb-3">
+                                    <label for="price_sale" class="col-sm-2 col-form-label">Giá khuyến mãi</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" class="form-control" id="price_sale" name="price_sale"
+                                            value="{{ old('price_sale', $product->price_sale) }}">
                                     </div>
                                 </div>
                             </div>
 
                             <div id="quantity-section">
-                            <!-- Số lượng -->
-                            <div class="row mb-3">
-                                <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
-                                <div class="col-sm-10">
-                                    <input type="number" class="form-control" id="quantity" name="quantity"
+                                <!-- Số lượng -->
+                                <div class="row mb-3">
+                                    <label for="quantity" class="col-sm-2 col-form-label">Số lượng</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" class="form-control" id="quantity" name="quantity"
                                             value="{{ old('quantity', $product->quantity) }}">
                                     </div>
                                 </div>
@@ -321,13 +354,13 @@
 
                 {{-- Move the Update and Back buttons outside the main form --}}
                 <div class="row mb-3 mt-3">
-                    <div class="col-sm-10 offset-sm-2">
+                    <div class="text-center">
                         <button type="submit" form="product-edit-form" class="btn btn-warning">Cập nhật</button>
                         <a href="{{ route('products.index') }}" class="btn btn-secondary">Quay lại</a>
                     </div>
                 </div>
             </div>
-            </div>
+        </div>
     </section>
 </main>
 

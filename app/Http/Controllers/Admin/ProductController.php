@@ -194,16 +194,19 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $template = 'backend.products.edit';
         $product = Product::with(['variants.attributeValues'])->findOrFail($id);
-
-        // Explicitly reload the variants relationship to get the latest data
-        $product->load('variants.attributeValues');
-
-        $categories = Category::all();
+        $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
         $brands = Brand::all();
-        $attributes = Attribute::with('attributeValues')->get();
-        return view('backend.dashboard.layout', compact('template', 'categories', 'brands', 'product', 'attributes'));
+        $attributes = Attribute::with('attributevalues')->get();
+
+        $template = 'backend.products.edit';
+        return view('backend.dashboard.layout', [
+            'template' => $template,
+            'product' => $product,
+            'allCategories' => $allCategories,
+            'brands' => $brands,
+            'attributes' => $attributes,
+        ]);
     }
 
     /**
