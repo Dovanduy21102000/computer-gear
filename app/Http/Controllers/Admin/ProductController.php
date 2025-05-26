@@ -33,13 +33,18 @@ class ProductController extends Controller
             $query->where('brand_id', $request->brand);
         }
 
-        $categories = Category::all();
+        $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
         $brands = Brand::all();
 
         $products = $query->latest('id')->paginate(10);
 
         $template = 'backend.products.index';
-        return view('backend.dashboard.layout', compact('products', 'categories', 'brands', 'template'));
+        return view('backend.dashboard.layout', [
+            'products' => $products,
+            'allCategories' => $allCategories,
+            'brands' => $brands,
+            'template' => $template,
+        ]);
     }
 
     /**

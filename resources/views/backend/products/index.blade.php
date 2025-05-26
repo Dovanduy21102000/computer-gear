@@ -28,14 +28,48 @@
                                     <div class="row">
                                         <!-- Lọc danh mục -->
                                         <div class="col-md-4">
+                                            @php
+                                                if (!function_exists('renderCategoryOptionsFilter')) {
+                                                    function renderCategoryOptionsFilter(
+                                                        $categories,
+                                                        $parentId = null,
+                                                        $parentName = null,
+                                                        $selectedId = null,
+                                                    ) {
+                                                        foreach ($categories as $category) {
+                                                            if ($category['parent_id'] == $parentId) {
+                                                                $hasChildren =
+                                                                    collect($categories)
+                                                                        ->where('parent_id', $category['id'])
+                                                                        ->count() > 0;
+                                                                $displayName =
+                                                                    $parentName && $hasChildren
+                                                                        ? "{$category['name']} ({$parentName})"
+                                                                        : $category['name'];
+                                                                if ($hasChildren) {
+                                                                    echo "<optgroup label=\"{$displayName}\">";
+                                                                    renderCategoryOptionsFilter(
+                                                                        $categories,
+                                                                        $category['id'],
+                                                                        $category['name'],
+                                                                        $selectedId,
+                                                                    );
+                                                                    echo '</optgroup>';
+                                                                } else {
+                                                                    $selected =
+                                                                        $selectedId == $category['id']
+                                                                            ? 'selected'
+                                                                            : '';
+                                                                    echo "<option value=\"{$category['id']}\" $selected>{$displayName}</option>";
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            @endphp
                                             <select name="category" id="category" class="form-control">
                                                 <option value="">-- Danh mục --</option>
-                                                @foreach ($categories as $category)
-                                                    <option value="{{ $category->id }}"
-                                                        {{ request('category') == $category->id ? 'selected' : '' }}>
-                                                        {{ $category->name }}
-                                                    </option>
-                                                @endforeach
+                                                @php renderCategoryOptionsFilter($allCategories, null, null, request('category')); @endphp
                                             </select>
                                         </div>
 
