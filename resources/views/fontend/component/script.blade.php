@@ -222,122 +222,122 @@
         });
     });
 
-    // //Chat real time
-    // document.addEventListener('DOMContentLoaded', () => {
-    //     const toggle = document.getElementById('chat-toggle');
-    //     const chatBox = document.getElementById('chat-box');
-    //     const closeBtn = document.getElementById('close-chat');
-    //     const chatMessages = document.getElementById('chat-messages');
-    //     const chatForm = document.getElementById('chat-form');
-    //     const chatInput = document.getElementById('chat-input');
+    //Chat real time
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggle = document.getElementById('chat-toggle');
+        const chatBox = document.getElementById('chat-box');
+        const closeBtn = document.getElementById('close-chat');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
 
-    //     const receiverId = {{ $admin?->id ?? 'null' }};
-    //     const userId = {{ auth()->id() ?? 'null' }};
-    //     let echoInstance = null;
-    //     let loadedChat = false;
+        const receiverId = {{ $admin?->id ?? 'null' }};
+        const userId = {{ auth()->id() ?? 'null' }};
+        let echoInstance = null;
+        let loadedChat = false;
 
-    //     function appendMessage(message, who = 'me') {
-    //         const div = document.createElement('div');
-    //         div.className = who === 'me' ? 'text-end mb-2' : 'text-start mb-2';
-    //         div.innerHTML =
-    //             `<span class="badge bg-${who === 'me' ? 'primary' : 'secondary'}">${message}</span>`;
-    //         chatMessages.appendChild(div);
-    //         chatMessages.scrollTop = chatMessages.scrollHeight;
-    //     }
+        function appendMessage(message, who = 'me') {
+            const div = document.createElement('div');
+            div.className = who === 'me' ? 'text-end mb-2' : 'text-start mb-2';
+            div.innerHTML =
+                `<span class="badge bg-${who === 'me' ? 'primary' : 'secondary'}">${message}</span>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
 
-    //     toggle.onclick = async () => {
-    //         @if (!auth()->check())
-    //             Swal.fire({
-    //                 icon: 'warning',
-    //                 title: 'Bạn chưa đăng nhập',
-    //                 text: 'Vui lòng đăng nhập để sử dụng chức năng chat!',
-    //                 confirmButtonText: 'OK'
-    //             });
-    //             return;
-    //         @endif
+        toggle.onclick = async () => {
+            @if (!auth()->check())
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Bạn chưa đăng nhập',
+                    text: 'Vui lòng đăng nhập để sử dụng chức năng chat!',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            @endif
 
-    //         chatBox.style.display = chatBox.style.display === 'none' ? 'block' : 'none';
+            chatBox.style.display = chatBox.style.display === 'none' ? 'block' : 'none';
 
-    //         if (!loadedChat) {
-    //             try {
-    //                 const res = await fetch(`/chat/messages/${receiverId}`);
-    //                 const messages = await res.json();
-    //                 messages.forEach(m => {
-    //                     appendMessage(m.message, m.sender_id == userId ? 'me' : 'them');
-    //                 });
-    //                 loadedChat = true;
-    //             } catch (error) {
-    //                 console.error('Lỗi tải tin nhắn:', error);
-    //             }
-    //         }
+            if (!loadedChat) {
+                try {
+                    const res = await fetch(`/chat/messages/${receiverId}`);
+                    const messages = await res.json();
+                    messages.forEach(m => {
+                        appendMessage(m.message, m.sender_id == userId ? 'me' : 'them');
+                    });
+                    loadedChat = true;
+                } catch (error) {
+                    console.error('Lỗi tải tin nhắn:', error);
+                }
+            }
 
-    //         if (!window.Echo && userId) {
-    //             try {
-    //                 window.Pusher = Pusher;
+            if (!window.Echo && userId) {
+                try {
+                    window.Pusher = Pusher;
 
-    //                 window.Echo = new Echo({
-    //                     broadcaster: 'pusher',
-    //                     key: '{{ env('PUSHER_APP_KEY') }}',
-    //                     cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
-    //                     forceTLS: true,
-    //                 });
+                    window.Echo = new Echo({
+                        broadcaster: 'pusher',
+                        key: '{{ env('PUSHER_APP_KEY') }}',
+                        cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
+                        forceTLS: true,
+                    });
 
-    //                 window.Echo.connector.pusher.connection.bind('connected', () => {
-    //                     console.log('✅ Đã kết nối thành công đến Pusher');
-    //                 });
+                    window.Echo.connector.pusher.connection.bind('connected', () => {
+                        console.log('✅ Đã kết nối thành công đến Pusher');
+                    });
 
-    //                 window.Echo.private(`chat.${userId}`)
-    //                     .listen('MessageSent', (e) => {
-    //                         console.log('📨 Nhận được tin nhắn:', e.message);
-    //                         appendMessage(e.message.message, 'them');
-    //                     });
+                    window.Echo.private(`chat.${userId}`)
+                        .listen('MessageSent', (e) => {
+                            console.log('📨 Nhận được tin nhắn:', e.message);
+                            appendMessage(e.message.message, 'them');
+                        });
 
-    //             } catch (err) {
-    //                 console.error('❌ Lỗi khi khởi tạo Echo:', err);
-    //             }
-    //         }
+                } catch (err) {
+                    console.error('❌ Lỗi khi khởi tạo Echo:', err);
+                }
+            }
 
-    //     };
+        };
 
-    //     closeBtn.onclick = () => chatBox.style.display = 'none';
+        closeBtn.onclick = () => chatBox.style.display = 'none';
 
-    //     chatForm.onsubmit = async (e) => {
-    //         e.preventDefault();
-    //         const msg = chatInput.value;
-    //         if (!msg.trim()) return;
+        chatForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const msg = chatInput.value;
+            if (!msg.trim()) return;
 
-    //         appendMessage(msg, 'me');
+            appendMessage(msg, 'me');
 
-    //         try {
-    //             const response = await fetch('/chat/send', {
-    //                 method: 'POST',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
-    //                 },
-    //                 body: JSON.stringify({
-    //                     receiver_id: receiverId,
-    //                     message: msg
-    //                 })
-    //             });
+            try {
+                const response = await fetch('/chat/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        receiver_id: receiverId,
+                        message: msg
+                    })
+                });
 
-    //             const result = await response.json();
-    //             console.log('Server response:', result);
-    //             chatInput.value = '';
-    //         } catch (error) {
-    //             console.error('Lỗi khi gửi tin nhắn:', error);
-    //         }
-    //     };
-    // });
+                const result = await response.json();
+                console.log('Server response:', result);
+                chatInput.value = '';
+            } catch (error) {
+                console.error('Lỗi khi gửi tin nhắn:', error);
+            }
+        };
+    });
 
-    // function appendMessage(message, who = 'me') {
-    //     const chatMessages = document.getElementById('chat-messages');
-    //     const div = document.createElement('div');
-    //     div.className = who === 'me' ? 'text-end mb-2' : 'text-start mb-2';
-    //     div.innerHTML = `<span class="badge bg-${who === 'me' ? 'primary' : 'secondary'}">${message}</span>`;
-    //     chatMessages.appendChild(div);
-    //     chatMessages.scrollTop = chatMessages.scrollHeight;
-    // }
+    function appendMessage(message, who = 'me') {
+        const chatMessages = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = who === 'me' ? 'text-end mb-2' : 'text-start mb-2';
+        div.innerHTML = `<span class="badge bg-${who === 'me' ? 'primary' : 'secondary'}">${message}</span>`;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
 </script>
 
 @stack('scripts')
