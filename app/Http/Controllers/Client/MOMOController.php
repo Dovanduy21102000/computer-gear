@@ -81,41 +81,27 @@ class MOMOController extends Controller
                 $finalPrice = max(0, $totalPrice - $couponDiscount);
 
                 // Use existing order code if provided, otherwise generate new one
-                $originalOrderCode = $request->input('order_code') ?? (date('YmdHis') . rand(100, 999));
-
-                // Check if a payment attempt already exists for this order code
-                $paymentAttempt = PaymentAttempt::where('order_code', $originalOrderCode)->first();
-
-                if ($request->has('resume') && $request->input('resume')) {
-                    $orderId = $originalOrderCode;
-                } elseif ($paymentAttempt) {
-                    // If retrying, append timestamp to avoid duplicate order_code
-                    $orderId = $originalOrderCode . '_' . time();
-                } else {
-                    // First attempt, use base code
-                    $orderId = $originalOrderCode;
-                }
+                $orderCode = $request->input('order_code') ?? (date('YmdHis') . rand(100, 999));
 
                 // Check if payment attempt already exists
-                $paymentAttempt = PaymentAttempt::where('order_code', $originalOrderCode)->first();
+                $paymentAttempt = PaymentAttempt::where('order_code', $orderCode)->first();
 
                 if ($paymentAttempt) {
-                    // Update existing payment attempt with new order ID
+                    // Update existing payment attempt
                     $paymentAttempt->update([
                         'amount' => $finalPrice,
                         'status' => 'pending',
                         'selected_items' => null,
                         'shipping_info' => session('momo_shipping_info'),
                         'coupon_info' => $coupon,
-                        'expires_at' => now()->addMinutes(15),
-                        'order_code' => $orderId // Update with new order ID
+                        'expires_at' => now()->addMinutes(15)
                     ]);
                 } else {
                     // Create new payment attempt
                     PaymentAttempt::create([
                         'user_id' => $userId,
                         'payment_method' => 'momo',
-                        'order_code' => $orderId, // Use new order ID for new attempts
+                        'order_code' => $orderCode,
                         'amount' => $finalPrice,
                         'status' => 'pending',
                         'selected_items' => null,
@@ -132,13 +118,10 @@ class MOMOController extends Controller
                 $secretKey = 'at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa';
                 $orderInfo = "Thanh toán qua MoMo";
                 $amount = $finalPrice;
+                $orderId = $orderCode;
                 $redirectUrl = route('momo.return');
                 $ipnUrl = route('momo.ipn');
-                $extraData = json_encode([
-                    'selected_items' => null,
-                    'original_order_code' => $originalOrderCode,
-                    'payment_attempt_id' => $paymentAttempt ? $paymentAttempt->id : null
-                ]);
+                $extraData = json_encode(['buy_now' => true]);
 
                 $requestId = time() . "";
                 $requestType = "payWithCC";
@@ -273,41 +256,27 @@ class MOMOController extends Controller
             ]);
 
             // Use existing order code if provided, otherwise generate new one
-            $originalOrderCode = $request->input('order_code') ?? (date('YmdHis') . rand(100, 999));
-
-            // Check if a payment attempt already exists for this order code
-            $paymentAttempt = PaymentAttempt::where('order_code', $originalOrderCode)->first();
-
-            if ($request->has('resume') && $request->input('resume')) {
-                $orderId = $originalOrderCode;
-            } elseif ($paymentAttempt) {
-                // If retrying, append timestamp to avoid duplicate order_code
-                $orderId = $originalOrderCode . '_' . time();
-            } else {
-                // First attempt, use base code
-                $orderId = $originalOrderCode;
-            }
+            $orderCode = $request->input('order_code') ?? (date('YmdHis') . rand(100, 999));
 
             // Check if payment attempt already exists
-            $paymentAttempt = PaymentAttempt::where('order_code', $originalOrderCode)->first();
+            $paymentAttempt = PaymentAttempt::where('order_code', $orderCode)->first();
 
             if ($paymentAttempt) {
-                // Update existing payment attempt with new order ID
+                // Update existing payment attempt
                 $paymentAttempt->update([
                     'amount' => $finalPrice,
                     'status' => 'pending',
                     'selected_items' => $selectedItemIds ?? null,
                     'shipping_info' => session('momo_shipping_info'),
                     'coupon_info' => $coupon,
-                    'expires_at' => now()->addMinutes(15),
-                    'order_code' => $orderId // Update with new order ID
+                    'expires_at' => now()->addMinutes(15)
                 ]);
             } else {
                 // Create new payment attempt
                 PaymentAttempt::create([
                     'user_id' => $userId,
                     'payment_method' => 'momo',
-                    'order_code' => $orderId, // Use new order ID for new attempts
+                    'order_code' => $orderCode,
                     'amount' => $finalPrice,
                     'status' => 'pending',
                     'selected_items' => $selectedItemIds ?? null,
@@ -324,13 +293,10 @@ class MOMOController extends Controller
             $secretKey = 'at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa';
             $orderInfo = "Thanh toán qua MoMo";
             $amount = $finalPrice;
+            $orderId = $orderCode;
             $redirectUrl = route('momo.return');
             $ipnUrl = route('momo.ipn');
-            $extraData = json_encode([
-                'selected_items' => $selectedItemIds,
-                'original_order_code' => $originalOrderCode,
-                'payment_attempt_id' => $paymentAttempt ? $paymentAttempt->id : null
-            ]);
+            $extraData = json_encode(['selected_items' => $selectedItemIds]);
 
             $requestId = time() . "";
             $requestType = "payWithCC";
@@ -412,26 +378,8 @@ class MOMOController extends Controller
                     ->with('error', 'Thanh toán thất bại: ' . ($request->message ?? 'Vui lòng thử lại sau.'));
             }
 
-            // Get payment attempt ID from extraData
-            $extraData = json_decode($request->extraData, true);
-            $paymentAttemptId = $extraData['payment_attempt_id'] ?? null;
-            $originalOrderCode = $extraData['original_order_code'] ?? null;
-
-            // If we have a payment attempt ID, get the payment attempt
-            $paymentAttempt = null;
-            if ($paymentAttemptId) {
-                $paymentAttempt = PaymentAttempt::find($paymentAttemptId);
-            }
-
-            // If we have an original order code but no payment attempt, try to find it
-            if (!$paymentAttempt && $originalOrderCode) {
-                $paymentAttempt = PaymentAttempt::where('order_code', 'like', $originalOrderCode . '%')
-                    ->orderBy('created_at', 'desc')
-                    ->first();
-            }
-
             // Check if order already exists to prevent duplicate processing
-            $existingOrder = Order::where('code', $originalOrderCode)->first();
+            $existingOrder = Order::where('code', $request->orderId)->first();
             if ($existingOrder) {
                 Log::info('Order already processed:', ['order_id' => $existingOrder->id]);
                 return redirect()->route('checkout.success', ['order_id' => $existingOrder->id])
@@ -445,135 +393,24 @@ class MOMOController extends Controller
                 return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
             }
 
-            // Check for buy now item
-            $buyNowItem = session('momo_buy_now_item');
-            if ($buyNowItem) {
-                // Calculate total price for buy now item
-                $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
-
-                // Apply coupon if exists
-                $coupon = session('coupon');
-                $couponDiscount = 0;
-                $couponId = null;
-
-                if ($coupon && is_array($coupon)) {
-                    if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
-                        if ($coupon['type'] === 'percent') {
-                            $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount'] ?? $totalPrice);
-                        } else {
-                            $couponDiscount = min($coupon['price'], $totalPrice);
-                        }
-                        $couponId = $coupon['id'];
-                    }
-                }
-
-                $finalPrice = max(0, $totalPrice - $couponDiscount);
-
-                // Verify the amount matches
-                if ($request->amount != $finalPrice) {
-                    Log::error('MOMO Amount Mismatch:', [
-                        'expected' => $finalPrice,
-                        'received' => $request->amount
-                    ]);
-                    throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
-                }
-
-                $shippingInfo = session('momo_shipping_info');
-                if (
-                    empty($shippingInfo['shipping_user_name']) ||
-                    empty($shippingInfo['shipping_phone']) ||
-                    empty($shippingInfo['shipping_address'])
-                ) {
-                    Log::error('Missing shipping info in session for MoMo order creation', [
-                        'orderId' => $request->orderId,
-                        'userId' => $userId,
-                        'shippingInfo' => $shippingInfo
-                    ]);
-                    return redirect()->route('checkout.index')->with('error', 'Thông tin giao hàng không hợp lệ. Vui lòng thử lại.');
-                }
-
-                // Create Order
-                $order = Order::create([
-                    'code' => $originalOrderCode,
-                    'user_id' => $userId,
-                    'shipping_user_name' => session('momo_shipping_info.shipping_user_name'),
-                    'shipping_email' => session('momo_shipping_info.shipping_email'),
-                    'shipping_phone' => session('momo_shipping_info.shipping_phone'),
-                    'shipping_address' => session('momo_shipping_info.shipping_address'),
-                    'province_id' => session('momo_shipping_info.province_id'),
-                    'district_id' => session('momo_shipping_info.district_id'),
-                    'coupon_code' => $coupon['code'] ?? null,
-                    'coupon_discount' => $couponDiscount,
-                    'total_price' => $totalPrice,
-                    'final_price' => $finalPrice,
-                    'payment_status' => 1,
-                    'status' => 'pending',
-                    'payment_method' => 'momo',
-                    'notes' => session('momo_shipping_info.notes'),
-                ]);
-
-                // Mark payment attempt as completed
-                if ($paymentAttempt) {
-                    $paymentAttempt->update(['status' => 'completed']);
-                }
-
-                // Record coupon usage
-                if ($couponId) {
-                    CouponUser::create([
-                        'user_id' => $userId,
-                        'coupon_id' => $couponId,
-                        'order_id' => $order->id
-                    ]);
-                }
-
-                // Create order item for buy now item
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $buyNowItem->product->id,
-                    'product_variant_id' => $buyNowItem->productVariant ? $buyNowItem->productVariant->id : null,
-                    'price' => $buyNowItem->price,
-                    'quantity' => $buyNowItem->quantity,
-                    'product_info' => json_encode([
-                        'product' => $buyNowItem->product->toArray(),
-                        'variant' => $buyNowItem->productVariant ? $buyNowItem->productVariant->toArray() : null
-                    ]),
-                ]);
-
-                // Update stock
-                if ($buyNowItem->productVariant) {
-                    $buyNowItem->productVariant->decrement('quantity', $buyNowItem->quantity);
-                } else {
-                    $buyNowItem->product->decrement('quantity', $buyNowItem->quantity);
-                }
-
-                // Clear sessions
-                session()->forget('coupon');
-                session()->forget('momo_buy_now_item');
-                session()->forget('momo_shipping_info');
-
-                DB::commit();
-
-                return redirect()->route('checkout.success', ['order_id' => $order->id])
-                    ->with('success', 'Đặt hàng thành công!');
-            }
-
-            // Handle regular cart items
             $cart = Cart::where('user_id', $userId)->first();
             if (!$cart) {
                 return redirect()->route('cart.index')->with('error', 'Giỏ hàng không tồn tại.');
             }
 
-            // Get selected items from payment attempt or session
+            // Get selected items from extraData or session
             $selectedItemIds = [];
-            if ($paymentAttempt && $paymentAttempt->selected_items) {
-                $selectedItemIds = $paymentAttempt->selected_items;
-            } elseif ($request->extraData) {
+            if ($request->extraData) {
                 $extraData = json_decode($request->extraData, true);
                 $selectedItemIds = $extraData['selected_items'] ?? [];
             }
 
             if (empty($selectedItemIds)) {
                 $selectedItemIds = session('momo_selected_items', []);
+            }
+
+            if (empty($selectedItemIds)) {
+                return redirect()->route('cart.index')->with('error', 'Vui lòng chọn sản phẩm để thanh toán.');
             }
 
             $cartItems = CartItem::with(['product', 'productVariant'])
@@ -654,7 +491,7 @@ class MOMOController extends Controller
 
             // Create Order
             $order = Order::create([
-                'code' => $originalOrderCode,
+                'code' => $request->orderId,
                 'user_id' => $userId,
                 'shipping_user_name' => session('momo_shipping_info.shipping_user_name'),
                 'shipping_email' => session('momo_shipping_info.shipping_email'),
@@ -740,26 +577,7 @@ class MOMOController extends Controller
     {
         Log::info('MoMo IPN Data: ', $request->all());
 
-        // Get payment attempt ID and original order code from extraData
-        $extraData = json_decode($request->input('extraData'), true);
-        $paymentAttemptId = $extraData['payment_attempt_id'] ?? null;
-        $originalOrderCode = $extraData['original_order_code'] ?? null;
-
-        // If we have a payment attempt ID, get the payment attempt
-        $paymentAttempt = null;
-        if ($paymentAttemptId) {
-            $paymentAttempt = PaymentAttempt::find($paymentAttemptId);
-        }
-
-        // If we have an original order code but no payment attempt, try to find it
-        if (!$paymentAttempt && $originalOrderCode) {
-            $paymentAttempt = PaymentAttempt::where('order_code', 'like', $originalOrderCode . '%')
-                ->orderBy('created_at', 'desc')
-                ->first();
-        }
-
-        // Find the order using the original order code
-        $order = Order::where('code', $originalOrderCode)->first();
+        $order = Order::where('code', $request->input('orderId'))->first();
 
         if (!$order) {
             return response()->json(['error' => 'Order not found'], 404);
@@ -771,20 +589,9 @@ class MOMOController extends Controller
                 'status' => 'pending'
             ]);
 
-            // Update payment attempt status if exists
-            if ($paymentAttempt) {
-                $paymentAttempt->update(['status' => 'completed']);
-            }
-
             return response()->json(['message' => 'Order confirmed'], 200);
         } else {
             $order->update(['payment_status' => 0]);
-
-            // Update payment attempt status if exists
-            if ($paymentAttempt) {
-                $paymentAttempt->update(['status' => 'failed']);
-            }
-
             return response()->json(['message' => 'Payment failed'], 400);
         }
     }

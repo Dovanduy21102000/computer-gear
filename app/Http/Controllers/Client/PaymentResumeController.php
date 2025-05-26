@@ -45,6 +45,14 @@ class PaymentResumeController extends Controller
         ]);
 
         if ($paymentAttempt->payment_method === 'momo') {
+            // Append a suffix to the order code for MoMo payment
+            $paymentAttempt->order_code = $paymentAttempt->order_code . '_' . time();
+
+            // Update expiration time
+            $paymentAttempt->update([
+                'expires_at' => now()->addMinutes(15)
+            ]);
+
             session(['momo_selected_items' => $paymentAttempt->selected_items]);
             return view('fontend.payment.resume_momo_post', ['paymentAttempt' => $paymentAttempt]);
         } else if ($paymentAttempt->payment_method === 'vn_pay') {

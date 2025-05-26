@@ -6,12 +6,13 @@ use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\CategoryPost;
 use App\Models\Product;
-use App\Models\OrderItem;
+use App\Models\ProductVariant;
+use App\Observers\ProductObserver;
+use App\Observers\ProductVariantObserver;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use App\Observers\OrderItemObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -84,6 +85,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with('admin', $admin);
         });
 
-        OrderItem::observe(OrderItemObserver::class);
+        Product::observe(ProductObserver::class);
+        ProductVariant::observe(ProductVariantObserver::class);
     }
 }
