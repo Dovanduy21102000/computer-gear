@@ -48,13 +48,13 @@ class ProductController extends Controller
     public function create()
     {
         $template = 'backend.products.create';
-        $categoryOptions = $this->getCategoryOptions();
+        $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
         $brands = Brand::all();
         $attributes = Attribute::with('attributevalues')->get();
 
         return view('backend.dashboard.layout', [
             'template' => $template,
-            'categoryOptions' => $categoryOptions,
+            'allCategories' => $allCategories,
             'brands' => $brands,
             'attributes' => $attributes,
         ]);
