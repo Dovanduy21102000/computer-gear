@@ -40,10 +40,10 @@
                                 <div class="col-sm-10">
                                     <select class="form-select" id="category_id" name="category_id" required>
                                         <option value="">Chọn danh mục</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}"
-                                                {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                                {{ $category->name }}</option>
+                                        @foreach ($categoryOptions as $category)
+                                            <option value="{{ $category['id'] }}">
+                                                {{ $category['name'] }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>

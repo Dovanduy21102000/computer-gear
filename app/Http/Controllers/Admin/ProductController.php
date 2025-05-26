@@ -48,11 +48,16 @@ class ProductController extends Controller
     public function create()
     {
         $template = 'backend.products.create';
-        $categories = Category::all();
+        $categoryOptions = $this->getCategoryOptions();
         $brands = Brand::all();
         $attributes = Attribute::with('attributevalues')->get();
 
-        return view('backend.dashboard.layout', compact('template', 'categories', 'brands', 'attributes'));
+        return view('backend.dashboard.layout', [
+            'template' => $template,
+            'categoryOptions' => $categoryOptions,
+            'brands' => $brands,
+            'attributes' => $attributes,
+        ]);
     }
 
     /**
@@ -326,5 +331,26 @@ class ProductController extends Controller
         event(new \App\Events\ProductStatusChanged($product));
         event(new \App\Events\ProductUpdated($product));
         return response()->json(['success' => true, 'status' => $product->status]);
+    }
+
+    /**
+     * Helper function to get all categories and their subcategories recursively with indentation.
+     */
+    private function getCategoryOptions($parentId = null, $prefix = '')
+    {
+        if (is_null($parentId)) {
+            $categories = \App\Models\Category::whereNull('parent_id')->orderBy('id')->get();
+        } else {
+            $categories = \App\Models\Category::where('parent_id', (int)$parentId)->orderBy('id')->get();
+        }
+        $result = [];
+        foreach ($categories as $category) {
+            $result[] = [
+                'id' => $category->id,
+                'name' => $prefix . $category->name
+            ];
+            $result = array_merge($result, $this->getCategoryOptions($category->id, $prefix . '-- '));
+        }
+        return $result;
     }
 }
