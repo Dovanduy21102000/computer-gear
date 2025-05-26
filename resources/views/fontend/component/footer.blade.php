@@ -22,7 +22,7 @@
       <!-- Sản phẩm máy tính -->
       <div>
         <h5 style="font-size: 18px; font-weight: 700; color: #212529; margin-bottom: 20px; text-transform: uppercase; border-bottom: 2px solid #007bff; padding-bottom: 5px;">
-          Sản phẩm máy tính
+          Danh mục sản phẩm 
         </h5>
         <ul style="list-style: none; padding: 0; margin: 0; font-size: 15px; color: #495057;">
           @foreach ($categories as $category)
