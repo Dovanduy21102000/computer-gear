@@ -8,6 +8,10 @@ function generateSlug(text) {
         .toString()
         .toLowerCase()
         .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Add: Remove accents
+        .replace(/đ/g, "d") // Add: Replace đ
+        .replace(/Đ/g, "d") // Add: Replace Đ
         .replace(/\s+/g, "-") // Replace spaces with -
         .replace(/&/g, "-and-") // Replace & with 'and'
         .replace(/[^\w\-]+/g, "") // Remove all non-word chars

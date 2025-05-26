@@ -339,3 +339,5 @@
     //     chatMessages.scrollTop = chatMessages.scrollHeight;
     // }
 </script>
+
+@stack('scripts')

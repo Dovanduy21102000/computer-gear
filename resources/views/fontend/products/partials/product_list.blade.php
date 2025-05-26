@@ -10,6 +10,12 @@
     .product-item {
         margin-bottom: 24px !important;
     }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
 </style>
 @php
     $view = $view ?? 'grid';
@@ -72,7 +78,8 @@
                                 <div class="mb-2">
                                     <a href="{{ route('client.products.detail', $product->slug) }}"
                                         class="d-block text-center">
-                                        <img class="img-fluid" style="height: 150px; width: 225px; object-fit: cover;"
+                                        <img class="img-fluid"
+                                            style="min-height: 150px; min-width: 225px; max-height: 150px; max-width: 225px; object-fit: cover;"
                                             src="{{ asset('storage/' . $product->thumbnail) }}"
                                             alt="{{ $product->name }}">
                                     </a>
@@ -148,9 +155,13 @@
             @endforeach
         </ul>
     </div>
-    <div class="pagination-container d-flex justify-content-center">
-        {{ $products->links('pagination::bootstrap-5') }}
-    </div>
+    {{-- <div class="pagination-container d-flex justify-content-center mt-5 position-static">
+        @if ($products->hasMorePages())
+            <button id="showMoreBtn" class="btn btn-primary" data-next-page="{{ $products->currentPage() + 1 }}">
+                Hiển thị thêm
+            </button>
+        @endif
+    </div> --}}
 @elseif ($view == 'list')
     <ul class="d-block list-unstyled products-group prodcut-list-view">
         @foreach ($products as $product)
@@ -325,7 +336,11 @@
             </li>
         @endforeach
     </ul>
-    <div class="pagination-container d-flex justify-content-center">
-        {{ $products->links('pagination::bootstrap-5') }}
-    </div>
+    {{-- <div class="pagination-container d-flex justify-content-center mt-5 position-static">
+        @if ($products->hasMorePages())
+            <button id="showMoreBtn" class="btn btn-primary" data-next-page="{{ $products->currentPage() + 1 }}">
+                Hiển thị thêm
+            </button>
+        @endif
+    </div> --}}
 @endif

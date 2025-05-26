@@ -327,6 +327,16 @@
                                         'products' => $products,
                                     ])
                                 </ul>
+                                <div class="pagination-container d-flex justify-content-center mt-5 position-static">
+                                    @if ($products->hasMorePages())
+                                        <button id="showMoreBtn" class="btn btn-primary"
+                                            data-next-page="{{ $products->currentPage() + 1 }}">
+                                            Hiển thị thêm
+                                        </button>
+                                    @else
+                                        <span class="text-muted">Đã tải hết sản phẩm.</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -421,4 +431,65 @@
             });
         }
     });
+
+    let currentPage = 1;
+    const perPage = 20; // Set this to your pagination limit
+
+    function handleShowMoreClick(e) {
+        if (e.target && e.target.id === 'showMoreBtn') {
+            e.preventDefault();
+            const showMoreBtn = e.target;
+            currentPage++;
+            const nextPage = currentPage;
+            // console.log('Show More clicked');
+            // console.log('Next page to fetch:', nextPage);
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', nextPage);
+            showMoreBtn.disabled = true;
+            showMoreBtn.textContent = 'Đang tải...';
+            fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const newGridProducts = tempDiv.querySelectorAll('.product-list > li');
+                    const newListProducts = tempDiv.querySelectorAll('.prodcut-list-view > li');
+                    const productList = document.querySelector('.product-list');
+                    const productListView = document.querySelector('.prodcut-list-view');
+                    let appendedCount = 0;
+                    if (productList && newGridProducts.length) {
+                        newGridProducts.forEach(item => {
+                            if (item.tagName === 'LI') {
+                                productList.appendChild(item);
+                                appendedCount++;
+                            }
+                        });
+                    } else if (productListView && newListProducts.length) {
+                        newListProducts.forEach(item => {
+                            if (item.tagName === 'LI') {
+                                productListView.appendChild(item);
+                                appendedCount++;
+                            }
+                        });
+                    }
+                    const paginationContainer = document.querySelector('.pagination-container');
+                    if (appendedCount < perPage) {
+                        paginationContainer.innerHTML = '<span class="text-muted">Đã tải hết sản phẩm.</span>';
+                    } else {
+                        showMoreBtn.disabled = false;
+                        showMoreBtn.textContent = 'Hiển thị thêm';
+                    }
+                })
+                .catch(() => {
+                    showMoreBtn.disabled = false;
+                    showMoreBtn.textContent = 'Hiển thị thêm';
+                });
+        }
+    }
+    document.removeEventListener('click', handleShowMoreClick);
+    document.addEventListener('click', handleShowMoreClick);
 </script>
