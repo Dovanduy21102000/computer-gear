@@ -165,7 +165,7 @@
                                                                     class="max-width-70 d-block"><img class="img-fluid"
                                                                         src="{{ asset('storage/' . $newProduct->thumbnail) }}"
                                                                         alt="Image Description"
-                                                                        style="width: 150px; height: 150px; object-fit: cover;">
+                                                                        style="width: 70px !important; height: 70px !important; object-fit: cover;">
                                                             </div>
                                                             <div class="col product-item__body pl-2 pl-lg-3">
                                                                 <div class="mb-4">
@@ -238,7 +238,7 @@
                                                                         class="img-fluid"
                                                                         src="{{ asset('storage/' . $newProduct->thumbnail) }}"
                                                                         alt="Image Description"
-                                                                        style="width: 150px; height: 150px; object-fit: cover;">
+                                                                        style="width: 70px !important; height: 70px !important; object-fit: cover;">
                                                             </div>
                                                             <div class="col product-item__body pl-2 pl-lg-3">
                                                                 <div class="mb-4">
