@@ -1137,8 +1137,8 @@
 
             // Kiểm tra giá
             let price = response.price_sale ?
-                `<del class=\"text-muted\">${response.price}</del> 
-                <span class=\"text-danger\">${response.price_sale}</span>` :
+                `<del class=\"text-muted\">${response.price}₫</del> <br>
+                <span class=\"text-danger\">${response.price_sale}₫</span>` :
                 `${response.price}`;
 
             // Cập nhật giá
@@ -1373,11 +1373,11 @@
                     if (priceContainer) {
                         if (e.price_sale) {
                             priceContainer.innerHTML = `
-                                <del class="text-muted">${formatPrice(e.price)}</del>
-                                <span class="text-danger">${formatPrice(e.price_sale)}</span>
+                                <del class="text-muted">${formatPrice(e.price)}₫</del>
+                                <span class="text-danger">${formatPrice(e.price_sale)}₫</span>
                             `;
                         } else {
-                            priceContainer.innerHTML = `<span>${formatPrice(e.price)}</span>`;
+                            priceContainer.innerHTML = `<span>${formatPrice(e.price)}₫</span>`;
                         }
                     }
 

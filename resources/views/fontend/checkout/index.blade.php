@@ -419,7 +419,7 @@
                                 <div class="js-form-message mb-6">
                                     <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" name="shipping_address"
-                                        value="{{ old('shipping_address', '') }}" required>
+                                        value="{{ old('shipping_address', Auth::user()->address ?? '') }}" required>
                                 </div>
                             </div>
 
