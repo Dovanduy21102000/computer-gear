@@ -42,6 +42,10 @@ class VNPayController extends Controller
             // Check for buy now item first
             $buyNowItem = session('buy_now_item');
             if ($buyNowItem) {
+                // Ensure buyNowItem has a product_id property
+                if (!isset($buyNowItem->product_id)) {
+                    $buyNowItem->product_id = $buyNowItem->id; // Fallback to id if product_id is not set
+                }
                 // Calculate total price for buy now item
                 $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
 
@@ -286,16 +290,16 @@ class VNPayController extends Controller
             $paymentAttempt = \App\Models\PaymentAttempt::where('order_code', $request->vnp_TxnRef)->first();
             if (!$paymentAttempt) {
                 throw new \Exception('Không tìm thấy thông tin thanh toán. Vui lòng liên hệ hỗ trợ.');
-                        }
+            }
             $expectedAmount = $paymentAttempt->amount;
-                $receivedAmount = $request->vnp_Amount / 100;
+            $receivedAmount = $request->vnp_Amount / 100;
             if ($expectedAmount != $receivedAmount) {
-                    Log::error('VNPay Amount Mismatch:', [
+                Log::error('VNPay Amount Mismatch:', [
                     'expected' => $expectedAmount,
-                        'received' => $receivedAmount
-                    ]);
-                    throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
-                }
+                    'received' => $receivedAmount
+                ]);
+                throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
+            }
             $coupon = $paymentAttempt->coupon_info;
             $selectedItemIds = $paymentAttempt->selected_items ?? [];
             $shipping = $paymentAttempt->shipping_info ?? [];
@@ -312,52 +316,52 @@ class VNPayController extends Controller
                 $buyNowItem = session('vnpay_buy_now_item');
                 if ($buyNowItem) {
                     $cartItems[] = $buyNowItem;
-                    }
                 }
+            }
 
             // Calculate total price (for record)
-                $totalPrice = 0;
-                foreach ($cartItems as $item) {
-                    $price = $item->productVariant ?
-                        ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
-                    $totalPrice += $price * $item->quantity;
-                }
+            $totalPrice = 0;
+            foreach ($cartItems as $item) {
+                $price = $item->productVariant ?
+                    ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
+                $totalPrice += $price * $item->quantity;
+            }
 
-                $couponDiscount = 0;
-                $couponId = null;
+            $couponDiscount = 0;
+            $couponId = null;
             if ($coupon && isset($coupon['type']) && $coupon['type'] === 'percent') {
-                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
                 $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
                     ? min($percentageDiscount, $coupon['maximum_amount'])
                     : $percentageDiscount;
                 $couponId = $coupon['id'] ?? null;
             } elseif ($coupon && isset($coupon['price'])) {
-                            $couponDiscount = min($coupon['price'], $totalPrice);
+                $couponDiscount = min($coupon['price'], $totalPrice);
                 $couponId = $coupon['id'] ?? null;
-                }
-                $finalPrice = max(0, $totalPrice - $couponDiscount);
+            }
+            $finalPrice = max(0, $totalPrice - $couponDiscount);
 
             // Create Order
-                $order = Order::create([
-                    'code' => $request->vnp_TxnRef,
-                    'user_id' => $userId,
-                    'shipping_user_name' => $shipping['shipping_user_name'] ?? null,
-                    'shipping_email' => $shipping['shipping_email'] ?? null,
-                    'shipping_phone' => $shipping['shipping_phone'] ?? null,
-                    'shipping_address' => $shipping['shipping_address'] ?? null,
-                    'province_id' => $shipping['province_id'] ?? null,
-                    'district_id' => $shipping['district_id'] ?? null,
-                    'coupon_code' => $coupon['code'] ?? null,
-                    'coupon_discount' => $couponDiscount,
-                    'total_price' => $totalPrice,
-                    'final_price' => $finalPrice,
-                    'payment_status' => 1,
-                    'status' => 'pending',
-                    'payment_method' => 'vn_pay',
-                    'notes' => $shipping['notes'] ?? null,
-                ]);
+            $order = Order::create([
+                'code' => $request->vnp_TxnRef,
+                'user_id' => $userId,
+                'shipping_user_name' => $shipping['shipping_user_name'] ?? null,
+                'shipping_email' => $shipping['shipping_email'] ?? null,
+                'shipping_phone' => $shipping['shipping_phone'] ?? null,
+                'shipping_address' => $shipping['shipping_address'] ?? null,
+                'province_id' => $shipping['province_id'] ?? null,
+                'district_id' => $shipping['district_id'] ?? null,
+                'coupon_code' => $coupon['code'] ?? null,
+                'coupon_discount' => $couponDiscount,
+                'total_price' => $totalPrice,
+                'final_price' => $finalPrice,
+                'payment_status' => 1,
+                'status' => 'pending',
+                'payment_method' => 'vn_pay',
+                'notes' => $shipping['notes'] ?? null,
+            ]);
 
-                if ($couponId) {
+            if ($couponId) {
                 $couponUser = \App\Models\CouponUser::where('user_id', $userId)
                     ->where('coupon_id', $couponId)
                     ->first();
@@ -371,25 +375,25 @@ class VNPayController extends Controller
                         'used' => 1
                     ]);
                 }
-                }
+            }
 
-                foreach ($cartItems as $item) {
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $item->product_id,
-                        'product_variant_id' => $item->product_variant_id,
-                        'price' => $item->productVariant ?
-                            ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price),
-                        'quantity' => $item->quantity,
-                        'product_info' => json_encode([
-                            'product' => $item->product->toArray(),
-                            'variant' => $item->productVariant ? $item->productVariant->toArray() : null
-                        ]),
-                    ]);
-                    if ($item->productVariant) {
-                        $item->productVariant->decrement('quantity', $item->quantity);
-                    } else {
-                        $item->product->decrement('quantity', $item->quantity);
+            foreach ($cartItems as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item->product->id,
+                    'product_variant_id' => $item->productVariant ? $item->productVariant->id : null,
+                    'price' => $item->productVariant ?
+                        ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price),
+                    'quantity' => $item->quantity,
+                    'product_info' => json_encode([
+                        'product' => $item->product->toArray(),
+                        'variant' => $item->productVariant ? $item->productVariant->toArray() : null
+                    ]),
+                ]);
+                if ($item->productVariant) {
+                    $item->productVariant->decrement('quantity', $item->quantity);
+                } else {
+                    $item->product->decrement('quantity', $item->quantity);
                 }
             }
 
@@ -406,7 +410,7 @@ class VNPayController extends Controller
             if (isset($cartItems)) {
                 foreach ($cartItems as $item) {
                     if (isset($item->id)) {
-                    $item->delete();
+                        $item->delete();
                     }
                 }
             }
