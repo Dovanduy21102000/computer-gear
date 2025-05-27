@@ -1331,7 +1331,7 @@
                 <div class="mb-8">
                     <dv
                         class=" d-flex justify-content-between border-bottom border-color-1 flex-md-nowrap flex-wrap border-sm-bottom-0">
-                        <h3 class="section-title mb-0 pb-2 font-size-22">Laptops & Computers</h3>
+                        <h3 class="section-title mb-0 pb-2 font-size-22">Laptop & PC</h3>
                     </dv>
                     <div class="mb-8 position-relative home-category-products-list" style="position: relative;">
                         <div id="homeCategoryProductListSpinner"
@@ -1609,7 +1609,7 @@
                 <div class="position-relative">
                     <div
                         class="d-flex justify-content-between border-bottom border-color-1 flex-md-nowrap flex-wrap border-sm-bottom-0">
-                        <h3 class="section-title mb-0 pb-2 font-size-22">Chuột & Bàn Phím</h3>
+                        <h3 class="section-title mb-0 pb-2 font-size-22">Màn hình</h3>
                     </div>
                     <div class="js-slick-carousel u-slick overflow-hidden u-slick-overflow-visble pt-3 pb-6 px-1"
                         data-pagi-classes="text-center right-0 bottom-1 left-0 u-slick__pagination u-slick__pagination--long mb-0 z-index-n1 mt-4"
@@ -1640,62 +1640,62 @@
                             "slidesToShow": 2
                           }
                         }]'>
-                        @foreach ($keyboardMouseProducts as $keyboardMouseProduct)
+                        @foreach ($screenProducts as $screenProduct)
                             <div class="js-slide products-group">
                                 <div class="product-item">
                                     <div class="product-item__outer h-100"
-                                        data-product-id="{{ $keyboardMouseProduct->id }}">
+                                        data-product-id="{{ $screenProduct->id }}">
                                         <div class="product-item__inner px-xl-4 p-3">
                                             <div class="product-item__body pb-xl-2">
                                                 <div class="mb-2">
-                                                    <a href="{{ $keyboardMouseProduct->category?->slug ? route('client.products.category', ['slug' => $keyboardMouseProduct->category->slug]) : '#' }}"
+                                                    <a href="{{ $screenProduct->category?->slug ? route('client.products.category', ['slug' => $keyboardMouseProduct->category->slug]) : '#' }}"
                                                         class="font-size-12 text-gray-5">
-                                                        {{ $keyboardMouseProduct->category->name ?? 'Danh mục' }}
+                                                        {{ $screenProduct->category->name ?? 'Danh mục' }}
                                                     </a>
                                                 </div>
                                                 <h5 class="mb-1 product-item__title truncate-title">
-                                                    <a href="{{ route('client.products.detail', $keyboardMouseProduct->slug) }}"
+                                                    <a href="{{ route('client.products.detail', $screenProduct->slug) }}"
                                                         class="text-blue font-weight-bold">
-                                                        {{ Str::limit($keyboardMouseProduct->name, 22) }}
+                                                        {{ Str::limit($screenProduct->name, 22) }}
                                                     </a>
                                                 </h5>
                                                 <div class="mb-2">
-                                                    <a href="{{ route('client.products.detail', $keyboardMouseProduct->slug) }}"
+                                                    <a href="{{ route('client.products.detail', $screenProduct->slug) }}"
                                                         class="d-block text-center">
                                                         <img class="img-fluid w-100"
                                                             style="height: 150px; object-fit: cover;"
-                                                            src="{{ asset('storage/' . $keyboardMouseProduct->thumbnail) }}"
-                                                            alt="{{ $keyboardMouseProduct->name }}">
+                                                            src="{{ asset('storage/' . $screenProduct->thumbnail) }}"
+                                                            alt="{{ $screenProduct->name }}">
                                                     </a>
                                                 </div>
                                                 <div class="text-warning text-ls-n2 font-size-16 mb-1"
                                                     style="width: 80px;">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <small
-                                                            class="{{ $i <= $keyboardMouseProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $keyboardMouseProduct->rating ? 'text-muted' : '' }}"></small>
+                                                            class="{{ $i <= $screenProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $screenProduct->rating ? 'text-muted' : '' }}"></small>
                                                     @endfor
                                                 </div>
                                                 <div class="flex-center-between mb-1 product-price">
                                                     <div class="prodcut-price mt-3">
-                                                        @if ($keyboardMouseProduct->price_sale)
+                                                        @if ($screenProduct->price_sale)
                                                             <div
                                                                 class="prodcut-price mt-3 d-flex align-items-center position-relative">
                                                                 <ins
-                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($keyboardMouseProduct->price_sale) }}đ</ins>
+                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($screenProduct->price_sale) }}đ</ins>
                                                                 <del
-                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ</del>
+                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($screenProduct->price, 0, ',', '.') }}đ</del>
                                                             </div>
                                                         @else
                                                             <div class="text-dark fw-bold fs-5">
-                                                                {{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ
+                                                                {{ number_format($screenProduct->price, 0, ',', '.') }}đ
                                                             </div>
                                                         @endif
                                                     </div>
 
 
                                                     <div class="d-none d-xl-block prodcut-add-cart">
-                                                        @if ($keyboardMouseProduct->is_variant)
-                                                            <a href="{{ route('client.products.detail', $keyboardMouseProduct->slug) }}"
+                                                        @if ($screenProduct->is_variant)
+                                                            <a href="{{ route('client.products.detail', $screenProduct->slug) }}"
                                                                 class="btn-add-cart btn-primary transition-3d-hover">
                                                                 <i class="ec ec-add-to-cart"></i>
                                                             </a>
@@ -1703,7 +1703,7 @@
                                                             <form action="{{ route('cart.add') }}" method="POST">
                                                                 @csrf
                                                                 <input type="hidden" name="product_id"
-                                                                    value="{{ $keyboardMouseProduct->id }}">
+                                                                    value="{{ $screenProduct->id }}">
                                                                 <input type="hidden" name="quantity" value="1">
                                                                 <button type="submit"
                                                                     class="btn-add-cart btn-primary transition-3d-hover">
