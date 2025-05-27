@@ -9,6 +9,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends BaseCRUDController
 {
@@ -24,7 +25,7 @@ class PostController extends BaseCRUDController
     public $titleShow   = 'Thông tin bài viết có id:';
 
     public $columns = [
-        'category_id'   => 'Danh mục',
+        'category_post_id'   => 'Danh mục',
         'title'         => 'Tiêu đề',
         'slug'          => 'Slug',
         'image'         => 'Thumbnail',
@@ -41,11 +42,17 @@ class PostController extends BaseCRUDController
 
     public function index()
     {
-        $data           = Post::paginate(8);
-        $category_post     = CategoryPost::all();
-        $title          = $this->titleIndex;
-        $columns        = $this->columns;
-        $urlBase        = $this->urlBase;
+        $query = Post::with('category_post');
+
+        if (request()->has('category') && request()->category != '') {
+            $query->where('category_post_id', request()->category);
+        }
+
+        $data = $query->paginate(8);
+        $category_post = CategoryPost::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
+        $title = $this->titleIndex;
+        $columns = $this->columns;
+        $urlBase = $this->urlBase;
 
         $template = 'backend.posts.index';
         return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'urlBase', 'category_post'));
@@ -85,8 +92,30 @@ class PostController extends BaseCRUDController
         return view('backend.dashboard.layout', compact('template', 'urlBase', 'post', 'category_post', 'title'))->with('isShowMode', true);;
     }
 
+    public function store(Request $request)
+    {
+        $validated = $this->validateStore($request);
 
+        // Handle image upload
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('posts/images', 'public');
+        }
 
+        $post = $this->model::create([
+            'category_post_id' => $validated['category_post_id'] ?? null,
+            'title' => $validated['title'],
+            'slug' => $validated['slug'],
+            'image' => $imagePath,
+            'description' => $validated['description'] ?? null,
+            'content' => $validated['content'],
+            'status' => $request->has('status') ? 1 : 0,
+            'is_hot' => $request->has('is_hot') ? 1 : 0,
+            'views' => $validated['views'] ?? 0,
+        ]);
+
+        return redirect()->route('posts.index')->with('success', 'Bài viết đã được tạo thành công!');
+    }
 
     protected function validateStore(Request $request)
     {
@@ -149,5 +178,69 @@ class PostController extends BaseCRUDController
                 ],
             ]);
         }
+    }
+
+    protected function validateUpdate(Request $request, $id)
+    {
+        if (!$request->slug) {
+            $request->merge(['slug' => Str::slug($request->title)]);
+        }
+        return $request->validate([
+            'category_post_id' => 'nullable|exists:category_post,id',
+            'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|unique:posts,slug,' . $id,
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'description' => 'nullable|string|max:500',
+            'content' => 'required|string',
+            'status' => 'nullable|boolean',
+            'is_hot' => 'nullable|boolean',
+            'views' => 'nullable|integer|min:0',
+        ], [
+            'title.required' => 'Tiêu đề là bắt buộc.',
+            'slug.unique' => 'Slug đã tồn tại, vui lòng chọn slug khác.',
+            'category_post_id.exists' => 'Danh mục không hợp lệ.',
+            'image.image' => 'Ảnh phải là định dạng hợp lệ (jpeg, png, jpg, gif).',
+            'image.max' => 'Ảnh không được vượt quá 5MB.',
+            'content.required' => 'Nội dung bài viết là bắt buộc.',
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $this->validateUpdate($request, $id);
+
+        $post = $this->model::findOrFail($id);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($post->image) {
+                Storage::disk('public')->delete($post->image);
+            }
+            $imagePath = $request->file('image')->store('posts/images', 'public');
+        } else {
+            $imagePath = $post->image;
+        }
+
+        $post->update([
+            'category_post_id' => $validated['category_post_id'] ?? null,
+            'title' => $validated['title'],
+            'slug' => $validated['slug'],
+            'image' => $imagePath,
+            'description' => $validated['description'] ?? null,
+            'content' => $validated['content'],
+            'status' => $request->has('status') ? 1 : 0,
+            'is_hot' => $request->has('is_hot') ? 1 : 0,
+        ]);
+
+        return redirect()->route('posts.index')->with('success', 'Bài viết đã được cập nhật thành công!');
+    }
+
+    public function toggleStatus($id)
+    {
+        $post = $this->model::findOrFail($id);
+        $post->status = $post->status ? 0 : 1;
+        $post->save();
+        return response()->json(['status' => $post->status]);
     }
 }

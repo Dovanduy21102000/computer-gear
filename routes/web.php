@@ -125,6 +125,8 @@ Route::prefix('admin')->group(function () {
         Route::post('/chat/send', [AdminChatController::class, 'sendMessage']);
 
         Route::post('products/{id}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggleStatus');
+
+        Route::post('posts/toggle-status/{id}', [PostController::class, 'toggleStatus'])->name('posts.toggleStatus');
     });
 
     // Biến thể sản phẩm
