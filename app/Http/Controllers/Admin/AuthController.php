@@ -6,22 +6,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User; // Sử dụng Eloquent Model
+use App\Models\User;
 
 class AuthController extends Controller
 {
     // Hiển thị trang login
     public function index()
     {
-        if (Auth::check()) {
-            // Kiểm tra người dùng đã đăng nhập và có vai trò admin chưa
-            if (Auth::user()->role === 'admin') {
-                return redirect()->route('dashboard.index'); // Nếu admin, chuyển hướng đến dashboard
+        if (Auth::guard('admin')->check()) {
+            if (Auth::guard('admin')->user()->role === 'admin') {
+                return redirect()->route('dashboard.index'); 
             }
-            return redirect()->route('home.index'); // Nếu không phải admin, chuyển hướng đến trang chủ
+            return redirect()->route('home.index'); 
         }
     
-        return view('backend.auth.login'); // Trả về trang đăng nhập nếu chưa đăng nhập
+        return view('backend.auth.login');
     }
     
     // Xử lý đăng nhập
@@ -32,33 +31,31 @@ class AuthController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        // Lấy thông tin người dùng từ bảng users
-        $user = User::where('email', $request->email)->first(); // Sử dụng Eloquent để truy vấn
+        $user = User::where('email', $request->email)->first();
 
-        // Kiểm tra người dùng tồn tại và mật khẩu chính xác
         if ($user && Hash::check($request->password, $user->password)) {
-            Auth::login($user); // Đăng nhập người dùng
-
-            // Kiểm tra vai trò của người dùng
             if ($user->role === 'admin') {
+                Auth::guard('admin')->login($user);
                 return redirect()->route('dashboard.index')->with('success', 'Đăng nhập thành công');
             }
 
-            // Nếu người dùng không phải là admin, đăng xuất và chuyển hướng lại trang login
-            Auth::logout();
-            return redirect()->route('auth.admin')->with('error', 'Bạn không có quyền truy cập!');
+            Auth::guard('admin')->logout();
+            return redirect()->route('auth.admin.login')->with('error', 'Bạn không có quyền truy cập!');
         }
 
-        // Nếu email hoặc mật khẩu sai, trả về thông báo lỗi
-        return redirect()->route('auth.admin')->with('error', 'Email hoặc mật khẩu không chính xác!');
+        return redirect()->route('auth.admin.login')->with('error', 'Email hoặc mật khẩu không chính xác!');
     }
 
     // Đăng xuất
-    public function logout(Request $request)
-    {
-        Auth::logout(); // Đăng xuất người dùng
-        $request->session()->invalidate(); // Hủy session
-        $request->session()->regenerateToken(); // Tạo lại token CSRF
-        return redirect()->route('auth.admin'); // Chuyển hướng về trang login
-    }
+  public function logout(Request $request)
+{
+    Auth::guard('admin')->logout();
+
+    // Không invalidate toàn bộ session, tránh đăng xuất luôn guard 'web'
+    // Chỉ regenerate token để tránh CSRF
+    $request->session()->regenerateToken();
+
+    return redirect()->route('auth.admin');
+}
+
 }

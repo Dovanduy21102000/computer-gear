@@ -88,12 +88,12 @@ class DashboardController extends Controller
             ? (($orders - $previousOrders) / $previousOrders) * 100
             : ($orders > 0 ? 100 : 0);
 
-        // 2. Thống kê doanh thu
-        $revenue1 = Order::where('status', 'completed')
+        // 2. Thống kê doanh thu từ đơn hàng completed và success
+        $revenue1 = Order::whereIn('status', ['completed', 'success'])
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('total_price');
 
-        $previousRevenue = Order::where('status', 'completed')
+        $previousRevenue = Order::whereIn('status', ['completed', 'success'])
             ->whereBetween('created_at', [$previousStartDate, $previousEndDate])
             ->sum('total_price');
 
@@ -121,14 +121,14 @@ class DashboardController extends Controller
 
         // Số đơn hàng theo tháng
         $salesRaw = Order::selectRaw('MONTH(created_at) as month, COUNT(*) as total_orders')
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'success'])
             ->whereYear('created_at', $year)
             ->groupBy('month')
             ->pluck('total_orders', 'month');
 
         // Doanh thu theo tháng (chia đơn vị triệu)
         $revenueRaw = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as total_revenue')
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'success'])
             ->whereYear('created_at', $year)
             ->groupBy('month')
             ->pluck('total_revenue', 'month');
@@ -157,17 +157,20 @@ class DashboardController extends Controller
             ->get();
         // dd($ordersToday);
 
-        $topSellingProducts = Product::select('products.*')
+
+        // Controller - Lấy top 5 sản phẩm bán chạy nhất tháng này (FIXED)
+        $topSellingProducts = Product::select('products.id', 'products.name', 'products.price', 'products.thumbnail')
             ->join('order_items', 'products.id', '=', 'order_items.product_id')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->whereIn('orders.status', ['completed', 'success']) // Chỉ lấy đơn hàng hoàn thành
             ->whereMonth('orders.created_at', Carbon::now()->month)
             ->whereYear('orders.created_at', Carbon::now()->year)
-            ->selectRaw('SUM(order_items.quantity) as total_sold, SUM(order_items.quantity * order_items.price) as total_revenue')
-            ->groupBy('products.id')
-            ->orderByDesc('total_sold')
-            ->take(5)
+            ->selectRaw('SUM(order_items.quantity) as quantity_sold')
+            ->selectRaw('SUM(order_items.quantity) * products.price as total_revenue') // FIX: Tổng số lượng nhân với giá sản phẩm
+            ->groupBy('products.id', 'products.name', 'products.price', 'products.thumbnail')
+            ->orderByDesc('quantity_sold')
+            ->limit(5)
             ->get();
-
 
         // Lấy danh sách người mua mới nhất
         $latestBuyers = Order::with('user')

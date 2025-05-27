@@ -46,15 +46,16 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 // Admin Routes
+// Admin Routes
 Route::prefix('admin')->group(function () {
     // Đăng nhập và đăng xuất dành cho admin
     Route::get('login', [AuthController::class, 'index'])->name('auth.admin');
-    Route::post('login', [AuthController::class, 'login'])->name('auth.login');
-    Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout');
-    // Route admin cần quyền truy cập
+    Route::post('login', [AuthController::class, 'login'])->name('auth.admin.login');
+    Route::get('logout', [AuthController::class, 'logout'])->name('auth.admin.logout');
 
-    Route::middleware(['auth', 'admin'])->group(function () {
-        // Routes cho Profile Admin
+    // Các route cần kiểm tra session admin
+    Route::middleware(['admin.session.cookie', 'auth:admin', 'admin'])->group(function () {
+        // Các route chỉ admin đăng nhập mới truy cập được
 
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
 
@@ -64,7 +65,7 @@ Route::prefix('admin')->group(function () {
             Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('changePassword');
             Route::get('/delete-image', [ProfileController::class, 'deleteImage'])->name('deleteImage');
         });
-        //
+
         Route::get('orders/cancel-tabs', [OrderController::class, 'cancelTabs'])->name('orders.cancelTabs');
         Route::put('orders/{id}/approve-cancel', [OrderController::class, 'approveCancel'])->name('orders.cancel-approve');
         Route::put('orders/{id}/reject-cancel', [OrderController::class, 'rejectCancel'])->name('orders.cancel-reject');
@@ -84,70 +85,44 @@ Route::prefix('admin')->group(function () {
             'contacts'          => ContactController::class,
             'productvariants'   => ProductVariantController::class,
             'category_post'     => CategoryPostController::class,
-
-
-
-
-
         ];
 
         foreach ($objects as $object => $controller) {
             Route::resource($object, $controller);
         };
+
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
+
         // Route quản lý thông số sản phẩm
         Route::prefix('specifications')->name('admin.specifications.')->group(function () {
-            Route::get('product/{product_id}', [SpecificationController::class, 'index'])
-                ->name('index');
-
-            Route::get('product/{product_id}/create', [SpecificationController::class, 'create'])
-                ->name('create');
-
-            Route::post('product/{product_id}', [SpecificationController::class, 'store'])
-                ->name('store');
-
-            Route::get('product/{product_id}/specification/{id}/edit', [SpecificationController::class, 'edit'])
-                ->name('edit');
-
-            Route::put('product/{product_id}/bulk-update', [SpecificationController::class, 'bulkUpdate'])
-                ->name('bulkUpdate');
+            Route::get('product/{product_id}', [SpecificationController::class, 'index'])->name('index');
+            Route::get('product/{product_id}/create', [SpecificationController::class, 'create'])->name('create');
+            Route::post('product/{product_id}', [SpecificationController::class, 'store'])->name('store');
+            Route::get('product/{product_id}/specification/{id}/edit', [SpecificationController::class, 'edit'])->name('edit');
+            Route::put('product/{product_id}/bulk-update', [SpecificationController::class, 'bulkUpdate'])->name('bulkUpdate');
         });
 
-
-
         Route::prefix('products/{product_id}/images')->name('backend.product_images.')->group(function () {
-            // Trang danh sách ảnh
             Route::get('/', [ProductImageController::class, 'index'])->name('index');
-
-            // Thêm ảnh mới
             Route::get('/create', [ProductImageController::class, 'create'])->name('create');
             Route::post('/', [ProductImageController::class, 'store'])->name('store');
-
-            // Sửa toàn bộ album ảnh
-            Route::get('/edit', [ProductImageController::class, 'edit'])->name('edit');  // ✅ không có {key}
-            Route::put('/', [ProductImageController::class, 'update'])->name('update');  // ✅ không có {key}
-
-            // Xoá ảnh cụ thể theo index trong mảng
+            Route::get('/edit', [ProductImageController::class, 'edit'])->name('edit');
+            Route::put('/', [ProductImageController::class, 'update'])->name('update');
             Route::delete('/{key}', [ProductImageController::class, 'destroy'])->name('destroy');
         });
 
-
-
-
-
-        // Đảm bảo rằng route này đã được thêm vào trong routes/web.php
         Route::put('/comments/{id}/toggle-status', [CommentController::class, 'toggleStatus'])->name('admin.comments.toggleStatus');
-
         Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
         Route::get('/comments/{id}/show', [CommentController::class, 'show'])->name('comments.show');
 
-        //Chat realtime
+        // Chat realtime
         Route::get('/chats', [AdminChatController::class, 'index'])->name('chats.index');
         Route::get('/chat/users', [AdminChatController::class, 'getUsers']);
         Route::get('/chat/messages/{userId}', [AdminChatController::class, 'getMessages']);
         Route::post('/chat/send', [AdminChatController::class, 'sendMessage']);
     });
-    //Biêns thể
+
+    // Biến thể sản phẩm
     Route::prefix('products/{product}/variants')->group(function () {
         Route::get('/', [ProductVariantController::class, 'index'])->name('variants.index');
         Route::get('/create', [ProductVariantController::class, 'create'])->name('variants.create');
@@ -296,4 +271,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment/resume', [PaymentResumeController::class, 'index'])->name('payment.resume.index');
     Route::get('/payment/resume/{id}', [PaymentResumeController::class, 'resume'])->name('payment.resume.process');
     Route::get('/payment/cancel/{id}', [PaymentResumeController::class, 'cancel'])->name('payment.resume.cancel');
+});
+
+Route::get('/products/sort/{sort}', [ProductClientController::class, 'index'])->name('client.products.sort');
+
+Route::get('/admin', function () {
+    if (auth('admin')->check()) {
+        return redirect()->route('dashboard.index');
+    }
+    return redirect()->route('auth.admin');
 });

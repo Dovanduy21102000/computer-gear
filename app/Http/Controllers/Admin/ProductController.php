@@ -286,7 +286,15 @@ class ProductController extends Controller
             'status' => $request->status,
             'is_variant' => $request->is_variant,
         ]);
+
+        Log::info('Product updated in database', [
+            'product_id' => $product->id,
+            'price' => $product->price,
+            'quantity' => $product->quantity
+        ]);
+
         event(new ProductUpdated($product));
+        Log::info('ProductUpdated event dispatched', ['product_id' => $product->id]);
 
         $product->variants()->delete();
 

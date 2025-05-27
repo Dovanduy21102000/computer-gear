@@ -7,6 +7,7 @@
             'pending' => 'Đang chờ',
             'completed' => 'Hoàn thành',
             'cancelled' => 'Đã hủy',
+            'expired' => 'Đã hết hạn',
         ];
     @endphp
     <ul class="nav nav-tabs nav-justified border-0 rounded shadow-sm mb-3 bg-white overflow-auto" id="resumeTabs"
@@ -28,7 +29,15 @@
             <div class="tab-pane fade @if ($loop->first) show active @endif" id="{{ $statusKey }}"
                 role="tabpanel">
                 @php
-                    $paymentsByStatus = $allPayments->where('status', $statusKey);
+                    if ($statusKey === 'expired') {
+                        $paymentsByStatus = $allPayments->where('status', 'pending')->where('is_expired', true);
+                    } elseif ($statusKey === 'pending') {
+                        $paymentsByStatus = $allPayments->where('status', 'pending')->where(function ($item) {
+                            return empty($item->is_expired) || !$item->is_expired;
+                        });
+                    } else {
+                        $paymentsByStatus = $allPayments->where('status', $statusKey);
+                    }
                 @endphp
                 @if ($paymentsByStatus->count())
                     <div class="table-responsive">
@@ -46,39 +55,50 @@
                             <tbody>
                                 @foreach ($paymentsByStatus as $payment)
                                     <tr>
-                                        <td class="font-weight-bold">{{ $payment->order_code }}</td>
-                                        <td>
+                                        <td class="font-weight-bold align-middle">{{ $payment->order_code }}</td>
+                                        <td class="align-middle">
                                             @if ($payment->payment_method === 'momo')
-                                                <span class="badge bg-primary">MoMo</span>
+                                                <span class="badge badge-momo badge-lg">MoMo</span>
                                             @else
-                                                <span class="badge bg-success">VNPay</span>
+                                                <span class="badge badge-vnpay badge-lg">VNPay</span>
                                             @endif
                                         </td>
-                                        <td class="text-danger">{{ number_format($payment->amount) }} VNĐ</td>
-                                        <td>{{ $payment->created_at->format('d/m/Y H:i') }}</td>
-                                        <td>
+                                        <td class="text-danger align-middle">{{ number_format($payment->amount) }} VNĐ
+                                        </td>
+                                        <td class="align-middle">{{ $payment->created_at->format('d/m/Y H:i') }}</td>
+                                        <td class="align-middle">
                                             @if ($payment->status === 'pending')
-                                                <span class="badge bg-warning text-dark">Đang chờ</span>
+                                                @if (!empty($payment->is_expired) && $payment->is_expired)
+                                                    <span class="badge bg-danger text-white badge-lg">Đã hết
+                                                        hạn</span>
+                                                @else
+                                                    <span class="badge badge-pending text-white badge-lg">Đang
+                                                        chờ</span>
+                                                @endif
                                             @elseif ($payment->status === 'cancelled')
-                                                <span class="badge bg-danger">Đã hủy</span>
+                                                <span class="badge bg-danger text-white badge-lg">Đã hủy</span>
                                             @elseif ($payment->status === 'completed')
-                                                <span class="badge bg-success">Hoàn thành</span>
+                                                <span class="badge bg-success text-white badge-lg">Hoàn thành</span>
                                             @else
                                                 <span
-                                                    class="badge bg-light text-dark">{{ ucfirst($payment->status) }}</span>
+                                                    class="badge bg-light text-dark badge-lg">{{ ucfirst($payment->status) }}</span>
                                             @endif
                                         </td>
-                                        <td>
+                                        <td class="align-middle">
                                             @if ($payment->status === 'pending')
-                                                <a href="{{ route('payment.resume.process', $payment->id) }}"
-                                                    class="btn btn-outline-primary btn-sm me-2 rounded-0">
-                                                    Tiếp tục
-                                                </a>
-                                                <a href="{{ route('payment.resume.cancel', $payment->id) }}"
-                                                    class="btn btn-outline-danger btn-sm rounded-0"
-                                                    onclick="return confirm('Bạn có chắc muốn hủy thanh toán này?')">
-                                                    Hủy
-                                                </a>
+                                                @if (!empty($payment->is_expired) && $payment->is_expired)
+                                                    <span class="text-muted">-</span>
+                                                @else
+                                                    <a href="{{ route('payment.resume.process', $payment->id) }}"
+                                                        class="btn btn-success btn-sm me-2 rounded-0">
+                                                        Tiếp tục
+                                                    </a>
+                                                    <a href="{{ route('payment.resume.cancel', $payment->id) }}"
+                                                        class="btn btn-outline-danger btn-sm rounded-0"
+                                                        onclick="return confirm('Bạn có chắc muốn hủy thanh toán này?')">
+                                                        Hủy
+                                                    </a>
+                                                @endif
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
@@ -98,3 +118,27 @@
         @endforeach
     </div>
 </div>
+
+<style>
+    .badge-lg {
+        font-size: 0.92rem;
+        padding: 0.52em 0.9em;
+        border-radius: 0.6em;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+    }
+
+    .badge-pending {
+        background: #4a90e2 !important;
+    }
+
+    .badge-vnpay {
+        background: #005baa !important;
+        color: #fff !important;
+    }
+
+    .badge-momo {
+        background: #a50064 !important;
+        color: #fff !important;
+    }
+</style>

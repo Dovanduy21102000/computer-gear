@@ -54,9 +54,8 @@
                 <div class="d-flex">
                     <ul class="d-flex list-unstyled mb-0">
 
-                        <li class="col"><a
-                                href="{{route('wishlist.index')}}"
-                                class="text-gray-90" data-toggle="tooltip" data-placement="top" title="Yêu thích"><i
+                        <li class="col"><a href="{{ route('wishlist.index') }}" class="text-gray-90"
+                                data-toggle="tooltip" data-placement="top" title="Yêu thích"><i
                                     class="font-size-22 ec ec-favorites"></i></a></li>
                         <li class="col pr-0">
                             <meta name="user-id" content="{{ auth()->id() }}">
@@ -69,7 +68,7 @@
                                     {{ $total_items }}
                                 </span>
                             </a>
-                            
+
                         </li>
                     </ul>
                 </div>
@@ -79,4 +78,3 @@
     </div>
 </div>
 <!-- End Vertical-and-secondary-menu -->
-
