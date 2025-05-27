@@ -117,12 +117,13 @@ class CheckoutController extends Controller
             // Apply coupon if exists
             $coupon = session('coupon');
             $couponDiscount = 0;
-            if ($coupon && $totalPrice >= $coupon['min_order_total']) {
-                if ($coupon['type'] === 'percent') {
-                    $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
-                } else {
-                    $couponDiscount = min($totalPrice, $coupon['price']);
-                }
+            if ($coupon && isset($coupon['type']) && $coupon['type'] === 'percent') {
+                $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                    ? min($percentageDiscount, $coupon['maximum_amount'])
+                    : $percentageDiscount;
+            } elseif ($coupon && isset($coupon['price'])) {
+                $couponDiscount = min($coupon['price'], $totalPrice);
             }
 
             $finalPrice = max(0, $totalPrice - $couponDiscount);
@@ -355,8 +356,11 @@ class CheckoutController extends Controller
 
                 if ($coupon) {
                     if ($totalPrice >= $coupon['min_order_total']) {
-                        if ($coupon['type'] === 'percent') {
-                            $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
+                        if (isset($coupon['type']) && $coupon['type'] === 'percent') {
+                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                            $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                                ? min($percentageDiscount, $coupon['maximum_amount'])
+                                : $percentageDiscount;
                         } else {
                             $couponDiscount = min($totalPrice, $coupon['price']);
                         }
@@ -474,10 +478,13 @@ class CheckoutController extends Controller
 
             if ($coupon) {
                 if ($totalPrice >= $coupon['min_order_total']) {
-                    if ($coupon['type'] === 'percent') {
-                        $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
+                    if (isset($coupon['type']) && $coupon['type'] === 'percent') {
+                        $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                        $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                            ? min($percentageDiscount, $coupon['maximum_amount'])
+                            : $percentageDiscount;
                     } else {
-                        $couponDiscount = min($totalPrice, $coupon['price']);
+                        $couponDiscount = min($coupon['price'], $totalPrice);
                     }
                     $couponId = $coupon['id'];
                 }
@@ -806,10 +813,13 @@ class CheckoutController extends Controller
             $couponId = null;
 
             if ($coupon && $totalPrice >= $coupon['min_order_total']) {
-                if ($coupon['type'] === 'percent') {
-                    $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
+                if (isset($coupon['type']) && $coupon['type'] === 'percent') {
+                    $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                    $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                        ? min($percentageDiscount, $coupon['maximum_amount'])
+                        : $percentageDiscount;
                 } else {
-                    $couponDiscount = min($totalPrice, $coupon['price']);
+                    $couponDiscount = min($coupon['price'], $totalPrice);
                 }
                 $couponId = $coupon['id'];
             }

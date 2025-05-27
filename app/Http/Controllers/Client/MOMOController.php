@@ -69,8 +69,11 @@ class MOMOController extends Controller
 
                 if ($coupon && is_array($coupon)) {
                     if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
-                        if ($coupon['type'] === 'percent') {
-                            $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount'] ?? $totalPrice);
+                        if (isset($coupon['type']) && $coupon['type'] === 'percent') {
+                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                            $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                                ? min($percentageDiscount, $coupon['maximum_amount'])
+                                : $percentageDiscount;
                         } else {
                             $couponDiscount = min($coupon['price'], $totalPrice);
                         }
@@ -231,13 +234,11 @@ class MOMOController extends Controller
 
             if ($coupon && is_array($coupon)) {
                 if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
-                    if ($coupon['type'] === 'percent') {
-                        // Calculate percentage discount
+                    if (isset($coupon['type']) && $coupon['type'] === 'percent') {
                         $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
-                        // Apply maximum amount limit if set
-                        $couponDiscount = isset($coupon['maximum_amount']) ?
-                            min($percentageDiscount, $coupon['maximum_amount']) :
-                            $percentageDiscount;
+                        $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                            ? min($percentageDiscount, $coupon['maximum_amount'])
+                            : $percentageDiscount;
                     } else {
                         $couponDiscount = min($coupon['price'], $totalPrice);
                     }
@@ -394,6 +395,23 @@ class MOMOController extends Controller
                 return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
             }
 
+            // Use PaymentAttempt data
+            $paymentAttempt = \App\Models\PaymentAttempt::where('order_code', $request->orderId)->first();
+            if (!$paymentAttempt) {
+                throw new \Exception('Không tìm thấy thông tin thanh toán. Vui lòng liên hệ hỗ trợ.');
+            }
+            $expectedAmount = $paymentAttempt->amount;
+            if ($request->amount != $expectedAmount) {
+                Log::error('MOMO Amount Mismatch:', [
+                    'expected' => $expectedAmount,
+                    'received' => $request->amount
+                ]);
+                throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
+            }
+            $coupon = $paymentAttempt->coupon_info;
+            $selectedItemIds = $paymentAttempt->selected_items ?? [];
+            $shippingInfo = $paymentAttempt->shipping_info ?? [];
+
             // Check for buy now item first
             $buyNowItem = session('buy_now_item');
             if ($buyNowItem) {
@@ -401,14 +419,16 @@ class MOMOController extends Controller
                 $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
 
                 // Apply coupon if exists
-                $coupon = session('coupon');
                 $couponDiscount = 0;
                 $couponId = null;
 
                 if ($coupon && is_array($coupon)) {
                     if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
-                        if ($coupon['type'] === 'percent') {
-                            $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount'] ?? $totalPrice);
+                        if (isset($coupon['type']) && $coupon['type'] === 'percent') {
+                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                            $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                                ? min($percentageDiscount, $coupon['maximum_amount'])
+                                : $percentageDiscount;
                         } else {
                             $couponDiscount = min($coupon['price'], $totalPrice);
                         }
@@ -467,11 +487,19 @@ class MOMOController extends Controller
 
                 // Record coupon usage
                 if ($couponId) {
-                    CouponUser::create([
-                        'user_id' => $userId,
-                        'coupon_id' => $couponId,
-                        'order_id' => $order->id
-                    ]);
+                    $couponUser = \App\Models\CouponUser::where('user_id', $userId)
+                        ->where('coupon_id', $couponId)
+                        ->first();
+                    if ($couponUser) {
+                        $couponUser->used = 1;
+                        $couponUser->save();
+                    } else {
+                        \App\Models\CouponUser::create([
+                            'user_id' => $userId,
+                            'coupon_id' => $couponId,
+                            'used' => 1
+                        ]);
+                    }
                 }
 
                 // Create order item for buy now item
@@ -509,13 +537,6 @@ class MOMOController extends Controller
             $cart = Cart::where('user_id', $userId)->first();
             if (!$cart) {
                 return redirect()->route('cart.index')->with('error', 'Giỏ hàng không tồn tại.');
-            }
-
-            // Get selected items from extraData or session
-            $selectedItemIds = [];
-            if ($request->extraData) {
-                $extraData = json_decode($request->extraData, true);
-                $selectedItemIds = $extraData['selected_items'] ?? [];
             }
 
             if (empty($selectedItemIds)) {
@@ -557,19 +578,16 @@ class MOMOController extends Controller
             }
 
             // Apply Coupon Discount
-            $coupon = session('coupon');
             $couponDiscount = 0;
             $couponId = null;
 
             if ($coupon && is_array($coupon)) {
                 if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
-                    if ($coupon['type'] === 'percent') {
-                        // Calculate percentage discount
+                    if (isset($coupon['type']) && $coupon['type'] === 'percent') {
                         $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
-                        // Apply maximum amount limit if set
-                        $couponDiscount = isset($coupon['maximum_amount']) ?
-                            min($percentageDiscount, $coupon['maximum_amount']) :
-                            $percentageDiscount;
+                        $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                            ? min($percentageDiscount, $coupon['maximum_amount'])
+                            : $percentageDiscount;
                     } else {
                         $couponDiscount = min($coupon['price'], $totalPrice);
                     }
@@ -628,11 +646,19 @@ class MOMOController extends Controller
 
             // Record coupon usage
             if ($couponId) {
-                CouponUser::create([
-                    'user_id' => $userId,
-                    'coupon_id' => $couponId,
-                    'order_id' => $order->id
-                ]);
+                $couponUser = \App\Models\CouponUser::where('user_id', $userId)
+                    ->where('coupon_id', $couponId)
+                    ->first();
+                if ($couponUser) {
+                    $couponUser->used = 1;
+                    $couponUser->save();
+                } else {
+                    \App\Models\CouponUser::create([
+                        'user_id' => $userId,
+                        'coupon_id' => $couponId,
+                        'used' => 1
+                    ]);
+                }
             }
 
             // Save Order Items and Update Stock
