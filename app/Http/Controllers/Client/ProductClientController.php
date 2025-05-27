@@ -61,24 +61,23 @@ class ProductClientController extends Controller
             }
         }
 
-        // SEO-friendly sort from route (pretty slugs)
+
+        // SEO-friendly sort from query (?sort=gia-cao-nhat)
         $sortMap = [
             'gia-cao-nhat' => 'price_desc',
             'gia-thap-nhat' => 'price_asc',
             'moi-nhat' => 'newest',
             'mac-dinh' => 'default',
         ];
-        $sortSlug = $sort ?? $request->route('sort');
+        $sortSlug = $request->query('sort', 'mac-dinh');
         $sortParam = $sortMap[$sortSlug] ?? null;
-        Log::info('Sort Slug: ' . $sortSlug);
-        Log::info('Sort Param: ' . $sortParam);
         if ($sortParam) {
             switch ($sortParam) {
                 case 'price_asc':
-                    $query->orderByRaw('COALESCE(price_sale, price) ASC');
+                    $query->orderByRaw('COALESCE((SELECT MIN(COALESCE(price_sale, price)) FROM product_variants WHERE product_variants.product_id = products.id), price_sale, price) ASC');
                     break;
                 case 'price_desc':
-                    $query->orderByRaw('COALESCE(price_sale, price) DESC');
+                    $query->orderByRaw('COALESCE((SELECT MIN(COALESCE(price_sale, price)) FROM product_variants WHERE product_variants.product_id = products.id), price_sale, price) DESC');
                     break;
                 case 'newest':
                     $query->orderByDesc('created_at');

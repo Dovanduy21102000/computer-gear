@@ -1089,52 +1089,6 @@
             let quantity = response.quantity ?? 0;
             let variantImage = response.image; // Get the image path from the response
 
-            // Update the main product image display
-            if (variantImage) {
-                // Assuming the main slider container is #sliderSyncingNav
-                let $mainSlider = $('#sliderSyncingNav');
-
-                // Destroy the current slider instance
-                if ($mainSlider.hasClass('slick-initialized')) {
-                    $mainSlider.slick('unslick');
-                }
-
-                // Clear existing content and add the new variant image
-                $mainSlider.empty().append(
-                    '<div class="js-slide"><img class="img-fluid" src="' + window.storageBaseUrl +
-                    variantImage + '" alt="Variant Image"></div>'
-                );
-
-                // Re-initialize the slider (adjust options if needed)
-                $mainSlider.slick({
-                    infinite: true,
-                    arrows: true, // You might want to re-enable arrows
-                    // Add other original slider options here
-                    dots: true, // Example: add dots if they were there originally
-                    // Make sure to include all relevant data- attributes from the original #sliderSyncingNav
-                    // This is a placeholder, you should copy the exact data- attributes/options from the HTML
-                    dataArrowsClasses: "d-none d-lg-inline-block u-slick__arrow-classic u-slick__arrow-centered--y rounded-circle",
-                    dataArrowLeftClasses: "fas fa-arrow-left u-slick__arrow-classic-inner u-slick__arrow-classic-inner--left ml-lg-2 ml-xl-4",
-                    dataArrowRightClasses: "fas fa-arrow-right u-slick__arrow-classic-inner u-slick__arrow-classic-inner--right mr-lg-2 mr-xl-4",
-                    dataNavFor: "#sliderSyncingThumb"
-                });
-
-                // If you have a thumbnail slider linked, update it too
-                let $thumbSlider = $('#sliderSyncingThumb');
-                if ($thumbSlider.hasClass('slick-initialized')) {
-                    $thumbSlider.slick('unslick');
-                }
-                // For simplicity, let's just clear thumbnails if only one variant image is shown
-                $thumbSlider.empty(); // Clear thumbnail slider
-
-            } else {
-                // If no variant image, maybe revert to the main product thumbnail or a placeholder
-                // This part depends on your desired behavior when a variant has no specific image
-                console.warn("No variant image found in response.");
-                // You might want to load the default product images again here
-            }
-
-
             // Kiểm tra giá
             let price = response.price_sale ?
                 `<del class=\"text-muted\">${response.price}₫</del> <br>
