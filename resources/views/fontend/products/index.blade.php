@@ -420,6 +420,10 @@
                             });
                         }
                         history.pushState(null, '', newUrl);
+                        // Call grid reload logic
+                        if (typeof window.reloadProductGrid === "function") {
+                            window.reloadProductGrid();
+                        }
                     })
                     .finally(function() {
                         if (spinner) spinner.style.display = 'none';
