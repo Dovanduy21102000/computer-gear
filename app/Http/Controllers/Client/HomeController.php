@@ -43,10 +43,12 @@ class HomeController extends Controller
         $topViewedProducts = Product::with('brand')
             ->whereHas('category', $activeCategoryBrand)
             ->whereHas('brand', $activeCategoryBrand)
+            ->where('status', 1)
             ->orderByDesc('views')
+            ->latest()
             ->take(5)
             ->get();
-
+        // dd($topViewedProducts);
         // Sản phẩm có giảm giá
         $discountedProducts = Product::whereNotNull('price_sale')
             ->where('price_sale', '>', 0)
