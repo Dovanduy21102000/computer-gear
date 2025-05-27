@@ -73,12 +73,6 @@
             </ul>
         </li><!-- End Components Nav -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ route('chats.index') }}">
-                <i class="bi bi-chat-left-text"></i>
-                <span>Chat</span>
-            </a>
-        </li>
-        <li class="nav-item">
             <a class="nav-link collapsed" href="{{ route('users.index') }}">
                 <i class="bi bi-person"></i>
                 <span>Quản lý thành viên</span>
