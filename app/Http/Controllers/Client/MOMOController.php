@@ -495,10 +495,10 @@ class MOMOController extends Controller
                         $couponUser->save();
                     } else {
                         \App\Models\CouponUser::create([
-                            'user_id' => $userId,
-                            'coupon_id' => $couponId,
+                        'user_id' => $userId,
+                        'coupon_id' => $couponId,
                             'used' => 1
-                        ]);
+                    ]);
                     }
                 }
 
@@ -654,10 +654,10 @@ class MOMOController extends Controller
                     $couponUser->save();
                 } else {
                     \App\Models\CouponUser::create([
-                        'user_id' => $userId,
-                        'coupon_id' => $couponId,
+                    'user_id' => $userId,
+                    'coupon_id' => $couponId,
                         'used' => 1
-                    ]);
+                ]);
                 }
             }
 

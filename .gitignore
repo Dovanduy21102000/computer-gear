@@ -15,6 +15,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-/app/Events/OrderStatusUpdated.php
 .webpack.mix.js
 /storage
