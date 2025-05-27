@@ -1089,6 +1089,17 @@
             let quantity = response.quantity ?? 0;
             let variantImage = response.image; // Get the image path from the response
 
+            // Update only the main product image (not the slider)
+            if (variantImage) {
+                var mainImg = document.querySelector('.product-main-image img');
+                if (mainImg) {
+                    mainImg.src = window.storageBaseUrl + variantImage;
+                }
+            } else {
+                // Optionally, revert to the original product image if no variant image
+                // (No action needed if you want to keep the last image)
+            }
+
             // Kiểm tra giá
             let price = response.price_sale ?
                 `<del class=\"text-muted\">${response.price}₫</del> <br>
@@ -1485,4 +1496,9 @@
             window.initAttributeOptions();
         }
     });
+</script>
+
+<!-- Set the storage base URL for JS -->
+<script>
+    window.storageBaseUrl = "{{ asset('storage/') }}/";
 </script>
