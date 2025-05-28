@@ -72,64 +72,68 @@
                     <p><strong>Tổng tiền:</strong> <span
                             class="text-danger h5">{{ number_format($order->final_price, 0, ',', '.') }}₫</span></p>
 
-                            @if (in_array($order->status, ['pending', 'processing']))
-                            <div id="cancel-section" class="mt-3">
-                                <button class="btn btn-outline-danger" onclick="toggleCancelForm()">❌ Huỷ đơn hàng</button>
-                        
-                                <form id="cancel-form" action="{{ route('client.orders.cancel', $order->code) }}"
-                                    method="POST" class="mt-3 d-none">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="form-group">
-                                        <label for="cancel_reason"><strong>Lý do huỷ đơn hàng:</strong></label>
-                                        <textarea name="cancel_reason" id="cancel_reason" class="form-control" rows="3" required
-                                            placeholder="Nhập lý do..."></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-danger">Xác nhận huỷ</button>
-                                    <button type="button" class="btn btn-secondary ml-2" onclick="toggleCancelForm()">Huỷ bỏ</button>
-                                </form>
-                            </div>
-                        
-                            <script>
-                                function toggleCancelForm() {
-                                    const form = document.getElementById('cancel-form');
-                                    form.classList.toggle('d-none');
-                                }
-                            </script>
-                        @endif
-                        
-                        @if ($order->status === 'completed')
-                            <form action="{{ route('client.orders.confirmReceived', $order->code) }}" method="POST" class="mt-3">
+                    @if (in_array($order->status, ['pending', 'processing']))
+                        <div id="cancel-section" class="mt-3">
+                            <button class="btn btn-outline-danger" onclick="toggleCancelForm()">❌ Huỷ đơn hàng</button>
+
+                            <form id="cancel-form" action="{{ route('client.orders.cancel', $order->code) }}"
+                                method="POST" class="mt-3 d-none">
                                 @csrf
                                 @method('PUT')
-                                <button type="submit" class="btn btn-success">✅ Tôi đã nhận được hàng</button>
+                                <div class="form-group">
+                                    <label for="cancel_reason"><strong>Lý do huỷ đơn hàng:</strong></label>
+                                    <textarea name="cancel_reason" id="cancel_reason" class="form-control" rows="3" required
+                                        placeholder="Nhập lý do..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-danger">Xác nhận huỷ</button>
+                                <button type="button" class="btn btn-secondary ml-2" onclick="toggleCancelForm()">Huỷ
+                                    bỏ</button>
                             </form>
-                        
-                            <div id="refuse-section" class="mt-3">
-                                <button class="btn btn-outline-danger" onclick="toggleRefuseForm()">❌ Không nhận hàng</button>
-                        
-                                <form id="refuse-form" action="{{ route('client.orders.cancel', $order->code) }}"
-                                    method="POST" class="mt-3 d-none">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="form-group">
-                                        <label for="refuse_reason"><strong>Lý do không nhận:</strong></label>
-                                        <textarea name="cancel_reason" id="refuse_reason" class="form-control" rows="3" required
-                                            placeholder="Nhập lý do..."></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-danger">Xác nhận</button>
-                                    <button type="button" class="btn btn-secondary ml-2" onclick="toggleRefuseForm()">Huỷ bỏ</button>
-                                </form>
-                            </div>
-                        
-                            <script>
-                                function toggleRefuseForm() {
-                                    const form = document.getElementById('refuse-form');
-                                    form.classList.toggle('d-none');
-                                }
-                            </script>
-                        @endif
-                        
+                        </div>
+
+                        <script>
+                            function toggleCancelForm() {
+                                const form = document.getElementById('cancel-form');
+                                form.classList.toggle('d-none');
+                            }
+                        </script>
+                    @endif
+
+                    @if ($order->status === 'completed')
+                        <form action="{{ route('client.orders.confirmReceived', $order->code) }}" method="POST"
+                            class="mt-3">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="btn btn-success">✅ Tôi đã nhận được hàng</button>
+                        </form>
+
+                        <div id="refuse-section" class="mt-3">
+                            <button class="btn btn-outline-danger" onclick="toggleRefuseForm()">❌ Không nhận
+                                hàng</button>
+
+                            <form id="refuse-form" action="{{ route('client.orders.cancel', $order->code) }}"
+                                method="POST" class="mt-3 d-none">
+                                @csrf
+                                @method('PUT')
+                                <div class="form-group">
+                                    <label for="refuse_reason"><strong>Lý do không nhận:</strong></label>
+                                    <textarea name="cancel_reason" id="refuse_reason" class="form-control" rows="3" required
+                                        placeholder="Nhập lý do..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-danger">Xác nhận</button>
+                                <button type="button" class="btn btn-secondary ml-2" onclick="toggleRefuseForm()">Huỷ
+                                    bỏ</button>
+                            </form>
+                        </div>
+
+                        <script>
+                            function toggleRefuseForm() {
+                                const form = document.getElementById('refuse-form');
+                                form.classList.toggle('d-none');
+                            }
+                        </script>
+                    @endif
+
 
                 </div>
             </div>
@@ -157,6 +161,10 @@
                     @php
                         $hasVariant = $order->items->contains(fn($item) => $item->product_variant_id !== null);
                         $colspan = $hasVariant ? 4 : 3;
+                        $subtotal = 0;
+                        foreach ($order->items as $item) {
+                            $subtotal += $item->price * $item->quantity;
+                        }
                     @endphp
 
                     <thead class="thead-light">
@@ -175,24 +183,38 @@
 
                     <tbody>
                         @foreach ($order->items as $item)
+                            @php
+                                $productInfo = json_decode($item->product_info, true) ?? [];
+                                $archivedProduct = $productInfo['product'] ?? null;
+                                $archivedVariant = $productInfo['variant'] ?? null;
+                                $product = $item->product ?? $archivedProduct;
+                                $variant = $item->productVariant ?? $archivedVariant;
+                            @endphp
                             <tr>
                                 <td class="d-flex align-items-center">
                                     <img src="{{ $item->productVariant?->thumbnail
                                         ? asset('storage/' . $item->productVariant->thumbnail)
                                         : ($item->product?->thumbnail
                                             ? asset('storage/' . $item->product->thumbnail)
-                                            : asset('/images/no-image.png')) }}"
+                                            : ($archivedVariant['thumbnail'] ?? false
+                                                ? asset('storage/' . $archivedVariant['thumbnail'])
+                                                : ($archivedProduct['thumbnail'] ?? false
+                                                    ? asset('storage/' . $archivedProduct['thumbnail'])
+                                                    : asset('/images/no-image.png')))) }}"
                                         alt="product image" width="60" class="rounded shadow-sm mr-3">
 
                                     <div class="text-left ml-2">
                                         <strong>
-                                            <a href="{{ route('client.products.detail', $item->product->slug) }}"
-                                                class="text-dark">
-                                                {{ $item->product->name }}
-                                            </a>
+                                            @if ($item->product)
+                                                <a href="{{ route('client.products.detail', $item->product->slug) }}"
+                                                    class="text-dark">
+                                                    {{ $item->product->name }}
+                                                </a>
+                                            @else
+                                                {{ $archivedProduct['name'] ?? 'Unknown' }}
+                                            @endif
                                         </strong>
                                     </div>
-
                                 </td>
                                 @if ($hasVariant)
                                     <td class="text-left">
@@ -206,16 +228,21 @@
                                                     </li>
                                                 @endforeach
                                             </ul>
+                                        @elseif ($archivedVariant && !empty($archivedVariant['attributeValues']))
+                                            <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
+                                                @foreach ($archivedVariant['attributeValues'] as $value)
+                                                    <li class="mb-1">
+                                                        <i class="fas fa-check-circle text-primary mr-1"></i>
+                                                        <strong>{{ $value['attribute']['name'] ?? '' }}:</strong>
+                                                        {{ $value['value'] }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
                                         @else
                                             <span class="text-muted">—</span>
                                         @endif
                                     </td>
                                 @endif
-
-
-
-
-
                                 <td>{{ number_format($item->price, 0, ',', '.') }}₫</td>
                                 <td>{{ $item->quantity }}</td>
                                 <td class="text-danger">
@@ -225,15 +252,38 @@
                         @endforeach
                     </tbody>
 
-                    <tfoot>
-                        <tr>
-                            <th colspan="{{ $colspan }}" class="text-right">Tổng cộng:</th>
-                            <th class="text-danger h5">
-                                {{ number_format($order->final_price, 0, ',', '.') }}₫
-                            </th>
-                        </tr>
-                    </tfoot>
                 </table>
+            </div>
+
+            <!-- Order summary card below the table -->
+            <div class="row justify-content-end mt-3">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li class="d-flex justify-content-between mb-2">
+                                    <span>Tạm tính:</span>
+                                    <span>{{ number_format($subtotal, 0, ',', '.') }}₫</span>
+                                </li>
+                                @if (!empty($order->coupon_code) && !empty($order->coupon_discount))
+                                    <li class="d-flex justify-content-between mb-2">
+                                        <span>
+                                            Giảm giá:
+                                            <span class="badge bg-info text-dark ml-1">{{ $order->coupon_code }}</span>
+                                        </span>
+                                        <span
+                                            class="text-danger">-{{ number_format($order->coupon_discount, 0, ',', '.') }}₫</span>
+                                    </li>
+                                @endif
+                                <li class="d-flex justify-content-between mt-3 border-top pt-3">
+                                    <span class="font-weight-bold" style="font-size: 1.1rem;">Tổng tiền:</span>
+                                    <span
+                                        class="text-danger h4 mb-0 font-weight-bold">{{ number_format($order->final_price, 0, ',', '.') }}₫</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

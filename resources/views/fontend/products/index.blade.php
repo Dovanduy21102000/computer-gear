@@ -26,7 +26,22 @@
                             <a href="{{ route('client.products.index') }}">Sản phẩm</a>
                         </li>
 
-
+                        @if (request('category'))
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                <a
+                                    href="{{ route('client.products.filter', array_merge(request()->except('brand'), ['category' => $currentCategory->slug])) }}">
+                                    {{ $currentCategory->name ?? request('category') }}
+                                </a>
+                            </li>
+                        @endif
+                        @if (request('brand'))
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                <a
+                                    href="{{ route('client.products.filter', array_merge(request()->except('category'), ['brand' => is_array(request('brand')) ? request('brand')[0] : request('brand')])) }}">
+                                    {{ $brands->where('id', is_array(request('brand')) ? request('brand')[0] : request('brand'))->first()->name ?? '' }}
+                                </a>
+                            </li>
+                        @endif
                     </ol>
                 </nav>
 
@@ -291,7 +306,8 @@
                             data-style="btn-sm bg-white font-weight-normal py-2 border text-gray-20 bg-lg-down-transparent border-lg-down-0">
                             <option value="mac-dinh" @if (($sortSlug ?? '') == 'mac-dinh' || empty($sortSlug)) selected @endif>Sắp xếp mặc định
                             </option>
-                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo mới
+                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo
+                                mới
                                 nhất</option>
                             <option value="gia-thap-nhat" @if (($sortSlug ?? '') == 'gia-thap-nhat') selected @endif>Sắp xếp từ
                                 thấp tới cao</option>
@@ -301,11 +317,11 @@
 
 
                     </div>
-                    <nav class="px-3 flex-horizontal-center text-gray-20">
+                    {{-- <nav class="px-3 flex-horizontal-center text-gray-20">
                         @if ($products->count())
                             <span>Trang {{ $products->currentPage() }} / {{ $products->lastPage() }}</span>
                         @endif
-                    </nav>
+                    </nav> --}}
 
                 </div>
                 <!-- End Shop-control-bar -->
@@ -321,11 +337,11 @@
                                         class="sr-only">Loading...</span></div>
                             </div>
                             <div id="ajaxProductList">
-                                
-                                    @include('fontend.products.partials.product_list', [
-                                        'products' => $products,
-                                    ])
-                                
+
+                                @include('fontend.products.partials.product_list', [
+                                    'products' => $products,
+                                ])
+
                                 <div class="pagination-container d-flex justify-content-center mt-5 position-static">
                                     @if ($products->hasMorePages())
                                         <button id="showMoreBtn" class="btn btn-primary"
@@ -401,11 +417,8 @@
                 var sortValue = sortSelect.value;
                 var url = new URL(window.location.href);
                 var basePath = '/products';
-                if (sortValue !== 'mac-dinh') {
-                    basePath += '/sort/' + sortValue;
-                }
-                var params = url.searchParams.toString();
-                var newUrl = basePath + (params ? ('?' + params) : '');
+                url.searchParams.set('sort', sortValue);
+                var newUrl = basePath + '?' + url.searchParams.toString();
                 if (spinner) spinner.style.display = 'flex';
                 fetch(newUrl, {
                         headers: {
@@ -423,6 +436,10 @@
                             });
                         }
                         history.pushState(null, '', newUrl);
+                        // Call grid reload logic
+                        if (typeof window.reloadProductGrid === "function") {
+                            window.reloadProductGrid();
+                        }
                     })
                     .finally(function() {
                         if (spinner) spinner.style.display = 'none';

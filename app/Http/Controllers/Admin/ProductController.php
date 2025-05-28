@@ -54,7 +54,7 @@ class ProductController extends Controller
     {
         $template = 'backend.products.create';
         $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
-        $brands = Brand::all();
+        $brands = Brand::where('is_active', true)->get();
         $attributes = Attribute::with('attributevalues')->get();
 
         return view('backend.dashboard.layout', [
@@ -201,7 +201,7 @@ class ProductController extends Controller
     {
         $product = Product::with(['variants.attributeValues'])->findOrFail($id);
         $allCategories = Category::orderBy('name')->get(['id', 'name', 'parent_id'])->toArray();
-        $brands = Brand::all();
+        $brands = Brand::where('is_active', true)->get();
         $attributes = Attribute::with('attributevalues')->get();
 
         $template = 'backend.products.edit';

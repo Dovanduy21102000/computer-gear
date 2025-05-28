@@ -71,18 +71,13 @@ class CheckoutController extends Controller
                 return $districts;
             });
 
-            // If buy now item exists, use it instead of cart items
-            if ($buyNowItem) {
-                $cartItems[] = $buyNowItem;
-            } else {
-                // Get selected items from URL parameters
-                if ($request->has('selected_items')) {
-                    $selectedItems = explode(',', $request->input('selected_items'));
-                }
-
-                // Log::info('Selected items from URL:', ['selected_items' => $selectedItems]);
-
+            // Get selected items from URL parameters
+            if ($request->has('selected_items')) {
+                $selectedItems = explode(',', $request->input('selected_items'));
                 if (!empty($selectedItems)) {
+                    // Clear and ignore buy now item if cart items are selected
+                    session()->forget('buy_now_item');
+                    $buyNowItem = null;
                     // Get cart items from database for selected items
                     $cart = Cart::where('user_id', Auth::id())->first();
                     if ($cart) {
@@ -101,11 +96,16 @@ class CheckoutController extends Controller
                                 return $cartItem;
                             });
                     }
-
-                    // Log::info('Cart items from database for selected items:', [
-                    //     'items' => $cartItems
-                    // ]);
+                } elseif ($buyNowItem) {
+                    // If no selected items but buy now item exists, use it
+                    $cartItems[] = $buyNowItem;
                 }
+            } elseif ($buyNowItem) {
+                // If no selected items param but buy now item exists, use it
+                $cartItems[] = $buyNowItem;
+            } else {
+                // If neither, clear buy now item
+                session()->forget('buy_now_item');
             }
 
             // Calculate total price
@@ -130,6 +130,19 @@ class CheckoutController extends Controller
 
             // Log coupon in session
             Log::info('Coupon in session at checkout:', ['coupon' => session('coupon')]);
+
+            $buyNowItem = session('buy_now_item');
+            if (is_object($buyNowItem) && property_exists($buyNowItem, 'stdClass')) {
+                $buyNowItem = $buyNowItem->stdClass;
+            }
+            \Log::info('Checkout buy_now_item from session (index)', [
+                'price' => $buyNowItem->price ?? null,
+                'variant' => $buyNowItem->productVariant ?? null,
+                'product' => $buyNowItem->product ?? null,
+            ]);
+            if ($buyNowItem && !isset($buyNowItem->price)) {
+                throw new \Exception('Dữ liệu sản phẩm mua ngay không hợp lệ. Vui lòng thử lại.');
+            }
 
             $template = 'fontend.checkout.index';
             return view('fontend.layout', compact(
@@ -345,77 +358,48 @@ class CheckoutController extends Controller
 
             // Check for buy now item first
             $buyNowItem = session('buy_now_item');
+            if (is_object($buyNowItem) && property_exists($buyNowItem, 'stdClass')) {
+                $buyNowItem = $buyNowItem->stdClass;
+            }
+            Log::info('Checkout buy_now_item from session (processCheckout)', [
+                'price' => $buyNowItem->price ?? null,
+                'variant' => $buyNowItem->productVariant ?? null,
+                'product' => $buyNowItem->product ?? null,
+            ]);
+            if ($buyNowItem && !isset($buyNowItem->price)) {
+                throw new \Exception('Dữ liệu sản phẩm mua ngay không hợp lệ. Vui lòng thử lại.');
+            }
             if ($buyNowItem) {
-                // Calculate total price for buy now item
-                $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
-
-                // Apply coupon if exists
-                $coupon = session('coupon');
-                $couponDiscount = 0;
-                $couponId = null;
-
-                if ($coupon) {
-                    if ($totalPrice >= $coupon['min_order_total']) {
-                        if (isset($coupon['type']) && $coupon['type'] === 'percent') {
-                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
-                            $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
-                                ? min($percentageDiscount, $coupon['maximum_amount'])
-                                : $percentageDiscount;
-                        } else {
-                            $couponDiscount = min($totalPrice, $coupon['price']);
-                        }
-                        $couponId = $coupon['id'];
-                    }
+                // Always reload the product and variant from the database
+                $product = \App\Models\Product::find($buyNowItem->product->id);
+                $variant = null;
+                if ($buyNowItem->productVariant && isset($buyNowItem->productVariant->id)) {
+                    $variant = \App\Models\ProductVariant::find($buyNowItem->productVariant->id);
                 }
-
-                $finalPrice = max(0, $totalPrice - $couponDiscount);
-
-                // Create Order
-                $order = Order::create([
-                    'code' => date('YmdHis') . rand(100, 999),
-                    'user_id' => $userId,
-                    'shipping_user_name' => $request->shipping_user_name,
-                    'shipping_email' => $request->shipping_email,
-                    'shipping_phone' => $request->shipping_phone,
-                    'shipping_address' => $request->shipping_address,
-                    'province_id' => $request->province_id,
-                    'district_id' => $request->district_id,
-                    'coupon_code' => $coupon['code'] ?? null,
-                    'coupon_discount' => $couponDiscount,
-                    'total_price' => $totalPrice,
-                    'final_price' => $finalPrice,
-                    'payment_status' => $request->payment_method === 'cash' ? 0 : 1,
-                    'status' => 'pending',
-                    'payment_method' => $request->payment_method,
-                    'notes' => $request->notes,
-                ]);
-
-                if ($couponId) {
-                    CouponUser::create([
-                        'user_id' => $userId,
-                        'coupon_id' => $couponId,
-                        'order_id' => $order->id
-                    ]);
+                $finalPriceForOrderItem = $variant
+                    ? ($variant->price_sale ?? $variant->price)
+                    : ($product->price_sale ?? $product->price);
+                if (is_null($finalPriceForOrderItem)) {
+                    throw new \Exception('Không thể xác định giá sản phẩm. Vui lòng kiểm tra lại biến thể hoặc sản phẩm.');
                 }
-
                 // Create order item for buy now item
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $buyNowItem->product->id,
-                    'product_variant_id' => $buyNowItem->productVariant ? $buyNowItem->productVariant->id : null,
-                    'price' => $buyNowItem->price,
+                    'product_id' => $product->id,
+                    'product_variant_id' => $variant ? $variant->id : null,
+                    'price' => $finalPriceForOrderItem,
                     'quantity' => $buyNowItem->quantity,
                     'product_info' => json_encode([
-                        'product' => $buyNowItem->product->toArray(),
-                        'variant' => $buyNowItem->productVariant ? $buyNowItem->productVariant->toArray() : null
+                        'product' => $product->toArray(),
+                        'variant' => $variant ? $variant->toArray() : null
                     ]),
                 ]);
 
                 // Update stock
-                if ($buyNowItem->productVariant) {
-                    $buyNowItem->productVariant->decrement('quantity', $buyNowItem->quantity);
+                if ($variant) {
+                    $variant->decrement('quantity', $buyNowItem->quantity);
                 } else {
-                    $buyNowItem->product->decrement('quantity', $buyNowItem->quantity);
+                    $product->decrement('quantity', $buyNowItem->quantity);
                 }
 
                 // Clear sessions
@@ -423,6 +407,15 @@ class CheckoutController extends Controller
                 session()->forget('buy_now_item');
 
                 DB::commit();
+
+                // Delete cart items AFTER successful transaction
+                if (isset($cartItems)) {
+                    foreach ($cartItems as $item) {
+                        if (isset($item->id) && !is_string($item->id)) {
+                            $item->delete();
+                        }
+                    }
+                }
 
                 return redirect()->route('checkout.success', ['order_id' => $order->id])
                     ->with('success', 'Đặt hàng thành công! Vui lòng thanh toán khi nhận hàng.');
@@ -514,11 +507,23 @@ class CheckoutController extends Controller
 
             // Record coupon usage
             if ($couponId) {
-                CouponUser::create([
-                    'user_id' => $userId,
-                    'coupon_id' => $couponId,
-                    'order_id' => $order->id
-                ]);
+                $couponUser = CouponUser::where('user_id', $userId)
+                    ->where('coupon_id', $couponId)
+                    ->first();
+                if ($couponUser) {
+                    $couponUser->used = 1;
+                    $couponUser->save();
+                } else {
+                    CouponUser::create([
+                        'user_id' => $userId,
+                        'coupon_id' => $couponId,
+                        'used' => 1,
+                        'order_id' => $order->id
+                    ]);
+                }
+
+                // Increment the coupon's used_count
+                \App\Models\Coupon::where('id', $couponId)->increment('used_count');
             }
 
             // Save Order Items and Update Stock
@@ -574,6 +579,7 @@ class CheckoutController extends Controller
 
     public function applyCoupon(Request $request)
     {
+
         $isAjax = $request->expectsJson() || $request->ajax();
         $request->validate([
             'coupon_code' => 'required|string|exists:coupons,code',
@@ -828,8 +834,8 @@ class CheckoutController extends Controller
 
             // Create temporary cart item for checkout
             $cartItem = new \stdClass();
-            $cartItem->id = 'buy_now_' . time(); // Add a unique ID
-            $cartItem->product = $product;
+            $cartItem->product = $product; // Assign product first
+            $cartItem->id = $cartItem->product->id; // Set the id to the actual product ID
             $cartItem->productVariant = $productVariantId ? ProductVariant::with(['attributeValues.attribute'])->find($productVariantId) : null;
             $cartItem->quantity = $request->quantity;
             $cartItem->price = $price;

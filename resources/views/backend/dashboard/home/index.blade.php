@@ -406,9 +406,15 @@
                                                         </th>
                                                         <td>{{ $order->user->name ?? 'N/A' }}</td>
                                                         <td class="text-primary">
-                                                            {{ $item->productVariant->sku ?? 'Sản phẩm không tồn tại' }}
+                                                            @if ($item->productVariant)
+                                                                {{ $item->productVariant->sku }}
+                                                            @elseif($item->product)
+                                                                {{ $item->product->name }}
+                                                            @else
+                                                                Sản phẩm không tồn tại
+                                                            @endif
                                                         </td>
-                                                        <td>${{ number_format($order->final_price) }}</td>
+                                                        <td>{{ number_format($order->final_price) }}</td>
                                                         <td>
                                                             @if ($order->status == 'approved')
                                                                 <span class="badge bg-success">Đã duyệt</span>
@@ -461,15 +467,24 @@
                                         @foreach ($topSellingProducts as $product)
                                             <tr>
                                                 <th scope="row">
-                                                    <a href="{{ route('products.show', $product->id) }}"><img
-                                                            src="{{ asset('storage/' . $product->thumbnail) }}"
-                                                            alt="{{ $product->name }}" width="50"></a>
+                                                    <a href="{{ route('products.show', $product->product_id) }}">
+                                                        <img src="{{ asset('storage/' . $product->thumbnail) }}"
+                                                            alt="{{ $product->product_name }}" width="50">
+                                                    </a>
                                                 </th>
-                                                <td><a href="{{ route('products.show', $product->id) }}"
-                                                        class="text-primary fw-bold">{{ $product->name }}</a></td>
-                                                <td>${{ number_format($product->price, 2) }}</td>
-                                                <td class="fw-bold">{{ $product->total_sold }}</td>
-                                                <td>${{ number_format($product->total_revenue, 2) }}</td>
+                                                <td>
+                                                    <a href="{{ route('products.show', $product->product_id) }}"
+                                                        class="text-primary fw-bold">
+                                                        @if ($product->sku)
+                                                            {{ $product->sku }}
+                                                        @else
+                                                            {{ $product->product_name }}
+                                                        @endif
+                                                    </a>
+                                                </td>
+                                                <td>{{ number_format($product->price) }}đ</td>
+                                                <td class="fw-bold">{{ $product->quantity_sold }}</td>
+                                                <td>{{ number_format($product->total_revenue) }}đ</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -526,82 +541,6 @@
                         </div>
                     </div>
                 </div><!-- End Recent Activity -->
-
-                <!-- Budget Report -->
-                <div class="card">
-                    <div class="filter">
-                        <a class="icon" href="#" data-bs-toggle="dropdown"><i
-                                class="bi bi-three-dots"></i></a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                            <li class="dropdown-header text-start">
-                                <h6>Filter</h6>
-                            </li>
-
-                            <li><a class="dropdown-item" href="#">Hôm nay</a></li>
-                            <li><a class="dropdown-item" href="#">Tháng này</a></li>
-                            <li><a class="dropdown-item" href="#">Năm nay</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="card-body pb-0">
-                        <h5 class="card-title">Báo cáo ngân sách <span>| Tháng này</span></h5>
-
-                        <div id="budgetChart" style="min-height: 400px;" class="echart"></div>
-
-                        <script>
-                            document.addEventListener("DOMContentLoaded", () => {
-                                var budgetChart = echarts.init(document.querySelector("#budgetChart")).setOption({
-                                    legend: {
-                                        data: ['Allocated Budget', 'Actual Spending']
-                                    },
-                                    radar: {
-                                        // shape: 'circle',
-                                        indicator: [{
-                                                name: 'Sales',
-                                                max: 6500
-                                            },
-                                            {
-                                                name: 'Administration',
-                                                max: 16000
-                                            },
-                                            {
-                                                name: 'Information Technology',
-                                                max: 30000
-                                            },
-                                            {
-                                                name: 'Customer Support',
-                                                max: 38000
-                                            },
-                                            {
-                                                name: 'Development',
-                                                max: 52000
-                                            },
-                                            {
-                                                name: 'Marketing',
-                                                max: 25000
-                                            }
-                                        ]
-                                    },
-                                    series: [{
-                                        name: 'Budget vs spending',
-                                        type: 'radar',
-                                        data: [{
-                                                value: [4200, 3000, 20000, 35000, 50000, 18000],
-                                                name: 'Allocated Budget'
-                                            },
-                                            {
-                                                value: [5000, 14000, 28000, 26000, 42000, 21000],
-                                                name: 'Actual Spending'
-                                            }
-                                        ]
-                                    }]
-                                });
-                            });
-                        </script>
-
-                    </div>
-                </div><!-- End Budget Report -->
-
                 <!-- News & Updates Traffic -->
                 <div class="card">
                     <div class="card-body pb-0">

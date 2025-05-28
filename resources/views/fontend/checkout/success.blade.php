@@ -130,7 +130,7 @@
 
                         <div class="text-center mt-5">
                             <a href="{{ route('home.index') }}" class="btn btn-primary">Tiếp tục mua sắm</a>
-                            <a href="{{ route('order.track') }}" class="btn btn-outline-primary ml-2">Theo dõi đơn
+                            <a href="{{ route('client.orders.index') }}" class="btn btn-outline-primary ml-2">Theo dõi đơn
                                 hàng</a>
                         </div>
                     </div>

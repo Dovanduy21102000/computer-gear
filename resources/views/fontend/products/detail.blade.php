@@ -73,6 +73,12 @@
 <!-- CSS CMT -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 <style>
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+
     .rating input {
         display: none;
     }
@@ -83,15 +89,10 @@
         cursor: pointer;
     }
 
-    .rating input:checked~label {
-        color: #3b87de;
-        /* Yellow color for selected stars */
-    }
-
+    .rating input:checked~label,
     .rating label:hover,
     .rating label:hover~label {
         color: #3b87de;
-        /* Highlight on hover */
     }
 
     /* Ensure stars are in left-to-right order */
@@ -111,17 +112,27 @@
             <div class="my-md-3">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-3 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble">
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a
-                                href="{{ route('home.index') }}">Trang chủ</a></li>
                         <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
-                            @if ($product->category)
-                                <a href="#">{{ $product->category->name }}</a>
-                            @else
-                                <span>Danh mục không xác định</span>
-                            @endif
+                            <a href="{{ route('home.index') }}">Trang chủ</a>
                         </li>
+                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                            <a href="{{ route('client.products.index') }}">Sản phẩm</a>
+                        </li>
+                        @if ($product->category)
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                <a
+                                    href="{{ route('client.products.category', ['slug' => $product->category->slug]) }}">{{ $product->category->name }}</a>
+                            </li>
+                        @endif
+                        @if ($product->brand)
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                <a
+                                    href="{{ route('client.products.brand', ['brandSlug' => $product->brand->slug]) }}">{{ $product->brand->name }}</a>
+                            </li>
+                        @endif
                         <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">
-                            {{ $product->name }}</li>
+                            {{ $product->name }}
+                        </li>
                     </ol>
                 </nav>
             </div>
@@ -174,7 +185,8 @@
                             </div>
                         </div>
                         <div class="mb-1">
-                            <a href="#" class="font-size-12 text-gray-5 mb-2 d-inline-block">
+                            <a href="{{ $product->category?->slug ? route('client.products.category', ['slug' => $product->category->slug]) : '#' }}"
+                                class="font-size-12 text-gray-5 mb-2 d-inline-block">
                                 {{ $product->category->name ?? 'Danh mục' }}</a>
                             <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
                             <div class="mb-2">
@@ -183,7 +195,7 @@
                                         <!-- Hiển thị sao dựa trên đánh giá trung bình -->
                                         @for ($i = 1; $i <= 5; $i++)
                                             <small
-                                                class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
+                                                class="fas fa-star {{ $i <= $product->average_rating ? '' : 'text-muted' }}"></small>
                                         @endfor
                                     </div>
                                     <span class="text-secondary font-size-13">({{ $totalReviews }} đánh giá từ khách
@@ -199,7 +211,9 @@
                                 <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
                                 @if ($product->brand)
                                     <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
-                                        Thương hiệu: <a href="#" class="text-dark">{{ $product->brand->name }}</a>
+                                        Thương hiệu: <a
+                                            href="{{ $product->brand?->brandSlug ? route('client.products.brand', ['brandSlug' => $product->brand->slug]) : '#' }}"
+                                            class="text-dark">{{ $product->brand->name }}</a>
                                     </p>
                                 @endif
                             </div>
@@ -273,16 +287,17 @@
                                             </span>
                                         @endif
                                     @elseif ($product->price_sale)
-                                        <del
-                                            class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
                                         <span
                                             class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                        <br>
+                                        <del
+                                            class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
                                     @else
                                         {{ number_format($product->price, 0, ',', '.') }}₫
                                     @endif
                                 </div>
                                 <small id="outOfStockWarning" class="text-danger d-none">Sản phẩm này đã hết
-                                    hàng</small>
+                                    hàng. Vui lòng liên hệ để được hỗ trợ.</small>
                             </div>
 
                             <div class="mb-1">
@@ -352,12 +367,19 @@
                                 <a href="{{ route('cart.add') }}" id="addToCartBtn"
                                     class="btn btn-block btn-primary-dark" disabled>
                                     <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
-
                                 </a>
                             </div>
                             <div class="mb-2">
                                 <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
                             </div>
+
+                            @if (!auth()->check())
+                                <div class="alert alert-info mt-2">
+                                    <i class="fas fa-info-circle"></i> Vui lòng <a href="{{ route('login') }}">đăng
+                                        nhập</a> để thêm sản phẩm vào giỏ hàng hoặc mua ngay.
+                                </div>
+                            @endif
+
                             <div class="flex-content-center flex-wrap">
                                 <div class="border-top pt-2 flex-center-between flex-wrap">
                                     @include('fontend.component.wishlist-button', ['product' => $product])
@@ -557,11 +579,11 @@
                                                         bạn</label>
                                                 </div>
                                                 <div class="col-md-8 col-lg-9">
-                                                    <div class="rating">
+                                                    <div class="rating d-flex flex-row-reverse">
                                                         @for ($i = 5; $i >= 1; $i--)
                                                             <input type="radio" id="star{{ $i }}"
                                                                 name="rating" value="{{ $i }}"
-                                                                {{ $comment->rating == $i ? 'checked' : '' }}>
+                                                                {{ isset($comment) && $comment->rating == $i ? 'checked' : '' }}>
                                                             <label for="star{{ $i }}"
                                                                 class="fa fa-star"></label>
                                                         @endfor
@@ -614,10 +636,11 @@
                                                         bạn</label>
                                                 </div>
                                                 <div class="col-md-8 col-lg-9">
-                                                    <div class="rating">
+                                                    <div class="rating d-flex flex-row-reverse">
                                                         @for ($i = 5; $i >= 1; $i--)
                                                             <input type="radio" id="star{{ $i }}"
-                                                                name="rating" value="{{ $i }}">
+                                                                name="rating" value="{{ $i }}"
+                                                                {{ isset($comment) && $comment->rating == $i ? 'checked' : '' }}>
                                                             <label for="star{{ $i }}"
                                                                 class="fa fa-star"></label>
                                                         @endfor
@@ -681,11 +704,11 @@
                                             </div>
                                             <!-- End Review Rating -->
 
-                                            <p class="text-gray-90">{{ $comment->content }}</p>
+                                            <p class="">{{ $comment->content }}</p>
 
                                             <!-- Display image if exists -->
                                             @if ($comment->image)
-                                                <div class="comment-image">
+                                                <div class="comment-image mb-2" style="width: 250px;">
                                                     <img src="{{ Storage::url($comment->image) }}"
                                                         alt="Comment Image" class="img-fluid" />
                                                 </div>
@@ -1089,56 +1112,21 @@
             let quantity = response.quantity ?? 0;
             let variantImage = response.image; // Get the image path from the response
 
-            // Update the main product image display
+            // Update only the main product image (not the slider)
             if (variantImage) {
-                // Assuming the main slider container is #sliderSyncingNav
-                let $mainSlider = $('#sliderSyncingNav');
-
-                // Destroy the current slider instance
-                if ($mainSlider.hasClass('slick-initialized')) {
-                    $mainSlider.slick('unslick');
+                var mainImg = document.querySelector('.product-main-image img');
+                if (mainImg) {
+                    mainImg.src = window.storageBaseUrl + variantImage;
                 }
-
-                // Clear existing content and add the new variant image
-                $mainSlider.empty().append(
-                    '<div class="js-slide"><img class="img-fluid" src="' + window.storageBaseUrl +
-                    variantImage + '" alt="Variant Image"></div>'
-                );
-
-                // Re-initialize the slider (adjust options if needed)
-                $mainSlider.slick({
-                    infinite: true,
-                    arrows: true, // You might want to re-enable arrows
-                    // Add other original slider options here
-                    dots: true, // Example: add dots if they were there originally
-                    // Make sure to include all relevant data- attributes from the original #sliderSyncingNav
-                    // This is a placeholder, you should copy the exact data- attributes/options from the HTML
-                    dataArrowsClasses: "d-none d-lg-inline-block u-slick__arrow-classic u-slick__arrow-centered--y rounded-circle",
-                    dataArrowLeftClasses: "fas fa-arrow-left u-slick__arrow-classic-inner u-slick__arrow-classic-inner--left ml-lg-2 ml-xl-4",
-                    dataArrowRightClasses: "fas fa-arrow-right u-slick__arrow-classic-inner u-slick__arrow-classic-inner--right mr-lg-2 mr-xl-4",
-                    dataNavFor: "#sliderSyncingThumb"
-                });
-
-                // If you have a thumbnail slider linked, update it too
-                let $thumbSlider = $('#sliderSyncingThumb');
-                if ($thumbSlider.hasClass('slick-initialized')) {
-                    $thumbSlider.slick('unslick');
-                }
-                // For simplicity, let's just clear thumbnails if only one variant image is shown
-                $thumbSlider.empty(); // Clear thumbnail slider
-
             } else {
-                // If no variant image, maybe revert to the main product thumbnail or a placeholder
-                // This part depends on your desired behavior when a variant has no specific image
-                console.warn("No variant image found in response.");
-                // You might want to load the default product images again here
+                // Optionally, revert to the original product image if no variant image
+                // (No action needed if you want to keep the last image)
             }
-
 
             // Kiểm tra giá
             let price = response.price_sale ?
-                `<del class=\"text-muted\">${response.price}₫</del> <br>
-                <span class=\"text-danger\">${response.price_sale}₫</span>` :
+                `<span class=\"text-danger\">${response.price_sale}₫</span><br>
+                <del class=\"text-muted\">${response.price}₫</del>` :
                 `${response.price}`;
 
             // Cập nhật giá
@@ -1236,10 +1224,20 @@
         $("#addToCartBtn, #buyNowBtn").click(function(event) {
             event.preventDefault();
 
-            // Check if user is authenticated for buy now action
-            if ($(this).attr('id') === 'buyNowBtn' && !{{ auth()->check() ? 'true' : 'false' }}) {
-                alert('Vui lòng đăng nhập để tiếp tục mua hàng!');
-                window.location.href = "{{ route('login') }}";
+            // Check if user is authenticated
+            if (!{{ auth()->check() ? 'true' : 'false' }}) {
+                Swal.fire({
+                    icon: "info",
+                    title: "Thông báo!",
+                    text: "Vui lòng đăng nhập để tiếp tục!",
+                    confirmButtonText: "Đăng nhập",
+                    showCancelButton: true,
+                    cancelButtonText: "Hủy"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('login') }}";
+                    }
+                });
                 return;
             }
 
@@ -1531,4 +1529,8 @@
             window.initAttributeOptions();
         }
     });
+</script>
+
+<script>
+    window.storageBaseUrl = "{{ asset('storage/') }}/";
 </script>

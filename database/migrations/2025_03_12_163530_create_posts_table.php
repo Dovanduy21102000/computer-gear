@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(\App\Models\Category::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(\App\Models\CategoryPost::class)->constrained('category_post')->cascadeOnDelete();
             $table->string('title');
             $table->string('slug')->unique();
             $table->string('image')->nullable();

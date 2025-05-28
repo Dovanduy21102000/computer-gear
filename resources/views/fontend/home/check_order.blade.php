@@ -91,18 +91,41 @@
                                     <tbody>
                                         @foreach ($order->orderItems as $item)
                                             @php
-                                                $product = json_decode($item->product_info, true) ?? [];
+                                                $productInfo = json_decode($item->product_info, true) ?? [];
+                                                $archivedProduct = $productInfo['product'] ?? null;
+                                                $archivedVariant = $productInfo['variant'] ?? null;
                                             @endphp
                                             <tr>
-                                                <td>{{ $product['name'] ?? 'Unknown' }}</td>
-                                                <td>{{ $product['sku'] ?? 'N/A' }}</td>
-                                                <td>{{ $item->quantity }}</td>
                                                 <td>
-                                                    {{ isset($product['price']) ? number_format(floatval($product['price']) * $item->quantity, 0, ',', '.') . ' đ' : 'N/A' }}
+                                                    {{ $archivedVariant['name'] ?? ($archivedProduct['name'] ?? 'Unknown') }}
                                                 </td>
                                                 <td>
-                                                    @if (!empty($product['thumbnail']))
-                                                        <img src="{{ asset('storage/' . $product['thumbnail']) }}"
+                                                    {{ $archivedVariant['sku'] ?? ($archivedProduct['sku'] ?? 'N/A') }}
+                                                </td>
+                                                <td>{{ $item->quantity }}</td>
+                                                <td>
+                                                    @if (!empty($archivedVariant['price_sale']))
+                                                        {{ number_format($archivedVariant['price_sale'] * $item->quantity, 0, ',', '.') }}
+                                                        đ
+                                                    @elseif (!empty($archivedProduct['price_sale']))
+                                                        {{ number_format($archivedProduct['price_sale'] * $item->quantity, 0, ',', '.') }}
+                                                        đ
+                                                    @elseif (!empty($archivedVariant['price']))
+                                                        {{ number_format($archivedVariant['price'] * $item->quantity, 0, ',', '.') }}
+                                                        đ
+                                                    @elseif (!empty($archivedProduct['price']))
+                                                        {{ number_format($archivedProduct['price'] * $item->quantity, 0, ',', '.') }}
+                                                        đ
+                                                    @else
+                                                        N/A
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if (!empty($archivedVariant['thumbnail']))
+                                                        <img src="{{ asset('storage/' . $archivedVariant['thumbnail']) }}"
+                                                            width="50" height="50" alt="Product Image">
+                                                    @elseif (!empty($archivedProduct['thumbnail']))
+                                                        <img src="{{ asset('storage/' . $archivedProduct['thumbnail']) }}"
                                                             width="50" height="50" alt="Product Image">
                                                     @else
                                                         Không có ảnh

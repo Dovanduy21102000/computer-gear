@@ -95,10 +95,11 @@
                                                                             class="text-gray-90">{{ Str::limit($newProduct->name, 22) }}</a>
                                                                     </h5>
                                                                 </div>
-                                                                <div class="text-warning text-ls-n2 font-size-16" style="width: 80px;">
+                                                                <div class="text-warning text-ls-n2 font-size-16"
+                                                                    style="width: 80px;">
                                                                     @for ($i = 1; $i <= 5; $i++)
                                                                         <small
-                                                                            class="{{ $i <= $newProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $newProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                            class="{{ $i <= $newProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $newProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                     @endfor
                                                                 </div>
                                                                 <div class="flex-center-between product-price">
@@ -233,7 +234,8 @@
                                                             class="product-item__inner py-md-3 mx-3 border-bottom row no-gutters">
                                                             <div class="col-auto product-media-left">
                                                                 <a href="{{ route('client.products.detail', $newProduct->slug) }}"
-                                                                    class="max-width-70 d-block"><img class="img-fluid"
+                                                                    class="max-width-70 d-block"><img
+                                                                        class="img-fluid"
                                                                         src="{{ asset('storage/' . $newProduct->thumbnail) }}"
                                                                         alt="Image Description"
                                                                         style="width: 150px; height: 150px; object-fit: cover;">
@@ -409,7 +411,7 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topViewedProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topViewedProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="mb-2"><a
@@ -532,7 +534,7 @@
                 <!-- Banner -->
                 <div class="row mb-6">
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4">
-                        <a href="{{ route('client.products.index') }}" class="d-black text-gray-90">
+                        <a href="{{ route('client.products.index') }}" class="d-black text-black">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/190x150/img3.jpg"
@@ -542,7 +544,7 @@
                                     <div class="mb-2 pb-1 font-size-18 font-weight-light text-ls-n1 text-lh-23">
                                         ƯU ĐÃI LỚN <strong>LAPTOP MỚI</strong>
                                     </div>
-                                    <div class="link text-gray-90 font-weight-bold font-size-15">
+                                    <div class="link text-blackblack font-weight-bold font-size-15">
                                         Mua ngay
                                         <span class="link__icon ml-1">
                                             <span class="link__icon-inner"><i
@@ -554,7 +556,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4">
-                        <a href="{{ route('client.products.index') }}" class="d-black text-gray-90">
+                        <a href="{{ route('client.products.index') }}" class="d-black text-black">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/246X176/img2.jpg"
@@ -564,7 +566,7 @@
                                     <div class="mb-2 pb-1 font-size-18 font-weight-light text-ls-n1 text-lh-23">
                                         PHỤ KIỆN & <strong>LINH KIỆN MÁY TÍNH</strong>
                                     </div>
-                                    <div class="link text-gray-90 font-weight-bold font-size-15">
+                                    <div class="link text-black font-weight-bold font-size-15">
                                         Mua ngay
                                         <span class="link__icon ml-1">
                                             <span class="link__icon-inner"><i
@@ -576,7 +578,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4 d-md-none d-wd-block">
-                        <a href="{{ route('client.products.index') }}" class="d-black text-gray-90">
+                        <a href="{{ route('client.products.index') }}" class="d-black text-black">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/246X176/img3.jpg" alt="PC Gaming">
@@ -585,7 +587,7 @@
                                     <div class="mb-2 pb-1 font-size-18 font-weight-light text-ls-n1 text-lh-23">
                                         TRẢI NGHIỆM <strong>PC GAMING ĐỈNH CAO</strong>
                                     </div>
-                                    <div class="link text-gray-90 font-weight-bold font-size-15">
+                                    <div class="link text-black font-weight-bold font-size-15">
                                         Mua ngay
                                         <span class="link__icon ml-1">
                                             <span class="link__icon-inner"><i
@@ -672,7 +674,7 @@
                                                             style="width: 80px;">
                                                             @for ($i = 1; $i <= 5; $i++)
                                                                 <small
-                                                                    class="{{ $i <= $topViewedProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                    class="{{ $i <= $topViewedProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                             @endfor
                                                         </div>
                                                         <div class="flex-center-between mb-1">
@@ -798,7 +800,7 @@
                                                             style="width: 80px;">
                                                             @for ($i = 1; $i <= 5; $i++)
                                                                 <small
-                                                                    class="{{ $i <= $discountedProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $discountedProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                    class="{{ $i <= $discountedProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $discountedProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                             @endfor
                                                         </div>
                                                         <div class="flex-center-between mb-1 product-price">
@@ -888,7 +890,7 @@
 
                 <!-- Full banner -->
                 <div class="mb-8">
-                    <a href="{{ route('client.products.index') }}" class="d-block text-gray-90">
+                    <a href="{{ route('client.products.index') }}" class="d-block text-black">
                         <div class="bg-img-hero pt-3"
                             style="background-image: url(fontend/assets/img/1400X206/img1.jpg);">
                             <div class="space-top-2-md p-4 pt-4 pt-md-5 pt-lg-6 pt-xl-5 pb-lg-4 px-xl-8 px-lg-6">
@@ -945,7 +947,7 @@
                                                         </div>
                                                         <div
                                                             class="col col-xl-7 col-wd product-item__body pl-2 pl-lg-3 pl-xl-0 pl-wd-3 mr-wd-1">
-                                                            <div class="mb-4 mb-xl-2 mb-wd-4">
+                                                            <div>
 
                                                                 <div class="mb-2"><a
                                                                         href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
@@ -955,15 +957,15 @@
                                                                     <a href="{{ route('client.products.detail', $topSellingProduct->slug) }}"
                                                                         class="text-blue font-weight-bold">{{ Str::limit($topSellingProduct->name, 22) }}</a>
                                                                 </h5>
-                                                                
+
                                                             </div>
                                                             <div class="text-warning text-ls-n2 font-size-16 mb-1"
-                                                                    style="width: 80px;">
-                                                                    @for ($i = 1; $i <= 5; $i++)
-                                                                        <small
-                                                                            class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
-                                                                    @endfor
-                                                                </div>
+                                                                style="width: 80px;">
+                                                                @for ($i = 1; $i <= 5; $i++)
+                                                                    <small
+                                                                        class="{{ $i <= $topSellingProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->average_rating ? 'text-muted' : '' }}"></small>
+                                                                @endfor
+                                                            </div>
                                                             <div class="flex-center-between mb-3 product-price">
                                                                 <div class="prodcut-price mt-3">
                                                                     @if ($topSellingProduct->is_variant && $topSellingProduct->variants->count())
@@ -983,25 +985,39 @@
                                                                             <div
                                                                                 class="prodcut-price mt-3 d-flex align-items-center position-relative">
                                                                                 <ins
-                                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">
+                                                                                    {{ number_format($minPrice, 0, ',', '.') }}
+                                                                                    đ
+                                                                                </ins>
                                                                                 <del
-                                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">
+                                                                                    {{ number_format($originalMin, 0, ',', '.') }}
+                                                                                    đ
+                                                                                </del>
                                                                             </div>
                                                                         @else
                                                                             <span
-                                                                                class="text-dark fw-bold">{{ number_format($minPrice, 0, ',', '.') }}đ</span>
+                                                                                class="text-dark fw-bold">{{ number_format($minPrice, 0, ',', '.') }}
+                                                                                đ</span>
                                                                         @endif
                                                                     @elseif ($topSellingProduct->price_sale && $topSellingProduct->price_sale > 0)
                                                                         <div
                                                                             class="prodcut-price mt-3 d-flex align-items-center position-relative">
                                                                             <ins
-                                                                                class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}đ</ins>
+                                                                                class="font-size-20 text-red text-decoration-none product-sale-price">
+                                                                                {{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}
+                                                                                đ
+                                                                            </ins>
                                                                             <del
-                                                                                class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($topSellingProduct->price, 0, ',', '.') }}đ</del>
+                                                                                class="font-size-12 tex-gray-6 position-absolute bottom-100">
+                                                                                {{ number_format($topSellingProduct->price, 0, ',', '.') }}
+                                                                                đ
+                                                                            </del>
                                                                         </div>
                                                                     @else
                                                                         <span
-                                                                            class="text-dark fw-bold">{{ number_format($topSellingProduct->price, 0, ',', '.') }}đ</span>
+                                                                            class="text-dark fw-bold">{{ number_format($topSellingProduct->price, 0, ',', '.') }}
+                                                                            đ</span>
                                                                     @endif
                                                                 </div>
                                                                 <div class="d-none d-xl-block prodcut-add-cart">
@@ -1061,7 +1077,7 @@
                                                         </div>
                                                         <div
                                                             class="col col-xl-7 col-wd product-item__body pl-2 pl-lg-3 pl-xl-0 pl-wd-3 mr-wd-1">
-                                                            <div class="mb-4 mb-xl-2 mb-wd-4">
+                                                            <div>
                                                                 <div class="mb-2"><a
                                                                         href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
                                                                         class="font-size-12 text-gray-5">{{ $topSellingProduct->brand ? $topSellingProduct->brand->name : 'Không có thương hiệu' }}</a>
@@ -1075,27 +1091,61 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topSellingProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="flex-center-between mb-3 product-price">
                                                                 <div class="prodcut-price mt-3">
-                                                                    @if ($topSellingProduct->price_sale)
+                                                                    @if ($topSellingProduct->is_variant && $topSellingProduct->variants->count())
+                                                                        @php
+                                                                            $prices = $topSellingProduct->variants->pluck(
+                                                                                'price',
+                                                                            );
+                                                                            $salePrices = $topSellingProduct->variants
+                                                                                ->pluck('price_sale')
+                                                                                ->filter();
+                                                                            $minPrice = $salePrices->count()
+                                                                                ? $salePrices->min()
+                                                                                : $prices->min();
+                                                                            $originalMin = $prices->min();
+                                                                        @endphp
+                                                                        @if ($salePrices->count())
+                                                                            <div
+                                                                                class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                                <ins
+                                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">
+                                                                                    {{ number_format($minPrice, 0, ',', '.') }}
+                                                                                    đ
+                                                                                </ins>
+                                                                                <del
+                                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">
+                                                                                    {{ number_format($originalMin, 0, ',', '.') }}
+                                                                                    đ
+                                                                                </del>
+                                                                            </div>
+                                                                        @else
+                                                                            <span
+                                                                                class="text-dark fw-bold">{{ number_format($minPrice, 0, ',', '.') }}
+                                                                                đ</span>
+                                                                        @endif
+                                                                    @elseif ($topSellingProduct->price_sale && $topSellingProduct->price_sale > 0)
                                                                         <div
-                                                                            class="text-gray-100 font-size-15 font-weight-bold product-sale-price">
-                                                                            {{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}
-                                                                            đ
-                                                                        </div>
-                                                                        <div class="text-muted font-size-12">
-                                                                            <del>{{ number_format($topSellingProduct->price, 0, ',', '.') }}
-                                                                                đ</del>
+                                                                            class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                            <ins
+                                                                                class="font-size-20 text-red text-decoration-none product-sale-price">
+                                                                                {{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}
+                                                                                đ
+                                                                            </ins>
+                                                                            <del
+                                                                                class="font-size-12 tex-gray-6 position-absolute bottom-100">
+                                                                                {{ number_format($topSellingProduct->price, 0, ',', '.') }}
+                                                                                đ
+                                                                            </del>
                                                                         </div>
                                                                     @else
-                                                                        <div
-                                                                            class="text-gray-100 font-size-15 font-weight-bold">
-                                                                            {{ number_format($topSellingProduct->price, 0, ',', '.') }}
-                                                                            đ
-                                                                        </div>
+                                                                        <span
+                                                                            class="text-dark fw-bold">{{ number_format($topSellingProduct->price, 0, ',', '.') }}
+                                                                            đ</span>
                                                                     @endif
                                                                 </div>
                                                                 <div class="d-none d-xl-block prodcut-add-cart">
@@ -1159,7 +1209,7 @@
                                                         </div>
                                                         <div
                                                             class="col col-xl-7 col-wd product-item__body pl-2 pl-lg-3 pl-xl-0 pl-wd-3 mr-wd-1">
-                                                            <div class="mb-4 mb-xl-2 mb-wd-4">
+                                                            <div>
                                                                 <div class="mb-2"><a
                                                                         href="{{ route('client.products.brand', ['brandSlug' => $topSellingProduct->brand->slug]) }}"
                                                                         class="font-size-12 text-gray-5">{{ $topSellingProduct->brand ? $topSellingProduct->brand->name : 'Không có thương hiệu' }}</a>
@@ -1173,27 +1223,61 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topSellingProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="flex-center-between mb-3 product-price">
                                                                 <div class="prodcut-price mt-3">
-                                                                    @if ($topSellingProduct->price_sale)
+                                                                    @if ($topSellingProduct->is_variant && $topSellingProduct->variants->count())
+                                                                        @php
+                                                                            $prices = $topSellingProduct->variants->pluck(
+                                                                                'price',
+                                                                            );
+                                                                            $salePrices = $topSellingProduct->variants
+                                                                                ->pluck('price_sale')
+                                                                                ->filter();
+                                                                            $minPrice = $salePrices->count()
+                                                                                ? $salePrices->min()
+                                                                                : $prices->min();
+                                                                            $originalMin = $prices->min();
+                                                                        @endphp
+                                                                        @if ($salePrices->count())
+                                                                            <div
+                                                                                class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                                <ins
+                                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">
+                                                                                    {{ number_format($minPrice, 0, ',', '.') }}
+                                                                                    đ
+                                                                                </ins>
+                                                                                <del
+                                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">
+                                                                                    {{ number_format($originalMin, 0, ',', '.') }}
+                                                                                    đ
+                                                                                </del>
+                                                                            </div>
+                                                                        @else
+                                                                            <span
+                                                                                class="text-dark fw-bold">{{ number_format($minPrice, 0, ',', '.') }}
+                                                                                đ</span>
+                                                                        @endif
+                                                                    @elseif ($topSellingProduct->price_sale && $topSellingProduct->price_sale > 0)
                                                                         <div
-                                                                            class="text-gray-100 font-size-15 font-weight-bold product-sale-price">
-                                                                            {{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}
-                                                                            đ
-                                                                        </div>
-                                                                        <div class="text-muted font-size-12">
-                                                                            <del>{{ number_format($topSellingProduct->price, 0, ',', '.') }}
-                                                                                đ</del>
+                                                                            class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                            <ins
+                                                                                class="font-size-20 text-red text-decoration-none product-sale-price">
+                                                                                {{ number_format($topSellingProduct->price_sale, 0, ',', '.') }}
+                                                                                đ
+                                                                            </ins>
+                                                                            <del
+                                                                                class="font-size-12 tex-gray-6 position-absolute bottom-100">
+                                                                                {{ number_format($topSellingProduct->price, 0, ',', '.') }}
+                                                                                đ
+                                                                            </del>
                                                                         </div>
                                                                     @else
-                                                                        <div
-                                                                            class="text-gray-100 font-size-15 font-weight-bold">
-                                                                            {{ number_format($topSellingProduct->price, 0, ',', '.') }}
-                                                                            đ
-                                                                        </div>
+                                                                        <span
+                                                                            class="text-dark fw-bold">{{ number_format($topSellingProduct->price, 0, ',', '.') }}
+                                                                            đ</span>
                                                                     @endif
                                                                 </div>
                                                                 <div class="d-none d-xl-block prodcut-add-cart">
@@ -1247,7 +1331,7 @@
                 <div class="mb-8">
                     <dv
                         class=" d-flex justify-content-between border-bottom border-color-1 flex-md-nowrap flex-wrap border-sm-bottom-0">
-                        <h3 class="section-title mb-0 pb-2 font-size-22">Laptops & Computers</h3>
+                        <h3 class="section-title mb-0 pb-2 font-size-22">Laptop & PC</h3>
                     </dv>
                     <div class="mb-8 position-relative home-category-products-list" style="position: relative;">
                         <div id="homeCategoryProductListSpinner"
@@ -1296,7 +1380,7 @@
                                                             style="width: 80px;">
                                                             @for ($i = 1; $i <= 5; $i++)
                                                                 <small
-                                                                    class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                                                    class="{{ $i <= $product->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $product->average_rating ? 'text-muted' : '' }}"></small>
                                                             @endfor
                                                         </div>
                                                         <div class="flex-center-between mb-1">
@@ -1464,23 +1548,47 @@
                                                     style="width: 80px;">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <small
-                                                            class="{{ $i <= $keyboardMouseProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $keyboardMouseProduct->rating ? 'text-muted' : '' }}"></small>
+                                                            class="{{ $i <= $keyboardMouseProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $keyboardMouseProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                     @endfor
                                                 </div>
                                                 <div class="flex-center-between mb-1 product-price">
                                                     <div class="prodcut-price mt-3">
-                                                        @if ($keyboardMouseProduct->price_sale)
+                                                        @if ($keyboardMouseProduct->is_variant && $keyboardMouseProduct->variants->count())
+                                                            @php
+                                                                $prices = $keyboardMouseProduct->variants->pluck(
+                                                                    'price',
+                                                                );
+                                                                $salePrices = $keyboardMouseProduct->variants
+                                                                    ->pluck('price_sale')
+                                                                    ->filter();
+                                                                $minPrice = $salePrices->count()
+                                                                    ? $salePrices->min()
+                                                                    : $prices->min();
+                                                                $originalMin = $prices->min();
+                                                            @endphp
+                                                            @if ($salePrices->count())
+                                                                <div
+                                                                    class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                    <ins
+                                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                                    <del
+                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                                </div>
+                                                            @else
+                                                                <span
+                                                                    class="text-dark fw-bold">{{ number_format($minPrice, 0, ',', '.') }}đ</span>
+                                                            @endif
+                                                        @elseif ($keyboardMouseProduct->price_sale && $keyboardMouseProduct->price_sale > 0)
                                                             <div
                                                                 class="prodcut-price mt-3 d-flex align-items-center position-relative">
                                                                 <ins
-                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($keyboardMouseProduct->price_sale) }}đ</ins>
+                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($keyboardMouseProduct->price_sale, 0, ',', '.') }}đ</ins>
                                                                 <del
                                                                     class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ</del>
                                                             </div>
                                                         @else
-                                                            <div class="text-dark fw-bold fs-5">
-                                                                {{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ
-                                                            </div>
+                                                            <span
+                                                                class="text-dark fw-bold">{{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ</span>
                                                         @endif
                                                     </div>
 
@@ -1521,6 +1629,151 @@
                     </div>
                 </div>
                 <!-- End Laptops & Computers -->
+
+                <div class="position-relative">
+                    <div
+                        class="d-flex justify-content-between border-bottom border-color-1 flex-md-nowrap flex-wrap border-sm-bottom-0">
+                        <h3 class="section-title mb-0 pb-2 font-size-22">Màn hình</h3>
+                    </div>
+                    <div class="js-slick-carousel u-slick overflow-hidden u-slick-overflow-visble pt-3 pb-6 px-1"
+                        data-pagi-classes="text-center right-0 bottom-1 left-0 u-slick__pagination u-slick__pagination--long mb-0 z-index-n1 mt-4"
+                        data-slides-show="5" data-slides-scroll="1"
+                        data-responsive='[{
+                          "breakpoint": 1400,
+                          "settings": {
+                            "slidesToShow": 4
+                          }
+                        }, {
+                            "breakpoint": 1200,
+                            "settings": {
+                              "slidesToShow": 3
+                            }
+                        }, {
+                          "breakpoint": 992,
+                          "settings": {
+                            "slidesToShow": 3
+                          }
+                        }, {
+                          "breakpoint": 768,
+                          "settings": {
+                            "slidesToShow": 2
+                          }
+                        }, {
+                          "breakpoint": 554,
+                          "settings": {
+                            "slidesToShow": 2
+                          }
+                        }]'>
+                        @foreach ($screenProducts as $screenProduct)
+                            <div class="js-slide products-group">
+                                <div class="product-item">
+                                    <div class="product-item__outer h-100"
+                                        data-product-id="{{ $screenProduct->id }}">
+                                        <div class="product-item__inner px-xl-4 p-3">
+                                            <div class="product-item__body pb-xl-2">
+                                                <div class="mb-2">
+                                                    <a href="{{ $screenProduct->category?->slug ? route('client.products.category', ['slug' => $keyboardMouseProduct->category->slug]) : '#' }}"
+                                                        class="font-size-12 text-gray-5">
+                                                        {{ $screenProduct->category->name ?? 'Danh mục' }}
+                                                    </a>
+                                                </div>
+                                                <h5 class="mb-1 product-item__title truncate-title">
+                                                    <a href="{{ route('client.products.detail', $screenProduct->slug) }}"
+                                                        class="text-blue font-weight-bold">
+                                                        {{ Str::limit($screenProduct->name, 22) }}
+                                                    </a>
+                                                </h5>
+                                                <div class="mb-2">
+                                                    <a href="{{ route('client.products.detail', $screenProduct->slug) }}"
+                                                        class="d-block text-center">
+                                                        <img class="img-fluid w-100"
+                                                            style="height: 150px; object-fit: cover;"
+                                                            src="{{ asset('storage/' . $screenProduct->thumbnail) }}"
+                                                            alt="{{ $screenProduct->name }}">
+                                                    </a>
+                                                </div>
+                                                <div class="text-warning text-ls-n2 font-size-16 mb-1"
+                                                    style="width: 80px;">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        <small
+                                                            class="{{ $i <= $screenProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $screenProduct->average_rating ? 'text-muted' : '' }}"></small>
+                                                    @endfor
+                                                </div>
+                                                <div class="flex-center-between mb-1 product-price">
+                                                    <div class="prodcut-price mt-3">
+                                                        @if ($screenProduct->is_variant && $screenProduct->variants->count())
+                                                            @php
+                                                                $prices = $screenProduct->variants->pluck('price');
+                                                                $salePrices = $screenProduct->variants
+                                                                    ->pluck('price_sale')
+                                                                    ->filter();
+                                                                $minPrice = $salePrices->count()
+                                                                    ? $salePrices->min()
+                                                                    : $prices->min();
+                                                                $originalMin = $prices->min();
+                                                            @endphp
+                                                            @if ($salePrices->count())
+                                                                <div
+                                                                    class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                    <ins
+                                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                                    <del
+                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                                </div>
+                                                            @else
+                                                                <span
+                                                                    class="text-dark fw-bold">{{ number_format($minPrice, 0, ',', '.') }}đ</span>
+                                                            @endif
+                                                        @elseif ($screenProduct->price_sale && $screenProduct->price_sale > 0)
+                                                            <div
+                                                                class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                <ins
+                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($screenProduct->price_sale, 0, ',', '.') }}đ</ins>
+                                                                <del
+                                                                    class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($screenProduct->price, 0, ',', '.') }}đ</del>
+                                                            </div>
+                                                        @else
+                                                            <span
+                                                                class="text-dark fw-bold">{{ number_format($screenProduct->price, 0, ',', '.') }}đ</span>
+                                                        @endif
+                                                    </div>
+
+
+                                                    <div class="d-none d-xl-block prodcut-add-cart">
+                                                        @if ($screenProduct->is_variant)
+                                                            <a href="{{ route('client.products.detail', $screenProduct->slug) }}"
+                                                                class="btn-add-cart btn-primary transition-3d-hover">
+                                                                <i class="ec ec-add-to-cart"></i>
+                                                            </a>
+                                                        @else
+                                                            <form action="{{ route('cart.add') }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="product_id"
+                                                                    value="{{ $screenProduct->id }}">
+                                                                <input type="hidden" name="quantity" value="1">
+                                                                <button type="submit"
+                                                                    class="btn-add-cart btn-primary transition-3d-hover">
+                                                                    <i class="ec ec-add-to-cart"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="product-item__footer">
+                                                <div class="border-top pt-2 flex-center-between flex-wrap">
+                                                    @include('fontend.component.wishlist-button', [
+                                                        'product' => $keyboardMouseProduct,
+                                                    ])
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
     </div>

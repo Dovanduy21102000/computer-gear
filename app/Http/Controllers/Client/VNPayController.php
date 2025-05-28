@@ -42,6 +42,10 @@ class VNPayController extends Controller
             // Check for buy now item first
             $buyNowItem = session('buy_now_item');
             if ($buyNowItem) {
+                // Ensure buyNowItem has a product_id property
+                if (!isset($buyNowItem->product_id)) {
+                    $buyNowItem->product_id = $buyNowItem->id; // Fallback to id if product_id is not set
+                }
                 // Calculate total price for buy now item
                 $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
 
@@ -311,7 +315,26 @@ class VNPayController extends Controller
             } else {
                 $buyNowItem = session('vnpay_buy_now_item');
                 if ($buyNowItem) {
-                    $cartItems[] = $buyNowItem;
+                    // Always reload the product and variant from the database
+                    $product = \App\Models\Product::find($buyNowItem->product_id ?? $buyNowItem->product->id ?? $buyNowItem->id);
+                    $variant = null;
+                    if ((isset($buyNowItem->product_variant_id) && $buyNowItem->product_variant_id) || (isset($buyNowItem->productVariant) && isset($buyNowItem->productVariant->id))) {
+                        $variantId = $buyNowItem->product_variant_id ?? $buyNowItem->productVariant->id;
+                        $variant = \App\Models\ProductVariant::find($variantId);
+                    }
+                    $finalPriceForOrderItem = $variant
+                        ? ($variant->price_sale ?? $variant->price)
+                        : ($product->price_sale ?? $product->price);
+                    if (is_null($finalPriceForOrderItem)) {
+                        throw new \Exception('Không thể xác định giá sản phẩm. Vui lòng kiểm tra lại biến thể hoặc sản phẩm.');
+                    }
+                    // Create a cart item instance for buy now
+                    $cartItem = new \App\Models\CartItem();
+                    $cartItem->product_id = $product->id;
+                    $cartItem->product_variant_id = $variant ? $variant->id : null;
+                    $cartItem->quantity = $buyNowItem->quantity;
+                    $cartItem->price = $finalPriceForOrderItem;
+                    $cartItems[] = $cartItem;
                 }
             }
 
@@ -376,8 +399,8 @@ class VNPayController extends Controller
             foreach ($cartItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $item->product_id,
-                    'product_variant_id' => $item->product_variant_id,
+                    'product_id' => $item->product->id,
+                    'product_variant_id' => $item->productVariant ? $item->productVariant->id : null,
                     'price' => $item->productVariant ?
                         ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price),
                     'quantity' => $item->quantity,

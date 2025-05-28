@@ -194,7 +194,7 @@
             @csrf
 
             <!-- Add hidden input for selected items -->
-            @if (request()->has('selected_items'))
+            @if (request()->has('selected_items') && !request()->has('buy_now'))
                 @php
                     $selectedItems = explode(',', request()->input('selected_items'));
                 @endphp

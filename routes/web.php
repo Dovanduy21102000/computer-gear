@@ -91,6 +91,12 @@ Route::prefix('admin')->group(function () {
             Route::resource($object, $controller);
         };
 
+        // Toggle contact status
+        Route::post('contacts/{id}/toggle-status', [ContactController::class, 'toggleStatus'])->name('contacts.toggleStatus');
+
+        // Toggle brand status
+        Route::put('brands/{id}/toggle-status', [BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
+
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
 
         // Route quản lý thông số sản phẩm
@@ -122,6 +128,10 @@ Route::prefix('admin')->group(function () {
         Route::post('/chat/send', [AdminChatController::class, 'sendMessage']);
 
         Route::post('products/{id}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggleStatus');
+
+        Route::post('posts/toggle-status/{id}', [PostController::class, 'toggleStatus'])->name('posts.toggleStatus');
+
+        Route::post('category_post/toggle-status/{id}', [App\Http\Controllers\Admin\CategoryPostController::class, 'toggleStatus'])->name('category_post.toggleStatus');
     });
 
     // Biến thể sản phẩm

@@ -16,7 +16,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ $title }}</h5>
                         <a href="{{ route($urlBase . 'create') }}" class="btn btn-primary">
-                     Thêm mới
+                            Thêm mới
                         </a>
 
                         <div class="table-responsive mt-3">
@@ -33,26 +33,37 @@
                                 <tbody>
                                     @foreach ($data as $item)
                                         <tr>
-                                             <td class="text-center">{{ $loop->iteration }}</td>
+                                            <td class="text-center">{{ $loop->iteration }}</td>
                                             <td class="text-center">{{ $item->name }}</td>
                                             <td class="text-center">
-                                                <img src="{{ $item->logo ? asset('storage/' . $item->logo) : asset('backend/img/mvc_logo.png') }}" 
-                                                     alt="logo" width="80" class="img-thumbnail">
+                                                <img src="{{ $item->logo ? asset('storage/' . $item->logo) : asset('backend/img/mvc_logo.png') }}"
+                                                    alt="logo" width="80" class="img-thumbnail">
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge {{ $item->is_active ? 'bg-success' : 'bg-danger' }}">
-                                                    {{ $item->is_active ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
-                                                </span>
+                                                <form action="{{ route($urlBase . 'toggle-status', $item->id) }}"
+                                                    method="POST" style="display: inline;">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <button type="submit"
+                                                        class="btn btn-link p-0 border-0 bg-transparent">
+                                                        <span
+                                                            class="badge {{ $item->is_active ? 'bg-success' : 'bg-danger' }}">
+                                                            {{ $item->is_active ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
+                                                        </span>
+                                                    </button>
+                                                </form>
                                             </td>
                                             <td class="text-center" class="text-center text-nowrap">
-                                                <a href="{{ route($urlBase . 'show', $item) }}" class="btn btn-success btn-sm">
+                                                <a href="{{ route($urlBase . 'show', $item) }}"
+                                                    class="btn btn-success btn-sm">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                <a href="{{ route($urlBase . 'edit', $item) }}" class="btn btn-warning btn-sm">
+                                                <a href="{{ route($urlBase . 'edit', $item) }}"
+                                                    class="btn btn-warning btn-sm">
                                                     <i class="bi bi-pencil-square"></i>
                                                 </a>
                                                 <form action="{{ route($urlBase . 'destroy', $item) }}" method="post"
-                                                      style="display: inline-block;">
+                                                    style="display: inline-block;">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="btn btn-danger btn-sm"

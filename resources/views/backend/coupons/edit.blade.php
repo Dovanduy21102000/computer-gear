@@ -102,7 +102,7 @@
                                 <label for="expire_date" class="col-sm-2 col-form-label">Ngày hết hạn</label>
                                 <div class="col-sm-10">
                                     <input type="date" name="expire_date" class="form-control"
-                                        value="{{ old('expire_date', $coupon->expire_date) }}">
+                                        value="{{ old('expire_date', $coupon->expire_date ? date('Y-m-d', strtotime($coupon->expire_date)) : '') }}">
                                 </div>
                             </div>
 
