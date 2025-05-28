@@ -355,6 +355,10 @@ class CartController extends Controller
                     $cartItemModel->productVariant->quantity :
                     $cartItemModel->product->quantity;
 
+                if ($newQuantity < 1) {
+                    throw new \Exception('Số lượng sản phẩm phải lớn hơn 0.');
+                }
+
                 if ($newQuantity > $maxQuantity) {
                     throw new \Exception('Số lượng sản phẩm vượt quá tồn kho.');
                 }
