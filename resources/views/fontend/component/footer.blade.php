@@ -3,9 +3,10 @@
 
     <!-- Logo và hotline -->
     <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 50px;">
-      <a href="#" style="display: inline-block; background: #e9ecef; padding: 12px; border-radius: 10px; transition: background-color 0.3s;">
-        <img src="{{ asset('fontend/assets/img/100X100/img6.png') }}" alt="Logo Electro" height="80" style="display: block;">
-      </a>
+      <a class="order-1 order-xl-0 navbar-brand u-header__navbar-brand u-header__navbar-brand-center"
+                        href="{{ route('home.index') }}" aria-label="Computer Gear">
+                        <img src="{{ asset('fontend/assets/img/computergearlogo.png') }}" alt="computergear">
+                    </a>
       <div style="min-width: 220px;">
         <p style="margin: 0; font-size: 14px; color: #6c757d;">Có gì thắc mắc? Liên hệ 24/7!</p>
         <p style="margin: 5px 0 0; font-size: 18px; font-weight: 700; color: #007bff; line-height: 1.2;">
