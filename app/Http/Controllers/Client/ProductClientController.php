@@ -194,9 +194,8 @@ class ProductClientController extends Controller
                 $attributes = [];
                 foreach ($variant->attributeValues as $attrVal) {
                     if ($attrVal->attribute) {
-                        // Use the same key format as in the frontend (lowercase, underscores)
-                        $key = strtolower(str_replace(' ', '_', $attrVal->attribute->name));
-                        $attributes[$key] = $attrVal->value;
+                        $key = strtolower(str_replace([' ', '_'], '', trim($attrVal->attribute->name)));
+                        $attributes[$key] = trim($attrVal->value);
                     }
                 }
                 $result[] = [
