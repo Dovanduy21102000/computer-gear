@@ -40,19 +40,19 @@
                                     <tbody>
                                         @foreach ($contacts as $contact)
                                             <tr>
-                                                 <td class="text-center">{{ $loop->iteration }}</td>
+                                                <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td class="text-center">{{ $contact->name }}</td>
                                                 <td class="text-center">{{ $contact->email }}</td>
                                                 <td class="text-center">{{ $contact->phone ?? 'Không có' }}</td>
                                                 {{-- <td class="text-center">{{ Str::limit($contact->message, 50) }}</td> --}}
                                                 <td class="text-center">
-                                                    @if ($contact->status === 'pending')
-                                                        <span class="badge bg-warning">Chờ xử lý</span>
-                                                    @elseif ($contact->status === 'resolved')
-                                                        <span class="badge bg-success">Đã xử lý</span>
-                                                    @else
-                                                        <span class="badge bg-danger">Spam</span>
-                                                    @endif
+                                                    <span
+                                                        class="badge status-toggle-contact
+                                                            {{ $contact->status === 'pending' ? 'bg-warning' : ($contact->status === 'resolved' ? 'bg-success' : 'bg-danger') }}"
+                                                        data-id="{{ $contact->id }}"
+                                                        data-status="{{ $contact->status }}" style="cursor:pointer">
+                                                        {{ $contact->status === 'pending' ? 'Chờ xử lý' : ($contact->status === 'resolved' ? 'Đã xử lý' : 'Spam') }}
+                                                    </span>
                                                 </td>
                                                 <td class="text-center">
                                                     <a href="{{ route('contacts.show', $contact->id) }}">
@@ -61,13 +61,13 @@
                                                         </button>
                                                     </a>
                                                     <a href="{{ route('contacts.edit', $contact->id) }}"><button
-                                                        type="button" class="btn btn-warning"><i
-                                                            class="bi bi-wrench"></i></button></a>
-                                                    <form action="{{ route('contacts.destroy', $contact->id) }}" 
+                                                            type="button" class="btn btn-warning"><i
+                                                                class="bi bi-wrench"></i></button></a>
+                                                    <form action="{{ route('contacts.destroy', $contact->id) }}"
                                                         method="POST" style="display:inline;">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger" 
+                                                        <button type="submit" class="btn btn-danger"
                                                             onclick="return confirm('Xóa liên hệ này?')">
                                                             <i class="bi bi-trash-fill"></i>
                                                         </button>
@@ -87,3 +87,30 @@
         </div>
     </section>
 </main><!-- End #main -->
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.status-toggle-contact').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    const contactId = this.getAttribute('data-id');
+                    fetch(`/admin/contacts/${contactId}/toggle-status`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert('Không thể thay đổi trạng thái!');
+                            }
+                        });
+                });
+            });
+        });
+    </script>
+@endpush

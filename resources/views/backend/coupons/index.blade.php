@@ -52,7 +52,7 @@
                                     <tbody>
                                         @foreach ($coupons as $coupon)
                                             <tr>
-                                                 <td class="text-center">{{ $loop->iteration }}</td>
+                                                <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td>{{ $coupon->name }}</td>
                                                 <td>{{ $coupon->code }}</td>
                                                 <td>{{ $coupon->type == 'percent' ? 'Phần trăm' : 'Cố định' }}</td>

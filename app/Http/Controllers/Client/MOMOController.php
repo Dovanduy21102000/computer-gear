@@ -56,11 +56,29 @@ class MOMOController extends Controller
             // Check for buy now item first
             $buyNowItem = session('buy_now_item');
             if ($buyNowItem) {
+                // Create temporary cart item for buy now
+                $cartItem = new \stdClass();
+                $cartItem->product = $buyNowItem->product; // Assign product first
+                $cartItem->id = $cartItem->product->id; // Set the id to the actual product ID
+                $cartItem->productVariant = $buyNowItem->productVariant;
+                $cartItem->quantity = $buyNowItem->quantity;
+                $cartItem->price = $buyNowItem->price;
+
                 // Store buy now item in session for later use
                 session(['momo_buy_now_item' => $buyNowItem]);
 
+                // Store buy now item data in extra_data for payment resumption
+                $buyNowExtraData = [
+                    'buy_now_item' => [
+                        'product_id' => $buyNowItem->product->id,
+                        'variant_id' => $buyNowItem->productVariant ? $buyNowItem->productVariant->id : null,
+                        'quantity' => $buyNowItem->quantity,
+                        'price' => $buyNowItem->price,
+                    ]
+                ];
+
                 // Calculate total price for buy now item
-                $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
+                $totalPrice = $cartItem->price * $cartItem->quantity;
 
                 // Apply coupon if exists
                 $coupon = session('coupon');
@@ -97,7 +115,8 @@ class MOMOController extends Controller
                         'selected_items' => null,
                         'shipping_info' => session('momo_shipping_info'),
                         'coupon_info' => $coupon,
-                        'expires_at' => now()->addMinutes(15)
+                        'expires_at' => now()->addMinutes(15),
+                        'extra_data' => json_encode($buyNowExtraData)
                     ]);
                 } else {
                     // Create new payment attempt
@@ -110,7 +129,8 @@ class MOMOController extends Controller
                         'selected_items' => null,
                         'shipping_info' => session('momo_shipping_info'),
                         'coupon_info' => $coupon,
-                        'expires_at' => now()->addMinutes(15)
+                        'expires_at' => now()->addMinutes(15),
+                        'extra_data' => json_encode($buyNowExtraData)
                     ]);
                 }
 
@@ -409,151 +429,62 @@ class MOMOController extends Controller
                 throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
             }
             $coupon = $paymentAttempt->coupon_info;
-            $selectedItemIds = $paymentAttempt->selected_items ?? [];
+            $selectedItemIds = $paymentAttempt->selected_items;
+            // Normalize selectedItemIds to array
+            if (is_string($selectedItemIds)) {
+                $selectedItemIds = json_decode($selectedItemIds, true);
+            }
             $shippingInfo = $paymentAttempt->shipping_info ?? [];
 
-            // Check for buy now item first
-            $buyNowItem = session('buy_now_item');
-            if ($buyNowItem) {
-                // Calculate total price for buy now item
-                $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
-
-                // Apply coupon if exists
-                $couponDiscount = 0;
-                $couponId = null;
-
-                if ($coupon && is_array($coupon)) {
-                    if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
-                        if (isset($coupon['type']) && $coupon['type'] === 'percent') {
-                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
-                            $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
-                                ? min($percentageDiscount, $coupon['maximum_amount'])
-                                : $percentageDiscount;
-                        } else {
-                            $couponDiscount = min($coupon['price'], $totalPrice);
+            $cartItems = [];
+            if ($selectedItemIds && is_array($selectedItemIds) && count($selectedItemIds) > 0) {
+                // CART LOGIC
+                $cart = Cart::where('user_id', $userId)->first();
+                $cartItems = CartItem::with(['product', 'productVariant'])
+                    ->where('cart_id', $cart->id)
+                    ->whereIn('id', $selectedItemIds)
+                    ->get();
+            } else {
+                // BUY NOW LOGIC
+                $buyNowItem = null;
+                
+                // First try to get from extra_data
+                if (!empty($paymentAttempt->extra_data)) {
+                    $extra = json_decode($paymentAttempt->extra_data, true);
+                    if (!empty($extra['buy_now_item'])) {
+                        $product = Product::find($extra['buy_now_item']['product_id']);
+                        if ($product) {
+                            $variant = $extra['buy_now_item']['variant_id'] ? ProductVariant::find($extra['buy_now_item']['variant_id']) : null;
+                            $buyNowItem = (object)[
+                                'product' => $product,
+                                'productVariant' => $variant,
+                                'quantity' => $extra['buy_now_item']['quantity'],
+                                'price' => $extra['buy_now_item']['price'],
+                            ];
                         }
-                        $couponId = $coupon['id'];
                     }
                 }
-
-                $finalPrice = max(0, $totalPrice - $couponDiscount);
-
-                // Verify the amount matches
-                if ($request->amount != $finalPrice) {
-                    Log::error('MOMO Amount Mismatch:', [
-                        'expected' => $finalPrice,
-                        'received' => $request->amount
-                    ]);
-                    throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
+                
+                // If not found in extra_data, try session
+                if (!$buyNowItem) {
+                    $buyNowItem = session('momo_buy_now_item');
                 }
-
-                $shippingInfo = session('momo_shipping_info');
-                if (
-                    empty($shippingInfo['shipping_user_name']) ||
-                    empty($shippingInfo['shipping_phone']) ||
-                    empty($shippingInfo['shipping_address'])
-                ) {
-                    Log::error('Missing shipping info in session for MoMo order creation', [
-                        'orderId' => $request->orderId,
-                        'userId' => $userId,
-                        'shippingInfo' => $shippingInfo
-                    ]);
-                    return redirect()->route('cart.index')->with('error', 'Thông tin giao hàng không hợp lệ. Vui lòng thử lại.');
+                
+                if ($buyNowItem) {
+                    $cartItems[] = $buyNowItem;
                 }
-
-                // Create Order
-                $order = Order::create([
-                    'code' => preg_replace('/_\d+$/', '', $request->orderId),
-                    'user_id' => $userId,
-                    'shipping_user_name' => session('momo_shipping_info.shipping_user_name'),
-                    'shipping_email' => session('momo_shipping_info.shipping_email'),
-                    'shipping_phone' => session('momo_shipping_info.shipping_phone'),
-                    'shipping_address' => session('momo_shipping_info.shipping_address'),
-                    'province_id' => session('momo_shipping_info.province_id'),
-                    'district_id' => session('momo_shipping_info.district_id'),
-                    'coupon_code' => $coupon['code'] ?? null,
-                    'coupon_discount' => $couponDiscount,
-                    'total_price' => $totalPrice,
-                    'final_price' => $finalPrice,
-                    'payment_status' => 1,
-                    'status' => 'pending',
-                    'payment_method' => 'momo',
-                    'notes' => session('momo_shipping_info.notes'),
-                ]);
-
-                // Mark payment attempt as completed
-                \App\Models\PaymentAttempt::where('order_code', $order->code)
-                    ->update(['status' => 'completed']);
-
-                // Record coupon usage
-                if ($couponId) {
-                    $couponUser = \App\Models\CouponUser::where('user_id', $userId)
-                        ->where('coupon_id', $couponId)
-                        ->first();
-                    if ($couponUser) {
-                        $couponUser->used = 1;
-                        $couponUser->save();
-                    } else {
-                        \App\Models\CouponUser::create([
-                        'user_id' => $userId,
-                        'coupon_id' => $couponId,
-                            'used' => 1
-                    ]);
-                    }
-                }
-
-                // Create order item for buy now item
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $buyNowItem->product->id,
-                    'product_variant_id' => $buyNowItem->productVariant ? $buyNowItem->productVariant->id : null,
-                    'price' => $buyNowItem->price,
-                    'quantity' => $buyNowItem->quantity,
-                    'product_info' => json_encode([
-                        'product' => $buyNowItem->product->toArray(),
-                        'variant' => $buyNowItem->productVariant ? $buyNowItem->productVariant->toArray() : null
-                    ]),
-                ]);
-
-                // Update stock
-                if ($buyNowItem->productVariant) {
-                    $buyNowItem->productVariant->decrement('quantity', $buyNowItem->quantity);
-                } else {
-                    $buyNowItem->product->decrement('quantity', $buyNowItem->quantity);
-                }
-
-                // Clear sessions
-                session()->forget('coupon');
-                session()->forget('momo_shipping_info');
-                session()->forget('buy_now_item');
-
-                DB::commit();
-
-                return redirect()->route('checkout.success', ['order_id' => $order->id])
-                    ->with('success', 'Đặt hàng thành công!');
             }
 
-            // Handle cart items payment
-            $cart = Cart::where('user_id', $userId)->first();
-            if (!$cart) {
-                return redirect()->route('cart.index')->with('error', 'Giỏ hàng không tồn tại.');
-            }
+            // Log the cart items for debugging
+            Log::info('Cart items after processing:', [
+                'cart_items_count' => count($cartItems),
+                'is_buy_now' => empty($selectedItemIds),
+                'has_extra_data' => !empty($paymentAttempt->extra_data),
+                'extra_data' => $paymentAttempt->extra_data
+            ]);
 
-            if (empty($selectedItemIds)) {
-                $selectedItemIds = session('momo_selected_items', []);
-            }
-
-            if (empty($selectedItemIds)) {
-                return redirect()->route('cart.index')->with('error', 'Vui lòng chọn sản phẩm để thanh toán.');
-            }
-
-            $cartItems = CartItem::with(['product', 'productVariant'])
-                ->where('cart_id', $cart->id)
-                ->whereIn('id', $selectedItemIds)
-                ->get();
-
-            if ($cartItems->isEmpty()) {
-                return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống.');
+            if (empty($cartItems)) {
+                throw new \Exception('Không tìm thấy sản phẩm để thanh toán.');
             }
 
             // Validate stock availability
@@ -654,22 +585,24 @@ class MOMOController extends Controller
                     $couponUser->save();
                 } else {
                     \App\Models\CouponUser::create([
-                    'user_id' => $userId,
-                    'coupon_id' => $couponId,
+                        'user_id' => $userId,
+                        'coupon_id' => $couponId,
                         'used' => 1
-                ]);
+                    ]);
                 }
+
+                // Increment the coupon's used_count
+                \App\Models\Coupon::where('id', $couponId)->increment('used_count');
             }
 
-            // Save Order Items and Update Stock
+            // Create order items and update stock
             foreach ($cartItems as $item) {
                 // Create order item
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $item->product_id,
-                    'product_variant_id' => $item->product_variant_id,
-                    'price' => $item->productVariant ?
-                        ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price),
+                    'product_id' => $item->product->id,
+                    'product_variant_id' => $item->productVariant ? $item->productVariant->id : null,
+                    'price' => $item->price,
                     'quantity' => $item->quantity,
                     'product_info' => json_encode([
                         'product' => $item->product->toArray(),
@@ -690,13 +623,9 @@ class MOMOController extends Controller
             session()->forget('momo_selected_items');
             session()->forget('momo_shipping_info');
             session()->forget('buy_now_item');
+            session()->forget('momo_buy_now_item');
 
             DB::commit();
-
-            // Delete cart items AFTER successful transaction
-            foreach ($cartItems as $item) {
-                $item->delete();
-            }
 
             return redirect()->route('checkout.success', ['order_id' => $order->id])
                 ->with('success', 'Đặt hàng thành công!');

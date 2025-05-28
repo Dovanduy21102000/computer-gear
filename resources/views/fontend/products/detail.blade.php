@@ -73,6 +73,12 @@
 <!-- CSS CMT -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 <style>
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+
     .rating input {
         display: none;
     }
@@ -83,15 +89,10 @@
         cursor: pointer;
     }
 
-    .rating input:checked~label {
-        color: #3b87de;
-        /* Yellow color for selected stars */
-    }
-
+    .rating input:checked~label,
     .rating label:hover,
     .rating label:hover~label {
         color: #3b87de;
-        /* Highlight on hover */
     }
 
     /* Ensure stars are in left-to-right order */
@@ -557,11 +558,11 @@
                                                         bạn</label>
                                                 </div>
                                                 <div class="col-md-8 col-lg-9">
-                                                    <div class="rating">
+                                                    <div class="rating d-flex flex-row-reverse">
                                                         @for ($i = 5; $i >= 1; $i--)
                                                             <input type="radio" id="star{{ $i }}"
                                                                 name="rating" value="{{ $i }}"
-                                                                {{ $comment->rating == $i ? 'checked' : '' }}>
+                                                                {{ isset($comment) && $comment->rating == $i ? 'checked' : '' }}>
                                                             <label for="star{{ $i }}"
                                                                 class="fa fa-star"></label>
                                                         @endfor
@@ -614,10 +615,11 @@
                                                         bạn</label>
                                                 </div>
                                                 <div class="col-md-8 col-lg-9">
-                                                    <div class="rating">
+                                                    <div class="rating d-flex flex-row-reverse">
                                                         @for ($i = 5; $i >= 1; $i--)
                                                             <input type="radio" id="star{{ $i }}"
-                                                                name="rating" value="{{ $i }}">
+                                                                name="rating" value="{{ $i }}"
+                                                                {{ isset($comment) && $comment->rating == $i ? 'checked' : '' }}>
                                                             <label for="star{{ $i }}"
                                                                 class="fa fa-star"></label>
                                                         @endfor
@@ -1498,7 +1500,6 @@
     });
 </script>
 
-<!-- Set the storage base URL for JS -->
 <script>
     window.storageBaseUrl = "{{ asset('storage/') }}/";
 </script>
