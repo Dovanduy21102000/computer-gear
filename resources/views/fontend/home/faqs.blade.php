@@ -120,6 +120,12 @@
                         <p class="mb-0">- Đầy đủ hộp, phụ kiện, tem nhãn và phiếu bảo hành.</p>
                         <p class="mb-0">- Gửi yêu cầu trong vòng 3-7 ngày kể từ ngày nhận hàng.</p>
                     </div>
+                    <div class="card-body pl-0 pb-8">
+                        <h6 class="mb-0">2. Không áp dụng đổi trả với:</h6>
+                        <p class="mb-0">- Sản phẩm đã qua sử dụng hoặc có dấu hiệu hư hại do người dùng.</p>
+                        <p class="mb-0">- Các phần mềm dã kích hoạt bản quyền hoặc đăng nhập tài khoản.</p>
+                        <p class="mb-0">- Không có đầy đủ video và hình ảnh khi mở hàng ra.</p>
+                    </div>
                 </div>
             </div>
             <!-- End Card -->
