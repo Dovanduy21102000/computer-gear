@@ -36,51 +36,50 @@ class CategoryPostController extends BaseCRUDController
         $title      = $this->titleIndex;
         $columns    = $this->columns;
         $urlBase    = $this->urlBase;
+        $category_post = CategoryPost::orderBy('name')->get(['id', 'name', 'parent_id']);
         $template = 'backend.category_post.index';
-        return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'urlBase'));
+        return view('backend.dashboard.layout', compact('template', 'data', 'title', 'columns', 'urlBase', 'category_post'));
     }
 
     public function validateStore(Request $request)
-{
-    if (!$request->slug) {
+    {
+        if (!$request->slug) {
             $request->merge(['slug' => SlugHelper::createSlug($request->name)]);
+        }
+
+        // Kiểm tra parent_id có tồn tại trong bảng 'category_post' không
+        return $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|unique:category_post,slug', // sửa bảng đúng
+            'parent_id' => 'nullable|exists:category_post,id', // sửa bảng đúng
+            'is_active' => 'nullable|boolean',
+        ], [
+            'name.required' => 'Tên danh mục là bắt buộc.',
+            'slug.unique' => 'Slug đã tồn tại, vui lòng chọn slug khác.',
+            'parent_id.exists' => 'Danh mục cha không hợp lệ.', // sửa lại thông báo nếu cần
+        ]);
     }
 
-    // Kiểm tra parent_id có tồn tại trong bảng 'category_post' không
-    return $request->validate([
-        'name' => 'required|string|max:255',
-        'slug' => 'nullable|string|unique:category_post,slug', // sửa bảng đúng
-        'parent_id' => 'nullable|exists:category_post,id', // sửa bảng đúng
-        'is_active' => 'nullable|boolean',
-    ], [
-        'name.required' => 'Tên danh mục là bắt buộc.',
-        'slug.unique' => 'Slug đã tồn tại, vui lòng chọn slug khác.',
-        'parent_id.exists' => 'Danh mục cha không hợp lệ.', // sửa lại thông báo nếu cần
-    ]);
-}
+    public function create()
+    {
+        $category_post = CategoryPost::orderBy('name')->get(['id', 'name', 'parent_id']);
+        $title      = $this->titleCreate;
+        $urlBase    = $this->urlBase;
 
-public function create()
-{
-    // Lấy danh mục cha
-    $category_post = CategoryPost::whereNull('parent_id')->get(); // Lấy danh mục không có parent
-    $title      = $this->titleCreate;
-    $urlBase    = $this->urlBase;
+        $template = 'backend.category_post.add';
+        return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'category_post'));
+    }
 
-    $template = 'backend.category_post.add';
-    return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'category_post'));
-}
+    public function edit($id)
+    {
+        $category_post = CategoryPost::orderBy('name')->get(['id', 'name', 'parent_id']);
+        $category      = $this->model::findOrFail($id);
+        $title         = $this->titleEdit;
+        $urlBase       = $this->urlBase;
 
-public function edit($id)
-{
-    // Lấy danh mục cha
-    $category_post = CategoryPost::whereNull('parent_id')->get();
-    $category      = $this->model::findOrFail($id);
-    $title         = $this->titleEdit;
-    $urlBase       = $this->urlBase;
-
-    $template = 'backend.category_post.edit';
-    return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'category_post', 'category'));
-}
+        $template = 'backend.category_post.edit';
+        return view('backend.dashboard.layout', compact('template', 'title', 'urlBase', 'category_post', 'category'));
+    }
 
     public function show($id)
     {
@@ -90,5 +89,13 @@ public function edit($id)
 
         $template = 'backend.category_post.show';
         return view('backend.dashboard.layout', compact('template', 'urlBase', 'category_post', 'category'));
+    }
+
+    public function toggleStatus($id)
+    {
+        $cat = $this->model::findOrFail($id);
+        $cat->is_active = $cat->is_active ? 0 : 1;
+        $cat->save();
+        return response()->json(['is_active' => $cat->is_active]);
     }
 }
