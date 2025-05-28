@@ -46,7 +46,6 @@ class UserOrderController extends Controller
             $ordersByStatus[$key] = $orders->where('status', $key);
         }
     }
-//     // Kiểm tra toàn bộ biến truyền vào
 // dd($orderTabs, $ordersByStatus);
     $template = 'fontend.oders.index';
     return view('fontend.layout', compact('orders', 'orderTabs', 'ordersByStatus', 'template', 'search'));

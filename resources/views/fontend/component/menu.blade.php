@@ -1,4 +1,4 @@
-<<<<<<< HEAD <!-- Logo and Menu -->
+<!-- Logo and Menu -->
     <div class="py-2 py-xl-4 bg-primary-down-lg">
         <div class="container my-0dot5 my-xl-0">
             <div class="row align-items-center">
@@ -12,31 +12,6 @@
                             href="{{ route('home.index') }}" aria-label="Computer Gear">
                             <img src="{{ asset('fontend/assets/img/computergearlogo.png') }}" alt="computergear">
                         </a>
-                        <!-- End Logo -->
-                        =======
-                        <!-- Logo and Menu -->
-                        <div class="py-2 py-xl-4 bg-primary-down-lg">
-                            <div class="container my-0dot5 my-xl-0">
-                                <div class="row align-items-center">
-                                    <!-- Logo-offcanvas-menu -->
-                                    <div class="col-auto">
-                                        <!-- Nav -->
-                                        <nav
-                                            class="navbar navbar-expand u-header__navbar py-0 justify-content-xl-between max-width-270 min-width-270">
-                                            <!-- Logo -->
-                                            <a class="order-1 order-xl-0 navbar-brand u-header__navbar-brand u-header__navbar-brand-center"
-                                                href="{{ route('home.index') }}" aria-label="Computer Gear">
-                                                <svg version="1.1" width="350px" height="60px" viewBox="0 0 350 60"
-                                                    xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 0;">
-
-                                                    <text x="10" y="40" font-size="38" fill="#333E48" font-weight="bold"
-                                                        font-family="Arial, sans-serif">COMPUTER GEAR</text>
-                                                </svg>
-                                            </a>
-                                            <!-- End Logo -->
-                                            >>>>>>> 39d3bf9a916ce769edaa0b4ed6e7ffc15644285b
-
-
                                             <!-- Fullscreen Toggle Button -->
                                             <button id="sidebarHeaderInvokerMenu" type="button"
                                                 class="navbar-toggler d-block btn u-hamburger mr-3 mr-xl-0"
