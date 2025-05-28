@@ -60,7 +60,33 @@
             </div>
         </div>
         <hr>
-        
+        <div class="mb-12 text-center">
+            <h1>Các Câu Hỏi Khác</h1>
+        </div>
+        <!-- Basics Accordion -->
+        <div id="basicsAccordion" class="mb-12">
+            <!-- Card -->
+            <div class="card mb-3 border-top-0 border-left-0 border-right-0 border-color-1 rounded-0">
+                <div class="card-header card-collapse bg-transparent-on-hover border-0" id="basicsHeadingOne">
+                    <h5 class="mb-0">
+                        <button type="button"
+                            class="px-0 btn btn-link btn-block d-flex justify-content-between card-btn py-3 font-size-25 border-0"
+                            data-toggle="collapse" data-target="#basicsCollapseOne" aria-expanded="true"
+                            aria-controls="basicsCollapseOne">
+                            Chính sách bảo hành sản phẩm như thế nào?
+
+                            <span class="card-btn-arrow">
+                                <i class="fas fa-chevron-down text-gray-90 font-size-18"></i>
+                            </span>
+                        </button>
+                    </h5>
+                </div>
+                
+            </div>
+            <!-- End Card -->
+
+            
+        </div>
         <!-- End Basics Accordion -->
     </div>
 </main>
