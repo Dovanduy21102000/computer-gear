@@ -1498,7 +1498,6 @@
     });
 </script>
 
-<!-- Set the storage base URL for JS -->
 <script>
     window.storageBaseUrl = "{{ asset('storage/') }}/";
 </script>

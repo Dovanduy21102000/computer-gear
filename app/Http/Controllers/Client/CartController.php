@@ -550,11 +550,73 @@ class CartController extends Controller
 
     public function applyCoupon(Request $request)
     {
+        Log::info('Buy now item in session (AJAX):', ['buy_now_item' => session('buy_now_item')]);
         $request->validate([
             'code' => 'required|string',
         ]);
 
         $userId = Auth::id();
+
+        // Handle Buy Now mode
+        $buyNowItem = session('buy_now_item');
+        if ($buyNowItem) {
+            // Determine which coupon to use (public or private)
+            $publicCoupon = DB::table('coupons')
+                ->where('code', $request->code)
+                ->where('is_public', true)
+                ->where('status', 1)
+                ->first();
+            $privateCoupon = DB::table('coupon_user')
+                ->join('coupons', 'coupon_user.coupon_id', '=', 'coupons.id')
+                ->where('coupon_user.user_id', $userId)
+                ->where('coupons.code', $request->code)
+                ->where('coupon_user.used', false)
+                ->where('coupons.status', 1)
+                ->select('coupons.*', 'coupon_user.coupon_id')
+                ->first();
+
+            $coupon = $publicCoupon ?: $privateCoupon;
+            if (!$coupon) {
+                return response()->json(['success' => false, 'message' => 'Bạn không có mã giảm giá này hoặc đã sử dụng rồi!']);
+            }
+
+            // Store coupon in session
+            session(['coupon' => [
+                'id' => $coupon->id,
+                'code' => $coupon->code,
+                'type' => $coupon->type,
+                'price' => $coupon->price,
+                'min_order_total' => $coupon->min_order_total,
+                'maximum_amount' => $coupon->maximum_amount,
+                'is_public' => isset($coupon->is_public) ? $coupon->is_public : false,
+            ]]);
+
+            $subtotal = $buyNowItem->price * $buyNowItem->quantity;
+            $discount = 0;
+            if ($coupon->type === 'percent') {
+                $discount = min(
+                    $subtotal * ($coupon->price / 100),
+                    $coupon->maximum_amount ?? $subtotal
+                );
+            } else {
+                $discount = min($coupon->price, $subtotal);
+            }
+            $total = max(0, $subtotal - $discount);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Áp dụng mã giảm giá thành công!',
+                'coupon' => [
+                    'code' => $coupon->code,
+                    'type' => $coupon->type,
+                    'price' => $coupon->price,
+                    'maximum_amount' => $coupon->maximum_amount ?? null
+                ],
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'total' => $total
+            ]);
+        }
 
         // Check public coupon
         $publicCoupon = DB::table('coupons')
