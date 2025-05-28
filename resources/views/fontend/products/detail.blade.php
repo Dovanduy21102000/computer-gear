@@ -184,7 +184,7 @@
                                         <!-- Hiển thị sao dựa trên đánh giá trung bình -->
                                         @for ($i = 1; $i <= 5; $i++)
                                             <small
-                                                class="fas fa-star {{ $i <= $averageRating ? '' : 'text-muted' }}"></small>
+                                                class="fas fa-star {{ $i <= $product->average_rating ? '' : 'text-muted' }}"></small>
                                         @endfor
                                     </div>
                                     <span class="text-secondary font-size-13">({{ $totalReviews }} đánh giá từ khách

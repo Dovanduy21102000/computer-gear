@@ -1,5 +1,5 @@
 @php
-$hideOnPages = ['profile', 'account', 'cart', 'orders'];
+    $hideOnPages = ['profile', 'account', 'cart', 'orders'];
 @endphp
 @if (!in_array(request()->path(), $hideOnPages))
     <div class="container d-none d-lg-block mb-3">
@@ -58,14 +58,16 @@ $hideOnPages = ['profile', 'account', 'cart', 'orders'];
                     @foreach ($activeProducts as $product)
                         <li class="product-item product-item__list row no-gutters mb-6 remove-divider">
                             <div class="col-auto">
-                                <a href="{{ route('client.products.detail', $product->slug) }}" class="d-block width-75 text-center">
+                                <a href="{{ route('client.products.detail', $product->slug) }}"
+                                    class="d-block width-75 text-center">
                                     <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
                                         alt="{{ $product->name }}">
                                 </a>
                             </div>
                             <div class="col pl-4 d-flex flex-column">
                                 <h5 class="product-item__title mb-0">
-                                    <a href="{{ route('client.products.detail', $product->slug) }}" class="text-blue font-weight-bold">
+                                    <a href="{{ route('client.products.detail', $product->slug) }}"
+                                        class="text-blue font-weight-bold">
                                         {{ $product->name }}
                                     </a>
                                 </h5>
@@ -75,7 +77,8 @@ $hideOnPages = ['profile', 'account', 'cart', 'orders'];
                                             <span class="font-size-15 text-danger font-weight-bold">
                                                 {{ number_format($product->price_sale, 0, ',', '.') }}₫
                                             </span>
-                                            <span class="font-size-13 text-muted ml-2" style="text-decoration: line-through;">
+                                            <span class="font-size-13 text-muted ml-2"
+                                                style="text-decoration: line-through;">
                                                 {{ number_format($product->price, 0, ',', '.') }}₫
                                             </span>
                                         </div>
@@ -101,22 +104,24 @@ $hideOnPages = ['profile', 'account', 'cart', 'orders'];
                     @foreach ($topRatedProducts as $product)
                         <li class="product-item product-item__list row no-gutters mb-6 remove-divider">
                             <div class="col-auto">
-                                <a href="{{ route('client.products.detail', $product->slug) }}" class="d-block width-75 text-center">
+                                <a href="{{ route('client.products.detail', $product->slug) }}"
+                                    class="d-block width-75 text-center">
                                     <img class="img-fluid" src="{{ asset('storage/' . $product->thumbnail) }}"
                                         alt="{{ $product->name }}">
                                 </a>
                             </div>
                             <div class="col pl-4 d-flex flex-column">
                                 <h5 class="product-item__title mb-0">
-                                    <a href="{{ route('client.products.detail', $product->slug) }}" class="text-blue font-weight-bold">
+                                    <a href="{{ route('client.products.detail', $product->slug) }}"
+                                        class="text-blue font-weight-bold">
                                         {{ $product->name }}
                                     </a>
                                 </h5>
                                 <div class="text-warning mb-2">
-                                    @for ($i = 0; $i < floor($product->comments_avg_rating); $i++)
+                                    @for ($i = 0; $i < floor($product->average_rating); $i++)
                                         <small class="fas fa-star"></small> <!-- Full star -->
                                     @endfor
-                                    @for ($i = 0; $i < 5 - floor($product->comments_avg_rating); $i++)
+                                    @for ($i = 0; $i < 5 - floor($product->average_rating); $i++)
                                         <small class="far fa-star text-muted"></small> <!-- Empty star -->
                                     @endfor
                                 </div>
@@ -126,7 +131,8 @@ $hideOnPages = ['profile', 'account', 'cart', 'orders'];
                                             <span class="font-size-15 text-danger font-weight-bold">
                                                 {{ number_format($product->price_sale, 0, ',', '.') }}₫
                                             </span>
-                                            <span class="font-size-13 text-muted ml-2" style="text-decoration: line-through;">
+                                            <span class="font-size-13 text-muted ml-2"
+                                                style="text-decoration: line-through;">
                                                 {{ number_format($product->price, 0, ',', '.') }}₫
                                             </span>
                                         </div>

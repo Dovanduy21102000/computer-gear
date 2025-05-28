@@ -87,7 +87,7 @@
                                 <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
                                     @for ($i = 1; $i <= 5; $i++)
                                         <small
-                                            class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                            class="{{ $i <= $product->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $product->average_rating ? 'text-muted' : '' }}"></small>
                                     @endfor
                                 </div>
                                 <div class="flex-center-between mb-1 mt-4">
@@ -219,7 +219,7 @@
                                 <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
                                     @for ($i = 1; $i <= 5; $i++)
                                         <small
-                                            class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                            class="{{ $i <= $product->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $product->average_rating ? 'text-muted' : '' }}"></small>
                                     @endfor
                                 </div>
                                 <div class="prodcut-price mb-2">

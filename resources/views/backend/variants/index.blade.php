@@ -8,7 +8,9 @@
             </ol>
         </nav>
     </div><!-- End Page Title -->
-
+    <a class="btn btn-secondary" href="{{ route('products.index') }}">
+        <i class="fas fa-arrow-left"></i> Quay lại danh sách sản phẩm
+    </a>
     <section class="section">
         <div class="row">
             <div class="col-lg-12">
@@ -16,10 +18,12 @@
                     <div class="card-body">
                         <h5 class="card-title text-dark">Quản lý sản phẩm biến thể của {{ $product->name }}</h5>
                         <div class="d-flex justify-content-between mb-3">
-                            <a class="btn btn-success"
-                                href="{{ route('variants.create', ['product' => $product->id]) }}">
-                                Thêm mới
-                            </a>
+                            <div>
+                                <a class="btn btn-success me-2"
+                                    href="{{ route('variants.create', ['product' => $product->id]) }}">
+                                    Thêm mới
+                                </a>
+                            </div>
                             <input class="form-control w-25" placeholder="Tìm kiếm..." type="search" name="search">
                         </div>
                         <div style="overflow-x: auto;">

@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use App\Helpers\SlugHelper;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class BrandController extends BaseCRUDController
 {
@@ -112,5 +114,65 @@ class BrandController extends BaseCRUDController
             'logo.mimes' => 'Định dạng logo không hợp lệ (chỉ chấp nhận jpeg, png, jpg, gif, svg).',
             'logo.max' => 'Kích thước logo không được vượt quá 2MB.',
         ]);
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $brand = $this->model::findOrFail($id);
+
+            // Check if brand has associated products
+            if ($brand->products()->exists()) {
+                return redirect()->back()->with([
+                    'alert' => [
+                        'type' => 'warning',
+                        'content' => 'Không thể xóa thương hiệu này vì có sản phẩm đang sử dụng. Vui lòng xóa hoặc chuyển các sản phẩm sang thương hiệu khác trước khi xóa thương hiệu này.'
+                    ]
+                ]);
+            }
+
+            // Delete the brand's logo if it exists
+            if ($brand->logo && Storage::disk('public')->exists($brand->logo)) {
+                Storage::disk('public')->delete($brand->logo);
+            }
+
+            // Delete the brand
+            $brand->delete();
+
+            return redirect()->route($this->urlBase . 'index')->with([
+                'alert' => [
+                    'content' => 'Xóa thương hiệu thành công.'
+                ]
+            ]);
+        } catch (\Throwable $th) {
+            return redirect()->back()->with([
+                'alert' => [
+                    'type' => 'error',
+                    'content' => 'Có lỗi xảy ra khi xóa thương hiệu: ' . $th->getMessage()
+                ]
+            ]);
+        }
+    }
+
+    public function toggleStatus($id)
+    {
+        try {
+            $brand = $this->model::findOrFail($id);
+            $brand->is_active = !$brand->is_active;
+            $brand->save();
+
+            return redirect()->back()->with([
+                'alert' => [
+                    'content' => 'Cập nhật trạng thái thành công.'
+                ]
+            ]);
+        } catch (\Throwable $th) {
+            return redirect()->back()->with([
+                'alert' => [
+                    'type' => 'error',
+                    'content' => 'Có lỗi xảy ra khi cập nhật trạng thái: ' . $th->getMessage()
+                ]
+            ]);
+        }
     }
 }
