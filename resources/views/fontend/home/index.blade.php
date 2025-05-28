@@ -99,7 +99,7 @@
                                                                     style="width: 80px;">
                                                                     @for ($i = 1; $i <= 5; $i++)
                                                                         <small
-                                                                            class="{{ $i <= $newProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $newProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                            class="{{ $i <= $newProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $newProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                     @endfor
                                                                 </div>
                                                                 <div class="flex-center-between product-price">
@@ -411,7 +411,7 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topViewedProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topViewedProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="mb-2"><a
@@ -674,7 +674,7 @@
                                                             style="width: 80px;">
                                                             @for ($i = 1; $i <= 5; $i++)
                                                                 <small
-                                                                    class="{{ $i <= $topViewedProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                    class="{{ $i <= $topViewedProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                             @endfor
                                                         </div>
                                                         <div class="flex-center-between mb-1">
@@ -800,7 +800,7 @@
                                                             style="width: 80px;">
                                                             @for ($i = 1; $i <= 5; $i++)
                                                                 <small
-                                                                    class="{{ $i <= $discountedProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $discountedProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                    class="{{ $i <= $discountedProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $discountedProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                             @endfor
                                                         </div>
                                                         <div class="flex-center-between mb-1 product-price">
@@ -963,7 +963,7 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topSellingProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="flex-center-between mb-3 product-price">
@@ -1091,7 +1091,7 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topSellingProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="flex-center-between mb-3 product-price">
@@ -1223,7 +1223,7 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topSellingProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="flex-center-between mb-3 product-price">
@@ -1380,7 +1380,7 @@
                                                             style="width: 80px;">
                                                             @for ($i = 1; $i <= 5; $i++)
                                                                 <small
-                                                                    class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                                                    class="{{ $i <= $product->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $product->average_rating ? 'text-muted' : '' }}"></small>
                                                             @endfor
                                                         </div>
                                                         <div class="flex-center-between mb-1">
@@ -1548,7 +1548,7 @@
                                                     style="width: 80px;">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <small
-                                                            class="{{ $i <= $keyboardMouseProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $keyboardMouseProduct->rating ? 'text-muted' : '' }}"></small>
+                                                            class="{{ $i <= $keyboardMouseProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $keyboardMouseProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                     @endfor
                                                 </div>
                                                 <div class="flex-center-between mb-1 product-price">
@@ -1672,7 +1672,7 @@
                                                     style="width: 80px;">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <small
-                                                            class="{{ $i <= $screenProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $screenProduct->rating ? 'text-muted' : '' }}"></small>
+                                                            class="{{ $i <= $screenProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $screenProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                     @endfor
                                                 </div>
                                                 <div class="flex-center-between mb-1 product-price">
