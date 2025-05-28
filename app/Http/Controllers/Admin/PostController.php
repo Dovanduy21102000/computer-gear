@@ -95,7 +95,7 @@ class PostController extends BaseCRUDController
         }
 
         return $request->validate([
-            'category_post_id' => 'nullable|exists:category_post,id',
+            'category_id' => 'nullable|exists:category_post,id',
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|unique:posts,slug',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
@@ -107,7 +107,7 @@ class PostController extends BaseCRUDController
         ], [
             'title.required' => 'Tiêu đề là bắt buộc.',
             'slug.unique' => 'Slug đã tồn tại, vui lòng chọn slug khác.',
-            'category_post_id.exists' => 'Danh mục không hợp lệ.',
+            'category_id.exists' => 'Danh mục không hợp lệ.',
             'image.image' => 'Ảnh phải là định dạng hợp lệ (jpeg, png, jpg, gif).',
             'image.max' => 'Ảnh không được vượt quá 5MB.',
             'content.required' => 'Nội dung bài viết là bắt buộc.',
