@@ -17,7 +17,53 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">{{ $title }}</h5>
-                        <a href="{{ route($urlBase . 'create') }}" class="btn btn-primary">Thêm mới</a>
+                        @php
+                            if (!function_exists('renderCategoryOptions')) {
+                                function renderCategoryOptions(
+                                    $categories,
+                                    $parentId = null,
+                                    $parentName = null,
+                                    $selectedId = null,
+                                ) {
+                                    foreach ($categories as $category) {
+                                        if ($category['parent_id'] == $parentId) {
+                                            $hasChildren =
+                                                collect($categories)->where('parent_id', $category['id'])->count() > 0;
+                                            $displayName =
+                                                $parentName && $hasChildren
+                                                    ? "{$category['name']} ({$parentName})"
+                                                    : $category['name'];
+                                            if ($hasChildren) {
+                                                echo "<optgroup label=\"{$displayName}\">";
+                                                renderCategoryOptions(
+                                                    $categories,
+                                                    $category['id'],
+                                                    $category['name'],
+                                                    $selectedId,
+                                                );
+                                                echo '</optgroup>';
+                                            } else {
+                                                $selected = $selectedId == $category['id'] ? 'selected' : '';
+                                                echo "<option value=\"{$category['id']}\" {$selected}>{$displayName}</option>";
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        @endphp
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <form method="GET" action="{{ route($urlBase . 'index') }}"
+                                class="d-flex align-items-center flex-grow-1">
+                                <select name="parent" id="parent" class="form-control me-2"
+                                    style="max-width:300px;">
+                                    <option value="">-- Lọc theo danh mục cha --</option>
+                                    @php renderCategoryOptions($category_post->toArray(), null, null, request('parent')); @endphp
+                                </select>
+                                <button type="submit" class="btn btn-primary ms-2">Lọc</button>
+                                <a href="{{ route($urlBase . 'index') }}" class="btn btn-secondary ms-2">Reset</a>
+                            </form>
+                            <a href="{{ route($urlBase . 'create') }}" class="btn btn-primary ms-2">Thêm mới</a>
+                        </div>
 
                         <!-- Table with stripped rows -->
                         <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
@@ -79,9 +125,14 @@
                                                     <div class="created_at">{{ $item->created_at }}</div>
                                                 </td>
                                                 <td class="text-center">
-                                                    <div class="is_active">
-                                                        {{ $item->is_active ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
-                                                    </div>
+                                                    <span
+                                                        class="badge status-toggle-badge {{ $item->is_active ? 'bg-success' : 'bg-danger' }}"
+                                                        data-id="{{ $item->id }}" style="cursor:pointer;">
+                                                        <span
+                                                            class="status-text">{{ $item->is_active ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}</span>
+                                                        <span class="spinner-border spinner-border-sm d-none"
+                                                            role="status" aria-hidden="true"></span>
+                                                    </span>
                                                 </td>
                                                 <td class="text-center text-nowrap" style="width: 1px;">
                                                     <a href="{{ route($urlBase . 'show', $item) }}"
@@ -123,3 +174,42 @@
     </section>
 
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.status-toggle-badge').forEach(function(badge) {
+            badge.addEventListener('click', function() {
+                var catId = this.getAttribute('data-id');
+                var badgeEl = this;
+                var spinner = badgeEl.querySelector('.spinner-border');
+                var statusText = badgeEl.querySelector('.status-text');
+                spinner.classList.remove('d-none');
+                fetch('/admin/category_post/toggle-status/' + catId, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector(
+                                'meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        spinner.classList.add('d-none');
+                        if (data.is_active === 1) {
+                            badgeEl.classList.remove('bg-danger');
+                            badgeEl.classList.add('bg-success');
+                            statusText.textContent = 'Đã kích hoạt';
+                        } else {
+                            badgeEl.classList.remove('bg-success');
+                            badgeEl.classList.add('bg-danger');
+                            statusText.textContent = 'Chưa kích hoạt';
+                        }
+                    })
+                    .catch(() => {
+                        spinner.classList.add('d-none');
+                        alert('Đã xảy ra lỗi!');
+                    });
+            });
+        });
+    });
+</script>
