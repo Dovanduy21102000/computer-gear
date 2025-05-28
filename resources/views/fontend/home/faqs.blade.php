@@ -171,7 +171,14 @@
                         </button>
                     </h5>
                 </div>
-                
+                <div id="basicsCollapseTwo" class="collapse" aria-labelledby="basicsHeadingTwo"
+                    data-parent="#basicsAccordion">
+                    <div class="card-body pl-0 pb-8">
+                        <h6 class="mb-0">1. Nếu tôi cần cài lại Windows hoặc hỗ trợ kỹ thuật thì sao?</h6>
+                        <p class="mb-0"> Bạn có thể mang sản phẩm đến cửa hàng để được hộ trợ cài đặt phần mềm, vệ sinh máy miễn phí.</p>
+                    </div>
+                   
+                </div>
             </div>
         </div>
         <!-- End Basics Accordion -->
