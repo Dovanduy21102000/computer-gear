@@ -30,7 +30,7 @@
                                         <div class="order-status">
                                             @php
                                                 if ($order->status == 'completed') {
-                                                    $badge = 'success';
+                                                    $badge = 'secondary';
                                                 } elseif ($order->status == 'pending') {
                                                     $badge = 'warning';
                                                 } elseif ($order->status == 'canceled') {
@@ -56,13 +56,47 @@
                                                 <div class="order-product-price">{{ number_format($item->price, 0, ',', '.') }} ₫</div>
                                             </div>
                                 @endforeach
+                                @if ($order->status === 'completed')
+                        <form action="{{ route('client.orders.confirmReceived', $order->code) }}" method="POST"
+                            class="mt-3">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="btn btn-success">✅ Tôi đã nhận được hàng</button>
+                        </form>
+
+                        <div id="refuse-section" class="mt-3">
+                            <button class="btn btn-outline-danger" onclick="toggleRefuseForm()">❌ Không nhận
+                                hàng</button>
+
+                            <form id="refuse-form" action="{{ route('client.orders.cancel', $order->code) }}"
+                                method="POST" class="mt-3 d-none">
+                                @csrf
+                                @method('PUT')
+                                <div class="form-group">
+                                    <label for="refuse_reason"><strong>Lý do không nhận:</strong></label>
+                                    <textarea name="cancel_reason" id="refuse_reason" class="form-control" rows="3" required
+                                        placeholder="Nhập lý do..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-danger">Xác nhận</button>
+                                <button type="button" class="btn btn-secondary ml-2" onclick="toggleRefuseForm()">Huỷ
+                                    bỏ</button>
+                            </form>
+                        </div>
+
+                        <script>
+                            function toggleRefuseForm() {
+                                const form = document.getElementById('refuse-form');
+                                form.classList.toggle('d-none');
+                            }
+                        </script>
+                    @endif
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center flex-wrap">
                                         <div class="order-actions mb-2 mb-md-0">
-                                            <button class="btn btn-outline-dark btn-sm">Yêu cầu trả hàng</button>
-                                            <button class="btn btn-outline-dark btn-sm">Mua lại</button>
-                                            <button class="btn btn-outline-dark btn-sm">Đánh giá</button>
-                                            <a href="{{ route('client.orders.show', $order->code) }}" class="btn btn-light btn-sm">Chi tiết</a>
+                                            
+                                            
+        
+                                            <a href="{{ route('client.orders.show', $order->code) }}" class="btn btn-primary btn-sm"> Xem chi tiết</a>
                                         </div>
                                         <div class="order-total">Tổng: {{ number_format($order->final_price, 0, ',', '.') }} ₫</div>
                                     </div>
@@ -78,6 +112,9 @@
             </div>
             @endif
         @endforeach
+    </div>
+    <div class="mt-4">
+        {{ $orders->links() }}
     </div>
 </div>
 <style>
@@ -210,10 +247,10 @@
         color: #007bff;
         text-align: right;
     }
-    .badge-success {background: #e6f4ea; color: #219653;}
-    .badge-warning {background: #fff8e1; color: #f2994a;}
+    .badge-success {background: #21aa48; color: #219653;}
+    .badge-warning {background: #fff8e1; color: #ad9401;}
     .badge-danger {background: #fdecea; color: #eb5757;}
-    .badge-secondary {background: #f2f2f2; color: #828282;}
+    .badge-secondary {background: #f2f2f2; color: #377eef;}
     .btn-outline-dark, .btn-light {border-radius: 20px;}
     @media (max-width: 600px) {
         .order-card .d-flex {flex-direction: column !important; align-items: flex-start !important;}

@@ -175,7 +175,7 @@
                             </div>
                         </div>
                         <div class="mb-1">
-                            <a href="#" class="font-size-12 text-gray-5 mb-2 d-inline-block">
+                            <a href="{{ $product->category?->slug ? route('client.products.category', ['slug' => $product->category->slug]) : '#' }}" class="font-size-12 text-gray-5 mb-2 d-inline-block">
                                 {{ $product->category->name ?? 'Danh mục' }}</a>
                             <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
                             <div class="mb-2">
@@ -200,7 +200,7 @@
                                 <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
                                 @if ($product->brand)
                                     <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
-                                        Thương hiệu: <a href="#" class="text-dark">{{ $product->brand->name }}</a>
+                                        Thương hiệu: <a href="{{ $product->brand?->brandSlug ? route('client.products.brand', ['slug' => $product->brand->brandSlug]) : '#' }}" class="text-dark">{{ $product->brand->name }}</a>
                                     </p>
                                 @endif
                             </div>

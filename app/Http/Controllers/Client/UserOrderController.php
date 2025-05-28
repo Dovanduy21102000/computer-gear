@@ -26,16 +26,18 @@ class UserOrderController extends Controller
                   });
         })
         ->orderBy('created_at', 'desc')
-        ->get();
+        ->paginate(10);
 
     $orderTabs = [
         'all' => 'Tất cả',
-        'pending' => 'Chờ thanh toán',
-        'processing' => 'Đang xử lý/đã xác nhận',
+        'pending' => 'Chờ xác nhận',
+        'processing' => 'Đang xử lý',
         'delivered' => 'Đang giao',
-        'completed' => 'Hoàn thành',
-        'canceled' => 'Đã hủy',
-        'refund' => 'Hoàn tiền/trả hàng',
+        'completed' => 'Đã giao',
+        'success' => 'Đã nhận hàng',
+        'cancel'=>'Đã hủy',
+        'pending_cancel' => 'Đang chờ duyệt hủy',
+        ''
     ];
 
     $ordersByStatus = [];

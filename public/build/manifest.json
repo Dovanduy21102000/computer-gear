@@ -1,9 +1,25 @@
 {
+  "_pusher-BaBYCiB9.js": {
+    "file": "assets/pusher-BaBYCiB9.js",
+    "name": "pusher"
+  },
   "resources/js/app.js": {
-    "file": "assets/app-B2uwg9_y.js",
+    "file": "assets/app-DEw2l7Tp.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "imports": [
+      "_pusher-BaBYCiB9.js"
+    ]
+  },
+  "resources/js/realtime.js": {
+    "file": "assets/realtime-DlsaZb3i.js",
+    "name": "realtime",
+    "src": "resources/js/realtime.js",
+    "isEntry": true,
+    "imports": [
+      "_pusher-BaBYCiB9.js"
+    ]
   },
   "resources/sass/app.scss": {
     "file": "assets/app-DqME6eCz.css",
