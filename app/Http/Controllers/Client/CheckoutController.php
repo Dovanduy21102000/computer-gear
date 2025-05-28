@@ -606,7 +606,7 @@ class CheckoutController extends Controller
 
     public function applyCoupon(Request $request)
     {
-        
+
         $isAjax = $request->expectsJson() || $request->ajax();
         $request->validate([
             'coupon_code' => 'required|string|exists:coupons,code',
