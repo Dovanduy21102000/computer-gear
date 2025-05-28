@@ -1,4 +1,4 @@
-        <main id="content" role="main" class="cart-page">
+<main id="content" role="main" class="cart-page">
             <div class="container bg-md-transparent" style="padding: 10px; border-bottom: 1px solid #9d9c9c;">
                 <div class="container">
                     <div class="my-md-3">
@@ -478,6 +478,19 @@
 
                             if (newQuantity > maxQuantity) {
                                 this.value = maxQuantity;
+                                return;
+                            }
+                            if (newQuantity < 1) {
+                                this.value = 1;
+                                // Cập nhật lại tổng tiền về 0 nếu số lượng là 0, hoặc về giá đúng nếu là 1
+                                const row = this.closest('tr');
+                                const priceCell = row.querySelector('td[data-title="Price"] span');
+                                const totalCell = row.querySelector('td[data-title="Total"] span');
+                                if (priceCell && totalCell) {
+                                    const priceText = priceCell.textContent.replace(/[^\d]/g, '');
+                                    const price = parseInt(priceText);
+                                    totalCell.textContent = price.toLocaleString('vi-VN') + '₫';
+                                }
                                 return;
                             }
 

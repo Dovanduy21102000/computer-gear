@@ -72,7 +72,7 @@ class UserOrderController extends Controller
 
         // Kiểm tra số lần huỷ đơn của người dùng trong 1 giờ
         $key = 'cancel-attempts:' . $user->id;
-        if (RateLimiter::tooManyAttempts($key, 3)) {
+        if (RateLimiter::tooManyAttempts($key, 5)) {
             return back()->with('error', 'Bạn đã huỷ đơn quá nhiều lần. Vui lòng thử lại sau 1 giờ.');
         }
         RateLimiter::hit($key, 3600);
@@ -83,7 +83,7 @@ class UserOrderController extends Controller
             ->firstOrFail();
 
         // Kiểm tra trạng thái đơn hàng có cho phép huỷ không
-        if (!in_array($order->status, ['pending', 'processing', 'delivered'])) {
+        if (!in_array($order->status, ['pending', 'processing', 'delivered','completed'])) {
             return back()->with('error', 'Không thể huỷ đơn hàng này.');
         }
 
