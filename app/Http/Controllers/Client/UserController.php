@@ -123,6 +123,23 @@ class UserController extends Controller
 
         $user = Auth::user();
 
+        // Xác thực đầu vào
+        $validator = Validator::make($request->all(), [
+            'currentPassword' => 'required',
+            'newPassword' => 'required|min:6|confirmed',
+        ], [
+            'currentPassword.required' => 'Vui lòng nhập mật khẩu hiện tại.',
+            'newPassword.required' => 'Vui lòng nhập mật khẩu mới.',
+            'newPassword.min' => 'Mật khẩu mới phải có ít nhất 6 ký tự.',
+            'newPassword.confirmed' => 'Mật khẩu mới và xác nhận không khớp.',
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
         // Kiểm tra mật khẩu hiện tại
         if (!Hash::check($request->currentPassword, $user->password)) {
             return redirect()->back()->with([
@@ -132,24 +149,22 @@ class UserController extends Controller
             ])->withInput();
         }
 
-        // Xác thực đầu vào
-        $request->validate([
-            'currentPassword' => 'required',
-            'newPassword' => 'required|min:8|confirmed',
-        ], [
-            'currentPassword.required' => 'Vui lòng nhập mật khẩu hiện tại.',
-            'newPassword.required' => 'Vui lòng nhập mật khẩu mới.',
-            'newPassword.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
-            'newPassword.confirmed' => 'Mật khẩu mới và xác nhận không khớp.',
-        ]);
-
+        // Kiểm tra mật khẩu mới phải khác mật khẩu cũ
+        if ($request->newPassword === $request->currentPassword) {
+            return redirect()->back()->with([
+                'alert' => [
+                    'content' => 'Mật khẩu mới phải khác mật khẩu hiện tại.'
+                ]
+            ])->withInput();
+        }
 
         $user->password = Hash::make($request->newPassword);
         $user->save();
 
-
         return redirect()->route('user.show')->with([
-            'success' => 'Cập nhật mật khẩu thành công!',
+            'alert' => [
+                'content' => 'Mật khẩu đã được thay đổi thành công!'
+            ]
         ]);
     }
 }
