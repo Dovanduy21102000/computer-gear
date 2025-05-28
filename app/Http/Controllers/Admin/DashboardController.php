@@ -158,16 +158,25 @@ class DashboardController extends Controller
         // dd($ordersToday);
 
 
-        // Controller - Lấy top 5 sản phẩm bán chạy nhất tháng này (FIXED)
-        $topSellingProducts = Product::select('products.id', 'products.name', 'products.price', 'products.thumbnail')
-            ->join('order_items', 'products.id', '=', 'order_items.product_id')
+        // Controller - Lấy top 5 sản phẩm/biến thể bán chạy nhất tháng này (có SKU, giá, doanh thu)
+        $topSellingProducts = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->whereIn('orders.status', ['completed', 'success']) // Chỉ lấy đơn hàng hoàn thành
-            ->whereMonth('orders.created_at', Carbon::now()->month)
-            ->whereYear('orders.created_at', Carbon::now()->year)
-            ->selectRaw('SUM(order_items.quantity) as quantity_sold')
-            ->selectRaw('SUM(order_items.quantity) * products.price as total_revenue') // FIX: Tổng số lượng nhân với giá sản phẩm
-            ->groupBy('products.id', 'products.name', 'products.price', 'products.thumbnail')
+            ->leftJoin('product_variants', 'order_items.product_variant_id', '=', 'product_variants.id')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->whereIn('orders.status', ['completed', 'success'])
+            ->whereMonth('orders.created_at', \Carbon\Carbon::now()->month)
+            ->whereYear('orders.created_at', \Carbon\Carbon::now()->year)
+            ->select(
+                'products.id as product_id',
+                'products.name as product_name',
+                'products.thumbnail',
+                'product_variants.id as variant_id',
+                'product_variants.sku',
+                \DB::raw('COALESCE(product_variants.price_sale, product_variants.price, products.price_sale, products.price) as price'),
+                \DB::raw('SUM(order_items.quantity) as quantity_sold'),
+                \DB::raw('SUM(order_items.quantity * COALESCE(product_variants.price_sale, product_variants.price, products.price_sale, products.price)) as total_revenue')
+            )
+            ->groupBy('products.id', 'products.name', 'products.thumbnail', 'product_variants.id', 'product_variants.sku', 'product_variants.price', 'product_variants.price_sale', 'products.price', 'products.price_sale')
             ->orderByDesc('quantity_sold')
             ->limit(5)
             ->get();
