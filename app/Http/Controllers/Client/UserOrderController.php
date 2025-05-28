@@ -35,7 +35,7 @@ class UserOrderController extends Controller
         'delivered' => 'Đang giao',
         'completed' => 'Đã giao',
         'success' => 'Đã nhận hàng',
-        'cancel'=>'Đã hủy',
+        'canceled'=>'Đã hủy',
         'pending_cancel' => 'Đang chờ duyệt hủy',
         ''
     ];
