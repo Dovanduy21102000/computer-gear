@@ -414,7 +414,9 @@ class CheckoutController extends Controller
                     'order_id' => $order->id,
                     'product_id' => $buyNowItem->product->id,
                     'product_variant_id' => $buyNowItem->productVariant ? $buyNowItem->productVariant->id : null,
-                    'price' => $buyNowItem->price,
+                    'price' => $buyNowItem->productVariant
+                        ? ($buyNowItem->productVariant->price_sale ?? $buyNowItem->productVariant->price)
+                        : ($buyNowItem->product->price_sale ?? $buyNowItem->product->price),
                     'quantity' => $buyNowItem->quantity,
                     'product_info' => json_encode([
                         'product' => $buyNowItem->product->toArray(),
