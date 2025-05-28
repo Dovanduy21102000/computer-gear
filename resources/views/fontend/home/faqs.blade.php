@@ -129,7 +129,22 @@
                 </div>
             </div>
             <!-- End Card -->
-            
+            <div class="card mb-3 border-top-0 border-left-0 border-right-0 border-color-1 rounded-0">
+                <div class="card-header card-collapse bg-transparent-on-hover border-0" id="basicsHeadingTwo">
+                    <h5 class="mb-0">
+                        <button type="button"
+                            class="px-0 btn btn-link btn-block d-flex justify-content-between card-btn collapsed py-3 font-size-25 border-0"
+                            data-toggle="collapse" data-target="#basicsCollapseTwo" aria-expanded="false"
+                            aria-controls="basicsCollapseTwo">
+                            Khuyến mãi & ưu đãi
+
+                            <span class="card-btn-arrow">
+                                <i class="fas fa-chevron-down text-gray-90 font-size-18"></i>
+                            </span>
+                        </button>
+                    </h5>
+                </div>
+            </div>
         </div>
         <!-- End Basics Accordion -->
     </div>
