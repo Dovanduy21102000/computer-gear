@@ -22,12 +22,13 @@ class ProductClientController extends Controller
     {
         $query = Product::where('status', true);
         $category = null;
+        $currentCategory = null;
         // Nếu có truyền category dạng slug (?category=printer)
         if ($request->filled('category')) {
             $category = Category::where('slug', $request->category)
                 ->where('is_active', 1)
                 ->first();
-
+            $currentCategory = $category;
             if ($category) {
                 $query->where('category_id', $category->id);
             } else {
@@ -116,7 +117,7 @@ class ProductClientController extends Controller
         }
 
         $template = 'fontend.products.index';
-        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category', 'newProduct', 'sortParam', 'sortSlug'));
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'category', 'currentCategory', 'newProduct', 'sortParam', 'sortSlug'));
     }
 
     public function getNewProduct()
@@ -347,10 +348,11 @@ class ProductClientController extends Controller
     public function filteredProducts(Request $request)
     {
         $productsQuery = Product::query()->where('status', true);
-
+        $currentCategory = null;
         // Lấy danh mục theo slug nếu có
         if ($request->has('category')) {
             $category = Category::where('slug', $request->category)->firstOrFail();
+            $currentCategory = $category;
             // Get all category IDs including parent and children
             $categoryIds = $this->getAllCategoryIds($category);
             $productsQuery->whereIn('category_id', $categoryIds);
@@ -380,6 +382,6 @@ class ProductClientController extends Controller
         $newProduct = $this->getNewProduct();
         $template = 'fontend.products.index';
 
-        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'newProduct'));
+        return view('fontend.layout', compact('template', 'products', 'categories', 'brands', 'newProduct', 'currentCategory'));
     }
 }

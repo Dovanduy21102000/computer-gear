@@ -112,17 +112,27 @@
             <div class="my-md-3">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-3 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble">
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a
-                                href="{{ route('home.index') }}">Trang chủ</a></li>
                         <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
-                            @if ($product->category)
-                                <a href="#">{{ $product->category->name }}</a>
-                            @else
-                                <span>Danh mục không xác định</span>
-                            @endif
+                            <a href="{{ route('home.index') }}">Trang chủ</a>
                         </li>
+                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                            <a href="{{ route('client.products.index') }}">Sản phẩm</a>
+                        </li>
+                        @if ($product->category)
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                <a
+                                    href="{{ route('client.products.category', ['slug' => $product->category->slug]) }}">{{ $product->category->name }}</a>
+                            </li>
+                        @endif
+                        @if ($product->brand)
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                <a
+                                    href="{{ route('client.products.brand', ['brandSlug' => $product->brand->slug]) }}">{{ $product->brand->name }}</a>
+                            </li>
+                        @endif
                         <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">
-                            {{ $product->name }}</li>
+                            {{ $product->name }}
+                        </li>
                     </ol>
                 </nav>
             </div>
@@ -202,7 +212,7 @@
                                 @if ($product->brand)
                                     <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
                                         Thương hiệu: <a
-                                            href="{{ $product->brand?->brandSlug ? route('client.products.brand', ['slug' => $product->brand->brandSlug]) : '#' }}"
+                                            href="{{ $product->brand?->brandSlug ? route('client.products.brand', ['brandSlug' => $product->brand->slug]) : '#' }}"
                                             class="text-dark">{{ $product->brand->name }}</a>
                                     </p>
                                 @endif
@@ -278,7 +288,8 @@
                                         @endif
                                     @elseif ($product->price_sale)
                                         <span
-                                            class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span> <br>
+                                            class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                        <br>
                                         <del
                                             class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
                                     @else
