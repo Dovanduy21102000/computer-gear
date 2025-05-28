@@ -342,14 +342,14 @@
                                 </div>
                                 @foreach ($attributes as $attributeName => $values)
                                     <div class="mb-1">
-                                        <h6 class="font-size-14">Chọn {{ ucfirst($attributeName) }}</h6>
+                                        <h6 class="font-size-14">Chọn {{ ucfirst(trim($attributeName)) }}</h6>
                                         <div class="attribute-options">
                                             @foreach ($values as $value)
                                                 <label class="attribute-option">
                                                     <input type="radio"
-                                                        name="{{ strtolower(str_replace(' ', '_', $attributeName)) }}"
-                                                        value="{{ $value }}" class="d-none">
-                                                    <span class="attribute-box">{{ $value }}</span>
+                                                        name="{{ strtolower(str_replace(' ', '_', trim($attributeName))) }}"
+                                                        value="{{ trim($value) }}" class="d-none">
+                                                    <span class="attribute-box">{{ trim($value) }}</span>
                                                 </label>
                                             @endforeach
                                         </div>
@@ -364,10 +364,17 @@
 
 
                             <div class="mb-1 pb-0dot5" style="margin-top: 10px">
-                                <a href="{{ route('cart.add') }}" id="addToCartBtn"
-                                    class="btn btn-block btn-primary-dark" disabled>
-                                    <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
-                                </a>
+                                <form id="addToCartForm" action="{{ route('cart.add') }}" method="POST"
+                                    class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <input type="hidden" name="quantity" id="cartQuantity" value="1">
+                                    <input type="hidden" name="attributes" id="cartAttributes" value="">
+                                    <button type="submit" id="addToCartBtn" class="btn btn-block btn-primary-dark"
+                                        disabled>
+                                        <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
+                                    </button>
+                                </form>
                             </div>
                             <div class="mb-2">
                                 <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
@@ -918,8 +925,24 @@
                     get_all: true
                 },
                 success: function(response) {
-                    allVariants = response;
-                    console.log("All variants loaded:", allVariants);
+                    // Normalize the variant data when it's first loaded
+                    allVariants = response.map(variant => {
+                        // Create a new normalized attributes object
+                        const normalizedAttributes = {};
+                        Object.entries(variant.attributes).forEach(([key, value]) => {
+                            // Remove trailing underscores and trim both key and value
+                            const normalizedKey = key.trim().replace(/_+$/, '');
+                            const normalizedValue = value.trim();
+                            normalizedAttributes[normalizedKey] = normalizedValue;
+                        });
+
+                        // Return the variant with normalized attributes
+                        return {
+                            ...variant,
+                            attributes: normalizedAttributes
+                        };
+                    });
+                    console.log("All variants loaded and normalized:", allVariants);
                 },
                 error: function(xhr) {
                     console.error("Error loading variants:", xhr);
@@ -935,10 +958,14 @@
             let testAttributes = {
                 ...selectedAttributes
             };
+            // Normalize the attribute name and value
+            attributeName = attributeName.trim().replace(/_+$/, '');
+            attributeValue = attributeValue.trim();
             testAttributes[attributeName] = attributeValue;
             let found = allVariants.some(variant => {
                 return Object.entries(testAttributes).every(([key, value]) => {
-                    return variant.attributes[key] === value;
+                    // Normalize both sides of the comparison
+                    return variant.attributes[key]?.trim() === value;
                 });
             });
             console.log('Checking', testAttributes, '=>', found);
@@ -966,7 +993,8 @@
             let sum = 0;
             allVariants.forEach(variant => {
                 let isMatch = Object.entries(selectedAttributes).every(([key, value]) => {
-                    return variant.attributes[key] === value;
+                    // Normalize both sides of the comparison
+                    return variant.attributes[key]?.trim() === value;
                 });
                 if (isMatch) sum += variant.quantity;
             });
@@ -977,22 +1005,24 @@
         function updateAttributeOptions() {
             let selectedAttributes = {};
             $(".attribute-option input[type='radio']:checked").each(function() {
-                let attributeName = $(this).attr("name");
-                let attributeValue = $(this).val();
+                let attributeName = $(this).attr("name").trim().replace(/_+$/, '');
+                let attributeValue = $(this).val().trim();
                 selectedAttributes[attributeName] = attributeValue;
             });
+            console.log('Selected attributes:', selectedAttributes);
+            console.log('All variants:', allVariants);
 
             // If nothing is selected, enable all options
             if (Object.keys(selectedAttributes).length === 0) {
                 $(".attribute-option").removeClass('disabled').css('opacity', '1');
                 $(".attribute-option input[type='radio']").prop('disabled', false);
-                updateStockDisplay(mainProductQuantity);
                 return;
             }
 
             // For each attribute group
             $(".attribute-options").each(function() {
-                let attributeName = $(this).find('input[type="radio"]').first().attr("name");
+                let attributeName = $(this).find('input[type="radio"]').first().attr("name").trim()
+                    .replace(/_+$/, '');
 
                 // For each option in this group
                 $(this).find('.attribute-option').each(function() {
@@ -1016,165 +1046,25 @@
                     }
                 });
             });
-
-            // Update the stock display for partial selection
-            let matchingQuantity = getMatchingQuantity(selectedAttributes);
-            updateStockDisplay(matchingQuantity);
         }
 
         // Add CSS for disabled state
-        $('<style>')
-            .text(`
-                .attribute-option.disabled {
-                    cursor: not-allowed;
-                    background-color: #f5f5f5;
-                }
-                .attribute-option.disabled .attribute-box {
-                    color: #999;
-                }
-            `)
-            .appendTo('head');
-
-        // Kiểm tra các thuộc tính đã chọn
-        function checkVariants() {
-            let selectedAttributes = {}; // Lưu biến thể đã chọn
-
-            $(".attribute-option input[type='radio']:checked").each(function() {
-                let attributeName = $(this).attr("name");
-                let attributeValue = $(this).val();
-                selectedAttributes[attributeName] = attributeValue;
-            });
-
-            // Kiểm tra nếu chưa chọn đủ thuộc tính
-            if (Object.keys(selectedAttributes).length < $(".attribute-options").length) {
-                $("#variantAlert").show();
-                disablePurchase();
-                return false;
-            }
-
-            $("#variantAlert").hide();
-            return selectedAttributes;
-        }
-
-        // Hàm gửi request và cập nhật UI
-        function fetchVariantData(productId, selectedAttributes, cacheKey) {
-            // Khởi tạo queryParams với product_id
-            let queryParams = `product_id=${encodeURIComponent(productId)}`;
-
-            // Duyệt qua các thuộc tính đã chọn và tạo query string
-            for (let [key, value] of Object.entries(selectedAttributes)) {
-                queryParams += `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-            }
-
-            let url = '{{ route('getVariant') }}' + '?' + queryParams;
-            console.log("Request URL:", url);
-
-            $.ajax({
-                url: url,
-                type: 'GET',
-                beforeSend: function() {
-                    $(".attribute-option").each(function() {
-                        $(this).addClass("loading");
-                    });
-                },
-                success: function(response) {
-                    console.log("Response from API:", response);
-                    if (!response || Object.keys(response).length === 0) {
-                        disablePurchase();
-                        return;
+        if (!document.getElementById('attribute-option-disabled-style')) {
+            $('<style id="attribute-option-disabled-style">')
+                .text(`
+                    .attribute-option.disabled {
+                        cursor: not-allowed;
+                        background-color: #f5f5f5;
                     }
-                    variantCache[cacheKey] = response;
-                    updateUI(response);
-                    $(".attribute-option").each(function() {
-                        $(this).removeClass("loading");
-                    });
-                },
-                error: function(xhr) {
-                    console.error("❌ Lỗi AJAX:", xhr.responseText);
-                    Swal.fire({
-                        icon: "error",
-                        title: "Lỗi!",
-                        text: "Có lỗi xảy ra khi tải thông tin biến thể.",
-                        confirmButtonText: "OK"
-                    });
-                    disablePurchase();
-                    $(".attribute-option").each(function() {
-                        $(this).removeClass("loading");
-                    });
-                }
-            });
-        }
-
-        // In updateUI, only update price and out-of-stock warning, not stock display
-        function updateUI(response) {
-            console.log("🏆 UI đang cập nhật...", response);
-
-            let quantity = response.quantity ?? 0;
-            let variantImage = response.image; // Get the image path from the response
-
-            // Update only the main product image (not the slider)
-            if (variantImage) {
-                var mainImg = document.querySelector('.product-main-image img');
-                if (mainImg) {
-                    mainImg.src = window.storageBaseUrl + variantImage;
-                }
-            } else {
-                // Optionally, revert to the original product image if no variant image
-                // (No action needed if you want to keep the last image)
-            }
-
-            // Kiểm tra giá
-            let price = response.price_sale ?
-                `<span class=\"text-danger\">${response.price_sale}₫</span><br>
-                <del class=\"text-muted\">${response.price}₫</del>` :
-                `${response.price}`;
-
-            // Cập nhật giá
-            $("#productPrice").html(price);
-
-            // Show/hide out of stock warning
-            if (quantity > 0) {
-                $("#outOfStockWarning").addClass("d-none");
-                $("#quantityInput").prop("disabled", false).val(1);
-                enablePurchase();
-            } else {
-                $("#outOfStockWarning").removeClass("d-none");
-                $("#quantityInput").val("").prop("disabled", true);
-                disablePurchase();
-            }
-            updateStockDisplay(quantity);
-        }
-
-        // Vô hiệu hóa các nút "Thêm vào giỏ" và "Mua ngay"
-        function disablePurchase() {
-            $("#addToCartBtn, #buyNowBtn").prop("disabled", true);
-        }
-
-        // Kích hoạt các nút nếu đủ điều kiện
-        function enablePurchase() {
-            let selectedAttributes = checkVariants();
-            let quantity = parseInt($("#quantityInput").val(), 10) || 0;
-            let stockQuantity = parseInt($("#quantityInput").attr("max"), 10);
-            let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
-
-            if (isVariantProduct) {
-                if (!selectedAttributes || quantity < 1 || stockQuantity === 0) {
-                    disablePurchase();
-                } else {
-                    $("#addToCartBtn, #buyNowBtn").prop("disabled", false);
-                }
-            } else {
-                if (quantity < 1 || stockQuantity === 0) {
-                    disablePurchase();
-                } else {
-                    $("#addToCartBtn, #buyNowBtn").prop("disabled", false);
-                }
-            }
+                    .attribute-option.disabled .attribute-box {
+                        color: #999;
+                    }
+                `)
+                .appendTo('head');
         }
 
         // Update attribute options when any selection changes
         $(document).on('change', ".attribute-option input[type='radio']", function() {
-            console.log("Radio changed");
             // Add selected class for visual feedback
             $(".attribute-option").each(function() {
                 if ($(this).find('input[type="radio"]').is(":checked")) {
@@ -1183,159 +1073,16 @@
                     $(this).removeClass("selected");
                 }
             });
-
             updateAttributeOptions();
-            let selectedAttributes = {};
-            $(".attribute-option input[type='radio']:checked").each(function() {
-                let attributeName = $(this).attr("name");
-                let attributeValue = $(this).val();
-                selectedAttributes[attributeName] = attributeValue;
-            });
-            console.log("Selected attributes:", selectedAttributes);
-            let result = checkVariants();
-            if (!result) return;
-
-            let cacheKey = JSON.stringify(selectedAttributes);
-            let productId = {{ $product->id }};
-
-            if (variantCache[cacheKey]) {
-                updateUI(variantCache[cacheKey]);
-            } else {
-                fetchVariantData(productId, selectedAttributes, cacheKey);
-            }
         });
-
-        // Xử lý thay đổi số lượng
-        $("#quantityInput").on("input", function() {
-            let max = parseInt($(this).attr("max"), 10);
-            let value = $(this).val().replace(/\D/g, "");
-
-            if (max === 0 || value === "") {
-                $(this).val("");
-                disablePurchase();
-                return;
-            }
-
-            value = Math.max(1, Math.min(max, parseInt(value, 10)));
-            $(this).val(value);
-            enablePurchase();
-        });
-
-        $("#addToCartBtn, #buyNowBtn").click(function(event) {
-            event.preventDefault();
-
-            // Check if user is authenticated
-            if (!{{ auth()->check() ? 'true' : 'false' }}) {
-                Swal.fire({
-                    icon: "info",
-                    title: "Thông báo!",
-                    text: "Vui lòng đăng nhập để tiếp tục!",
-                    confirmButtonText: "Đăng nhập",
-                    showCancelButton: true,
-                    cancelButtonText: "Hủy"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "{{ route('login') }}";
-                    }
-                });
-                return;
-            }
-
-            let selectedAttributes = checkVariants();
-            let quantity = parseInt($("#quantityInput").val(), 10) || 1;
-            let isVariantProduct = {{ $product->is_variant ? 'true' : 'false' }};
-
-            if (isVariantProduct && (!selectedAttributes || parseInt($("#quantityInput").attr("max"),
-                    10) === 0)) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Lỗi!",
-                    text: "⚠️ Vui lòng chọn đầy đủ biến thể hoặc sản phẩm đã hết hàng!",
-                    confirmButtonText: "OK"
-                });
-                return;
-            }
-
-            if (!isVariantProduct && parseInt($("#quantityInput").attr("max"), 10) === 0) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Lỗi!",
-                    text: "⚠️ Sản phẩm đã hết hàng!",
-                    confirmButtonText: "OK"
-                });
-                return;
-            }
-
-            let formData = {
-                product_id: {{ $product->id }},
-                quantity: quantity
-            };
-
-            if (isVariantProduct && selectedAttributes) {
-                formData.attributes = selectedAttributes;
-            }
-
-            let isBuyNow = $(this).attr('id') === 'buyNowBtn';
-            let url = isBuyNow ? "{{ route('checkout.buy-now') }}" : "{{ route('cart.add') }}";
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: formData,
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (isBuyNow) {
-                        window.location.href = "{{ route('checkout.index') }}";
-                    } else {
-                        console.log("Cart response:", response);
-
-                        if (response.error) {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Lỗi!",
-                                text: response.message ||
-                                    "Có lỗi xảy ra khi cập nhật giỏ hàng.",
-                                confirmButtonText: "OK"
-                            });
-                        } else {
-                            if (response.cartCount !== undefined) {
-                                $("#cart-badge-count").text(response.cartCount);
-                            }
-
-                            Swal.fire({
-                                icon: "success",
-                                title: "Thành công!",
-                                text: response.message ||
-                                    "Sản phẩm đã được thêm vào giỏ hàng!",
-                                confirmButtonText: "OK"
-                            });
-                        }
-                    }
-                },
-                error: function(xhr) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Lỗi!",
-                        text: xhr.responseJSON?.message ||
-                            "Có lỗi xảy ra, vui lòng thử lại",
-                        confirmButtonText: "OK"
-                    });
-                }
-            });
-        });
-
-        // Initial update of attribute options
-        updateAttributeOptions();
-        disablePurchase();
 
         // Universal radio deselect logic (works for label and box clicks)
-        $(document).on('mousedown', '.attribute-option', function(e) {
-            let $input = $(this).find('input[type="radio"]');
-            $input.attr('data-waschecked', $input.prop('checked'));
-        });
-        $(document).on('click', '.attribute-option', function(e) {
+        $(document).off('mousedown.attributeOption').on('mousedown.attributeOption', '.attribute-option',
+            function(e) {
+                let $input = $(this).find('input[type="radio"]');
+                $input.attr('data-waschecked', $input.prop('checked'));
+            });
+        $(document).off('click.attributeOption').on('click.attributeOption', '.attribute-option', function(e) {
             let $input = $(this).find('input[type="radio"]');
             if ($input.attr('data-waschecked') === 'true') {
                 console.log('Deselecting via label:', $input[0]);
@@ -1345,6 +1092,9 @@
                 e.preventDefault();
             }
         });
+
+        // Initial update
+        updateAttributeOptions();
     });
 </script>
 @auth
@@ -1421,13 +1171,17 @@
             let testAttributes = {
                 ...selectedAttributes
             };
+            // Normalize the attribute name and value
+            attributeName = attributeName.trim().replace(/_+$/, '');
+            attributeValue = attributeValue.trim();
             testAttributes[attributeName] = attributeValue;
             let found = allVariants.some(variant => {
                 return Object.entries(testAttributes).every(([key, value]) => {
-                    return variant.attributes[key] === value;
+                    // Normalize both sides of the comparison
+                    return variant.attributes[key]?.trim() === value;
                 });
             });
-            // console.log('Checking', testAttributes, '=>', found);
+            console.log('Checking', testAttributes, '=>', found);
             return found;
         }
 
@@ -1435,10 +1189,12 @@
         function updateAttributeOptions() {
             let selectedAttributes = {};
             $(".attribute-option input[type='radio']:checked").each(function() {
-                let attributeName = $(this).attr("name");
-                let attributeValue = $(this).val();
+                let attributeName = $(this).attr("name").trim().replace(/_+$/, '');
+                let attributeValue = $(this).val().trim();
                 selectedAttributes[attributeName] = attributeValue;
             });
+            console.log('Selected attributes:', selectedAttributes);
+            console.log('All variants:', allVariants);
 
             // If nothing is selected, enable all options
             if (Object.keys(selectedAttributes).length === 0) {
@@ -1449,7 +1205,8 @@
 
             // For each attribute group
             $(".attribute-options").each(function() {
-                let attributeName = $(this).find('input[type="radio"]').first().attr("name");
+                let attributeName = $(this).find('input[type="radio"]').first().attr("name").trim().replace(
+                    /_+$/, '');
 
                 // For each option in this group
                 $(this).find('.attribute-option').each(function() {
@@ -1533,4 +1290,81 @@
 
 <script>
     window.storageBaseUrl = "{{ asset('storage/') }}/";
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Update cart attributes when selection changes
+        function updateCartAttributes() {
+            let selectedAttributes = {};
+            $(".attribute-option input[type='radio']:checked").each(function() {
+                let attributeName = $(this).attr("name").trim().replace(/_+$/, '');
+                let attributeValue = $(this).val().trim();
+                selectedAttributes[attributeName] = attributeValue;
+            });
+            $("#cartAttributes").val(JSON.stringify(selectedAttributes));
+
+            // Enable/disable add to cart button based on selection
+            let hasAllAttributes = Object.keys(selectedAttributes).length === $(".attribute-options").length;
+            $("#addToCartBtn").prop('disabled', !hasAllAttributes);
+        }
+
+        // Update cart quantity when quantity input changes
+        $("#quantityInput").on('change', function() {
+            $("#cartQuantity").val($(this).val());
+        });
+
+        // Update cart attributes when radio buttons change
+        $(document).on('change', ".attribute-option input[type='radio']", function() {
+            updateCartAttributes();
+        });
+
+        // Handle form submission with AJAX
+        $("#addToCartForm").on('submit', function(e) {
+            e.preventDefault();
+
+            let form = $(this);
+            let submitBtn = form.find('button[type="submit"]');
+            let originalBtnText = submitBtn.html();
+
+            // Disable button and show loading state
+            submitBtn.prop('disabled', true).html(
+                '<i class="fas fa-spinner fa-spin mr-2"></i>Đang thêm...');
+
+            $.ajax({
+                url: form.attr('action'),
+                method: 'POST',
+                data: {
+                    _token: form.find('input[name="_token"]').val(),
+                    product_id: form.find('input[name="product_id"]').val(),
+                    quantity: form.find('input[name="quantity"]').val(),
+                    attributes: form.find('input[name="attributes"]').val()
+                },
+                success: function(response) {
+                    // Show success message
+                    toastr.success('Đã thêm sản phẩm vào giỏ hàng');
+
+                    // Update cart count if available
+                    if (response.cartCount) {
+                        $("#cartCount").text(response.cartCount);
+                    }
+                },
+                error: function(xhr) {
+                    // Show error message
+                    let errorMessage = 'Có lỗi xảy ra khi thêm vào giỏ hàng';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    toastr.error(errorMessage);
+                },
+                complete: function() {
+                    // Re-enable button and restore original text
+                    submitBtn.prop('disabled', false).html(originalBtnText);
+                }
+            });
+        });
+
+        // Initial update
+        updateCartAttributes();
+    });
 </script>

@@ -293,11 +293,6 @@ window.renderProductCard = function (product, view = "grid") {
                     <div class="prodcut-price mb-2">
                         ${priceHtml}
                     </div>
-                    <ul class="font-size-12 p-0 text-gray-110 mb-4 d-none d-md-block">
-                        <li class="line-clamp-1 mb-1 list-bullet">Chất lượng cao cấp</li>
-                        <li class="line-clamp-1 mb-1 list-bullet">Thiết kế bền bỉ, chống sốc</li>
-                        <li class="line-clamp-1 mb-1 list-bullet">Bảo hành chính hãng</li>
-                    </ul>
                 </div>
             </div>
             <div class="product-item__footer col-md-3 d-md-block">
