@@ -274,10 +274,10 @@
                                             </span>
                                         @endif
                                     @elseif ($product->price_sale)
-                                        <del
-                                            class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
                                         <span
                                             class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                        <del
+                                            class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
                                     @else
                                         {{ number_format($product->price, 0, ',', '.') }}₫
                                     @endif
@@ -353,12 +353,19 @@
                                 <a href="{{ route('cart.add') }}" id="addToCartBtn"
                                     class="btn btn-block btn-primary-dark" disabled>
                                     <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
-
                                 </a>
                             </div>
                             <div class="mb-2">
                                 <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
                             </div>
+
+                            @if (!auth()->check())
+                                <div class="alert alert-info mt-2">
+                                    <i class="fas fa-info-circle"></i> Vui lòng <a href="{{ route('login') }}">đăng
+                                        nhập</a> để thêm sản phẩm vào giỏ hàng hoặc mua ngay.
+                                </div>
+                            @endif
+
                             <div class="flex-content-center flex-wrap">
                                 <div class="border-top pt-2 flex-center-between flex-wrap">
                                     @include('fontend.component.wishlist-button', ['product' => $product])
@@ -1104,8 +1111,9 @@
 
             // Kiểm tra giá
             let price = response.price_sale ?
-                `<del class=\"text-muted\">${response.price}₫</del> <br>
-                <span class=\"text-danger\">${response.price_sale}₫</span>` :
+                `<span class=\"text-danger\">${response.price_sale}₫</span><br>
+                <del class=\"text-muted\">${response.price}₫</del>`
+                 :
                 `${response.price}`;
 
             // Cập nhật giá
@@ -1203,10 +1211,20 @@
         $("#addToCartBtn, #buyNowBtn").click(function(event) {
             event.preventDefault();
 
-            // Check if user is authenticated for buy now action
-            if ($(this).attr('id') === 'buyNowBtn' && !{{ auth()->check() ? 'true' : 'false' }}) {
-                alert('Vui lòng đăng nhập để tiếp tục mua hàng!');
-                window.location.href = "{{ route('login') }}";
+            // Check if user is authenticated
+            if (!{{ auth()->check() ? 'true' : 'false' }}) {
+                Swal.fire({
+                    icon: "info",
+                    title: "Thông báo!",
+                    text: "Vui lòng đăng nhập để tiếp tục!",
+                    confirmButtonText: "Đăng nhập",
+                    showCancelButton: true,
+                    cancelButtonText: "Hủy"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('login') }}";
+                    }
+                });
                 return;
             }
 
