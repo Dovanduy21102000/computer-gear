@@ -114,9 +114,11 @@
                 <div id="basicsCollapseTwo" class="collapse" aria-labelledby="basicsHeadingTwo"
                     data-parent="#basicsAccordion">
                     <div class="card-body pl-0 pb-8">
-                        <p class="mb-0">Chúng tôi hỗ trợ đổi trả trong vòng 7 ngày với điều kiện sản phẩm còn nguyên
-                            vẹn và đầy
-                            đủ phụ kiện đi kèm.</p>
+                        <h6 class="mb-0">1. Điều kiện đổi trả</h6>
+                        <p class="mb-0">  Đủ điều kiện đổi trả hoặc trả hàng, sản phẩm cần đáp ứng các tiêu chí sau:</p>
+                        <p class="mb-0">- Còn nguyên trạng, chưa qua sử dụng, không bị trày xước, rơi vỡ.</p>
+                        <p class="mb-0">- Đầy đủ hộp, phụ kiện, tem nhãn và phiếu bảo hành.</p>
+                        <p class="mb-0">- Gửi yêu cầu trong vòng 3-7 ngày kể từ ngày nhận hàng.</p>
                     </div>
                 </div>
             </div>
