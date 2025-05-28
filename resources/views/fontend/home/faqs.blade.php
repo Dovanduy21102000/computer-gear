@@ -7,8 +7,10 @@
             <div class="my-md-3">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-3 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble">
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a href="{{route('home.index')}}">Trang chủ</a></li>
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">Câu hỏi thường gặp</li>
+                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a
+                                href="{{ route('home.index') }}">Trang chủ</a></li>
+                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">Câu hỏi
+                            thường gặp</li>
                     </ol>
                 </nav>
             </div>
@@ -31,16 +33,34 @@
         </div>
         <div class="row mb-8">
             <div class="col-lg-6 mb-5 mb-lg-8">
-                <h3 class="font-size-18 font-weight-semi-bold text-gray-39 mb-4">Có những phương thức giao hàng nào?</h3>
-                <p class="text-gray-90">Chúng tôi hỗ trợ giao hàng tiêu chuẩn và giao hàng nhanh thông qua các đơn vị vận chuyển
+                <h3 class="font-size-18 font-weight-semi-bold text-gray-39 mb-4">Có những phương thức giao hàng nào?
+                </h3>
+                <p class="text-gray-90">Chúng tôi hỗ trợ giao hàng tiêu chuẩn và giao hàng nhanh thông qua các đơn vị
+                    vận chuyển
                     uy tín như Viettel Post, GHN và GHTK.</p>
             </div>
             <div class="col-lg-6 mb-5 mb-lg-8">
                 <h3 class="font-size-18 font-weight-semi-bold text-gray-39 mb-4">Thời gian nhận hàng là bao lâu?</h3>
-                <p class="text-gray-90">Thời gian giao hàng tuỳ thuộc vào khu vực giao hàng, thời gian có thể từ 1-3 ngày làm
+                <p class="text-gray-90">Thời gian giao hàng tuỳ thuộc vào khu vực giao hàng, thời gian có thể từ 1-3
+                    ngày làm
                     việc đối với nội thành, và 3-7 ngày làm việc đối với khu vực ngoại thành hoặc tỉnh thành khác.</p>
             </div>
-
+            <div class="col-lg-6 mb-5 mb-lg-8">
+                <h3 class="font-size-18 font-weight-semi-bold text-gray-39 mb-4">Làm thế nào để theo dõi đơn hàng?</h3>
+                <p class="text-gray-90">Bạn có thể theo dõi đơn hàng bằng cách nhập mã đơn hàng vào trang "Quản lý đơn
+                    hàng"
+                    hoặc kiểm tra email xác nhận đơn hàng của bạn.</p>
+            </div>
+            <div class="col-lg-6 mb-5 mb-lg-8">
+                <h3 class="font-size-18 font-weight-semi-bold text-gray-39 mb-4">Có cần tài khoản để đặt hàng không?
+                </h3>
+                <p class="text-gray-90">Có, bạn phải có tài khoản thì mới có thể đặt hàng. Vì khi đăng ký tài khoản sẽ
+                    giúp bạn
+                    theo dõi đơn hàng dễ dàng hơn.</p>
+            </div>
+        </div>
+        <hr>
+        
         <!-- End Basics Accordion -->
     </div>
 </main>
