@@ -71,18 +71,13 @@ class CheckoutController extends Controller
                 return $districts;
             });
 
-            // If buy now item exists, use it instead of cart items
-            if ($buyNowItem) {
-                $cartItems[] = $buyNowItem;
-            } else {
-                // Get selected items from URL parameters
-                if ($request->has('selected_items')) {
-                    $selectedItems = explode(',', $request->input('selected_items'));
-                }
-
-                // Log::info('Selected items from URL:', ['selected_items' => $selectedItems]);
-
+            // Get selected items from URL parameters
+            if ($request->has('selected_items')) {
+                $selectedItems = explode(',', $request->input('selected_items'));
                 if (!empty($selectedItems)) {
+                    // Clear and ignore buy now item if cart items are selected
+                    session()->forget('buy_now_item');
+                    $buyNowItem = null;
                     // Get cart items from database for selected items
                     $cart = Cart::where('user_id', Auth::id())->first();
                     if ($cart) {
@@ -101,11 +96,16 @@ class CheckoutController extends Controller
                                 return $cartItem;
                             });
                     }
-
-                    // Log::info('Cart items from database for selected items:', [
-                    //     'items' => $cartItems
-                    // ]);
+                } elseif ($buyNowItem) {
+                    // If no selected items but buy now item exists, use it
+                    $cartItems[] = $buyNowItem;
                 }
+            } elseif ($buyNowItem) {
+                // If no selected items param but buy now item exists, use it
+                $cartItems[] = $buyNowItem;
+            } else {
+                // If neither, clear buy now item
+                session()->forget('buy_now_item');
             }
 
             // Calculate total price
