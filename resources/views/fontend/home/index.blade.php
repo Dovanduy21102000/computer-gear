@@ -534,7 +534,7 @@
                 <!-- Banner -->
                 <div class="row mb-6">
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4">
-                        <a href="{{ route('client.products.index') }}" class="d-black text-gray-90">
+                        <a href="{{ route('client.products.index') }}" class="d-black text-black">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/190x150/img3.jpg"
@@ -544,7 +544,7 @@
                                     <div class="mb-2 pb-1 font-size-18 font-weight-light text-ls-n1 text-lh-23">
                                         ƯU ĐÃI LỚN <strong>LAPTOP MỚI</strong>
                                     </div>
-                                    <div class="link text-gray-90 font-weight-bold font-size-15">
+                                    <div class="link text-blackblack font-weight-bold font-size-15">
                                         Mua ngay
                                         <span class="link__icon ml-1">
                                             <span class="link__icon-inner"><i
@@ -556,7 +556,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4">
-                        <a href="{{ route('client.products.index') }}" class="d-black text-gray-90">
+                        <a href="{{ route('client.products.index') }}" class="d-black text-black">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/246X176/img2.jpg"
@@ -566,7 +566,7 @@
                                     <div class="mb-2 pb-1 font-size-18 font-weight-light text-ls-n1 text-lh-23">
                                         PHỤ KIỆN & <strong>LINH KIỆN MÁY TÍNH</strong>
                                     </div>
-                                    <div class="link text-gray-90 font-weight-bold font-size-15">
+                                    <div class="link text-black font-weight-bold font-size-15">
                                         Mua ngay
                                         <span class="link__icon ml-1">
                                             <span class="link__icon-inner"><i
@@ -578,7 +578,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-4 mb-xl-0 col-wd-4 d-md-none d-wd-block">
-                        <a href="{{ route('client.products.index') }}" class="d-black text-gray-90">
+                        <a href="{{ route('client.products.index') }}" class="d-black text-black">
                             <div class="min-height-166 py-1 py-xl-2 py-wd-4 d-flex bg-gray-1 align-items-center">
                                 <div class="col-6 col-xl-7 col-wd-6 pr-0">
                                     <img class="img-fluid" src="fontend/assets/img/246X176/img3.jpg" alt="PC Gaming">
@@ -587,7 +587,7 @@
                                     <div class="mb-2 pb-1 font-size-18 font-weight-light text-ls-n1 text-lh-23">
                                         TRẢI NGHIỆM <strong>PC GAMING ĐỈNH CAO</strong>
                                     </div>
-                                    <div class="link text-gray-90 font-weight-bold font-size-15">
+                                    <div class="link text-black font-weight-bold font-size-15">
                                         Mua ngay
                                         <span class="link__icon ml-1">
                                             <span class="link__icon-inner"><i
@@ -890,7 +890,7 @@
 
                 <!-- Full banner -->
                 <div class="mb-8">
-                    <a href="{{ route('client.products.index') }}" class="d-block text-gray-90">
+                    <a href="{{ route('client.products.index') }}" class="d-block text-black">
                         <div class="bg-img-hero pt-3"
                             style="background-image: url(fontend/assets/img/1400X206/img1.jpg);">
                             <div class="space-top-2-md p-4 pt-4 pt-md-5 pt-lg-6 pt-xl-5 pb-lg-4 px-xl-8 px-lg-6">

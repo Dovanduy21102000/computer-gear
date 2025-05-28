@@ -13,15 +13,45 @@ use Illuminate\Support\Facades\RateLimiter;
 class UserOrderController extends Controller
 {
 
-    public function index()
-    {
-        $orders = Order::where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->get();
+    public function index(Request $request)
+{
+    $search = $request->input('q');
 
-        $template = 'fontend.oders.index';
-        return view('fontend.layout', compact('orders', 'template'));
+    $orders = Order::with(['items.product'])
+        ->where('user_id', Auth::id())
+        ->when($search, function ($query, $search) {
+            $query->where('code', 'like', "%$search%")
+                  ->orWhereHas('items.product', function ($q) use ($search) {
+                      $q->where('name', 'like', "%$search%");
+                  });
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+
+    $orderTabs = [
+        'all' => 'Tất cả',
+        'pending' => 'Chờ xác nhận',
+        'processing' => 'Đang xử lý',
+        'delivered' => 'Đang giao',
+        'completed' => 'Đã giao',
+        'success' => 'Đã nhận hàng',
+        'cancel'=>'Đã hủy',
+        'pending_cancel' => 'Đang chờ duyệt hủy',
+        ''
+    ];
+
+    $ordersByStatus = [];
+    foreach ($orderTabs as $key => $label) {
+        if ($key === 'all') {
+            $ordersByStatus[$key] = $orders;
+        } else {
+            $ordersByStatus[$key] = $orders->where('status', $key);
+        }
     }
+// dd($orderTabs, $ordersByStatus);
+    $template = 'fontend.oders.index';
+    return view('fontend.layout', compact('orders', 'orderTabs', 'ordersByStatus', 'template', 'search'));
+}
 
 
     public function show($code)
@@ -53,16 +83,16 @@ class UserOrderController extends Controller
             ->firstOrFail();
 
         // Kiểm tra trạng thái đơn hàng có cho phép huỷ không
-        if (!in_array($order->status, ['pending', 'processing','delivered'])) {
+        if (!in_array($order->status, ['pending', 'processing', 'delivered'])) {
             return back()->with('error', 'Không thể huỷ đơn hàng này.');
         }
 
-        
+
         $request->validate([
             'cancel_reason' => 'required|string|max:255',
         ]);
 
-       
+
         $order->cancel_requested = true;  // Đánh dấu yêu cầu huỷ
         $order->cancel_reason = $request->cancel_reason;
         $order->status = 'pending_cancel';
