@@ -94,6 +94,9 @@ Route::prefix('admin')->group(function () {
         // Toggle contact status
         Route::post('contacts/{id}/toggle-status', [ContactController::class, 'toggleStatus'])->name('contacts.toggleStatus');
 
+        // Toggle brand status
+        Route::put('brands/{id}/toggle-status', [BrandController::class, 'toggleStatus'])->name('brands.toggle-status');
+
         Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
 
         // Route quản lý thông số sản phẩm
