@@ -81,7 +81,24 @@
                         </button>
                     </h5>
                 </div>
-                
+                <div id="basicsCollapseOne" class="collapse show" aria-labelledby="basicsHeadingOne"
+                    data-parent="#basicsAccordion">
+                    <div class="card-body pl-0 pb-8">
+                        <p class="mb-0">Tất cả các sản phẩm bán ra đều được bảo hành tuỳ thuộc vào từng loại sản phẩm.
+                        </p>
+                        <h6 class="mb-0">1. Thời gian bảo hành là bao lâu?</h6>
+                        <p class="mb-0">- Laptop, PC, linh kiện: Thường 12 - 36 tháng tuỳ thuộc vào hãng và model.</p>
+                        <p class="mb-0">- Phụ kiện (chuột, bàn phím,...): Thường 6 - 12 tháng. </p>
+                        <p class="mb-0">Bạn có thể kiểm tra thông tin bảo hành cụ thể trên trang sản phẩm.</p>
+                        <p></p>
+                        <h6 class="mb-0">2. Điều kiện để được bảo hành?</h6>
+                        <p class="mb-0">- Sản phẩm còn trong thời hạn bảo hành.</p>
+                        <p class="mb-0">- Sản phẩm bị lỗi kỹ thuật do nhà sản xuất (không do rơi vỡ, nước vào, cháy
+                            nổi,...)
+                        </p>
+
+                    </div>
+                </div>
             </div>
             <!-- End Card -->
 
