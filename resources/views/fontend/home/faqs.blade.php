@@ -144,6 +144,14 @@
                         </button>
                     </h5>
                 </div>
+                <div id="basicsCollapseTwo" class="collapse" aria-labelledby="basicsHeadingTwo"
+                    data-parent="#basicsAccordion">
+                    <div class="card-body pl-0 pb-8">
+                        <h6 class="mb-0">1. Làm sao để sử dụng mã giảm giá?</h6>
+                        <p class="mb-0"> Bạn chọn mã giảm giá tại bước thanh toán. Mối đơn hàng chỉ áp dụng một mã.</p>
+                    </div>
+                    
+                </div>
             </div>
         </div>
         <!-- End Basics Accordion -->
