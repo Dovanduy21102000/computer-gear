@@ -48,7 +48,7 @@ class ContactClientController extends Controller
     
 
         // Gửi email thông báo
-        Mail::to('Ducngph46559@fpt.edu.vn')->send(new ContactMail($contact));
+        Mail::to('doduy21102000@gmail.com')->send(new ContactMail($contact));
 
     
         // Gửi email phản hồi lại cho người gửi
