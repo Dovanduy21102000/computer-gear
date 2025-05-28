@@ -111,7 +111,14 @@
                         </button>
                     </h5>
                 </div>
-                
+                <div id="basicsCollapseTwo" class="collapse" aria-labelledby="basicsHeadingTwo"
+                    data-parent="#basicsAccordion">
+                    <div class="card-body pl-0 pb-8">
+                        <p class="mb-0">Chúng tôi hỗ trợ đổi trả trong vòng 7 ngày với điều kiện sản phẩm còn nguyên
+                            vẹn và đầy
+                            đủ phụ kiện đi kèm.</p>
+                    </div>
+                </div>
             </div>
             <!-- End Card -->
             
