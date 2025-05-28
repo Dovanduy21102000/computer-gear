@@ -175,7 +175,8 @@
                             </div>
                         </div>
                         <div class="mb-1">
-                            <a href="{{ $product->category?->slug ? route('client.products.category', ['slug' => $product->category->slug]) : '#' }}" class="font-size-12 text-gray-5 mb-2 d-inline-block">
+                            <a href="{{ $product->category?->slug ? route('client.products.category', ['slug' => $product->category->slug]) : '#' }}"
+                                class="font-size-12 text-gray-5 mb-2 d-inline-block">
                                 {{ $product->category->name ?? 'Danh mục' }}</a>
                             <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
                             <div class="mb-2">
@@ -200,7 +201,9 @@
                                 <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
                                 @if ($product->brand)
                                     <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
-                                        Thương hiệu: <a href="{{ $product->brand?->brandSlug ? route('client.products.brand', ['slug' => $product->brand->brandSlug]) : '#' }}" class="text-dark">{{ $product->brand->name }}</a>
+                                        Thương hiệu: <a
+                                            href="{{ $product->brand?->brandSlug ? route('client.products.brand', ['slug' => $product->brand->brandSlug]) : '#' }}"
+                                            class="text-dark">{{ $product->brand->name }}</a>
                                     </p>
                                 @endif
                             </div>
@@ -275,7 +278,7 @@
                                         @endif
                                     @elseif ($product->price_sale)
                                         <span
-                                            class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                            class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span> <br>
                                         <del
                                             class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
                                     @else
@@ -283,7 +286,7 @@
                                     @endif
                                 </div>
                                 <small id="outOfStockWarning" class="text-danger d-none">Sản phẩm này đã hết
-                                    hàng</small>
+                                    hàng. Vui lòng liên hệ để được hỗ trợ.</small>
                             </div>
 
                             <div class="mb-1">
@@ -1112,8 +1115,7 @@
             // Kiểm tra giá
             let price = response.price_sale ?
                 `<span class=\"text-danger\">${response.price_sale}₫</span><br>
-                <del class=\"text-muted\">${response.price}₫</del>`
-                 :
+                <del class=\"text-muted\">${response.price}₫</del>` :
                 `${response.price}`;
 
             // Cập nhật giá
