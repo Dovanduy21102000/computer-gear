@@ -62,12 +62,17 @@ class Product extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function getAverageRatingAttribute()
+    {
+        return $this->comments()->where('status', 1)->avg('rating') ?? 0;
+    }
+
     public function isInWishlist()
-{
-    return auth()->check() &&
-           \App\Models\Wishlist::where('user_id', auth()->id())
-                               ->where('product_id', $this->id)
-                               ->exists();
-}
-   
+    {
+        return auth()->check() &&
+            \App\Models\Wishlist::where('user_id', auth()->id())
+            ->where('product_id', $this->id)
+            ->exists();
+    }
 }

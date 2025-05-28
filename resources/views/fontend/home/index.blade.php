@@ -99,7 +99,7 @@
                                                                     style="width: 80px;">
                                                                     @for ($i = 1; $i <= 5; $i++)
                                                                         <small
-                                                                            class="{{ $i <= $newProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $newProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                            class="{{ $i <= $newProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $newProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                     @endfor
                                                                 </div>
                                                                 <div class="flex-center-between product-price">
@@ -411,7 +411,7 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topViewedProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topViewedProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="mb-2"><a
@@ -674,7 +674,7 @@
                                                             style="width: 80px;">
                                                             @for ($i = 1; $i <= 5; $i++)
                                                                 <small
-                                                                    class="{{ $i <= $topViewedProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                    class="{{ $i <= $topViewedProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topViewedProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                             @endfor
                                                         </div>
                                                         <div class="flex-center-between mb-1">
@@ -800,7 +800,7 @@
                                                             style="width: 80px;">
                                                             @for ($i = 1; $i <= 5; $i++)
                                                                 <small
-                                                                    class="{{ $i <= $discountedProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $discountedProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                    class="{{ $i <= $discountedProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $discountedProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                             @endfor
                                                         </div>
                                                         <div class="flex-center-between mb-1 product-price">
@@ -963,7 +963,7 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topSellingProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="flex-center-between mb-3 product-price">
@@ -1091,7 +1091,7 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topSellingProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="flex-center-between mb-3 product-price">
@@ -1223,7 +1223,7 @@
                                                                 style="width: 80px;">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <small
-                                                                        class="{{ $i <= $topSellingProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->rating ? 'text-muted' : '' }}"></small>
+                                                                        class="{{ $i <= $topSellingProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $topSellingProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                                 @endfor
                                                             </div>
                                                             <div class="flex-center-between mb-3 product-price">
@@ -1380,7 +1380,7 @@
                                                             style="width: 80px;">
                                                             @for ($i = 1; $i <= 5; $i++)
                                                                 <small
-                                                                    class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                                                    class="{{ $i <= $product->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $product->average_rating ? 'text-muted' : '' }}"></small>
                                                             @endfor
                                                         </div>
                                                         <div class="flex-center-between mb-1">
@@ -1548,23 +1548,47 @@
                                                     style="width: 80px;">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <small
-                                                            class="{{ $i <= $keyboardMouseProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $keyboardMouseProduct->rating ? 'text-muted' : '' }}"></small>
+                                                            class="{{ $i <= $keyboardMouseProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $keyboardMouseProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                     @endfor
                                                 </div>
                                                 <div class="flex-center-between mb-1 product-price">
                                                     <div class="prodcut-price mt-3">
-                                                        @if ($keyboardMouseProduct->price_sale)
+                                                        @if ($keyboardMouseProduct->is_variant && $keyboardMouseProduct->variants->count())
+                                                            @php
+                                                                $prices = $keyboardMouseProduct->variants->pluck(
+                                                                    'price',
+                                                                );
+                                                                $salePrices = $keyboardMouseProduct->variants
+                                                                    ->pluck('price_sale')
+                                                                    ->filter();
+                                                                $minPrice = $salePrices->count()
+                                                                    ? $salePrices->min()
+                                                                    : $prices->min();
+                                                                $originalMin = $prices->min();
+                                                            @endphp
+                                                            @if ($salePrices->count())
+                                                                <div
+                                                                    class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                    <ins
+                                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                                    <del
+                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                                </div>
+                                                            @else
+                                                                <span
+                                                                    class="text-dark fw-bold">{{ number_format($minPrice, 0, ',', '.') }}đ</span>
+                                                            @endif
+                                                        @elseif ($keyboardMouseProduct->price_sale && $keyboardMouseProduct->price_sale > 0)
                                                             <div
                                                                 class="prodcut-price mt-3 d-flex align-items-center position-relative">
                                                                 <ins
-                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($keyboardMouseProduct->price_sale) }}đ</ins>
+                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($keyboardMouseProduct->price_sale, 0, ',', '.') }}đ</ins>
                                                                 <del
                                                                     class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ</del>
                                                             </div>
                                                         @else
-                                                            <div class="text-dark fw-bold fs-5">
-                                                                {{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ
-                                                            </div>
+                                                            <span
+                                                                class="text-dark fw-bold">{{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ</span>
                                                         @endif
                                                     </div>
 
@@ -1672,23 +1696,45 @@
                                                     style="width: 80px;">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <small
-                                                            class="{{ $i <= $screenProduct->rating ? 'fas' : 'far' }} fa-star {{ $i > $screenProduct->rating ? 'text-muted' : '' }}"></small>
+                                                            class="{{ $i <= $screenProduct->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $screenProduct->average_rating ? 'text-muted' : '' }}"></small>
                                                     @endfor
                                                 </div>
                                                 <div class="flex-center-between mb-1 product-price">
                                                     <div class="prodcut-price mt-3">
-                                                        @if ($screenProduct->price_sale)
+                                                        @if ($screenProduct->is_variant && $screenProduct->variants->count())
+                                                            @php
+                                                                $prices = $screenProduct->variants->pluck('price');
+                                                                $salePrices = $screenProduct->variants
+                                                                    ->pluck('price_sale')
+                                                                    ->filter();
+                                                                $minPrice = $salePrices->count()
+                                                                    ? $salePrices->min()
+                                                                    : $prices->min();
+                                                                $originalMin = $prices->min();
+                                                            @endphp
+                                                            @if ($salePrices->count())
+                                                                <div
+                                                                    class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                    <ins
+                                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                                    <del
+                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                                </div>
+                                                            @else
+                                                                <span
+                                                                    class="text-dark fw-bold">{{ number_format($minPrice, 0, ',', '.') }}đ</span>
+                                                            @endif
+                                                        @elseif ($screenProduct->price_sale && $screenProduct->price_sale > 0)
                                                             <div
                                                                 class="prodcut-price mt-3 d-flex align-items-center position-relative">
                                                                 <ins
-                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($screenProduct->price_sale) }}đ</ins>
+                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($screenProduct->price_sale, 0, ',', '.') }}đ</ins>
                                                                 <del
                                                                     class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($screenProduct->price, 0, ',', '.') }}đ</del>
                                                             </div>
                                                         @else
-                                                            <div class="text-dark fw-bold fs-5">
-                                                                {{ number_format($screenProduct->price, 0, ',', '.') }}đ
-                                                            </div>
+                                                            <span
+                                                                class="text-dark fw-bold">{{ number_format($screenProduct->price, 0, ',', '.') }}đ</span>
                                                         @endif
                                                     </div>
 

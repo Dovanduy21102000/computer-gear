@@ -61,7 +61,7 @@ class UserController extends Controller
         ];
 
         if ($request->phone != $user->phone) {
-            $rules['phone'] = 'required|string|size:10|regex:/^0[^6421][0-9]{8}$/|unique:users';
+            $rules['phone'] = 'required|string|regex:/^0[0-9]{9}$/|unique:users';
         }
 
         $messages = [
@@ -70,8 +70,7 @@ class UserController extends Controller
             'name.max' => 'Tên không được vượt quá :max kí tự!',
             'phone.required' => 'Số điện thoại không được để trống!',
             'phone.string' => 'Số điện thoại phải là một chuỗi ký tự!',
-            'phone.size' => 'Số điện thoại phải có độ dài :size chữ số!',
-            'phone.regex' => 'Số điện thoại không hợp lệ!',
+            'phone.regex' => 'Số điện thoại phải bắt đầu bằng số 0 và có 10 chữ số!',
             'phone.unique' => 'Số điện thoại đã tồn tại!',
             'address.string' => 'Địa chỉ phải là một chuỗi ký tự!',
             'address.max' => 'Địa chỉ không được vượt quá :max kí tự!',
@@ -124,6 +123,23 @@ class UserController extends Controller
 
         $user = Auth::user();
 
+        // Xác thực đầu vào
+        $validator = Validator::make($request->all(), [
+            'currentPassword' => 'required',
+            'newPassword' => 'required|min:6|confirmed',
+        ], [
+            'currentPassword.required' => 'Vui lòng nhập mật khẩu hiện tại.',
+            'newPassword.required' => 'Vui lòng nhập mật khẩu mới.',
+            'newPassword.min' => 'Mật khẩu mới phải có ít nhất 6 ký tự.',
+            'newPassword.confirmed' => 'Mật khẩu mới và xác nhận không khớp.',
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
         // Kiểm tra mật khẩu hiện tại
         if (!Hash::check($request->currentPassword, $user->password)) {
             return redirect()->back()->with([
@@ -133,24 +149,22 @@ class UserController extends Controller
             ])->withInput();
         }
 
-        // Xác thực đầu vào
-        $request->validate([
-            'currentPassword' => 'required',
-            'newPassword' => 'required|min:8|confirmed',
-        ], [
-            'currentPassword.required' => 'Vui lòng nhập mật khẩu hiện tại.',
-            'newPassword.required' => 'Vui lòng nhập mật khẩu mới.',
-            'newPassword.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
-            'newPassword.confirmed' => 'Mật khẩu mới và xác nhận không khớp.',
-        ]);
-
+        // Kiểm tra mật khẩu mới phải khác mật khẩu cũ
+        if ($request->newPassword === $request->currentPassword) {
+            return redirect()->back()->with([
+                'alert' => [
+                    'content' => 'Mật khẩu mới phải khác mật khẩu hiện tại.'
+                ]
+            ])->withInput();
+        }
 
         $user->password = Hash::make($request->newPassword);
         $user->save();
 
-
         return redirect()->route('user.show')->with([
-            'success' => 'Cập nhật mật khẩu thành công!',
+            'alert' => [
+                'content' => 'Mật khẩu đã được thay đổi thành công!'
+            ]
         ]);
     }
 }

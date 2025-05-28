@@ -67,7 +67,7 @@
                             <div class="btn-group w-100">
                                 <button id="editInfoTab" class="btn btn-outline-primary w-50 active">Chỉnh sửa thông
                                     tin</button>
-                                <button id="changePasswordTab" class="btn btn-outline-secondary w-50">Thay đổi mật
+                                <button id="changePasswordTab" class="btn btn-outline-primary w-50">Thay đổi mật
                                     khẩu</button>
                             </div>
                         </article>
@@ -112,23 +112,27 @@
                                 <div class="form-group">
                                     <label for="currentPassword"><strong>Mật khẩu hiện tại:</strong></label>
                                     <input type="password" id="currentPassword" name="currentPassword"
-                                        class="form-control" required>
+                                        class="form-control @error('currentPassword') is-invalid @enderror" required>
                                     @error('currentPassword')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="form-group">
                                     <label for="newPassword"><strong>Mật khẩu mới:</strong></label>
-                                    <input type="password" id="newPassword" name="newPassword" class="form-control"
-                                        required>
+                                    <input type="password" id="newPassword" name="newPassword"
+                                        class="form-control @error('newPassword') is-invalid @enderror" required>
                                     @error('newPassword')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="form-group">
                                     <label for="renewPassword"><strong>Nhập lại mật khẩu mới:</strong></label>
                                     <input type="password" id="renewPassword" name="newPassword_confirmation"
-                                        class="form-control" required>
+                                        class="form-control @error('newPassword_confirmation') is-invalid @enderror"
+                                        required>
+                                    @error('newPassword_confirmation')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-lg w-100">Thay đổi mật khẩu</button>
                             </form>
@@ -137,8 +141,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    </div>
     </div>
 </main>
 <br>

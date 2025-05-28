@@ -87,7 +87,7 @@
                                 <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
                                     @for ($i = 1; $i <= 5; $i++)
                                         <small
-                                            class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                            class="{{ $i <= $product->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $product->average_rating ? 'text-muted' : '' }}"></small>
                                     @endfor
                                 </div>
                                 <div class="flex-center-between mb-1 mt-4">
@@ -219,7 +219,7 @@
                                 <div class="text-warning text-ls-n2 font-size-16 mb-1" style="width: 80px;">
                                     @for ($i = 1; $i <= 5; $i++)
                                         <small
-                                            class="{{ $i <= $product->rating ? 'fas' : 'far' }} fa-star {{ $i > $product->rating ? 'text-muted' : '' }}"></small>
+                                            class="{{ $i <= $product->average_rating ? 'fas' : 'far' }} fa-star {{ $i > $product->average_rating ? 'text-muted' : '' }}"></small>
                                     @endfor
                                 </div>
                                 <div class="prodcut-price mb-2">
@@ -305,10 +305,10 @@
                                 <div class="d-none d-xl-block prodcut-add-cart w-100">
                                     @if ($product->is_variant)
                                         <a href="{{ route('client.products.detail', $product->slug) }}"
-                                            class="btn btn-warning w-100 py-2 rounded-pill shadow-sm transition-3d-hover"
+                                            class="btn btn-warning w-100 py-2 text-white rounded-pill shadow-sm transition-3d-hover"
                                             type="submit"
-                                            style="font-size: 1rem; font-weight: 600; background: #ffc107; border: none;">
-                                            <i class="ec ec-add-to-cart mr-2"></i> Thêm vào giỏ hàng
+                                            style="font-size: 1rem; font-weight: 600; background: #3b87de; border: none;">
+                                            <i class="ec ec-add-to-cart mr-2 text-white"></i> Thêm vào giỏ hàng
                                         </a>
                                     @else
                                         <form action="{{ route('cart.add') }}" method="POST">
@@ -316,10 +316,10 @@
                                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                                             <input type="hidden" name="quantity" value="1">
                                             <button
-                                                class="btn btn-warning w-100 py-2 rounded-pill shadow-sm transition-3d-hover"
+                                                class="btn btn-warning w-100 py-2 text-white rounded-pill shadow-sm transition-3d-hover"
                                                 type="submit"
-                                                style="font-size: 1rem; font-weight: 600; background: #ffc107; border: none;">
-                                                <i class="ec ec-add-to-cart mr-2"></i> Thêm vào giỏ hàng
+                                                style="font-size: 1rem; font-weight: 600; background: #3b87de; border: none;">
+                                                <i class="ec ec-add-to-cart mr-2 text-white"></i> Thêm vào giỏ hàng
                                             </button>
                                         </form>
                                     @endif
