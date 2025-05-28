@@ -71,7 +71,7 @@ class ProductVariantController extends Controller
         // Log::info('Attributes from request:', ['attributes' => $request->input('attributes')]);
 
         $imagePath = $request->hasFile('image')
-            ? $request->file('image')->store('products', 'public')
+            ? $request->file('image')->store('variants', 'public')
             : null;
 
         $variant = $product->variants()->create([
@@ -195,7 +195,7 @@ class ProductVariantController extends Controller
             if ($variant->image) {
                 Storage::disk('public')->delete($variant->image);
             }
-            $imagePath = $request->file('image')->store('products', 'public');
+            $imagePath = $request->file('image')->store('variants', 'public');
         } else {
             $imagePath = $variant->image;
         }
