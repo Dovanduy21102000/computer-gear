@@ -47,12 +47,10 @@ class OrderController extends Controller
             }
         }
 
-
         // Lấy danh sách quận/huyện theo tỉnh cũ nếu có
         $districts = [];
         if (!empty($order->province_id)) {
             $response = Http::get("https://provinces.open-api.vn/api/p/{$order->province_id}?depth=2");
-
             $districtData = json_decode($response->body(), true);
             $districts = $districtData['districts'] ?? [];
         }
@@ -65,7 +63,13 @@ class OrderController extends Controller
                 break;
             }
         }
-        $orderItems = $order->items()->with('product', 'productVariant')->get();
+
+        // Load order items với relationship và kiểm tra có variant không
+        $orderItems = $order->items()->with(['product', 'productVariant.attributeValues.attribute'])->get();
+
+        // Kiểm tra xem có item nào có variant không
+        $hasVariant = $orderItems->contains(fn($item) => $item->product_variant_id !== null);
+
         $template = 'backend.orders.show';
         return view('backend.dashboard.layout', compact(
             'template',
@@ -75,7 +79,8 @@ class OrderController extends Controller
             'districts',
             'provinceName',
             'districtName',
-            'orderItems'
+            'orderItems',
+            'hasVariant'
         ));
     }
 
@@ -148,8 +153,8 @@ class OrderController extends Controller
         $validTransitions = [
             'pending' => ['pending', 'processing', 'canceled'],
             'processing' => ['processing', 'delivered', 'canceled'],
-            'delivered' => ['delivered', 'completed', 'canceled'],
-            'completed' => ['completed', 'success'],
+            'delivered' => ['delivered', 'completed'],
+            'completed' => ['completed', 'success', 'canceled'],
             'success' => [],
             'canceled' => ['pending', 'processing', 'delivered']
         ];
@@ -160,9 +165,9 @@ class OrderController extends Controller
         }
 
         // Nếu đơn hàng đã giao, hoàn thành hoặc hủy => KHÔNG CHO PHÉP CHỈNH SỬA BẤT KỲ THÔNG TIN NÀO, chỉ được đổi trạng thái hợp lệ
-        if (in_array($order->status, ['delivered', 'completed', 'canceled'])) {
+        if (in_array($order->status, ['delivered', 'completed', 'success', 'canceled'])) {
             if ($newStatus === $order->status) {
-                return redirect()->back()->with('error', 'Bạn không thể chỉnh sửa đơn hàng đã hoàn thành hoặc bị hủy.');
+                return redirect()->back()->with('error', 'Bạn không thể chỉnh sửa đơn hàng');
             }
 
             // Chỉ cho phép cập nhật trạng thái nếu hợp lệ
@@ -277,16 +282,27 @@ class OrderController extends Controller
     }
 
     public function rejectCancel($id)
-    {
-        $order = Order::findOrFail($id);
-        if ($order->status === 'pending_cancel' && $order->cancel_requested) {
-            $order->cancel_requested = false;
-            $order->cancel_reason = null;
-            $order->save();
-            Mail::to($order->shipping_email)->send(new CancelRequestStatusMail($order, false));
+{
+    $order = Order::findOrFail($id);
 
-            return back()->with('success', 'Đã từ chối yêu cầu huỷ đơn hàng.');
+    if ($order->status === 'pending_cancel' && $order->cancel_requested) {
+        $order->cancel_requested = false;
+        $order->cancel_reason = null;
+
+        // Khôi phục trạng thái cũ nếu có
+        if ($order->previous_status) {
+            $order->status = $order->previous_status;
+            $order->previous_status = null;
         }
-        return back()->with('error', 'Không thể từ chối yêu cầu.');
+
+        $order->save();
+
+        Mail::to($order->shipping_email)->send(new CancelRequestStatusMail($order, false));
+
+        return back()->with('success', 'Đã từ chối yêu cầu huỷ đơn hàng.');
     }
+
+    return back()->with('error', 'Không thể từ chối yêu cầu.');
+}
+
 }

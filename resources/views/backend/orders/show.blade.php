@@ -101,7 +101,9 @@
                                 <tr>
                                     <th>Tên sản phẩm</th>
                                     <th>Ảnh</th>
-                                    <th>Thông số</th>
+                                    @if ($hasVariant)
+                                        <th>Phiên bản</th>
+                                    @endif
                                     <th>Số lượng</th>
                                     <th>Giá</th>
                                     <th>Tổng tiền</th>
@@ -109,38 +111,63 @@
                             </thead>
                             <tbody>
                                 @foreach ($orderItems as $item)
+                                    @php
+                                        $productInfo = json_decode($item->product_info, true) ?? [];
+                                        $archivedProduct = $productInfo['product'] ?? null;
+                                        $archivedVariant = $productInfo['variant'] ?? null;
+                                        $product = $item->product ?? $archivedProduct;
+                                        $variant = $item->productVariant ?? $archivedVariant;
+                                    @endphp
                                     <tr>
-                                        <td>{{ $item->product->name }}</td>
-                                        <td class="text-center">
-                                            <img src="{{ asset('storage/' . $item->product->thumbnail) }}"
-                                                alt="{{ $item->product->name }}" class="img-fluid"
-                                                style="max-width: 100px;">
-                                        </td>
                                         <td>
-                                            @if ($item->productVariant)
-                                                <strong>{{ $item->productVariant->sku }}</strong> <br>
-                                                <span class="text-muted">
-                                                    @foreach ($item->productVariant->attributeValues as $attr)
-                                                        {{ $attr->name }}{{ !$loop->last ? ', ' : '' }}
-                                                    @endforeach
-                                                </span>
-                                            @else
+                                            @if ($item->product)
                                                 {{ $item->product->name }}
+                                            @else
+                                                {{ $archivedProduct['name'] ?? 'Unknown' }}
                                             @endif
                                         </td>
+                                        <td class="text-center">
+                                            <img src="{{ $item->productVariant?->thumbnail
+                                                ? asset('storage/' . $item->productVariant->thumbnail)
+                                                : ($item->product?->thumbnail
+                                                    ? asset('storage/' . $item->product->thumbnail)
+                                                    : ($archivedVariant['thumbnail'] ?? false
+                                                        ? asset('storage/' . $archivedVariant['thumbnail'])
+                                                        : ($archivedProduct['thumbnail'] ?? false
+                                                            ? asset('storage/' . $archivedProduct['thumbnail'])
+                                                            : asset('/images/no-image.png')))) }}"
+                                                alt="product image" class="img-fluid" style="max-width: 100px;">
+                                        </td>
+                                        @if ($hasVariant)
+                                            <td>
+                                                @if ($item->productVariant && $item->productVariant->attributeValues->isNotEmpty())
+                                                    <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
+                                                        @foreach ($item->productVariant->attributeValues as $value)
+                                                            <li class="mb-1">
+                                                                <i class="fas fa-check-circle text-primary mr-1"></i>
+                                                                <strong>{{ $value->attribute->name ?? '' }}:</strong>
+                                                                {{ $value->value }}
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                @elseif ($archivedVariant && !empty($archivedVariant['attributeValues']))
+                                                    <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
+                                                        @foreach ($archivedVariant['attributeValues'] as $value)
+                                                            <li class="mb-1">
+                                                                <i class="fas fa-check-circle text-primary mr-1"></i>
+                                                                <strong>{{ $value['attribute']['name'] ?? '' }}:</strong>
+                                                                {{ $value['value'] }}
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
+                                            </td>
+                                        @endif
                                         <td class="text-center">{{ $item->quantity }}</td>
                                         <td class="text-right">
-                                            @if ($item->price_sale)
-                                                <span class="text-danger" style="text-decoration: line-through;">
-                                                    {{ number_format($item->price, 0, ',', '.') }} VNĐ
-                                                </span>
-                                                <br>
-                                                <span class="text-success">
-                                                    {{ number_format($item->price_sale, 0, ',', '.') }} VNĐ
-                                                </span>
-                                            @else
-                                                {{ number_format($item->price, 0, ',', '.') }} VNĐ
-                                            @endif
+                                            {{ number_format($item->price, 0, ',', '.') }} VNĐ
                                         </td>
                                         <td class="text-right">
                                             {{ number_format($item->price * $item->quantity, 0, ',', '.') }} VNĐ
@@ -153,7 +180,6 @@
                 </div>
             </div>
         </div>
-
         </div>
     </section>
 </main>

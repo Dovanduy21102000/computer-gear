@@ -186,7 +186,6 @@
                                         @elseif ($order->status === 'delivered')
                                             <option value="delivered" selected>Đang giao hàng</option>
                                             <option value="completed">Đã giao hàng</option>
-                                            <option value="canceled">Hủy đơn</option>
                                         @elseif ($order->status === 'completed')
                                             <option value="completed" selected>Đã giao hàng</option>
                                             <option value="success">Hoàn thành</option>
