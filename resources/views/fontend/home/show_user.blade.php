@@ -137,10 +137,10 @@
                                 <button type="submit" class="btn btn-primary btn-lg w-100">Thay đổi mật khẩu</button>
                             </form>
                         </article>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    </div>
     </div>
 </main>
 <br>

@@ -140,6 +140,7 @@ class ProductClientController extends Controller
     {
         $product = Product::where('slug', $slug)->firstOrFail();
         $product->increment('views');
+
         // Lấy thông tin biến thể + thuộc tính
         $variants = ProductVariant::where('product_id', $product->id)
             ->with(['attributeValues.attribute'])

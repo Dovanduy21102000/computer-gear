@@ -172,7 +172,7 @@
                             <th>Sản phẩm</th>
 
                             @if ($hasVariant)
-                                <th>Phiên bản</th>
+                                <th>Thông số</th>
                             @endif
 
                             <th>Đơn giá</th>
