@@ -61,7 +61,7 @@ class UserController extends Controller
         ];
 
         if ($request->phone != $user->phone) {
-            $rules['phone'] = 'required|string|size:10|regex:/^0[^6421][0-9]{8}$/|unique:users';
+            $rules['phone'] = 'required|string|regex:/^0[0-9]{9}$/|unique:users';
         }
 
         $messages = [
@@ -70,8 +70,7 @@ class UserController extends Controller
             'name.max' => 'Tên không được vượt quá :max kí tự!',
             'phone.required' => 'Số điện thoại không được để trống!',
             'phone.string' => 'Số điện thoại phải là một chuỗi ký tự!',
-            'phone.size' => 'Số điện thoại phải có độ dài :size chữ số!',
-            'phone.regex' => 'Số điện thoại không hợp lệ!',
+            'phone.regex' => 'Số điện thoại phải bắt đầu bằng số 0 và có 10 chữ số!',
             'phone.unique' => 'Số điện thoại đã tồn tại!',
             'address.string' => 'Địa chỉ phải là một chuỗi ký tự!',
             'address.max' => 'Địa chỉ không được vượt quá :max kí tự!',

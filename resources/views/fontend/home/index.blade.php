@@ -1703,9 +1703,7 @@
                                                     <div class="prodcut-price mt-3">
                                                         @if ($screenProduct->is_variant && $screenProduct->variants->count())
                                                             @php
-                                                                $prices = $screenProduct->variants->pluck(
-                                                                    'price',
-                                                                );
+                                                                $prices = $screenProduct->variants->pluck('price');
                                                                 $salePrices = $screenProduct->variants
                                                                     ->pluck('price_sale')
                                                                     ->filter();
