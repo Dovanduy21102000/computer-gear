@@ -177,7 +177,10 @@
                         <h6 class="mb-0">1. Nếu tôi cần cài lại Windows hoặc hỗ trợ kỹ thuật thì sao?</h6>
                         <p class="mb-0"> Bạn có thể mang sản phẩm đến cửa hàng để được hộ trợ cài đặt phần mềm, vệ sinh máy miễn phí.</p>
                     </div>
-                   
+                    <div class="card-body pl-0 pb-8">
+                        <h6 class="mb-0">2. Tôi có thể yêu cầu lắp đặt PC tại nhà không?</h6>
+                        <p class="mb-0">Có. Chúng tôi hỗ trợ lắp đặt tận nơi với phí dịch vụ tuỳ khu vực.</p>
+                    </div>
                 </div>
             </div>
         </div>
