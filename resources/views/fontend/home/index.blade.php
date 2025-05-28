@@ -1553,18 +1553,42 @@
                                                 </div>
                                                 <div class="flex-center-between mb-1 product-price">
                                                     <div class="prodcut-price mt-3">
-                                                        @if ($keyboardMouseProduct->price_sale)
+                                                        @if ($keyboardMouseProduct->is_variant && $keyboardMouseProduct->variants->count())
+                                                            @php
+                                                                $prices = $keyboardMouseProduct->variants->pluck(
+                                                                    'price',
+                                                                );
+                                                                $salePrices = $keyboardMouseProduct->variants
+                                                                    ->pluck('price_sale')
+                                                                    ->filter();
+                                                                $minPrice = $salePrices->count()
+                                                                    ? $salePrices->min()
+                                                                    : $prices->min();
+                                                                $originalMin = $prices->min();
+                                                            @endphp
+                                                            @if ($salePrices->count())
+                                                                <div
+                                                                    class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                    <ins
+                                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                                    <del
+                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                                </div>
+                                                            @else
+                                                                <span
+                                                                    class="text-dark fw-bold">{{ number_format($minPrice, 0, ',', '.') }}đ</span>
+                                                            @endif
+                                                        @elseif ($keyboardMouseProduct->price_sale && $keyboardMouseProduct->price_sale > 0)
                                                             <div
                                                                 class="prodcut-price mt-3 d-flex align-items-center position-relative">
                                                                 <ins
-                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($keyboardMouseProduct->price_sale) }}đ</ins>
+                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($keyboardMouseProduct->price_sale, 0, ',', '.') }}đ</ins>
                                                                 <del
                                                                     class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ</del>
                                                             </div>
                                                         @else
-                                                            <div class="text-dark fw-bold fs-5">
-                                                                {{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ
-                                                            </div>
+                                                            <span
+                                                                class="text-dark fw-bold">{{ number_format($keyboardMouseProduct->price, 0, ',', '.') }}đ</span>
                                                         @endif
                                                     </div>
 
@@ -1677,18 +1701,42 @@
                                                 </div>
                                                 <div class="flex-center-between mb-1 product-price">
                                                     <div class="prodcut-price mt-3">
-                                                        @if ($screenProduct->price_sale)
+                                                        @if ($screenProduct->is_variant && $screenProduct->variants->count())
+                                                            @php
+                                                                $prices = $screenProduct->variants->pluck(
+                                                                    'price',
+                                                                );
+                                                                $salePrices = $screenProduct->variants
+                                                                    ->pluck('price_sale')
+                                                                    ->filter();
+                                                                $minPrice = $salePrices->count()
+                                                                    ? $salePrices->min()
+                                                                    : $prices->min();
+                                                                $originalMin = $prices->min();
+                                                            @endphp
+                                                            @if ($salePrices->count())
+                                                                <div
+                                                                    class="prodcut-price mt-3 d-flex align-items-center position-relative">
+                                                                    <ins
+                                                                        class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($minPrice, 0, ',', '.') }}đ</ins>
+                                                                    <del
+                                                                        class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($originalMin, 0, ',', '.') }}đ</del>
+                                                                </div>
+                                                            @else
+                                                                <span
+                                                                    class="text-dark fw-bold">{{ number_format($minPrice, 0, ',', '.') }}đ</span>
+                                                            @endif
+                                                        @elseif ($screenProduct->price_sale && $screenProduct->price_sale > 0)
                                                             <div
                                                                 class="prodcut-price mt-3 d-flex align-items-center position-relative">
                                                                 <ins
-                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($screenProduct->price_sale) }}đ</ins>
+                                                                    class="font-size-20 text-red text-decoration-none product-sale-price">{{ number_format($screenProduct->price_sale, 0, ',', '.') }}đ</ins>
                                                                 <del
                                                                     class="font-size-12 tex-gray-6 position-absolute bottom-100">{{ number_format($screenProduct->price, 0, ',', '.') }}đ</del>
                                                             </div>
                                                         @else
-                                                            <div class="text-dark fw-bold fs-5">
-                                                                {{ number_format($screenProduct->price, 0, ',', '.') }}đ
-                                                            </div>
+                                                            <span
+                                                                class="text-dark fw-bold">{{ number_format($screenProduct->price, 0, ',', '.') }}đ</span>
                                                         @endif
                                                     </div>
 
