@@ -325,7 +325,9 @@
                                 foreach ($variants as $variant) {
                                     foreach ($variant->attributeValues as $attributeValue) {
                                         if (isset($attributeValue->attribute)) {
-                                            $attributeName = trim($attributeValue->attribute->name);
+                                            $attributeName = strtolower(
+                                                str_replace([' ', '_'], '', trim($attributeValue->attribute->name)),
+                                            );
                                             $attributeValueText = trim($attributeValue->value);
                                             $attributes[$attributeName][$attributeValueText] = $attributeValueText;
                                         }
@@ -346,10 +348,9 @@
                                         <div class="attribute-options">
                                             @foreach ($values as $value)
                                                 <label class="attribute-option">
-                                                    <input type="radio"
-                                                        name="{{ strtolower(str_replace(' ', '_', $attributeName)) }}"
-                                                        value="{{ $value }}" class="d-none">
-                                                    <span class="attribute-box">{{ $value }}</span>
+                                                    <input type="radio" name="{{ $attributeName }}"
+                                                        value="{{ trim($value) }}" class="d-none">
+                                                    <span class="attribute-box">{{ trim($value) }}</span>
                                                 </label>
                                             @endforeach
                                         </div>
