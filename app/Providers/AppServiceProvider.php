@@ -6,7 +6,12 @@ use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\CategoryPost;
 use App\Models\Product;
+
 use Doctrine\DBAL\Types\Type;
+
+use App\Models\ProductVariant;
+use App\Observers\ProductObserver;
+use App\Observers\ProductVariantObserver;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
@@ -49,22 +54,20 @@ class AppServiceProvider extends ServiceProvider
                     return 1;
                 });
             }
-            $topViewedProducts = Product::orderByDesc('views')
+            $topViewedProducts = Product::where('status', 1)
+                ->orderByDesc('views')
                 ->get()
                 ->shuffle()
-                ->take(3);
-            $activeProducts = Product::where('status', '1')
-                ->get()
-                ->shuffle()
-                ->take(3);
-            $topRatedProducts = Product::withCount('comments')
+                ->take(5);
+           
+            $topRatedProducts = Product::where('status', 1)
+                ->withCount('comments')
                 ->withAvg('comments', 'rating') // Tính trung bình rating của sản phẩm
                 ->orderByDesc('comments_avg_rating') // Sắp xếp theo rating trung bình
                 ->take(3)
                 ->get()
                 ->shuffle(); // Trộn ngẫu nhiên
             $activeProducts = Product::where('status', '1') // hoặc status = 1 tuỳ bạn định nghĩa
-
                 ->take(10) // Lấy top 10 sản phẩm nhiều lượt xem nhất (có thể điều chỉnh)
                 ->get()
                 ->shuffle() // Trộn ngẫu nhiên
@@ -81,7 +84,6 @@ class AppServiceProvider extends ServiceProvider
                 'topViewedProducts' => $topViewedProducts,
                 'activeProducts' => $activeProducts,
                 'topRatedProducts' => $topRatedProducts,
-                'activeProducts' => $activeProducts,
                 'categories' => $categories,
                 'categories_post' => $categories_post
             ]);
@@ -91,5 +93,8 @@ class AppServiceProvider extends ServiceProvider
             $admin = \App\Models\User::where('role', 'admin')->first();
             $view->with('admin', $admin);
         });
+
+        Product::observe(ProductObserver::class);
+        ProductVariant::observe(ProductVariantObserver::class);
     }
 }

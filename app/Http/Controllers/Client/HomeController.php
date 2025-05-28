@@ -43,10 +43,12 @@ class HomeController extends Controller
         $topViewedProducts = Product::with('brand')
             ->whereHas('category', $activeCategoryBrand)
             ->whereHas('brand', $activeCategoryBrand)
+            ->where('status', 1)
             ->orderByDesc('views')
+            ->latest()
             ->take(5)
             ->get();
-
+        // dd($topViewedProducts);
         // Sản phẩm có giảm giá
         $discountedProducts = Product::whereNotNull('price_sale')
             ->where('price_sale', '>', 0)
@@ -79,6 +81,16 @@ class HomeController extends Controller
             ->take(10)
             ->get();
 
+
+            $topCategories2 = ['Màn hình'];
+            $screenProducts = Product::whereHas('category', function ($query) use ($topCategories2) {
+                $query->whereIn('name', $topCategories2)->where('is_active', 1);
+            })
+                ->whereHas('brand', $activeCategoryBrand)
+                ->latest()
+                ->take(10)
+                ->get();
+
         // Danh sách thương hiệu đang hoạt động
         $brands = Brand::where('is_active', 1)->get();
         $total_items = CartItem::whereHas('cart', function ($query) {
@@ -106,6 +118,7 @@ class HomeController extends Controller
             'topSellingProducts',
             'products',
             'keyboardMouseProducts',
+            'screenProducts',
             'brands',
             'total_items',
             'recentPosts',

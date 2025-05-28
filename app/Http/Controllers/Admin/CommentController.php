@@ -39,7 +39,7 @@ class CommentController extends Controller
 
         // Kiểm tra trạng thái của đơn hàng
         $order = Order::where('user_id', Auth::id())
-            ->where('status', 'completed') // Trạng thái đơn hàng "hoàn thành"
+            ->where('status', 'success') // Trạng thái đơn hàng "hoàn thành"
             ->whereHas('items', function ($query) use ($request) {
                 $query->where('product_id', $request->product_id);
             })

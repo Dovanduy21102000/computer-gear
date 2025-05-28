@@ -117,12 +117,13 @@ class CheckoutController extends Controller
             // Apply coupon if exists
             $coupon = session('coupon');
             $couponDiscount = 0;
-            if ($coupon && $totalPrice >= $coupon['min_order_total']) {
-                if ($coupon['type'] === 'percent') {
-                    $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
-                } else {
-                    $couponDiscount = min($totalPrice, $coupon['price']);
-                }
+            if ($coupon && isset($coupon['type']) && $coupon['type'] === 'percent') {
+                $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                    ? min($percentageDiscount, $coupon['maximum_amount'])
+                    : $percentageDiscount;
+            } elseif ($coupon && isset($coupon['price'])) {
+                $couponDiscount = min($coupon['price'], $totalPrice);
             }
 
             $finalPrice = max(0, $totalPrice - $couponDiscount);
@@ -355,8 +356,11 @@ class CheckoutController extends Controller
 
                 if ($coupon) {
                     if ($totalPrice >= $coupon['min_order_total']) {
-                        if ($coupon['type'] === 'percent') {
-                            $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
+                        if (isset($coupon['type']) && $coupon['type'] === 'percent') {
+                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                            $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                                ? min($percentageDiscount, $coupon['maximum_amount'])
+                                : $percentageDiscount;
                         } else {
                             $couponDiscount = min($totalPrice, $coupon['price']);
                         }
@@ -387,11 +391,22 @@ class CheckoutController extends Controller
                 ]);
 
                 if ($couponId) {
-                    CouponUser::create([
-                        'user_id' => $userId,
-                        'coupon_id' => $couponId,
-                        'order_id' => $order->id
-                    ]);
+                    $couponUser = CouponUser::where('user_id', $userId)
+                        ->where('coupon_id', $couponId)
+                        ->first();
+                    if ($couponUser) {
+                        $couponUser->used = 1;
+                        $couponUser->save();
+                    } else {
+                        CouponUser::create([
+                            'user_id' => $userId,
+                            'coupon_id' => $couponId,
+                            'used' => 1,
+                        ]);
+                    }
+
+                    // Increment the coupon's used_count
+                    \App\Models\Coupon::where('id', $couponId)->increment('used_count');
                 }
 
                 // Create order item for buy now item
@@ -419,6 +434,15 @@ class CheckoutController extends Controller
                 session()->forget('buy_now_item');
 
                 DB::commit();
+
+                // Delete cart items AFTER successful transaction
+                if (isset($cartItems)) {
+                    foreach ($cartItems as $item) {
+                        if (isset($item->id) && !is_string($item->id)) {
+                            $item->delete();
+                        }
+                    }
+                }
 
                 return redirect()->route('checkout.success', ['order_id' => $order->id])
                     ->with('success', 'Đặt hàng thành công! Vui lòng thanh toán khi nhận hàng.');
@@ -474,10 +498,13 @@ class CheckoutController extends Controller
 
             if ($coupon) {
                 if ($totalPrice >= $coupon['min_order_total']) {
-                    if ($coupon['type'] === 'percent') {
-                        $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
+                    if (isset($coupon['type']) && $coupon['type'] === 'percent') {
+                        $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                        $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                            ? min($percentageDiscount, $coupon['maximum_amount'])
+                            : $percentageDiscount;
                     } else {
-                        $couponDiscount = min($totalPrice, $coupon['price']);
+                        $couponDiscount = min($coupon['price'], $totalPrice);
                     }
                     $couponId = $coupon['id'];
                 }
@@ -507,11 +534,23 @@ class CheckoutController extends Controller
 
             // Record coupon usage
             if ($couponId) {
-                CouponUser::create([
-                    'user_id' => $userId,
-                    'coupon_id' => $couponId,
-                    'order_id' => $order->id
-                ]);
+                $couponUser = CouponUser::where('user_id', $userId)
+                    ->where('coupon_id', $couponId)
+                    ->first();
+                if ($couponUser) {
+                    $couponUser->used = 1;
+                    $couponUser->save();
+                } else {
+                    CouponUser::create([
+                        'user_id' => $userId,
+                        'coupon_id' => $couponId,
+                        'used' => 1,
+                        'order_id' => $order->id
+                    ]);
+                }
+
+                // Increment the coupon's used_count
+                \App\Models\Coupon::where('id', $couponId)->increment('used_count');
             }
 
             // Save Order Items and Update Stock
@@ -567,6 +606,7 @@ class CheckoutController extends Controller
 
     public function applyCoupon(Request $request)
     {
+
         $isAjax = $request->expectsJson() || $request->ajax();
         $request->validate([
             'coupon_code' => 'required|string|exists:coupons,code',
@@ -806,10 +846,13 @@ class CheckoutController extends Controller
             $couponId = null;
 
             if ($coupon && $totalPrice >= $coupon['min_order_total']) {
-                if ($coupon['type'] === 'percent') {
-                    $couponDiscount = min($totalPrice * ($coupon['price'] / 100), $coupon['maximum_amount']);
+                if (isset($coupon['type']) && $coupon['type'] === 'percent') {
+                    $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                    $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                        ? min($percentageDiscount, $coupon['maximum_amount'])
+                        : $percentageDiscount;
                 } else {
-                    $couponDiscount = min($totalPrice, $coupon['price']);
+                    $couponDiscount = min($coupon['price'], $totalPrice);
                 }
                 $couponId = $coupon['id'];
             }
@@ -818,8 +861,8 @@ class CheckoutController extends Controller
 
             // Create temporary cart item for checkout
             $cartItem = new \stdClass();
-            $cartItem->id = 'buy_now_' . time(); // Add a unique ID
-            $cartItem->product = $product;
+            $cartItem->product = $product; // Assign product first
+            $cartItem->id = $cartItem->product->id; // Set the id to the actual product ID
             $cartItem->productVariant = $productVariantId ? ProductVariant::with(['attributeValues.attribute'])->find($productVariantId) : null;
             $cartItem->quantity = $request->quantity;
             $cartItem->price = $price;

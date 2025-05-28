@@ -73,6 +73,12 @@
 <!-- CSS CMT -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 <style>
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+
     .rating input {
         display: none;
     }
@@ -83,15 +89,10 @@
         cursor: pointer;
     }
 
-    .rating input:checked~label {
-        color: #3b87de;
-        /* Yellow color for selected stars */
-    }
-
+    .rating input:checked~label,
     .rating label:hover,
     .rating label:hover~label {
         color: #3b87de;
-        /* Highlight on hover */
     }
 
     /* Ensure stars are in left-to-right order */
@@ -557,11 +558,11 @@
                                                         bạn</label>
                                                 </div>
                                                 <div class="col-md-8 col-lg-9">
-                                                    <div class="rating">
+                                                    <div class="rating d-flex flex-row-reverse">
                                                         @for ($i = 5; $i >= 1; $i--)
                                                             <input type="radio" id="star{{ $i }}"
                                                                 name="rating" value="{{ $i }}"
-                                                                {{ $comment->rating == $i ? 'checked' : '' }}>
+                                                                {{ isset($comment) && $comment->rating == $i ? 'checked' : '' }}>
                                                             <label for="star{{ $i }}"
                                                                 class="fa fa-star"></label>
                                                         @endfor
@@ -614,10 +615,11 @@
                                                         bạn</label>
                                                 </div>
                                                 <div class="col-md-8 col-lg-9">
-                                                    <div class="rating">
+                                                    <div class="rating d-flex flex-row-reverse">
                                                         @for ($i = 5; $i >= 1; $i--)
                                                             <input type="radio" id="star{{ $i }}"
-                                                                name="rating" value="{{ $i }}">
+                                                                name="rating" value="{{ $i }}"
+                                                                {{ isset($comment) && $comment->rating == $i ? 'checked' : '' }}>
                                                             <label for="star{{ $i }}"
                                                                 class="fa fa-star"></label>
                                                         @endfor
@@ -1089,56 +1091,21 @@
             let quantity = response.quantity ?? 0;
             let variantImage = response.image; // Get the image path from the response
 
-            // Update the main product image display
+            // Update only the main product image (not the slider)
             if (variantImage) {
-                // Assuming the main slider container is #sliderSyncingNav
-                let $mainSlider = $('#sliderSyncingNav');
-
-                // Destroy the current slider instance
-                if ($mainSlider.hasClass('slick-initialized')) {
-                    $mainSlider.slick('unslick');
+                var mainImg = document.querySelector('.product-main-image img');
+                if (mainImg) {
+                    mainImg.src = window.storageBaseUrl + variantImage;
                 }
-
-                // Clear existing content and add the new variant image
-                $mainSlider.empty().append(
-                    '<div class="js-slide"><img class="img-fluid" src="' + window.storageBaseUrl +
-                    variantImage + '" alt="Variant Image"></div>'
-                );
-
-                // Re-initialize the slider (adjust options if needed)
-                $mainSlider.slick({
-                    infinite: true,
-                    arrows: true, // You might want to re-enable arrows
-                    // Add other original slider options here
-                    dots: true, // Example: add dots if they were there originally
-                    // Make sure to include all relevant data- attributes from the original #sliderSyncingNav
-                    // This is a placeholder, you should copy the exact data- attributes/options from the HTML
-                    dataArrowsClasses: "d-none d-lg-inline-block u-slick__arrow-classic u-slick__arrow-centered--y rounded-circle",
-                    dataArrowLeftClasses: "fas fa-arrow-left u-slick__arrow-classic-inner u-slick__arrow-classic-inner--left ml-lg-2 ml-xl-4",
-                    dataArrowRightClasses: "fas fa-arrow-right u-slick__arrow-classic-inner u-slick__arrow-classic-inner--right mr-lg-2 mr-xl-4",
-                    dataNavFor: "#sliderSyncingThumb"
-                });
-
-                // If you have a thumbnail slider linked, update it too
-                let $thumbSlider = $('#sliderSyncingThumb');
-                if ($thumbSlider.hasClass('slick-initialized')) {
-                    $thumbSlider.slick('unslick');
-                }
-                // For simplicity, let's just clear thumbnails if only one variant image is shown
-                $thumbSlider.empty(); // Clear thumbnail slider
-
             } else {
-                // If no variant image, maybe revert to the main product thumbnail or a placeholder
-                // This part depends on your desired behavior when a variant has no specific image
-                console.warn("No variant image found in response.");
-                // You might want to load the default product images again here
+                // Optionally, revert to the original product image if no variant image
+                // (No action needed if you want to keep the last image)
             }
-
 
             // Kiểm tra giá
             let price = response.price_sale ?
-                `<del class=\"text-muted\">${response.price}</del> 
-                <span class=\"text-danger\">${response.price_sale}</span>` :
+                `<del class=\"text-muted\">${response.price}₫</del> <br>
+                <span class=\"text-danger\">${response.price_sale}₫</span>` :
                 `${response.price}`;
 
             // Cập nhật giá
@@ -1373,11 +1340,11 @@
                     if (priceContainer) {
                         if (e.price_sale) {
                             priceContainer.innerHTML = `
-                                <del class="text-muted">${formatPrice(e.price)}</del>
-                                <span class="text-danger">${formatPrice(e.price_sale)}</span>
+                                <del class="text-muted">${formatPrice(e.price)}₫</del>
+                                <span class="text-danger">${formatPrice(e.price_sale)}₫</span>
                             `;
                         } else {
-                            priceContainer.innerHTML = `<span>${formatPrice(e.price)}</span>`;
+                            priceContainer.innerHTML = `<span>${formatPrice(e.price)}₫</span>`;
                         }
                     }
 
@@ -1531,4 +1498,8 @@
             window.initAttributeOptions();
         }
     });
+</script>
+
+<script>
+    window.storageBaseUrl = "{{ asset('storage/') }}/";
 </script>

@@ -233,6 +233,20 @@
                         location.reload();
                     });
             }
+
+            // Live search for products table
+            const searchInput = document.querySelector('.datatable-input');
+            const table = document.querySelector('.datatable-container table');
+            if (searchInput && table) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const rows = table.querySelectorAll('tbody tr');
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
         });
     </script>
 @endpush

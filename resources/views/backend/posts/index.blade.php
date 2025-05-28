@@ -18,7 +18,63 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">{{ $title }}</h5>
-                        <a href="{{ route($urlBase . 'create') }}" class="btn btn-primary">Thêm mới</a>
+
+                        <!-- Filter Form -->
+                        <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+                            <form method="GET" action="{{ route('posts.index') }}" class="flex-grow-1 me-2">
+                                <div class="row">
+                                    <!-- Category Filter -->
+                                    <div class="col-md-8">
+                                        @php
+                                            if (!function_exists('renderCategoryOptionsFilter')) {
+                                                function renderCategoryOptionsFilter(
+                                                    $categories,
+                                                    $parentId = null,
+                                                    $parentName = null,
+                                                    $selectedId = null,
+                                                ) {
+                                                    foreach ($categories as $category) {
+                                                        if ($category['parent_id'] == $parentId) {
+                                                            $hasChildren =
+                                                                collect($categories)
+                                                                    ->where('parent_id', $category['id'])
+                                                                    ->count() > 0;
+                                                            $displayName =
+                                                                $parentName && $hasChildren
+                                                                    ? "{$category['name']} ({$parentName})"
+                                                                    : $category['name'];
+                                                            if ($hasChildren) {
+                                                                echo "<optgroup label=\"{$displayName}\">";
+                                                                renderCategoryOptionsFilter(
+                                                                    $categories,
+                                                                    $category['id'],
+                                                                    $category['name'],
+                                                                    $selectedId,
+                                                                );
+                                                                echo '</optgroup>';
+                                                            } else {
+                                                                $selected =
+                                                                    $selectedId == $category['id'] ? 'selected' : '';
+                                                                echo "<option value=\"{$category['id']}\" {$selected}>{$displayName}</option>";
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        @endphp
+                                        <select name="category" id="category" class="form-control">
+                                            <option value="">-- Danh mục --</option>
+                                            @php renderCategoryOptionsFilter($category_post, null, null, request('category')); @endphp
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">Lọc</button>
+                                        <a href="{{ route('posts.index') }}" class="btn btn-secondary">Reset</a>
+                                    </div>
+                                </div>
+                            </form>
+                            <a href="{{ route($urlBase . 'create') }}" class="btn btn-primary ms-2">Thêm mới</a>
+                        </div>
 
                         <!-- Table -->
                         <div class="table-responsive">
@@ -27,6 +83,7 @@
                                     <tr>
                                         <th style="width: 15%;">Tiêu đề</th>
                                         <th style="width: 10%;">Slug</th>
+                                        <th style="width: 10%;">Thumbnail</th>
                                         <th style="width: 10%;">Danh mục</th>
                                         <th style="width: 20%;">Mô tả</th>
                                         <th style="width: 10%;">Lượt xem</th>
@@ -48,9 +105,19 @@
                                                 </div>
                                             </td>
                                             <td>
+                                                @if ($item->image)
+                                                    <img src="{{ asset('storage/' . $item->image) }}" alt="Thumbnail"
+                                                        style="width:60px; height:60px; object-fit:cover; border-radius:4px;">
+                                                @else
+                                                    <div
+                                                        style="width:60px; height:60px; background:#f0f0f0; border-radius:4px;">
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <td>
                                                 <div class="text-truncate"
-                                                    title="{{ $category_post->firstWhere('id', $item->category_id)->name ?? 'Không có' }}">
-                                                    {{ Str::limit($category_post->firstWhere('id', $item->category_id)->name ?? 'Không có', 20, '...') }}
+                                                    title="{{ $item->category_post->name ?? 'Không có' }}">
+                                                    {{ Str::limit($item->category_post->name ?? 'Không có', 20, '...') }}
                                                 </div>
                                             </td>
                                             <td>
@@ -58,10 +125,15 @@
                                                     {{ Str::limit($item->description, 50, '...') }}
                                                 </div>
                                             </td>
-                                            <td>{{ $item->view }}</td>
+                                            <td>{{ $item->views }}</td>
                                             <td>
-                                                <span class="badge {{ $item->status ? 'bg-success' : 'bg-danger' }}">
-                                                    {{ $item->status ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
+                                                <span
+                                                    class="badge status-toggle-badge {{ $item->status ? 'bg-success' : 'bg-danger' }}"
+                                                    data-id="{{ $item->id }}" style="cursor:pointer;">
+                                                    <span
+                                                        class="status-text">{{ $item->status ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}</span>
+                                                    <span class="spinner-border spinner-border-sm d-none" role="status"
+                                                        aria-hidden="true"></span>
                                                 </span>
                                             </td>
                                             <td class="text-nowrap">
@@ -118,3 +190,43 @@
         display: block;
     }
 </style>
+
+<!-- Add JS at the end of the file -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.status-toggle-badge').forEach(function(badge) {
+            badge.addEventListener('click', function() {
+                var postId = this.getAttribute('data-id');
+                var badgeEl = this;
+                var spinner = badgeEl.querySelector('.spinner-border');
+                var statusText = badgeEl.querySelector('.status-text');
+                spinner.classList.remove('d-none');
+                fetch('/admin/posts/toggle-status/' + postId, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector(
+                                'meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        spinner.classList.add('d-none');
+                        if (data.status === 1) {
+                            badgeEl.classList.remove('bg-danger');
+                            badgeEl.classList.add('bg-success');
+                            statusText.textContent = 'Đã kích hoạt';
+                        } else {
+                            badgeEl.classList.remove('bg-success');
+                            badgeEl.classList.add('bg-danger');
+                            statusText.textContent = 'Chưa kích hoạt';
+                        }
+                    })
+                    .catch(() => {
+                        spinner.classList.add('d-none');
+                        alert('Đã xảy ra lỗi!');
+                    });
+            });
+        });
+    });
+</script>

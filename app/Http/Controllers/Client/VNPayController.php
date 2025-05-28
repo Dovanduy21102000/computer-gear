@@ -42,6 +42,10 @@ class VNPayController extends Controller
             // Check for buy now item first
             $buyNowItem = session('buy_now_item');
             if ($buyNowItem) {
+                // Ensure buyNowItem has a product_id property
+                if (!isset($buyNowItem->product_id)) {
+                    $buyNowItem->product_id = $buyNowItem->id; // Fallback to id if product_id is not set
+                }
                 // Calculate total price for buy now item
                 $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
 
@@ -52,13 +56,11 @@ class VNPayController extends Controller
 
                 if ($coupon && is_array($coupon)) {
                     if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
-                        if ($coupon['type'] === 'percent') {
-                            // Calculate percentage discount
+                        if (isset($coupon['type']) && $coupon['type'] === 'percent') {
                             $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
-                            // Apply maximum amount limit if set
-                            $couponDiscount = isset($coupon['maximum_amount']) ?
-                                min($percentageDiscount, $coupon['maximum_amount']) :
-                                $percentageDiscount;
+                            $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                                ? min($percentageDiscount, $coupon['maximum_amount'])
+                                : $percentageDiscount;
                         } else {
                             $couponDiscount = min($coupon['price'], $totalPrice);
                         }
@@ -140,13 +142,11 @@ class VNPayController extends Controller
 
                 if ($coupon && is_array($coupon)) {
                     if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
-                        if ($coupon['type'] === 'percent') {
-                            // Calculate percentage discount
+                        if (isset($coupon['type']) && $coupon['type'] === 'percent') {
                             $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
-                            // Apply maximum amount limit if set
-                            $couponDiscount = isset($coupon['maximum_amount']) ?
-                                min($percentageDiscount, $coupon['maximum_amount']) :
-                                $percentageDiscount;
+                            $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                                ? min($percentageDiscount, $coupon['maximum_amount'])
+                                : $percentageDiscount;
                         } else {
                             $couponDiscount = min($coupon['price'], $totalPrice);
                         }
@@ -286,214 +286,120 @@ class VNPayController extends Controller
                 return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
             }
 
-            // Check for buy now item first
-            $buyNowItem = session('vnpay_buy_now_item');
-            if ($buyNowItem) {
-                // Calculate total price for buy now item
-                $totalPrice = $buyNowItem->price * $buyNowItem->quantity;
-
-                // Apply coupon if exists
-                $coupon = session('coupon');
-                $couponDiscount = 0;
-                $couponId = null;
-
-                if ($coupon && is_array($coupon)) {
-                    if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
-                        if ($coupon['type'] === 'percent') {
-                            // Calculate percentage discount
-                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
-                            // Apply maximum amount limit if set
-                            $couponDiscount = isset($coupon['maximum_amount']) ?
-                                min($percentageDiscount, $coupon['maximum_amount']) :
-                                $percentageDiscount;
-                        } else {
-                            $couponDiscount = min($coupon['price'], $totalPrice);
-                        }
-                        $couponId = $coupon['id'];
-                    }
-                }
-
-                $finalPrice = max(0, $totalPrice - $couponDiscount);
-
-                // Verify the amount matches
-                $receivedAmount = $request->vnp_Amount / 100;
-                if ($receivedAmount != $finalPrice) {
-                    Log::error('VNPay Amount Mismatch:', [
-                        'expected' => $finalPrice,
-                        'received' => $receivedAmount
-                    ]);
-                    throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
-                }
-
-                $shipping = session('vnpay_shipping_info', []);
-                $order = Order::create([
-                    'code' => $request->vnp_TxnRef,
-                    'user_id' => $userId,
-                    'shipping_user_name' => $shipping['shipping_user_name'] ?? null,
-                    'shipping_email' => $shipping['shipping_email'] ?? null,
-                    'shipping_phone' => $shipping['shipping_phone'] ?? null,
-                    'shipping_address' => $shipping['shipping_address'] ?? null,
-                    'province_id' => $shipping['province_id'] ?? null,
-                    'district_id' => $shipping['district_id'] ?? null,
-                    'coupon_code' => $coupon['code'] ?? null,
-                    'coupon_discount' => $couponDiscount,
-                    'total_price' => $totalPrice,
-                    'final_price' => $finalPrice,
-                    'payment_status' => 1,
-                    'status' => 'pending',
-                    'payment_method' => 'vn_pay',
-                    'notes' => $shipping['notes'] ?? null,
+            // Use PaymentAttempt data
+            $paymentAttempt = \App\Models\PaymentAttempt::where('order_code', $request->vnp_TxnRef)->first();
+            if (!$paymentAttempt) {
+                throw new \Exception('Không tìm thấy thông tin thanh toán. Vui lòng liên hệ hỗ trợ.');
+            }
+            $expectedAmount = $paymentAttempt->amount;
+            $receivedAmount = $request->vnp_Amount / 100;
+            if ($expectedAmount != $receivedAmount) {
+                Log::error('VNPay Amount Mismatch:', [
+                    'expected' => $expectedAmount,
+                    'received' => $receivedAmount
                 ]);
+                throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
+            }
+            $coupon = $paymentAttempt->coupon_info;
+            $selectedItemIds = $paymentAttempt->selected_items ?? [];
+            $shipping = $paymentAttempt->shipping_info ?? [];
 
-                if ($couponId) {
-                    CouponUser::create([
-                        'user_id' => $userId,
-                        'coupon_id' => $couponId,
-                        'order_id' => $order->id
-                    ]);
-                }
-
-                // Create order item for buy now item
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $buyNowItem->product->id,
-                    'product_variant_id' => $buyNowItem->productVariant ? $buyNowItem->productVariant->id : null,
-                    'price' => $buyNowItem->price,
-                    'quantity' => $buyNowItem->quantity,
-                    'product_info' => json_encode([
-                        'product' => $buyNowItem->product->toArray(),
-                        'variant' => $buyNowItem->productVariant ? $buyNowItem->productVariant->toArray() : null
-                    ]),
-                ]);
-
-                // Update stock
-                if ($buyNowItem->productVariant) {
-                    $buyNowItem->productVariant->decrement('quantity', $buyNowItem->quantity);
-                } else {
-                    $buyNowItem->product->decrement('quantity', $buyNowItem->quantity);
-                }
-            } else {
-                // Handle regular cart items
+            // Handle buy now or cart
+            $cartItems = [];
+            if ($selectedItemIds && is_array($selectedItemIds) && count($selectedItemIds) > 0) {
                 $cart = Cart::where('user_id', $userId)->first();
-                if (!$cart) {
-                    return redirect()->route('cart.index')->with('error', 'Giỏ hàng không tồn tại.');
-                }
-
-                $selectedItemIds = session('vnpay_selected_items', []);
-                if (empty($selectedItemIds)) {
-                    return redirect()->route('cart.index')->with('error', 'Vui lòng chọn sản phẩm để thanh toán.');
-                }
-
                 $cartItems = CartItem::with(['product', 'productVariant'])
                     ->where('cart_id', $cart->id)
                     ->whereIn('id', $selectedItemIds)
                     ->get();
-
-                if ($cartItems->isEmpty()) {
-                    return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống.');
+            } else {
+                $buyNowItem = session('vnpay_buy_now_item');
+                if ($buyNowItem) {
+                    // Create a cart item instance for buy now
+                    $cartItem = new CartItem();
+                    $cartItem->product_id = $buyNowItem->product_id;
+                    $cartItem->product_variant_id = $buyNowItem->product_variant_id ?? null;
+                    $cartItem->quantity = $buyNowItem->quantity;
+                    $cartItem->price = $buyNowItem->price;
+                    $cartItems[] = $cartItem;
                 }
+            }
 
-                // Validate stock availability
-                foreach ($cartItems as $item) {
-                    if ($item->productVariant) {
-                        if ($item->productVariant->quantity < $item->quantity) {
-                            throw new \Exception("Sản phẩm {$item->product->name} - {$item->productVariant->name} không đủ số lượng trong kho.");
-                        }
-                    } else {
-                        if ($item->product->quantity < $item->quantity) {
-                            throw new \Exception("Sản phẩm {$item->product->name} không đủ số lượng trong kho.");
-                        }
-                    }
-                }
+            // Calculate total price (for record)
+            $totalPrice = 0;
+            foreach ($cartItems as $item) {
+                $price = $item->productVariant ?
+                    ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
+                $totalPrice += $price * $item->quantity;
+            }
 
-                // Calculate Total Price
-                $totalPrice = 0;
-                foreach ($cartItems as $item) {
-                    $price = $item->productVariant ?
-                        ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price);
-                    $totalPrice += $price * $item->quantity;
-                }
+            $couponDiscount = 0;
+            $couponId = null;
+            if ($coupon && isset($coupon['type']) && $coupon['type'] === 'percent') {
+                $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
+                $couponDiscount = isset($coupon['maximum_amount']) && $coupon['maximum_amount'] > 0
+                    ? min($percentageDiscount, $coupon['maximum_amount'])
+                    : $percentageDiscount;
+                $couponId = $coupon['id'] ?? null;
+            } elseif ($coupon && isset($coupon['price'])) {
+                $couponDiscount = min($coupon['price'], $totalPrice);
+                $couponId = $coupon['id'] ?? null;
+            }
+            $finalPrice = max(0, $totalPrice - $couponDiscount);
 
-                // Apply Coupon Discount
-                $coupon = session('coupon');
-                $couponDiscount = 0;
-                $couponId = null;
+            // Create Order
+            $order = Order::create([
+                'code' => $request->vnp_TxnRef,
+                'user_id' => $userId,
+                'shipping_user_name' => $shipping['shipping_user_name'] ?? null,
+                'shipping_email' => $shipping['shipping_email'] ?? null,
+                'shipping_phone' => $shipping['shipping_phone'] ?? null,
+                'shipping_address' => $shipping['shipping_address'] ?? null,
+                'province_id' => $shipping['province_id'] ?? null,
+                'district_id' => $shipping['district_id'] ?? null,
+                'coupon_code' => $coupon['code'] ?? null,
+                'coupon_discount' => $couponDiscount,
+                'total_price' => $totalPrice,
+                'final_price' => $finalPrice,
+                'payment_status' => 1,
+                'status' => 'pending',
+                'payment_method' => 'vn_pay',
+                'notes' => $shipping['notes'] ?? null,
+            ]);
 
-                if ($coupon && is_array($coupon)) {
-                    if ($totalPrice >= ($coupon['min_order_total'] ?? 0)) {
-                        if ($coupon['type'] === 'percent') {
-                            // Calculate percentage discount
-                            $percentageDiscount = $totalPrice * ($coupon['price'] / 100);
-                            // Apply maximum amount limit if set
-                            $couponDiscount = isset($coupon['maximum_amount']) ?
-                                min($percentageDiscount, $coupon['maximum_amount']) :
-                                $percentageDiscount;
-                        } else {
-                            $couponDiscount = min($coupon['price'], $totalPrice);
-                        }
-                        $couponId = $coupon['id'];
-                    }
-                }
-
-                $finalPrice = max(0, $totalPrice - $couponDiscount);
-
-                // Verify the amount matches
-                $receivedAmount = $request->vnp_Amount / 100;
-                if ($receivedAmount != $finalPrice) {
-                    Log::error('VNPay Amount Mismatch:', [
-                        'expected' => $finalPrice,
-                        'received' => $receivedAmount
-                    ]);
-                    throw new \Exception('Số tiền thanh toán không khớp. Vui lòng liên hệ hỗ trợ.');
-                }
-
-                $shipping = session('vnpay_shipping_info', []);
-                $order = Order::create([
-                    'code' => $request->vnp_TxnRef,
-                    'user_id' => $userId,
-                    'shipping_user_name' => $shipping['shipping_user_name'] ?? null,
-                    'shipping_email' => $shipping['shipping_email'] ?? null,
-                    'shipping_phone' => $shipping['shipping_phone'] ?? null,
-                    'shipping_address' => $shipping['shipping_address'] ?? null,
-                    'province_id' => $shipping['province_id'] ?? null,
-                    'district_id' => $shipping['district_id'] ?? null,
-                    'coupon_code' => $coupon['code'] ?? null,
-                    'coupon_discount' => $couponDiscount,
-                    'total_price' => $totalPrice,
-                    'final_price' => $finalPrice,
-                    'payment_status' => 1,
-                    'status' => 'pending',
-                    'payment_method' => 'vn_pay',
-                    'notes' => $shipping['notes'] ?? null,
-                ]);
-
-                if ($couponId) {
-                    CouponUser::create([
+            if ($couponId) {
+                $couponUser = \App\Models\CouponUser::where('user_id', $userId)
+                    ->where('coupon_id', $couponId)
+                    ->first();
+                if ($couponUser) {
+                    $couponUser->used = 1;
+                    $couponUser->save();
+                } else {
+                    \App\Models\CouponUser::create([
                         'user_id' => $userId,
                         'coupon_id' => $couponId,
-                        'order_id' => $order->id
+                        'used' => 1
                     ]);
                 }
+            }
 
-                foreach ($cartItems as $item) {
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $item->product_id,
-                        'product_variant_id' => $item->product_variant_id,
-                        'price' => $item->productVariant ?
-                            ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price),
-                        'quantity' => $item->quantity,
-                        'product_info' => json_encode([
-                            'product' => $item->product->toArray(),
-                            'variant' => $item->productVariant ? $item->productVariant->toArray() : null
-                        ]),
-                    ]);
-
-                    if ($item->productVariant) {
-                        $item->productVariant->decrement('quantity', $item->quantity);
-                    } else {
-                        $item->product->decrement('quantity', $item->quantity);
-                    }
+            foreach ($cartItems as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item->product->id,
+                    'product_variant_id' => $item->productVariant ? $item->productVariant->id : null,
+                    'price' => $item->productVariant ?
+                        ($item->productVariant->price_sale ?? $item->productVariant->price) : ($item->product->price_sale ?? $item->product->price),
+                    'quantity' => $item->quantity,
+                    'product_info' => json_encode([
+                        'product' => $item->product->toArray(),
+                        'variant' => $item->productVariant ? $item->productVariant->toArray() : null
+                    ]),
+                ]);
+                if ($item->productVariant) {
+                    $item->productVariant->decrement('quantity', $item->quantity);
+                } else {
+                    $item->product->decrement('quantity', $item->quantity);
                 }
             }
 
@@ -509,7 +415,9 @@ class VNPayController extends Controller
             // Delete cart items AFTER successful transaction
             if (isset($cartItems)) {
                 foreach ($cartItems as $item) {
-                    $item->delete();
+                    if (isset($item->id)) {
+                        $item->delete();
+                    }
                 }
             }
 

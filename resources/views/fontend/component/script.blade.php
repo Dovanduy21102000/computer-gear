@@ -211,8 +211,6 @@
             }
         });
     });
-
-
 </script>
 
 @stack('scripts')

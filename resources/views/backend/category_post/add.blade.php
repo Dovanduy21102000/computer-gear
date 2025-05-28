@@ -55,12 +55,7 @@
                                     <select class="form-control @error('parent_id') is-invalid @enderror" id="parent_id"
                                         name="parent_id">
                                         <option value="">-- Chọn danh mục cha --</option>
-                                        @foreach ($category_post as $category)
-                                            <option value="{{ $category->id }}"
-                                                {{ old('parent_id') == $category->id ? 'selected' : '' }}>
-                                                {{ $category->name }}
-                                            </option>
-                                        @endforeach
+                                        @php renderCategoryOptions($category_post->toArray(), null, null, old('parent_id')); @endphp
                                     </select>
                                     @error('parent_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -82,12 +77,8 @@
 
                             <!-- Submit Button -->
                             <div class="row mb-3">
-                                <div class="col-sm-10 offset-sm-2">
+                                <div class="col-sm-12 d-flex justify-content-center gap-2">
                                     <button type="submit" class="btn btn-primary">Thêm mới</button>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-10 offset-sm-2">
                                     <a href="{{ route($urlBase . 'index') }}" class="btn btn-secondary">Quay lại</a>
                                 </div>
                             </div>
