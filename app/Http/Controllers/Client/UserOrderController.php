@@ -67,38 +67,40 @@ class UserOrderController extends Controller
     }
 
     public function cancel(Request $request, $code)
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        // Kiểm tra số lần huỷ đơn của người dùng trong 1 giờ
-        $key = 'cancel-attempts:' . $user->id;
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            return back()->with('error', 'Bạn đã huỷ đơn quá nhiều lần. Vui lòng thử lại sau 1 giờ.');
-        }
-        RateLimiter::hit($key, 3600);
-
-
-        $order = Order::where('code', $code)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
-
-        // Kiểm tra trạng thái đơn hàng có cho phép huỷ không
-        if (!in_array($order->status, ['pending', 'processing', 'delivered','completed'])) {
-            return back()->with('error', 'Không thể huỷ đơn hàng này.');
-        }
-
-
-        $request->validate([
-            'cancel_reason' => 'required|string|max:255',
-        ]);
-
-
-        $order->cancel_requested = true;  // Đánh dấu yêu cầu huỷ
-        $order->cancel_reason = $request->cancel_reason;
-        $order->status = 'pending_cancel';
-        $order->save();
-        return back()->with('info', 'Đã gửi yêu cầu huỷ. Người bán sẽ xem xét phê duyệt.');
+    // Giới hạn số lần huỷ đơn mỗi giờ
+    $key = 'cancel-attempts:' . $user->id;
+    if (RateLimiter::tooManyAttempts($key, 5)) {
+        return back()->with('error', 'Bạn đã huỷ đơn quá nhiều lần. Vui lòng thử lại sau 1 giờ.');
     }
+    RateLimiter::hit($key, 3600);
+
+    $order = Order::where('code', $code)
+        ->where('user_id', $user->id)
+        ->firstOrFail();
+
+    // Chỉ cho huỷ đơn khi đang ở trạng thái cho phép
+    if (!in_array($order->status, ['pending', 'processing', 'delivered','completed'])) {
+        return back()->with('error', 'Không thể huỷ đơn hàng này.');
+    }
+
+    // Validate lý do huỷ
+    $request->validate([
+        'cancel_reason' => 'required|string|max:255',
+    ]);
+
+    // Lưu trạng thái hiện tại trước khi cập nhật
+    $order->previous_status = $order->status;
+    $order->status = 'pending_cancel';
+    $order->cancel_requested = true;
+    $order->cancel_reason = $request->cancel_reason;
+    $order->save();
+
+    return back()->with('info', 'Đã gửi yêu cầu huỷ. Người bán sẽ xem xét phê duyệt.');
+}
+
 
 
 

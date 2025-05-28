@@ -277,16 +277,27 @@ class OrderController extends Controller
     }
 
     public function rejectCancel($id)
-    {
-        $order = Order::findOrFail($id);
-        if ($order->status === 'pending_cancel' && $order->cancel_requested) {
-            $order->cancel_requested = false;
-            $order->cancel_reason = null;
-            $order->save();
-            Mail::to($order->shipping_email)->send(new CancelRequestStatusMail($order, false));
+{
+    $order = Order::findOrFail($id);
 
-            return back()->with('success', 'Đã từ chối yêu cầu huỷ đơn hàng.');
+    if ($order->status === 'pending_cancel' && $order->cancel_requested) {
+        $order->cancel_requested = false;
+        $order->cancel_reason = null;
+
+        // Khôi phục trạng thái cũ nếu có
+        if ($order->previous_status) {
+            $order->status = $order->previous_status;
+            $order->previous_status = null;
         }
-        return back()->with('error', 'Không thể từ chối yêu cầu.');
+
+        $order->save();
+
+        Mail::to($order->shipping_email)->send(new CancelRequestStatusMail($order, false));
+
+        return back()->with('success', 'Đã từ chối yêu cầu huỷ đơn hàng.');
     }
+
+    return back()->with('error', 'Không thể từ chối yêu cầu.');
+}
+
 }
