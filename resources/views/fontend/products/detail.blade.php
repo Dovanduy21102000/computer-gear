@@ -704,11 +704,11 @@
                                             </div>
                                             <!-- End Review Rating -->
 
-                                            <p class="text-gray-90">{{ $comment->content }}</p>
+                                            <p class="">{{ $comment->content }}</p>
 
                                             <!-- Display image if exists -->
                                             @if ($comment->image)
-                                                <div class="comment-image">
+                                                <div class="comment-image mb-2" style="width: 250px;">
                                                     <img src="{{ Storage::url($comment->image) }}"
                                                         alt="Comment Image" class="img-fluid" />
                                                 </div>
