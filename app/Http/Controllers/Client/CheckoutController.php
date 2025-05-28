@@ -382,7 +382,27 @@ class CheckoutController extends Controller
                 if (is_null($finalPriceForOrderItem)) {
                     throw new \Exception('Không thể xác định giá sản phẩm. Vui lòng kiểm tra lại biến thể hoặc sản phẩm.');
                 }
-                // Create order item for buy now item
+
+                // Tạo đơn hàng trước khi tạo order item
+                $order = Order::create([
+                    'code' => date('YmdHis') . rand(100, 999),
+                    'user_id' => $userId,
+                    'shipping_user_name' => $request->shipping_user_name,
+                    'shipping_email' => $request->shipping_email,
+                    'shipping_phone' => $request->shipping_phone,
+                    'shipping_address' => $request->shipping_address,
+                    'province_id' => $request->province_id,
+                    'district_id' => $request->district_id,
+                    'coupon_code' => $coupon['code'] ?? null,
+                    'coupon_discount' => 0, // Nếu muốn áp dụng coupon cho buy now thì tính toán lại ở đây
+                    'total_price' => $finalPriceForOrderItem * $buyNowItem->quantity,
+                    'final_price' => $finalPriceForOrderItem * $buyNowItem->quantity,
+                    'payment_status' => $request->payment_method === 'cash' ? 0 : 1,
+                    'status' => 'pending',
+                    'payment_method' => $request->payment_method,
+                    'notes' => $request->notes,
+                ]);
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
