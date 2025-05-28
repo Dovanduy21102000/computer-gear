@@ -183,24 +183,38 @@
 
                     <tbody>
                         @foreach ($order->items as $item)
+                            @php
+                                $productInfo = json_decode($item->product_info, true) ?? [];
+                                $archivedProduct = $productInfo['product'] ?? null;
+                                $archivedVariant = $productInfo['variant'] ?? null;
+                                $product = $item->product ?? $archivedProduct;
+                                $variant = $item->productVariant ?? $archivedVariant;
+                            @endphp
                             <tr>
                                 <td class="d-flex align-items-center">
                                     <img src="{{ $item->productVariant?->thumbnail
                                         ? asset('storage/' . $item->productVariant->thumbnail)
                                         : ($item->product?->thumbnail
                                             ? asset('storage/' . $item->product->thumbnail)
-                                            : asset('/images/no-image.png')) }}"
+                                            : ($archivedVariant['thumbnail'] ?? false
+                                                ? asset('storage/' . $archivedVariant['thumbnail'])
+                                                : ($archivedProduct['thumbnail'] ?? false
+                                                    ? asset('storage/' . $archivedProduct['thumbnail'])
+                                                    : asset('/images/no-image.png')))) }}"
                                         alt="product image" width="60" class="rounded shadow-sm mr-3">
 
                                     <div class="text-left ml-2">
                                         <strong>
-                                            <a href="{{ route('client.products.detail', $item->product->slug) }}"
-                                                class="text-dark">
-                                                {{ $item->product->name }}
-                                            </a>
+                                            @if ($item->product)
+                                                <a href="{{ route('client.products.detail', $item->product->slug) }}"
+                                                    class="text-dark">
+                                                    {{ $item->product->name }}
+                                                </a>
+                                            @else
+                                                {{ $archivedProduct['name'] ?? 'Unknown' }}
+                                            @endif
                                         </strong>
                                     </div>
-
                                 </td>
                                 @if ($hasVariant)
                                     <td class="text-left">
@@ -214,16 +228,21 @@
                                                     </li>
                                                 @endforeach
                                             </ul>
+                                        @elseif ($archivedVariant && !empty($archivedVariant['attributeValues']))
+                                            <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
+                                                @foreach ($archivedVariant['attributeValues'] as $value)
+                                                    <li class="mb-1">
+                                                        <i class="fas fa-check-circle text-primary mr-1"></i>
+                                                        <strong>{{ $value['attribute']['name'] ?? '' }}:</strong>
+                                                        {{ $value['value'] }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
                                         @else
                                             <span class="text-muted">—</span>
                                         @endif
                                     </td>
                                 @endif
-
-
-
-
-
                                 <td>{{ number_format($item->price, 0, ',', '.') }}₫</td>
                                 <td>{{ $item->quantity }}</td>
                                 <td class="text-danger">

@@ -315,7 +315,13 @@ class VNPayController extends Controller
             } else {
                 $buyNowItem = session('vnpay_buy_now_item');
                 if ($buyNowItem) {
-                    $cartItems[] = $buyNowItem;
+                    // Create a cart item instance for buy now
+                    $cartItem = new CartItem();
+                    $cartItem->product_id = $buyNowItem->product_id;
+                    $cartItem->product_variant_id = $buyNowItem->product_variant_id ?? null;
+                    $cartItem->quantity = $buyNowItem->quantity;
+                    $cartItem->price = $buyNowItem->price;
+                    $cartItems[] = $cartItem;
                 }
             }
 
