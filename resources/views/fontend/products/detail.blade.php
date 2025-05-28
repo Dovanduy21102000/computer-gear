@@ -1133,14 +1133,22 @@
             // Cập nhật giá
             $("#productPrice").html(price);
 
+            // Update quantity input max and value
+            const quantityInput = document.getElementById('quantityInput');
+            if (quantityInput) {
+                quantityInput.max = quantity;
+                if (parseInt(quantityInput.value) > quantity) {
+                    quantityInput.value = quantity;
+                }
+                quantityInput.disabled = quantity <= 0;
+            }
+
             // Show/hide out of stock warning
             if (quantity > 0) {
                 $("#outOfStockWarning").addClass("d-none");
-                $("#quantityInput").prop("disabled", false).val(1);
                 enablePurchase();
             } else {
                 $("#outOfStockWarning").removeClass("d-none");
-                $("#quantityInput").val("").prop("disabled", true);
                 disablePurchase();
             }
             updateStockDisplay(quantity);
