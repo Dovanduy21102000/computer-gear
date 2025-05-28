@@ -63,21 +63,6 @@
                                             <span class="text-danger">Hết hàng</span>
                                         @endif
                                     </td>
-
-
-                                    <td class="align-middle">
-                                        @if ($product->quantity > 0)
-                                            <form action="{{ route('cart.add') }}" method="POST" class="d-inline-block">
-                                                @csrf
-                                                <input type="hidden" name="quantity" value="1">
-                                                <button type="submit" class="btn btn-primary rounded-pill px-4">
-                                                    <i class="fa fa-shopping-cart me-1"></i> Thêm vào giỏ
-                                                </button>
-                                            </form>
-                                        @else
-                                            <span class="text-muted">Không thể mua</span>
-                                        @endif
-                                    </td>
                                 </tr>
                         @endforeach
                     </tbody>

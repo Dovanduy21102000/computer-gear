@@ -112,17 +112,27 @@
             <div class="my-md-3">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-3 flex-nowrap flex-xl-wrap overflow-auto overflow-xl-visble">
-                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1"><a
-                                href="{{ route('home.index') }}">Trang chủ</a></li>
                         <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
-                            @if ($product->category)
-                                <a href="#">{{ $product->category->name }}</a>
-                            @else
-                                <span>Danh mục không xác định</span>
-                            @endif
+                            <a href="{{ route('home.index') }}">Trang chủ</a>
                         </li>
+                        <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                            <a href="{{ route('client.products.index') }}">Sản phẩm</a>
+                        </li>
+                        @if ($product->category)
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                <a
+                                    href="{{ route('client.products.category', ['slug' => $product->category->slug]) }}">{{ $product->category->name }}</a>
+                            </li>
+                        @endif
+                        @if ($product->brand)
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                <a
+                                    href="{{ route('client.products.brand', ['brandSlug' => $product->brand->slug]) }}">{{ $product->brand->name }}</a>
+                            </li>
+                        @endif
                         <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1 active" aria-current="page">
-                            {{ $product->name }}</li>
+                            {{ $product->name }}
+                        </li>
                     </ol>
                 </nav>
             </div>
@@ -175,7 +185,8 @@
                             </div>
                         </div>
                         <div class="mb-1">
-                            <a href="#" class="font-size-12 text-gray-5 mb-2 d-inline-block">
+                            <a href="{{ $product->category?->slug ? route('client.products.category', ['slug' => $product->category->slug]) : '#' }}"
+                                class="font-size-12 text-gray-5 mb-2 d-inline-block">
                                 {{ $product->category->name ?? 'Danh mục' }}</a>
                             <h2 class="font-size-25 text-lh-1dot2">{{ $product->name }}</h2>
                             <div class="mb-2">
@@ -200,7 +211,9 @@
                                 <!-- Tên thương hiệu căn chỉnh chiều cao với ảnh -->
                                 @if ($product->brand)
                                     <p class=" mb-0 font-weight-bold" style="line-height: 50px;">
-                                        Thương hiệu: <a href="#" class="text-dark">{{ $product->brand->name }}</a>
+                                        Thương hiệu: <a
+                                            href="{{ $product->brand?->brandSlug ? route('client.products.brand', ['brandSlug' => $product->brand->slug]) : '#' }}"
+                                            class="text-dark">{{ $product->brand->name }}</a>
                                     </p>
                                 @endif
                             </div>
@@ -274,16 +287,17 @@
                                             </span>
                                         @endif
                                     @elseif ($product->price_sale)
-                                        <del
-                                            class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
                                         <span
                                             class="text-danger">{{ number_format($product->price_sale, 0, ',', '.') }}₫</span>
+                                        <br>
+                                        <del
+                                            class="text-muted">{{ number_format($product->price, 0, ',', '.') }}₫</del>
                                     @else
                                         {{ number_format($product->price, 0, ',', '.') }}₫
                                     @endif
                                 </div>
                                 <small id="outOfStockWarning" class="text-danger d-none">Sản phẩm này đã hết
-                                    hàng</small>
+                                    hàng. Vui lòng liên hệ để được hỗ trợ.</small>
                             </div>
 
                             <div class="mb-1">
@@ -353,12 +367,19 @@
                                 <a href="{{ route('cart.add') }}" id="addToCartBtn"
                                     class="btn btn-block btn-primary-dark" disabled>
                                     <i class="ec ec-add-to-cart mr-2 font-size-20"></i>Thêm vào giỏ hàng
-
                                 </a>
                             </div>
                             <div class="mb-2">
                                 <a href="#" id="buyNowBtn" class="btn btn-block btn-dark" disabled>Mua ngay</a>
                             </div>
+
+                            @if (!auth()->check())
+                                <div class="alert alert-info mt-2">
+                                    <i class="fas fa-info-circle"></i> Vui lòng <a href="{{ route('login') }}">đăng
+                                        nhập</a> để thêm sản phẩm vào giỏ hàng hoặc mua ngay.
+                                </div>
+                            @endif
+
                             <div class="flex-content-center flex-wrap">
                                 <div class="border-top pt-2 flex-center-between flex-wrap">
                                     @include('fontend.component.wishlist-button', ['product' => $product])
@@ -683,11 +704,11 @@
                                             </div>
                                             <!-- End Review Rating -->
 
-                                            <p class="text-gray-90">{{ $comment->content }}</p>
+                                            <p class="">{{ $comment->content }}</p>
 
                                             <!-- Display image if exists -->
                                             @if ($comment->image)
-                                                <div class="comment-image">
+                                                <div class="comment-image mb-2" style="width: 250px;">
                                                     <img src="{{ Storage::url($comment->image) }}"
                                                         alt="Comment Image" class="img-fluid" />
                                                 </div>
@@ -1104,8 +1125,8 @@
 
             // Kiểm tra giá
             let price = response.price_sale ?
-                `<del class=\"text-muted\">${response.price}₫</del> <br>
-                <span class=\"text-danger\">${response.price_sale}₫</span>` :
+                `<span class=\"text-danger\">${response.price_sale}₫</span><br>
+                <del class=\"text-muted\">${response.price}₫</del>` :
                 `${response.price}`;
 
             // Cập nhật giá
@@ -1203,10 +1224,20 @@
         $("#addToCartBtn, #buyNowBtn").click(function(event) {
             event.preventDefault();
 
-            // Check if user is authenticated for buy now action
-            if ($(this).attr('id') === 'buyNowBtn' && !{{ auth()->check() ? 'true' : 'false' }}) {
-                alert('Vui lòng đăng nhập để tiếp tục mua hàng!');
-                window.location.href = "{{ route('login') }}";
+            // Check if user is authenticated
+            if (!{{ auth()->check() ? 'true' : 'false' }}) {
+                Swal.fire({
+                    icon: "info",
+                    title: "Thông báo!",
+                    text: "Vui lòng đăng nhập để tiếp tục!",
+                    confirmButtonText: "Đăng nhập",
+                    showCancelButton: true,
+                    cancelButtonText: "Hủy"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('login') }}";
+                    }
+                });
                 return;
             }
 

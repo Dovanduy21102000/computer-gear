@@ -406,7 +406,13 @@
                                                         </th>
                                                         <td>{{ $order->user->name ?? 'N/A' }}</td>
                                                         <td class="text-primary">
-                                                            {{ $item->productVariant->sku ?? 'Sản phẩm không tồn tại' }}
+                                                            @if ($item->productVariant)
+                                                                {{ $item->productVariant->sku }}
+                                                            @elseif($item->product)
+                                                                {{ $item->product->name }}
+                                                            @else
+                                                                Sản phẩm không tồn tại
+                                                            @endif
                                                         </td>
                                                         <td>{{ number_format($order->final_price) }}</td>
                                                         <td>
@@ -461,15 +467,24 @@
                                         @foreach ($topSellingProducts as $product)
                                             <tr>
                                                 <th scope="row">
-                                                    <a href="{{ route('products.show', $product->id) }}"><img
-                                                            src="{{ asset('storage/' . $product->thumbnail) }}"
-                                                            alt="{{ $product->name }}" width="50"></a>
+                                                    <a href="{{ route('products.show', $product->product_id) }}">
+                                                        <img src="{{ asset('storage/' . $product->thumbnail) }}"
+                                                            alt="{{ $product->product_name }}" width="50">
+                                                    </a>
                                                 </th>
-                                                <td><a href="{{ route('products.show', $product->id) }}"
-                                                        class="text-primary fw-bold">{{ $product->name }}</a></td>
-                                                <td>{{ number_format($product->price) }}</td>
+                                                <td>
+                                                    <a href="{{ route('products.show', $product->product_id) }}"
+                                                        class="text-primary fw-bold">
+                                                        @if ($product->sku)
+                                                            {{ $product->sku }}
+                                                        @else
+                                                            {{ $product->product_name }}
+                                                        @endif
+                                                    </a>
+                                                </td>
+                                                <td>{{ number_format($product->price) }}đ</td>
                                                 <td class="fw-bold">{{ $product->quantity_sold }}</td>
-                                                <td>{{ number_format($product->total_revenue) }}</td>
+                                                <td>{{ number_format($product->total_revenue) }}đ</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

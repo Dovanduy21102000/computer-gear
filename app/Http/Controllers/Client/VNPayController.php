@@ -315,12 +315,25 @@ class VNPayController extends Controller
             } else {
                 $buyNowItem = session('vnpay_buy_now_item');
                 if ($buyNowItem) {
+                    // Always reload the product and variant from the database
+                    $product = \App\Models\Product::find($buyNowItem->product_id ?? $buyNowItem->product->id ?? $buyNowItem->id);
+                    $variant = null;
+                    if ((isset($buyNowItem->product_variant_id) && $buyNowItem->product_variant_id) || (isset($buyNowItem->productVariant) && isset($buyNowItem->productVariant->id))) {
+                        $variantId = $buyNowItem->product_variant_id ?? $buyNowItem->productVariant->id;
+                        $variant = \App\Models\ProductVariant::find($variantId);
+                    }
+                    $finalPriceForOrderItem = $variant
+                        ? ($variant->price_sale ?? $variant->price)
+                        : ($product->price_sale ?? $product->price);
+                    if (is_null($finalPriceForOrderItem)) {
+                        throw new \Exception('Không thể xác định giá sản phẩm. Vui lòng kiểm tra lại biến thể hoặc sản phẩm.');
+                    }
                     // Create a cart item instance for buy now
-                    $cartItem = new CartItem();
-                    $cartItem->product_id = $buyNowItem->product_id;
-                    $cartItem->product_variant_id = $buyNowItem->product_variant_id ?? null;
+                    $cartItem = new \App\Models\CartItem();
+                    $cartItem->product_id = $product->id;
+                    $cartItem->product_variant_id = $variant ? $variant->id : null;
                     $cartItem->quantity = $buyNowItem->quantity;
-                    $cartItem->price = $buyNowItem->price;
+                    $cartItem->price = $finalPriceForOrderItem;
                     $cartItems[] = $cartItem;
                 }
             }

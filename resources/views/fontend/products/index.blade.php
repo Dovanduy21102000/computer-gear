@@ -26,7 +26,22 @@
                             <a href="{{ route('client.products.index') }}">Sản phẩm</a>
                         </li>
 
-
+                        @if (request('category'))
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                <a
+                                    href="{{ route('client.products.filter', array_merge(request()->except('brand'), ['category' => $currentCategory->slug])) }}">
+                                    {{ $currentCategory->name ?? request('category') }}
+                                </a>
+                            </li>
+                        @endif
+                        @if (request('brand'))
+                            <li class="breadcrumb-item flex-shrink-0 flex-xl-shrink-1">
+                                <a
+                                    href="{{ route('client.products.filter', array_merge(request()->except('category'), ['brand' => is_array(request('brand')) ? request('brand')[0] : request('brand')])) }}">
+                                    {{ $brands->where('id', is_array(request('brand')) ? request('brand')[0] : request('brand'))->first()->name ?? '' }}
+                                </a>
+                            </li>
+                        @endif
                     </ol>
                 </nav>
 
@@ -291,7 +306,8 @@
                             data-style="btn-sm bg-white font-weight-normal py-2 border text-gray-20 bg-lg-down-transparent border-lg-down-0">
                             <option value="mac-dinh" @if (($sortSlug ?? '') == 'mac-dinh' || empty($sortSlug)) selected @endif>Sắp xếp mặc định
                             </option>
-                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo mới
+                            <option value="moi-nhat" @if (($sortSlug ?? '') == 'moi-nhat') selected @endif>Sắp xếp theo
+                                mới
                                 nhất</option>
                             <option value="gia-thap-nhat" @if (($sortSlug ?? '') == 'gia-thap-nhat') selected @endif>Sắp xếp từ
                                 thấp tới cao</option>

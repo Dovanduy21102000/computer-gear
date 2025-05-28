@@ -6,6 +6,9 @@ use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\CategoryPost;
 use App\Models\Product;
+
+use Doctrine\DBAL\Types\Type;
+
 use App\Models\ProductVariant;
 use App\Observers\ProductObserver;
 use App\Observers\ProductVariantObserver;
@@ -13,7 +16,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-
+use Illuminate\Support\Facades\Schema;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -26,6 +29,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if (!Type::hasType('enum')) {
+        Type::addType('enum', \Doctrine\DBAL\Types\StringType::class);
+    }
+
+    // Đăng ký ánh xạ enum thành string cho các nền tảng database
+    Schema::getConnection()
+        ->getDoctrineSchemaManager()
+        ->getDatabasePlatform()
+        ->registerDoctrineTypeMapping('enum', 'string');
         Paginator::useBootstrapFive();
 
         View::composer('*', function ($view) {
